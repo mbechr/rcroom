@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>RC Classroom — Student Portal & Practice Infrastructure</title>
+  
+  <!-- Fonts: Inter (UI), Newsreader (Editorial Serif), Space Mono (Codes/Stats) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='25' fill='%230071e3'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' fill='%23ffffff' font-family='sans-serif' font-weight='bold' font-size='50'>RC</text></svg>">
+</head>
+<body class="apple-style">
+
+  <!-- Ambient Floating Glow Atmosphere -->
+  <div class="ambient-glow-background" aria-hidden="true">
+    <div class="glow-orb orb-primary"></div>
+    <div class="glow-orb orb-secondary"></div>
+    <div class="glow-orb orb-accent"></div>
+  </div>
+
+  <!-- Main Navigation Header -->
+  <!-- Main Navigation Header (Floating Glass Island) -->
+  <header class="portal-navbar" id="portalNavbar">
+    <!-- Level XP Micro Progress Strip -->
+    <div class="nav-xp-strip" id="navXpStrip" title="Next Level Progress">
+      <div class="nav-xp-strip-fill" id="navXpStripFill" style="width: 45%;"></div>
+    </div>
+
+    <div class="navbar-inner">
+      <!-- Brand Logo -->
+      <div class="brand-group" id="brandHomeBtn" title="Back to Dashboard">
+        <div class="brand-badge">
+          <span>RC</span>
+          <span class="brand-sparkle">✨</span>
+        </div>
+        <div class="brand-info">
+          <span class="brand-name">RC CLASSROOM</span>
+          <span class="brand-tagline">Student Portal &bull; SQL Analytics</span>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs with Sliding Magnetic Indicator -->
+      <nav class="portal-nav-tabs" id="portalNavTabs">
+        <!-- Floating Active Pill Tracker -->
+        <div class="nav-indicator-pill" id="navIndicatorPill"></div>
+
+        <button class="nav-tab active" data-view="dashboard">
+          <span class="tab-icon">🏠</span> <span data-i18n="navDashboard">Dashboard</span>
+        </button>
+        <button class="nav-tab" data-view="tracks">
+          <span class="tab-icon">🌟</span> <span data-i18n="navCurriculum">Curriculum Tracks</span>
+        </button>
+        <button class="nav-tab" data-view="skills">
+          <span class="tab-icon">📚</span> <span data-i18n="navSkills">Skills Bank</span> <span class="nav-skill-badge" id="navSkillsCountBadge">8K+</span>
+        </button>
+        <button class="nav-tab" data-view="reports">
+          <span class="tab-icon">📊</span> <span data-i18n="navReports">Student Reports</span>
+        </button>
+        <button class="nav-tab" data-view="leaderboard">
+          <span class="tab-icon">🏆</span> <span data-i18n="navLeaderboard">Leaderboard</span>
+        </button>
+        <button class="nav-tab teacher-nav-tab" data-view="teacher" id="teacherTabBtn" style="display: none;">
+          <span class="tab-icon">👩‍🏫</span> <span data-i18n="navTeacher">Teacher Console</span>
+        </button>
+      </nav>
+
+      <!-- Right Actions: Student Info & Controls -->
+      <div class="navbar-actions">
+        <!-- Active Student Pill (Click to view profile or switch) -->
+        <div class="student-active-pill" id="studentProfilePill" title="Click to switch student or log in">
+          <div class="student-avatar-wrap" id="navStudentAvatar">🦊</div>
+          <div class="student-meta-text">
+            <span class="student-name-label" id="navStudentName">Alex Turner</span>
+            <span class="student-grade-label" id="navStudentGrade">Year 4 &bull; <span id="navStudentXP">1,420 XP</span></span>
+          </div>
+          <span class="streak-badge" id="navStudentStreak" title="Daily Practice Streak">🔥 5</span>
+        </div>
+
+        <button class="lang-toggle-btn" id="langToggleBtn" title="Toggle Language (عربي / English)" onclick="I18N.toggle()">
+          🌐 <span data-i18n="switchLanguage">English</span>
+        </button>
+
+        <button class="icon-control-btn" id="switchStudentBtn" title="Switch Student or Log In">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+        </button>
+
+        <button class="icon-control-btn" id="themeToggleBtn" title="Toggle Dark/Light Mode">
+          <span id="themeIcon">☀️</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main View Router Container -->
+  <main class="portal-main-content">
+
+    <!-- ====================================================================
+         VIEW 1: STUDENT DASHBOARD
+         ==================================================================== -->
+    <section id="view-dashboard" class="portal-view active">
+      <!-- Student Greeting Banner -->
+      <div class="dashboard-hero-card">
+        <div class="hero-greeting-content">
+          <div class="welcome-pill">
+            <span class="live-dot"></span>
+            <span id="dashGreetingTag">ACTIVE PRACTICE SESSION</span>
+          </div>
+          <h1 class="hero-greeting-title">Welcome back, <span id="dashStudentName">Alex</span>! 👋</h1>
+          <p class="hero-greeting-desc">
+            You are currently on a <strong id="dashStreakText">5-day practice streak</strong>. Your next milestone is <strong>Level 6</strong>. Choose a track below or jump into the 8,264+ skills bank.
+          </p>
+          
+          <div class="hero-cta-group">
+            <button class="primary-glow-btn" id="dashStartPracticeBtn">
+              <span>🚀</span> <span>Resume Practice</span>
+            </button>
+            <button class="secondary-glass-btn" id="dashViewReportBtn">
+              <span>📊</span> <span>View My Performance Report</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Student Level & XP Card -->
+        <div class="student-level-card">
+          <div class="level-badge-large" id="dashLevelBadge">Lv. 5</div>
+          <div class="level-info-col">
+            <div class="level-title-row">
+              <span class="level-rank-name" id="dashRankTitle">Maths Explorer</span>
+              <span class="level-xp-counter"><strong id="dashCurrentXP">1,420</strong> / 2,000 XP</span>
+            </div>
+            <div class="xp-progress-bar-wrap">
+              <div class="xp-progress-bar-fill" id="dashXpFill" style="width: 71%;"></div>
+            </div>
+            <div class="level-footer-tip">Solve 4 more questions to reach Level 6!</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Assigned Homework by Miss Rania -->
+      <div class="assignments-dashboard-section" id="dashAssignmentsSection">
+        <div class="section-title-row">
+          <div>
+            <div class="section-kicker">📌 TEACHER ASSIGNMENTS</div>
+            <h2 class="section-heading">Assigned by Miss Rania</h2>
+          </div>
+          <span class="assignment-count-pill" id="dashAssignmentBadge">Active Tasks</span>
+        </div>
+        <div class="assignments-grid" id="dashAssignmentsGrid">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+
+      <!-- Quick Metrics Strip -->
+      <div class="dashboard-kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon-wrap icon-blue">📚</div>
+          <div class="kpi-details">
+            <span class="kpi-value" id="kpiQuestionsAnswered">142</span>
+            <span class="kpi-label">Questions Solved</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon-wrap icon-green">🎯</div>
+          <div class="kpi-details">
+            <span class="kpi-value" id="kpiAccuracyRate">88.5%</span>
+            <span class="kpi-label">Accuracy Rate</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon-wrap icon-purple">⏱️</div>
+          <div class="kpi-details">
+            <span class="kpi-value" id="kpiTimeSpent">1h 45m</span>
+            <span class="kpi-label">Practice Time</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon-wrap icon-orange">🏆</div>
+          <div class="kpi-details">
+            <span class="kpi-value" id="kpiMasteredCount">8</span>
+            <span class="kpi-label">Skills Mastered</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Spotlight Search Capsule -->
+      <div class="search-capsule-section">
+        <div class="search-capsule-box">
+          <svg class="search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          <input type="text" id="dashSpotlightInput" placeholder="Search 8,264+ skills by name, topic, or code (e.g. A.1)..." autocomplete="off">
+          <span class="kbd-badge">⌘K</span>
+        </div>
+      </div>
+
+      <!-- Featured Miss Rania Tracks Preview -->
+      <div class="dash-section-header">
+        <div>
+          <h2 class="section-title">Miss Rania's Active Tracks</h2>
+          <p class="section-subtitle">Curated course modules for your grade level</p>
+        </div>
+        <button class="text-link-btn" id="dashViewAllTracksBtn">View All Tracks &rarr;</button>
+      </div>
+
+      <div class="dash-tracks-preview-grid" id="dashTracksPreviewContainer">
+        <!-- Injected via JavaScript -->
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         VIEW 2: CURRICULUM TRACKS (MISS RANIA'S COURSES)
+         ==================================================================== -->
+    <section id="view-tracks" class="portal-view">
+      <div class="view-header-row">
+        <div>
+          <div class="view-kicker">// TEACHER RANIA'S CURATED TRACKS</div>
+          <h1 class="view-main-title">Structured Learning Pathways</h1>
+          <p class="view-lead-text">Complete units with pedagogical lecture notes, teacher tips, and direct drills connected to the 8,264+ skills engine.</p>
+        </div>
+        <!-- Subject Filter for Tracks -->
+        <div class="segmented-control" id="trackSubjectFilter">
+          <button class="segmented-btn active" data-subject="All">All</button>
+          <button class="segmented-btn" data-subject="maths">Maths</button>
+          <button class="segmented-btn" data-subject="english">English</button>
+          <button class="segmented-btn" data-subject="science">Science</button>
+        </div>
+      </div>
+
+      <!-- Teacher Tracks Container -->
+      <div class="teacher-tracks-container" id="teacherTracksFullContainer">
+        <!-- Injected via JS -->
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         VIEW 3: COMPLETE SKILLS BANK (8,264+ SKILLS)
+         ==================================================================== -->
+    <section id="view-skills" class="portal-view">
+      <div class="view-header-row">
+        <div>
+          <div class="view-kicker">// FULL CURRICULUM DIRECTORY</div>
+          <h1 class="view-main-title">8,264+ Interactive Skills Bank</h1>
+          <p class="view-lead-text">Browse every skill across Reception through Year 13. Practice any skill locally with instant feedback.</p>
+        </div>
+
+        <!-- Subject Segmented Control -->
+        <div class="segmented-control" id="skillsSubjectFilter">
+          <button class="segmented-btn active" data-subject="Maths">📐 Maths</button>
+          <button class="segmented-btn" data-subject="English">📚 English</button>
+          <button class="segmented-btn" data-subject="Science">🔬 Science</button>
+          <button class="segmented-btn" data-subject="All">🌐 All</button>
+        </div>
+      </div>
+
+      <!-- Search & Filters Toolbar -->
+      <div class="skills-filter-toolbar">
+        <div class="spotlight-input-wrapper">
+          <svg class="search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          <input type="text" id="skillsSearchInput" placeholder="Filter skills by code (e.g. A.1), name, or topic..." autocomplete="off">
+          <button id="skillsClearSearch" class="clear-btn" style="display:none;">✕</button>
+        </div>
+
+        <div class="segmented-control" id="statusFilterControl">
+          <button class="segmented-btn active" data-filter="all">All Skills</button>
+          <button class="segmented-btn" data-filter="favorites">★ Starred</button>
+          <button class="segmented-btn" data-filter="mastered">✓ Mastered</button>
+        </div>
+
+        <button class="secondary-glass-btn" id="expandCollapseAllSkillsBtn">
+          <span id="expandCollapseText">Collapse All</span>
+        </button>
+      </div>
+
+      <!-- Layout: Grades Sidebar + Skills Content Canvas -->
+      <div class="skills-browser-layout">
+        <!-- Sidebar -->
+        <aside class="grades-sidebar">
+          <div class="sidebar-header-label">Year Levels</div>
+          <ul class="grades-list" id="gradesNavList">
+            <!-- Dynamically populated -->
+          </ul>
+        </aside>
+
+        <!-- Main Skills Canvas -->
+        <div class="skills-content-canvas">
+          <div class="canvas-header-info">
+            <h2 id="currentGradeTitle">Loading Grade...</h2>
+            <p id="currentGradeSubtitle">Please wait while skills are indexed</p>
+          </div>
+
+          <div id="skillsCategoriesContainer">
+            <!-- Dynamically populated Categories & Skills -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         VIEW 4: STUDENT PERFORMANCE REPORTS & ANALYTICS
+         ==================================================================== -->
+    <section id="view-reports" class="portal-view">
+      <!-- Report Header -->
+      <div class="view-header-row">
+        <div>
+          <div class="view-kicker">// INDIVIDUAL STUDENT ANALYTICS</div>
+          <h1 class="view-main-title">Student Performance Report</h1>
+          <p class="view-lead-text">Detailed audit of question attempts, accuracy ratios, subject mastery, and time investment recorded in SQLite database.</p>
+        </div>
+
+        <div class="report-actions-row">
+          <button class="primary-glow-btn" id="printReportBtn">
+            <span>🖨️</span> <span>Print Official Report Card</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Printable Report Container -->
+      <div class="printable-report-card" id="printableReportCard">
+        <!-- Student Identity Header -->
+        <div class="report-student-header">
+          <div class="report-avatar-circle" id="reportAvatar">🦊</div>
+          <div class="report-student-info">
+            <h2 class="report-student-name" id="reportFullName">Alex Turner</h2>
+            <div class="report-meta-tags">
+              <span class="tag-badge" id="reportUsername">@alex</span>
+              <span class="tag-badge" id="reportGrade">Year 4</span>
+              <span class="tag-badge badge-primary" id="reportRankTitle">Level 5 &bull; Explorer</span>
+              <span class="tag-badge badge-streak" id="reportStreak">🔥 5 Day Streak</span>
+            </div>
+          </div>
+
+          <div class="report-timestamp-box">
+            <div class="report-date-label">Audit Generated</div>
+            <div class="report-date-val" id="reportGeneratedDate">September 2026</div>
+          </div>
+        </div>
+
+        <!-- Report KPI Metrics -->
+        <div class="report-metrics-grid">
+          <div class="metric-box">
+            <div class="metric-num" id="repTotalQuestions">142</div>
+            <div class="metric-title">Questions Attempted</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-num text-success" id="repAccuracy">88.5%</div>
+            <div class="metric-title">Overall Accuracy</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-num" id="repAvgScore">89.2</div>
+            <div class="metric-title">Average SmartScore</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-num" id="repTotalTime">1h 45m</div>
+            <div class="metric-title">Total Practice Time</div>
+          </div>
+          <div class="metric-box">
+            <div class="metric-num text-gold" id="repMasteredSkills">8</div>
+            <div class="metric-title">Mastered Skills (90+)</div>
+          </div>
+        </div>
+
+        <!-- Subject Breakdown Bars -->
+        <div class="report-section-block">
+          <h3 class="report-block-title">Subject Competency &amp; Mastery Breakdown</h3>
+          <div class="subject-progress-grid" id="reportSubjectBreakdownGrid">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+
+        <!-- Badges & Achievements -->
+        <div class="report-section-block">
+          <h3 class="report-block-title">Earned Achievement Badges</h3>
+          <div class="badges-showcase-grid" id="reportBadgesGrid">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+
+        <!-- Practice Session History Table -->
+        <div class="report-section-block">
+          <div class="block-header-between">
+            <h3 class="report-block-title">Recent Practice Log (SQLite Database Records)</h3>
+            <span class="record-counter-tag" id="reportRecordCount">Showing 7 Sessions</span>
+          </div>
+
+          <div class="history-table-wrapper">
+            <table class="history-table">
+              <thead>
+                <tr>
+                  <th>Date &amp; Time</th>
+                  <th>Skill Code</th>
+                  <th>Skill Topic</th>
+                  <th>Subject</th>
+                  <th>Questions</th>
+                  <th>Accuracy</th>
+                  <th>SmartScore</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="reportHistoryTableBody">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         VIEW 5: CLASSROOM LEADERBOARD
+         ==================================================================== -->
+    <section id="view-leaderboard" class="portal-view">
+      <div class="view-header-row">
+        <div>
+          <div class="view-kicker">// CLASSROOM LEADERBOARD</div>
+          <h1 class="view-main-title">Top Performing Students</h1>
+          <p class="view-lead-text">Ranked live by cumulative experience points (XP), practice consistency, and mastered curriculum competencies.</p>
+        </div>
+      </div>
+
+      <div class="leaderboard-card">
+        <div class="leaderboard-table-wrap">
+          <table class="leaderboard-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Student</th>
+                <th>Grade</th>
+                <th>Daily Streak</th>
+                <th>Total XP</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboardTableBody">
+              <!-- Injected via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+      <!-- ====================================================================
+         VIEW 6: TEACHER CONSOLE (MISS RANIA'S ADMIN PANEL)
+         ==================================================================== -->
+    <section id="view-teacher" class="portal-view">
+      <div class="view-header-row">
+        <div>
+          <div class="view-kicker">// INSTRUCTOR CONTROL CENTER</div>
+          <h1 class="view-main-title">Miss Rania's Teacher Console 👩‍🏫</h1>
+          <p class="view-lead-text">Monitor enrolled students, inspect individual progress reports, analyze mastery rates, and export classroom assessment data.</p>
+        </div>
+        <div class="view-actions-col">
+          <button class="primary-glow-btn" id="exportClassroomCsvBtn">
+            <span>📥</span> <span>Export Classroom CSV</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Class Overview KPI Banner -->
+      <div class="teacher-kpi-grid">
+        <div class="kpi-card glass-panel">
+          <div class="kpi-icon-wrap blue">👥</div>
+          <div class="kpi-data-col">
+            <span class="kpi-value" id="tTotalStudents">0</span>
+            <span class="kpi-label">Enrolled Students</span>
+          </div>
+        </div>
+        <div class="kpi-card glass-panel">
+          <div class="kpi-icon-wrap purple">📝</div>
+          <div class="kpi-data-col">
+            <span class="kpi-value" id="tTotalQuestions">0</span>
+            <span class="kpi-label">Total Questions Solved</span>
+          </div>
+        </div>
+        <div class="kpi-card glass-panel">
+          <div class="kpi-icon-wrap green">🎯</div>
+          <div class="kpi-data-col">
+            <span class="kpi-value" id="tClassAccuracy">0%</span>
+            <span class="kpi-label">Class Average Accuracy</span>
+          </div>
+        </div>
+        <div class="kpi-card glass-panel">
+          <div class="kpi-icon-wrap amber">⏱️</div>
+          <div class="kpi-data-col">
+            <span class="kpi-value" id="tTotalHours">0h</span>
+            <span class="kpi-label">Practice Hours Logged</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Student Roster & Live Analytics -->
+      <div class="report-section-card glass-panel">
+      <!-- Classroom Assignments & Homework Manager -->
+      <div class="report-section-card glass-panel" style="margin-bottom: 2rem;">
+        <div class="section-card-header">
+          <div>
+            <h3 class="card-title">📌 Classroom Assignments & Homework</h3>
+            <p class="card-subtitle">Active assigned skills, target due dates, and student completion tracking.</p>
+          </div>
+          <button class="primary-glow-btn" id="openCreateAssignmentModalBtn">
+            <span>+</span> <span>Create New Assignment</span>
+          </button>
+        </div>
+        <div class="assignments-teacher-grid" id="teacherAssignmentsGrid">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+
+      <!-- Student Roster & Live Analytics -->
+      <div class="report-section-card glass-panel">
+        <div class="section-card-header">
+          <div>
+            <h3 class="card-title">Enrolled Students Performance Roster</h3>
+            <p class="card-subtitle">Real-time breakdown of each student's competency, accuracy, and practice volume.</p>
+          </div>
+          <button class="secondary-glass-btn" id="openAddStudentModalBtn" style="font-size:0.85rem; padding: 0.4rem 0.85rem;">
+            <span>👤+</span> <span>Add New Student</span>
+          </button>
+        </div>
+
+        <div class="table-responsive-wrap">
+          <table class="report-history-table">
+            <thead>
+              <tr>
+                <th>Student</th>
+                <th>Grade</th>
+                <th>Questions Done</th>
+                <th>Accuracy</th>
+                <th>Avg SmartScore</th>
+                <th>Total XP</th>
+                <th>Streak</th>
+                <th>Last Active</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="teacherRosterTableBody">
+              <!-- Injected via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Two Column Grid: Attention Needed & Mastered Topics -->
+      <div class="teacher-columns-grid">
+        <div class="report-section-card glass-panel">
+          <div class="section-card-header">
+            <div>
+              <h3 class="card-title">⚠️ Topics Requiring Teacher Attention</h3>
+              <p class="card-subtitle">Skills where student accuracy dropped below 85%. Ideal for class revision.</p>
+            </div>
+          </div>
+          <div class="teacher-skills-list" id="teacherAttentionSkillsList">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+
+        <div class="report-section-card glass-panel">
+          <div class="section-card-header">
+            <div>
+              <h3 class="card-title">🌟 Top Mastered Competencies</h3>
+              <p class="card-subtitle">Skills where students consistently achieved SmartScore 90+.</p>
+            </div>
+          </div>
+          <div class="teacher-skills-list" id="teacherMasteredSkillsList">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ====================================================================
+       INTERACTIVE PRACTICE ROOM MODAL
+       ==================================================================== -->
+  <div class="practice-modal-backdrop" id="practiceModal">
+    <div class="practice-modal-window">
+      <!-- Modal Header: Skill Info & HUD Stats -->
+      <div class="practice-modal-header">
+        <div class="practice-skill-header-info">
+          <div class="practice-skill-meta-tags">
+            <span class="skill-code-badge" id="practiceModalSkillCode">A.1</span>
+            <span class="skill-subject-tag" id="practiceModalSkillSubject">Maths</span>
+          </div>
+          <h2 class="practice-skill-heading" id="practiceModalSkillTitle">Place value models - up to thousands</h2>
+        </div>
+
+        <div class="practice-header-right">
+          <div class="practice-hud-metrics">
+            <div class="hud-item">
+              <span class="hud-val" id="practiceTimer">00:00</span>
+              <span class="hud-lbl">Time</span>
+            </div>
+            <div class="hud-item">
+              <span class="hud-val" id="practiceAnswered">0</span>
+              <span class="hud-lbl">Answered</span>
+            </div>
+            <div class="hud-item highlight">
+              <span class="hud-val" id="practiceScore">0</span>
+              <span class="hud-lbl">SmartScore</span>
+            </div>
+          </div>
+          <button type="button" class="modal-close-btn" id="closePracticeModalBtn" title="Close practice session">✕</button>
+        </div>
+      </div>
+
+      <!-- Dedicated Secondary Interactive Tool Palette Strip -->
+      <div class="practice-toolbar-strip">
+        <div class="practice-toolbar-actions">
+          <button type="button" class="practice-tool-btn" id="practiceAudioBtn" title="Read Question Aloud">
+            <span id="audioBtnIcon">🔊</span> <span class="tool-btn-label" data-i18n="readAloud">Listen</span>
+          </button>
+          <button type="button" class="practice-tool-btn" id="practiceScratchpadBtn" title="Open Virtual Scratchpad / Pencil">
+            <span>✏️</span> <span class="tool-btn-label" data-i18n="scratchpad">Scratchpad</span>
+          </button>
+          <button type="button" class="practice-tool-btn" id="practiceCalcBtn" onclick="ClassroomTools.toggleCalculator()" title="Open School Calculator">
+            <span>🧮</span> <span class="tool-btn-label" data-i18n="calculator">Calculator</span>
+          </button>
+          <button type="button" class="practice-tool-btn" id="practiceNumLineBtn" onclick="ClassroomTools.toggleNumberLine()" title="Open Interactive Number Line">
+            <span>📏</span> <span class="tool-btn-label" data-i18n="numberLine">Number Line</span>
+          </button>
+          <button type="button" class="practice-tool-btn" id="practiceFracBtn" onclick="ClassroomTools.toggleFractions()" title="Open Fraction Visualizer">
+            <span>🥧</span> <span class="tool-btn-label" data-i18n="fractionModel">Fractions</span>
+          </button>
+          <button type="button" class="practice-tool-btn" id="practiceSoundFxBtn" title="Sound Effects">
+            <span id="soundFxIcon">🔔</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="practice-modal-body">
+        <!-- Interactive Scratchpad Layer -->
+        <div class="scratchpad-overlay" id="scratchpadOverlay" style="display: none;">
+          <div class="scratchpad-toolbar">
+            <div class="scratchpad-tool-group">
+              <button type="button" class="sp-tool-btn active" id="spToolPen" title="Pen Tool">✏️ Pen</button>
+              <button type="button" class="sp-tool-btn" id="spToolEraser" title="Eraser">🧹 Eraser</button>
+              <button type="button" class="sp-tool-btn" id="spToolClear" title="Clear Canvas">🗑️ Clear</button>
+            </div>
+            <div class="scratchpad-colors">
+              <span class="sp-color active" data-color="#ffd60a" style="background: #ffd60a;" title="Yellow"></span>
+              <span class="sp-color" data-color="#64d2ff" style="background: #64d2ff;" title="Cyan"></span>
+              <span class="sp-color" data-color="#30d158" style="background: #30d158;" title="Green"></span>
+              <span class="sp-color" data-color="#ff453a" style="background: #ff453a;" title="Red"></span>
+              <span class="sp-color" data-color="#ffffff" style="background: #ffffff;" title="White"></span>
+            </div>
+            <div class="scratchpad-width-group">
+              <button type="button" class="sp-width-btn" data-width="2" title="Fine">Fine</button>
+              <button type="button" class="sp-width-btn active" data-width="4" title="Medium">Med</button>
+              <button type="button" class="sp-width-btn" data-width="8" title="Thick">Thick</button>
+            </div>
+            <button type="button" class="sp-tool-btn close-btn" id="spCloseBtn" title="Close Scratchpad">✕ Close</button>
+          </div>
+          <canvas id="scratchpadCanvas"></canvas>
+        </div>
+        <div class="question-container">
+          <div class="question-text" id="practiceQuestionPrompt">Loading question...</div>
+          <div class="question-visual-box" id="practiceVisualBox"></div>
+        </div>
+
+        <div class="options-container" id="practiceOptionsGrid">
+          <!-- Options injected dynamically -->
+        </div>
+
+        <!-- Fill-in-the-Blank Direct Input Type -->
+        <div class="fill-in-container" id="practiceFillInContainer" style="display: none;">
+          <div class="fill-in-box-wrapper">
+            <input type="text" id="practiceFillInInput" class="fill-in-input" placeholder="Type your answer here..." autocomplete="off">
+            <button type="button" class="fill-in-submit-pill" id="practiceFillInSubmitBtn">Enter ↵</button>
+          </div>
+          <div class="fill-in-hint">Type your numeric or text answer and press Enter.</div>
+        </div>
+
+        <!-- True / False Split Card Type -->
+        <div class="true-false-container" id="practiceTrueFalseContainer" style="display: none;">
+          <button type="button" class="tf-card true-card" data-tf="True">
+            <span class="tf-icon">✅</span>
+            <span class="tf-label">TRUE</span>
+          </button>
+          <button type="button" class="tf-card false-card" data-tf="False">
+            <span class="tf-icon">❌</span>
+            <span class="tf-label">FALSE</span>
+          </button>
+        </div>
+
+        <!-- Feedback & Explanation Box -->
+        <div class="practice-feedback-banner" id="practiceFeedbackBox" style="display: none;">
+          <div class="feedback-heading" id="practiceFeedbackTitle"></div>
+          <div class="explanation-content" id="practiceExplanationText"></div>
+        </div>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="practice-modal-footer">
+        <button class="secondary-glass-btn" id="practiceSkipBtn">Skip Question</button>
+        <button class="primary-glow-btn" id="practiceSubmitBtn">Submit Answer</button>
+        <button class="success-glow-btn" id="practiceNextBtn" style="display: none;">Next Question &rarr;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       STUDENT AUTHENTICATION & SWITCHER MODAL
+       ==================================================================== -->
+  <div class="auth-modal-backdrop" id="authModal">
+    <div class="auth-modal-window">
+      <div class="auth-modal-header">
+        <div>
+          <h2 class="auth-title">Student Portal Access</h2>
+          <p class="auth-subtitle">Log in to track your scores, unlock badges, and generate official progress reports.</p>
+        </div>
+        <button class="modal-close-btn" id="closeAuthModalBtn">✕</button>
+      </div>
+
+      <!-- Auth Tabs -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-auth-tab="demo">🚀 Quick Demo Login</button>
+        <button class="auth-tab" data-auth-tab="login">🔑 Student Log In</button>
+        <button class="auth-tab" data-auth-tab="register">✨ Register New Student</button>
+        <button class="auth-tab teacher-tab-header" data-auth-tab="teacher">👩‍🏫 Teacher / Admin</button>
+      </div>
+
+      <!-- TAB 1: QUICK DEMO ACCOUNTS (1-Click Login) -->
+      <div class="auth-tab-content active" id="authTabDemo">
+        <div class="teacher-quick-login-card" id="quickTeacherLoginBtn" title="1-Click Teacher Console Access">
+          <div class="teacher-avatar-badge">👩‍🏫</div>
+          <div class="teacher-quick-info">
+            <div class="teacher-quick-title">Miss Rania (Classroom Instructor & Admin)</div>
+            <div class="teacher-quick-sub">Access the Teacher Console &bull; View all students' reports &bull; Manage curriculum</div>
+          </div>
+          <button type="button" class="teacher-quick-badge-btn">Instructor Access &rarr;</button>
+        </div>
+
+        <div class="demo-intro-text">
+          Or select any student profile below to test from a student's perspective:
+        </div>
+        <div class="demo-students-grid" id="demoStudentsList">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+
+      <!-- TAB 2: STANDARD STUDENT LOGIN -->
+      <div class="auth-tab-content" id="authTabLogin">
+        <form id="loginForm" class="auth-form" onsubmit="return false;">
+          <div class="form-group">
+            <label for="loginUsername">Student Username</label>
+            <input type="text" id="loginUsername" placeholder="e.g. alex, sophia, liam" required autocomplete="username">
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" placeholder="Enter your password" required autocomplete="current-password">
+          </div>
+          <div class="form-error-msg" id="loginErrorMsg" style="display: none;"></div>
+          <button type="submit" class="primary-glow-btn full-width" id="submitLoginBtn">Log In to Portal</button>
+          <div class="demo-tip">Demo password for existing students is: <code>password123</code></div>
+        </form>
+      </div>
+
+      <!-- TAB 3: REGISTER NEW STUDENT -->
+      <div class="auth-tab-content" id="authTabRegister">
+        <form id="registerForm" class="auth-form" onsubmit="return false;">
+          <div class="form-group">
+            <label for="regFullName">Full Name</label>
+            <input type="text" id="regFullName" placeholder="e.g. James Wilson" required>
+          </div>
+          <div class="form-group">
+            <label for="regUsername">Choose Username</label>
+            <input type="text" id="regUsername" placeholder="e.g. jwilson" required>
+          </div>
+          <div class="form-group">
+            <label for="regPassword">Create Password</label>
+            <input type="password" id="regPassword" placeholder="At least 6 characters" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="regGrade">Year Level</label>
+              <select id="regGrade">
+                <option value="Year 1">Year 1</option>
+                <option value="Year 2">Year 2</option>
+                <option value="Year 3">Year 3</option>
+                <option value="Year 4" selected>Year 4</option>
+                <option value="Year 5">Year 5</option>
+                <option value="Year 6">Year 6</option>
+                <option value="Year 7">Year 7</option>
+                <option value="Year 8">Year 8</option>
+                <option value="Year 9">Year 9</option>
+                <option value="Year 10">Year 10</option>
+                <option value="Year 11">Year 11</option>
+                <option value="Year 12">Year 12</option>
+                <option value="Year 13">Year 13</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Select Avatar</label>
+              <div class="avatar-selection-row" id="avatarPicker">
+                <button type="button" class="avatar-option-btn selected" data-avatar="🦊">🦊</button>
+                <button type="button" class="avatar-option-btn" data-avatar="🦄">🦄</button>
+                <button type="button" class="avatar-option-btn" data-avatar="🚀">🚀</button>
+                <button type="button" class="avatar-option-btn" data-avatar="🌟">🌟</button>
+                <button type="button" class="avatar-option-btn" data-avatar="🦁">🦁</button>
+                <button type="button" class="avatar-option-btn" data-avatar="🐼">🐼</button>
+                <button type="button" data-avatar="⚡" class="avatar-option-btn">⚡</button>
+                <button type="button" data-avatar="👑" class="avatar-option-btn">👑</button>
+              </div>
+            </div>
+          </div>
+          <div class="form-error-msg" id="regErrorMsg" style="display: none;"></div>
+          <button type="submit" class="primary-glow-btn full-width" id="submitRegisterBtn">Create Student Account</button>
+        </form>
+      </div>
+
+      <!-- TAB 4: TEACHER / ADMIN ACCESS -->
+      <div class="auth-tab-content" id="authTabTeacher">
+        <div class="teacher-auth-intro">
+          <div class="teacher-icon-huge">👩‍🏫</div>
+          <h3>Miss Rania's Teacher Console</h3>
+          <p>Log in as instructor to view all enrolled students, inspect individual report cards, track struggling topics, and export classroom analytics.</p>
+        </div>
+        <button type="button" class="primary-glow-btn full-width teacher-fast-login-btn" id="teacherDirectLoginBtn">
+          ⚡ 1-Click Instructor Sign In (Miss Rania)
+        </button>
+        <div class="auth-divider"><span>OR SIGN IN WITH CREDENTIALS</span></div>
+        <form id="teacherLoginForm" class="auth-form" onsubmit="return false;">
+          <div class="form-group">
+            <label for="teacherUsername">Admin Username</label>
+            <input type="text" id="teacherUsername" value="admin" required autocomplete="username">
+          </div>
+          <div class="form-group">
+            <label for="teacherPassword">Admin Password</label>
+            <input type="password" id="teacherPassword" value="admin123" required autocomplete="current-password">
+          </div>
+          <div class="form-error-msg" id="teacherErrorMsg" style="display: none;"></div>
+          <button type="submit" class="primary-glow-btn full-width" id="submitTeacherLoginBtn">Sign In to Teacher Console</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MODAL 1: CREATE CLASSROOM ASSIGNMENT MODAL
+       ==================================================================== -->
+  <div class="auth-modal-backdrop" id="createAssignmentModal">
+    <div class="auth-modal-window" style="max-width: 520px;">
+      <div class="auth-modal-header">
+        <div>
+          <h2 class="auth-title">Create Class Assignment 📌</h2>
+          <p class="auth-subtitle">Assign a specific curriculum skill as homework or required practice.</p>
+        </div>
+        <button class="modal-close-btn" id="closeCreateAssignmentModalBtn">✕</button>
+      </div>
+      <form id="createAssignmentForm" class="auth-form" onsubmit="return false;" style="padding: 1.5rem;">
+        <div class="form-group">
+          <label for="assignSubject">Subject</label>
+          <select id="assignSubject">
+            <option value="Maths" selected>Maths</option>
+            <option value="English">English</option>
+            <option value="Science">Science</option>
+            <option value="Social Studies">Social Studies</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="assignSkillSearch">Skill Code or Search</label>
+          <input type="text" id="assignSkillSearch" placeholder="e.g. A.1 or place value" required>
+        </div>
+        <div class="form-group">
+          <label for="assignSkillTitle">Skill Title</label>
+          <input type="text" id="assignSkillTitle" placeholder="e.g. Place value models - up to thousands" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="assignGrade">Year Level</label>
+            <select id="assignGrade">
+              <option value="Year 3">Year 3</option>
+              <option value="Year 4" selected>Year 4</option>
+              <option value="Year 5">Year 5</option>
+              <option value="Year 6">Year 6</option>
+              <option value="Year 7">Year 7</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="assignDueDate">Target Due Date</label>
+            <input type="date" id="assignDueDate" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="assignInstructions">Teacher Instructions (Optional)</label>
+          <textarea id="assignInstructions" rows="2" placeholder="e.g. Solve at least 10 questions and reach SmartScore 80!"></textarea>
+        </div>
+        <button type="submit" class="primary-glow-btn full-width" id="submitCreateAssignmentBtn">Publish Assignment to Class 🚀</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MODAL 2: ADD NEW STUDENT MODAL (TEACHER CONSOLE)
+       ==================================================================== -->
+  <div class="auth-modal-backdrop" id="addStudentModal">
+    <div class="auth-modal-window" style="max-width: 480px;">
+      <div class="auth-modal-header">
+        <div>
+          <h2 class="auth-title">Add Student to Roster 👤</h2>
+          <p class="auth-subtitle">Create a new student account with credentials and grade assignment.</p>
+        </div>
+        <button class="modal-close-btn" id="closeAddStudentModalBtn">✕</button>
+      </div>
+      <form id="addStudentForm" class="auth-form" onsubmit="return false;" style="padding: 1.5rem;">
+        <div class="form-group">
+          <label for="tNewStudentName">Student Full Name</label>
+          <input type="text" id="tNewStudentName" placeholder="e.g. Maya Lin" required>
+        </div>
+        <div class="form-group">
+          <label for="tNewStudentUser">Student Username</label>
+          <input type="text" id="tNewStudentUser" placeholder="e.g. mayalin" required>
+        </div>
+        <div class="form-group">
+          <label for="tNewStudentPass">Password</label>
+          <input type="password" id="tNewStudentPass" value="password123" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="tNewStudentGrade">Grade Level</label>
+            <select id="tNewStudentGrade">
+              <option value="Year 3">Year 3</option>
+              <option value="Year 4" selected>Year 4</option>
+              <option value="Year 5">Year 5</option>
+              <option value="Year 6">Year 6</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="tNewStudentAvatar">Avatar</label>
+            <select id="tNewStudentAvatar">
+              <option value="🦊" selected>🦊 Fox</option>
+              <option value="🦄">🦄 Unicorn</option>
+              <option value="🚀">🚀 Rocket</option>
+              <option value="🦁">🦁 Lion</option>
+              <option value="🐼">🐼 Panda</option>
+              <option value="🌟">🌟 Star</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="primary-glow-btn full-width" id="submitAddStudentBtn">Create Student Profile</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MODAL 3: RESET PASSWORD MODAL
+       ==================================================================== -->
+  <div class="auth-modal-backdrop" id="resetPasswordModal">
+    <div class="auth-modal-window" style="max-width: 420px;">
+      <div class="auth-modal-header">
+        <div>
+          <h2 class="auth-title">Reset Password 🔑</h2>
+          <p class="auth-subtitle" id="resetStudentSubtitle">Set a new password for student.</p>
+        </div>
+        <button class="modal-close-btn" id="closeResetPasswordModalBtn">✕</button>
+      </div>
+      <form id="resetPasswordForm" class="auth-form" onsubmit="return false;" style="padding: 1.5rem;">
+        <input type="hidden" id="resetStudentId">
+        <div class="form-group">
+          <label for="newResetPassword">New Password</label>
+          <input type="text" id="newResetPassword" value="password123" required>
+        </div>
+        <button type="submit" class="primary-glow-btn full-width" id="submitResetPasswordBtn">Update Password</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       CLASSROOM TOOL 1: SCHOOL CALCULATOR
+       ==================================================================== -->
+  <div class="classroom-tool-panel" id="calculatorWidget">
+    <div class="tool-panel-header">
+      <div class="tool-panel-title">🧮 <span data-i18n="calculator">Calculator</span></div>
+      <button type="button" class="tool-panel-close" onclick="ClassroomTools.toggleCalculator()">✕</button>
+    </div>
+    <div class="tool-panel-content">
+      <div class="calc-display" id="calcDisplay">0</div>
+      <div class="calc-grid">
+        <button type="button" class="calc-btn clear" onclick="ClassroomTools.calcClear()">C</button>
+        <button type="button" class="calc-btn op" onclick="ClassroomTools.calcPress('/')">÷</button>
+        <button type="button" class="calc-btn op" onclick="ClassroomTools.calcPress('*')">×</button>
+        <button type="button" class="calc-btn op" onclick="ClassroomTools.calcPress('-')">-</button>
+        
+        <button type="button" class="calc-btn" onclick="ClassroomTools.calcPress('7')">7</button>
+        <button type="button" class="calc-btn" onclick="ClassroomTools.calcPress('8')">8</button>
+        <button type="button" class="calc-btn" onclick="ClassroomTools.calcPress('9')">9</button>
+        <button type="button" class="calc-btn op" onclick="ClassroomTools.calcPress('+')">+</button>
+        
+        <button type="button" class="calc-btn" onclick="ClassroomTools.calcPress('4')">4</button>
+        <button type="button" class="calc-btn" onclick="ClassroomTools.calcPress('5')">5</button>
+        <button type="button" class="calc-btn" onclick="ClassroomTools.calcPress('6')">6</button>
+        <button type="button" class="calc-btn" onclick="ClassroomTools.calcPress('.')">.</button>
+        
+        <button type="button" class="calc-btn" onclick="ClassroomTools.calcPress('1')">1</button>
+        <button type="button" class="calc-btn" onclick="ClassroomTools.calcPress('2')">2</button>
+        <button type="button" class="calc-btn" onclick="ClassroomTools.calcPress('3')">3</button>
+        <button type="button" class="calc-btn" onclick="ClassroomTools.calcPress('0')">0</button>
+        
+        <button type="button" class="calc-btn eq" onclick="ClassroomTools.calcCalculate()">=</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       CLASSROOM TOOL 2: INTERACTIVE NUMBER LINE
+       ==================================================================== -->
+  <div class="classroom-tool-panel" id="numberLineWidget" style="width: 420px;">
+    <div class="tool-panel-header">
+      <div class="tool-panel-title">📏 <span data-i18n="numberLine">Interactive Number Line</span> (<span id="nlCurrentValDisplay">5</span>)</div>
+      <button type="button" class="tool-panel-close" onclick="ClassroomTools.toggleNumberLine()">✕</button>
+    </div>
+    <div class="tool-panel-content">
+      <div class="number-line-container">
+        <div class="number-line-axis" id="nlAxis"></div>
+      </div>
+      <div class="nl-controls">
+        <button type="button" class="secondary-glass-btn" onclick="ClassroomTools.jumpNumberLine(-10)">-10</button>
+        <button type="button" class="secondary-glass-btn" onclick="ClassroomTools.jumpNumberLine(-5)">-5</button>
+        <button type="button" class="secondary-glass-btn" onclick="ClassroomTools.jumpNumberLine(-1)">-1</button>
+        <button type="button" class="primary-glow-btn" onclick="ClassroomTools.jumpNumberLine(1)">+1</button>
+        <button type="button" class="primary-glow-btn" onclick="ClassroomTools.jumpNumberLine(5)">+5</button>
+        <button type="button" class="primary-glow-btn" onclick="ClassroomTools.jumpNumberLine(10)">+10</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       CLASSROOM TOOL 3: FRACTION VISUALIZER
+       ==================================================================== -->
+  <div class="classroom-tool-panel" id="fractionVisualizerWidget" style="width: 360px;">
+    <div class="tool-panel-header">
+      <div class="tool-panel-title">🥧 <span data-i18n="fractionModel">Fraction Model</span> (<span id="fractionTextLabel">3/4</span>)</div>
+      <button type="button" class="tool-panel-close" onclick="ClassroomTools.toggleFractions()">✕</button>
+    </div>
+    <div class="tool-panel-content">
+      <div class="fraction-viz-row">
+        <div class="fraction-inputs">
+          <input type="number" id="fracNumeratorInput" class="fraction-input-box" value="3" min="0" max="16" title="Numerator">
+          <div style="height: 2px; background: var(--border-card); width: 100%;"></div>
+          <input type="number" id="fracDenominatorInput" class="fraction-input-box" value="4" min="1" max="16" title="Denominator">
+        </div>
+        <div style="flex: 1; padding-left: 0.5rem; font-size: 0.85rem; color: var(--text-secondary);">
+          Adjust numerator & denominator to visualize parts of a whole interactively.
+        </div>
+      </div>
+      <div class="fraction-bar-preview" id="fractionBarContainer"></div>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MODAL 4: MASTERY CERTIFICATE MODAL
+       ==================================================================== -->
+  <div class="cert-modal-backdrop" id="masteryCertModal">
+    <div class="cert-container">
+      <div class="cert-header">
+        <div class="cert-seal">🎓</div>
+        <div class="cert-title-top" id="certTitle">CERTIFICATE OF MASTERY</div>
+        <div class="cert-subtitle">RANIA CLASSROOM • ACADEMIC EXCELLENCE</div>
+      </div>
+      <div class="cert-body">
+        <div class="cert-recipient-label" id="certIntro">This certifies that</div>
+        <div class="cert-student-name" id="certStudentName">Alex Turner</div>
+        <div class="cert-reason" id="certReason">
+          has demonstrated outstanding academic excellence and achieved 100% mastery in
+        </div>
+        <div style="font-size: 1.35rem; font-weight: 800; color: #8b6508; margin-top: 0.8rem;" id="certSkillName">
+          A.1: Place Value Models
+        </div>
+      </div>
+      <div class="cert-footer-row">
+        <div class="cert-sign-col">
+          <div class="cert-sign-line" id="certInstructor">Miss Rania</div>
+          <div class="cert-sign-title">Lead Classroom Educator</div>
+        </div>
+        <div>
+          <div class="cert-badge-gold">100%<br>MASTER</div>
+        </div>
+        <div class="cert-sign-col">
+          <div class="cert-sign-line" id="certDateValue" style="font-family: var(--font-ui); font-size: 1.1rem; padding-top: 0.5rem;">September 2026</div>
+          <div class="cert-sign-title">Date Awarded</div>
+        </div>
+      </div>
+      <div class="cert-actions-bar">
+        <button type="button" class="primary-glow-btn" onclick="MasteryCertificate.print()" data-i18n="certPrintBtn">🖨️ Print / Save as PDF</button>
+        <button type="button" class="secondary-glass-btn" onclick="MasteryCertificate.close()" data-i18n="close">✕ Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-notification" id="portalToast" style="display: none;">
+    <span class="toast-icon" id="toastIcon">🎉</span>
+    <span class="toast-message" id="toastMessage">Notification</span>
+  </div>
+
+  <!-- Scripts -->
+  <script src="data/curriculum_data.js"></script>
+  <script src="data/teacher_curriculum.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/scratchpad.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/sync.js"></script>
+  <script src="js/question-engine.js"></script>
+  <script src="js/classroom-tools.js"></script>
+  <script src="js/certificate.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

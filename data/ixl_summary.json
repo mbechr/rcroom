@@ -1,0 +1,22 @@
+{
+  "source": "https://uk.ixl.com",
+  "scraped_at": "2026-09-09T07:59:45Z",
+  "total_subjects": 3,
+  "total_grades": 39,
+  "total_categories": 1416,
+  "total_skills": 24792,
+  "subjects": {
+    "Maths": {
+      "grades_count": 14,
+      "skills_count": 15588
+    },
+    "English": {
+      "grades_count": 14,
+      "skills_count": 6111
+    },
+    "Science": {
+      "grades_count": 11,
+      "skills_count": 3093
+    }
+  }
+}

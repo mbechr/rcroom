@@ -1,0 +1,13 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Local backup archives
+*.zip
+
+# Temporary test artifacts
+New folder/
+*.png
+*.log
+.DS_Store
+Thumbs.db
