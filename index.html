@@ -344,11 +344,15 @@
               <!-- Dynamically populated via JS -->
             </div>
 
-            <!-- Footer: Custom Sign in or Register -->
-            <div class="pt-2 mt-2 border-t border-border-subtle flex items-center justify-between px-1">
-              <button class="text-xs text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1 cursor-pointer font-semibold" id="dropdownOpenFullModalBtn">
+            <!-- Footer: Switch Account or Log Out -->
+            <div class="pt-2 mt-2 border-t border-border-subtle flex flex-col gap-1.5 px-1">
+              <button class="text-xs text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1 cursor-pointer font-semibold py-1" id="dropdownOpenFullModalBtn">
                 <span class="material-symbols-outlined text-[15px]">manage_accounts</span>
-                <span data-i18n="moreLoginOptions">Login with Password / Add Student</span>
+                <span>تبديل الحساب / تسجيل طالب جديد</span>
+              </button>
+              <button type="button" class="w-full py-1.5 px-3 rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-600 font-bold text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer border border-red-500/20" id="globalLogoutBtn" onclick="logoutUser()">
+                <span class="material-symbols-outlined text-[16px]">logout</span>
+                <span>تسجيل الخروج (Log Out)</span>
               </button>
             </div>
           </div>
@@ -1433,53 +1437,59 @@
     <div class="auth-modal-window">
       <div class="auth-modal-header">
         <div>
-          <h2 class="auth-title">Student Portal Access</h2>
-          <p class="auth-subtitle">Log in to track your scores, unlock badges, and generate official progress reports.</p>
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-xl">🔐</span>
+            <h2 class="auth-title">RC Classroom — تسجيل الدخول</h2>
+          </div>
+          <p class="auth-subtitle">أدخل اسم المستخدم وكلمة المرور للوصول إلى حسابك (للطلاب والمعلمة)</p>
         </div>
         <button class="modal-close-btn" id="closeAuthModalBtn">✕</button>
       </div>
 
       <!-- Auth Tabs -->
       <div class="auth-tabs">
-        <button class="auth-tab active" data-auth-tab="demo">🚀 Quick Demo Login</button>
-        <button class="auth-tab" data-auth-tab="login">🔑 Student Log In</button>
-        <button class="auth-tab" data-auth-tab="register">✨ Register New Student</button>
-        <button class="auth-tab teacher-tab-header" data-auth-tab="teacher">👩‍🏫 Teacher / Admin</button>
+        <button class="auth-tab active" data-auth-tab="login">🔑 تسجيل الدخول (Sign In)</button>
+        <button class="auth-tab" data-auth-tab="register">✨ حساب طالب جديد (Register)</button>
       </div>
 
-      <!-- TAB 1: QUICK DEMO ACCOUNTS (1-Click Login) -->
-      <div class="auth-tab-content active" id="authTabDemo">
-        <div class="teacher-quick-login-card" id="quickTeacherLoginBtn" title="1-Click Teacher Console Access">
-          <div class="teacher-avatar-badge">👩‍🏫</div>
-          <div class="teacher-quick-info">
-            <div class="teacher-quick-title">Miss Rania (Classroom Instructor & Admin)</div>
-            <div class="teacher-quick-sub">Access the Teacher Console &bull; View all students' reports &bull; Manage curriculum</div>
-          </div>
-          <button type="button" class="teacher-quick-badge-btn">Instructor Access &rarr;</button>
-        </div>
-
-        <div class="demo-intro-text">
-          Or select any student profile below to test from a student's perspective:
-        </div>
-        <div class="demo-students-grid" id="demoStudentsList">
-          <!-- Injected via JS -->
-        </div>
-      </div>
-
-      <!-- TAB 2: STANDARD STUDENT LOGIN -->
-      <div class="auth-tab-content" id="authTabLogin">
+      <!-- TAB 1: UNIFIED SIGN IN (Students & Teacher) -->
+      <div class="auth-tab-content active" id="authTabLogin">
         <form id="loginForm" class="auth-form" onsubmit="return false;">
           <div class="form-group">
-            <label for="loginUsername">Student Username</label>
-            <input type="text" id="loginUsername" placeholder="e.g. alex, sophia, liam" required autocomplete="username">
+            <label for="loginUsername">اسم المستخدم (Username)</label>
+            <input type="text" id="loginUsername" placeholder="مثال: alex أو sophia أو للمعلمة admin" required autocomplete="username">
           </div>
           <div class="form-group">
-            <label for="loginPassword">Password</label>
-            <input type="password" id="loginPassword" placeholder="Enter your password" required autocomplete="current-password">
+            <label for="loginPassword">كلمة المرور (Password)</label>
+            <input type="password" id="loginPassword" placeholder="أدخل كلمة المرور الخاصة بحسابك" required autocomplete="current-password">
           </div>
           <div class="form-error-msg" id="loginErrorMsg" style="display: none;"></div>
-          <button type="submit" class="primary-glow-btn full-width" id="submitLoginBtn">Log In to Portal</button>
-          <div class="demo-tip">Demo password for existing students is: <code>password123</code></div>
+          <button type="submit" class="primary-glow-btn full-width" id="submitLoginBtn" style="font-weight: 700; font-size: 1rem; padding: 0.85rem;">
+            تسجيل الدخول إلى المنصة →
+          </button>
+
+          <!-- Helper Credentials Box for Testing -->
+          <div class="mt-4 p-3.5 rounded-xl bg-surface-container-low border border-border-subtle text-xs text-on-surface-variant flex flex-col gap-2">
+            <div class="font-bold text-on-surface flex items-center justify-between">
+              <span>💡 بيانات الحسابات الجاهزة للتجربة:</span>
+            </div>
+            <div class="flex items-center justify-between py-1 border-b border-border-subtle/50">
+              <span>👩‍🏫 <strong>المعلمة (Admin):</strong> <code>admin</code></span>
+              <span>كلمة المرور: <code>admin123</code></span>
+            </div>
+            <div class="flex items-center justify-between py-1">
+              <span>🎒 <strong>الطلاب (Students):</strong> <code>alex</code> أو <code>sophia</code></span>
+              <span>كلمة المرور: <code>password123</code></span>
+            </div>
+            <div class="flex items-center gap-2 pt-1">
+              <button type="button" class="px-2.5 py-1 rounded-lg bg-purple-100 hover:bg-purple-200 text-purple-800 text-[11px] font-bold transition-colors cursor-pointer" onclick="autofillLogin('admin', 'admin123')">
+                تعبئة بيانات المعلمة ⚡
+              </button>
+              <button type="button" class="px-2.5 py-1 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-800 text-[11px] font-bold transition-colors cursor-pointer" onclick="autofillLogin('alex', 'password123')">
+                تعبئة بيانات الطالب (Alex) 🎒
+              </button>
+            </div>
+          </div>
         </form>
       </div>
 

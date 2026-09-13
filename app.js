@@ -178,20 +178,8 @@ const AppState = {
   currentTheme: localStorage.getItem('rc_theme') || 'light',
   collapsedCategories: new Set(),
 
-  // Active Student State (Defaults to Alex Turner)
-  currentUser: JSON.parse(localStorage.getItem('current_student') || 'null') || {
-    id: 1,
-    username: 'alex',
-    full_name: 'Alex Turner',
-    grade_level: 'Year 4',
-    avatar: '🦊',
-    xp: 1420,
-    streak_days: 5,
-    badges: [
-      { badge_id: 'first_step', badge_name: 'First Step', badge_icon: '🎯', badge_desc: 'Completed your first practice session' },
-      { badge_id: 'streak_hero', badge_name: 'Streak Hero', badge_icon: '🔥', badge_desc: 'Maintained a practice streak for 3+ days' }
-    ]
-  },
+  // Active User Session (Null if not logged in; requires username & password)
+  currentUser: JSON.parse(localStorage.getItem('current_student') || 'null'),
 
   // Practice Room State
   practice: {
@@ -777,6 +765,16 @@ async function initPortal() {
   applyTheme(AppState.currentTheme);
   setupEventListeners();
   updateStudentHeader();
+
+  // Strict Authentication Gate Check
+  if (!AppState.currentUser) {
+    setTimeout(() => openAuthModal(true), 120);
+  } else {
+    const isTeacher = AppState.currentUser.role === 'teacher' || AppState.currentUser.username === 'admin' || AppState.currentUser.username === 'rania';
+    if (isTeacher) {
+      setTimeout(() => switchView('teacher'), 50);
+    }
+  }
 
   try {
     // 1. Load curriculum data
@@ -2443,22 +2441,49 @@ ${a} × ${b} = ?`,
 // Authentication & Multi-Student Controller
 // =============================================================================
 
-async function openAuthModal() {
-  el.authModal.classList.add('open');
-  el.loginErrorMsg.style.display = 'none';
-  el.regErrorMsg.style.display = 'none';
 
-  // Render demo cards
-  const demos = await DB.getDemoStudents();
-  el.demoStudentsList.innerHTML = demos.map(s => `
-    <div class="demo-student-card" onclick="loginDemoStudent('${s.username}')">
-      <div class="demo-avatar">${s.avatar}</div>
-      <div>
-        <div class="demo-name">${s.full_name}</div>
-        <div class="demo-grade">${s.grade_level} &bull; ${s.xp.toLocaleString()} XP</div>
-      </div>
-    </div>
-  `).join('');
+// =============================================================================
+// Global Authentication Gate & Session Functions
+// =============================================================================
+
+window.autofillLogin = function(username, password) {
+  const uInput = document.getElementById('loginUsername');
+  const pInput = document.getElementById('loginPassword');
+  if (uInput) uInput.value = username;
+  if (pInput) pInput.value = password;
+  const errorMsg = document.getElementById('loginErrorMsg');
+  if (errorMsg) errorMsg.style.display = 'none';
+};
+
+window.logoutUser = function() {
+  AppState.currentUser = null;
+  localStorage.removeItem('current_student');
+  localStorage.removeItem('rc_auth_token');
+  showToast('تم تسجيل الخروج بنجاح 👋');
+  updateStudentHeader();
+  toggleQuickSwitchDropdown(false);
+  openAuthModal(true);
+};
+
+async function openAuthModal(isMandatory = false) {
+  if (!el.authModal) return;
+  el.authModal.classList.add('open');
+  if (el.loginErrorMsg) el.loginErrorMsg.style.display = 'none';
+  if (el.regErrorMsg) el.regErrorMsg.style.display = 'none';
+
+  const closeBtn = document.getElementById('closeAuthModalBtn');
+  if (closeBtn) {
+    closeBtn.style.display = (isMandatory || !AppState.currentUser) ? 'none' : 'block';
+  }
+
+  // Switch to login tab by default
+  const loginTab = document.querySelector('[data-auth-tab="login"]');
+  if (loginTab) loginTab.click();
+
+  setTimeout(() => {
+    const uInput = document.getElementById('loginUsername');
+    if (uInput) uInput.focus();
+  }, 200);
 }
 
 async function loginDemoStudent(username) {
@@ -2901,7 +2926,13 @@ function setupEventListeners() {
   }
 
   if (el.closeAuthModalBtn) {
-    el.closeAuthModalBtn.addEventListener('click', () => el.authModal.classList.remove('open'));
+    el.closeAuthModalBtn.addEventListener('click', () => {
+      if (AppState.currentUser) {
+        el.authModal.classList.remove('open');
+      } else {
+        showToast('يرجى تسجيل الدخول أولاً للمتابعة 🔒');
+      }
+    });
   }
 
   // Auth Tabs
@@ -2918,7 +2949,7 @@ function setupEventListeners() {
     });
   });
 
-  // Login Form
+  // Login Form (Unified Authentication for Students and Teacher/Admin)
   if (el.loginForm) {
     el.loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -2928,9 +2959,16 @@ function setupEventListeners() {
         const student = await DB.login(u, p);
         setCurrentStudent(student);
         el.authModal.classList.remove('open');
-        showToast(`Welcome back, ${student.full_name}!`);
+        const isTeacher = student.role === 'teacher' || student.username === 'admin' || student.username === 'rania';
+        if (isTeacher) {
+          showToast('مرحباً بكِ معلمة رانيا (لوحة تحكم الإدارة) 👩‍🏫');
+          switchView('teacher');
+        } else {
+          showToast(`أهلاً بك يا ${student.full_name}! 👋`);
+          switchView('dashboard');
+        }
       } catch (err) {
-        el.loginErrorMsg.textContent = err.message || 'Login failed';
+        el.loginErrorMsg.textContent = err.message || 'اسم المستخدم أو كلمة المرور غير صحيحة';
         el.loginErrorMsg.style.display = 'block';
       }
     });
