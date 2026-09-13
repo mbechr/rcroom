@@ -8,10 +8,10 @@
   <!-- Fonts: Inter (UI), Newsreader (Editorial Serif), Space Mono (Codes/Stats) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="style.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='25' fill='%230071e3'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' fill='%23ffffff' font-family='sans-serif' font-weight='bold' font-size='50'>RC</text></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><rect width='48' height='48' rx='12' fill='%231d4ed8'/><path d='M14 15h9a6 6 0 0 1 0 12h-9V15zm6 7h3a1 1 0 0 0 0-2h-3v2z' fill='%23ffffff'/><path d='M22 27l5 9h-6l-4.5-8h4.5z' fill='%23ffffff'/><path d='M34 16l1.2 3.8 3.8 1.2-3.8 1.2-1.2 3.8-1.2-3.8-3.8-1.2 3.8-1.2z' fill='%23f59e0b'/></svg>">
 </head>
 <body class="apple-style">
 
@@ -33,9 +33,23 @@
     <div class="navbar-inner">
       <!-- Brand Logo -->
       <div class="brand-group" id="brandHomeBtn" title="Back to Dashboard">
-        <div class="brand-badge">
-          <span>RC</span>
-          <span class="brand-sparkle">✨</span>
+        <div class="brand-logo-wrap">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="36" height="36" class="brand-svg-logo">
+            <defs>
+              <linearGradient id="rcGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#3b82f6" />
+                <stop offset="100%" stop-color="#1d4ed8" />
+              </linearGradient>
+              <linearGradient id="rcSparkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stop-color="#f59e0b" />
+                <stop offset="100%" stop-color="#fbbf24" />
+              </linearGradient>
+            </defs>
+            <rect width="48" height="48" rx="12" fill="url(#rcGrad1)" />
+            <path d="M14 15h9a6 6 0 0 1 0 12h-9V15zm6 7h3a1 1 0 0 0 0-2h-3v2z" fill="#ffffff" />
+            <path d="M22 27l5 9h-6l-4.5-8h4.5z" fill="#ffffff" />
+            <path d="M34 16l1.2 3.8 3.8 1.2-3.8 1.2-1.2 3.8-1.2-3.8-3.8-1.2 3.8-1.2z" fill="url(#rcSparkGrad)" />
+          </svg>
         </div>
         <div class="brand-info">
           <span class="brand-name">RC CLASSROOM</span>
@@ -87,6 +101,10 @@
         <button class="icon-control-btn" id="switchStudentBtn" title="Switch Student or Log In">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
         </button>
+
+        <a href="stitch-designs/index.html" class="stitch-badge-link" target="_blank" title="View Stitch UI/UX Design System">
+          <span>✨</span> <span>Design Suite</span>
+        </a>
 
         <button class="icon-control-btn" id="themeToggleBtn" title="Toggle Dark/Light Mode">
           <span id="themeIcon">☀️</span>

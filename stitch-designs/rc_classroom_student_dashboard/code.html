@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Plus+Jakarta+Sans:wght@500;600;700;800&amp;family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-background": "#151b29",
+          "inverse-primary": "#b0c6ff",
+          "primary-fixed-dim": "#b0c6ff",
+          "surface-container-low": "#f1f3ff",
+          "tertiary-container": "#007954",
+          "surface-container": "#e9edff",
+          "on-primary": "#ffffff",
+          "secondary-container": "#6552ff",
+          "on-tertiary-container": "#9affce",
+          "surface-canvas": "#F8FAFC",
+          "on-error": "#ffffff",
+          "surface-tint": "#EFF6FF",
+          "on-primary-container": "#e5eaff",
+          "on-surface": "#151b29",
+          "outline": "#727786",
+          "tertiary-fixed-dim": "#68dba9",
+          "on-tertiary-fixed": "#002114",
+          "streak-amber": "#F59E0B",
+          "surface-bright": "#faf8ff",
+          "on-surface-variant": "#424654",
+          "secondary": "#4b32e7",
+          "error-container": "#ffdad6",
+          "on-secondary-fixed-variant": "#3912d8",
+          "tertiary": "#005e40",
+          "error": "#ba1a1a",
+          "secondary-fixed": "#e4dfff",
+          "surface-variant": "#dde2f6",
+          "on-secondary": "#ffffff",
+          "surface-container-highest": "#dde2f6",
+          "mastery-emerald": "#10B981",
+          "surface": "#faf8ff",
+          "tertiary-fixed": "#85f8c4",
+          "on-primary-fixed-variant": "#00419c",
+          "primary-container": "#0062e3",
+          "on-tertiary-fixed-variant": "#005137",
+          "danger-rose": "#EF4444",
+          "inverse-surface": "#2a303f",
+          "secondary-fixed-dim": "#c5c0ff",
+          "surface-container-lowest": "#ffffff",
+          "on-secondary-container": "#f7f2ff",
+          "on-primary-fixed": "#001945",
+          "on-tertiary": "#ffffff",
+          "on-error-container": "#93000a",
+          "streak-glow": "#FEF3C7",
+          "surface-container-high": "#e2e8fc",
+          "outline-variant": "#c2c6d7",
+          "border-subtle": "#E2E8F0",
+          "on-secondary-fixed": "#140067",
+          "surface-dim": "#d4d9ed",
+          "primary": "#004bb2",
+          "background": "#faf8ff",
+          "inverse-on-surface": "#edf0ff",
+          "primary-fixed": "#d9e2ff",
+          "surface-card": "#FFFFFF"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "space-xs": "0.25rem",
+          "space-md": "1rem",
+          "gutter": "1.5rem",
+          "space-xl": "2.5rem",
+          "gutter-mobile": "1rem",
+          "space-lg": "1.5rem",
+          "margin": "2rem",
+          "space-sm": "0.5rem",
+          "margin-mobile": "1rem"
+        },
+        "fontFamily": {
+          "headline-lg": [
+            "Plus Jakarta Sans"
+          ],
+          "body-md": [
+            "Inter"
+          ],
+          "display-hero": [
+            "Plus Jakarta Sans"
+          ],
+          "headline-sm": [
+            "Plus Jakarta Sans"
+          ],
+          "body-lg": [
+            "Inter"
+          ],
+          "headline-lg-mobile": [
+            "Plus Jakarta Sans"
+          ],
+          "body-sm": [
+            "Inter"
+          ],
+          "title-md": [
+            "Plus Jakarta Sans"
+          ],
+          "label-lg": [
+            "Plus Jakarta Sans"
+          ],
+          "label-md": [
+            "Plus Jakarta Sans"
+          ],
+          "label-sm": [
+            "Plus Jakarta Sans"
+          ],
+          "display-hero-mobile": [
+            "Plus Jakarta Sans"
+          ],
+          "headline-md": [
+            "Plus Jakarta Sans"
+          ]
+        },
+        "fontSize": {
+          "headline-lg": [
+            "36px",
+            {
+              "lineHeight": "44px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "700"
+            }
+          ],
+          "body-md": [
+            "16px",
+            {
+              "lineHeight": "24px",
+              "fontWeight": "400"
+            }
+          ],
+          "display-hero": [
+            "56px",
+            {
+              "lineHeight": "64px",
+              "letterSpacing": "-0.03em",
+              "fontWeight": "800"
+            }
+          ],
+          "headline-sm": [
+            "20px",
+            {
+              "lineHeight": "28px",
+              "fontWeight": "600"
+            }
+          ],
+          "body-lg": [
+            "18px",
+            {
+              "lineHeight": "28px",
+              "fontWeight": "400"
+            }
+          ],
+          "headline-lg-mobile": [
+            "28px",
+            {
+              "lineHeight": "36px",
+              "letterSpacing": "-0.015em",
+              "fontWeight": "700"
+            }
+          ],
+          "body-sm": [
+            "14px",
+            {
+              "lineHeight": "20px",
+              "fontWeight": "400"
+            }
+          ],
+          "title-md": [
+            "18px",
+            {
+              "lineHeight": "26px",
+              "fontWeight": "600"
+            }
+          ],
+          "label-lg": [
+            "14px",
+            {
+              "lineHeight": "20px",
+              "letterSpacing": "0.01em",
+              "fontWeight": "700"
+            }
+          ],
+          "label-md": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "letterSpacing": "0.02em",
+              "fontWeight": "600"
+            }
+          ],
+          "label-sm": [
+            "11px",
+            {
+              "lineHeight": "14px",
+              "letterSpacing": "0.04em",
+              "fontWeight": "700"
+            }
+          ],
+          "display-hero-mobile": [
+            "36px",
+            {
+              "lineHeight": "44px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "800"
+            }
+          ],
+          "headline-md": [
+            "24px",
+            {
+              "lineHeight": "32px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "700"
+            }
+          ]
+        }
+      },
+    },
+  }</script></head><body class="bg-surface-canvas font-body-md text-body-md text-on-surface antialiased min-h-screen"><header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-20 w-full px-gutter flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-lg shrink-0"><div class="flex items-center gap-space-sm"><img alt="RC Classroom Brand Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1V7ZgSLvxn2u5cycq8ZA4NYee45N_u71j2Yid-533k2MKjM7n_cK0PKQ633SF3wNLPGSx-A5zhaA4gBlc0iFO5Qa7yU-gWpRkq6WhY-95N3Z7wlumB3z5UxUxzA6UVRVY1aks7zM2I7ouckgrxr7kQu-5_bnS9ei7K059hh2dhKHTZoYCA-Fbbz4L9BOX8TsU0EIPtlUIc2XZ3R1YjppjiN6yKJViEHA5QniW1wWVgDtGGFniS3W1gz-2s"/><div class="flex flex-col"><span class="font-headline-sm text-headline-sm tracking-tight text-primary leading-none">RC CLASSROOM</span><span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mt-1">Student Portal • SQL Analytics</span></div></div><div class="h-7 w-px bg-surface-variant hidden xl:block"></div><nav class="hidden lg:flex items-center gap-1" data-active-classes="bg-primary-container text-on-primary font-label-md rounded-lg shadow-sm"><a aria-current="page" class="px-3 py-2 transition-all bg-primary-container text-on-primary font-label-md rounded-lg shadow-sm" data-path="dashboard" href="#">Dashboard</a><a class="px-3 py-2 rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="curriculum-tracks" href="#">Curriculum Tracks</a><a class="px-3 py-2 rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all flex items-center gap-1.5" data-path="skills-bank" href="#">Skills Bank <span class="px-1.5 py-0.5 rounded-full bg-surface-container text-primary font-label-sm text-label-sm font-bold">8,264+</span></a><a class="px-3 py-2 rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="student-reports" href="#">Student Reports</a><a class="px-3 py-2 rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="leaderboard" href="#">Leaderboard</a><a class="px-3 py-2 rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="teacher-console" href="#">Teacher Console</a></nav></div><div class="flex items-center gap-space-sm shrink-0"><div class="relative hidden 2xl:flex items-center"><div class="absolute left-3 flex items-center pointer-events-none"><span class="material-symbols-outlined text-on-surface-variant text-[18px]">search</span></div><input class="h-10 pl-9 pr-14 w-60 rounded-lg bg-surface-container-low text-on-surface placeholder:text-on-surface-variant font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary/20" placeholder="Fast Search queries, lessons..." type="text"/><div class="absolute right-2 px-1.5 py-0.5 rounded bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm">⌘K</div></div><div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-streak-glow shadow-[0_0_12px_rgba(245,158,11,0.25)]"><span class="material-symbols-outlined text-streak-amber text-[18px]">local_fire_department</span><span class="font-label-md text-label-md text-on-surface font-bold">5 Streak</span></div><button class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors font-label-sm text-label-sm" type="button"><span class="material-symbols-outlined text-[16px]">language</span><span>English</span></button><button aria-label="Theme toggle" class="w-9 h-9 rounded-lg flex items-center justify-center bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[18px]">light_mode</span></button><button aria-label="Notifications" class="relative w-9 h-9 rounded-lg flex items-center justify-center bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors" type="button"><span class="material-symbols-outlined text-[18px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-danger-rose"></span></button><div class="flex items-center gap-2 pl-2"><div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-low"><div class="w-7 h-7 rounded-full bg-streak-amber/20 flex items-center justify-center font-label-sm text-label-sm leading-none">🦊</div><div class="hidden md:flex flex-col text-left"><div class="flex items-center gap-1.5"><span class="font-label-md text-label-md text-on-surface font-bold leading-none">Alex Turner</span><span class="font-label-sm text-label-sm text-on-surface-variant leading-none">(Year 4)</span></div><span class="font-label-sm text-label-sm text-primary font-semibold leading-none mt-1">1,420 XP</span></div><span class="px-2 py-0.5 rounded-full bg-primary-fixed text-primary font-label-sm text-label-sm font-bold">Lv. 5</span></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></div></header><aside class="fixed left-0 top-20 bottom-0 w-64 bg-surface-container-lowest z-40 flex flex-col justify-between py-6 shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col gap-6 px-4"><div class="px-3 flex items-center justify-between"><span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Navigation Track</span><span class="px-2 py-0.5 rounded-full bg-mastery-emerald/15 text-mastery-emerald font-label-sm text-label-sm font-bold">Active Cohort</span></div><nav class="flex flex-col gap-1.5" data-active-classes="bg-primary-container text-on-primary font-bold shadow-sm"><a aria-current="page" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all bg-primary-container text-on-primary font-bold shadow-sm" data-path="dashboard" href="#"><span class="material-symbols-outlined text-[20px]">space_dashboard</span><span>Dashboard</span></a><a class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="curriculum-tracks" href="#"><span class="material-symbols-outlined text-[20px]">route</span><span>Curriculum Tracks</span></a><a class="flex items-center justify-between px-3.5 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="skills-bank" href="#"><div class="flex items-center gap-3"><span class="material-symbols-outlined text-[20px]">menu_book</span><span>Skills Bank</span></div><span class="font-label-sm text-label-sm font-bold text-primary">8.2k</span></a><a class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="student-reports" href="#"><span class="material-symbols-outlined text-[20px]">analytics</span><span>Student Reports</span></a><a class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="leaderboard" href="#"><span class="material-symbols-outlined text-[20px]">emoji_events</span><span>Leaderboard</span></a><a class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="teacher-console" href="#"><span class="material-symbols-outlined text-[20px]">cast_for_education</span><span>Teacher Console</span></a></nav></div><div class="px-4 flex flex-col gap-3"><div class="p-4 rounded-xl bg-surface-container-low flex flex-col gap-2"><div class="flex items-center justify-between"><span class="font-label-sm text-label-sm text-on-surface-variant">Daily XP Goal</span><span class="font-label-sm text-label-sm text-primary font-bold">350 / 500</span></div><div class="w-full h-2 rounded-full bg-surface-variant overflow-hidden"><div class="h-full rounded-full bg-primary-container w-[70%]"></div></div></div><div class="px-3 flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm"><span>SQL Sandbox v4.1</span><span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-mastery-emerald"></span>Online</span></div></div></aside><div class="pl-64"><main class="relative pt-20 w-full min-h-screen bg-surface-canvas"><div class="flex flex-col w-full px-gutter py-space-lg space-y-8 max-w-[1400px] mx-auto">
+<!-- Top Live Sync Status Bar -->
+<div class="flex flex-wrap items-center justify-between gap-4 bg-surface-card rounded-xl p-4 shadow-sm">
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-low text-on-surface">
+<span class="w-2.5 h-2.5 rounded-full bg-mastery-emerald animate-pulse"></span>
+<span class="font-label-sm text-label-sm font-semibold">🟢 SQLite Local Sync Active • Last session saved</span>
+</div>
+<div class="hidden sm:flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[16px] text-primary">sync</span>
+<span>Latest attempt: <strong class="text-on-surface font-semibold">A.1 Place value models</strong></span>
+</div>
+</div>
+<div class="flex items-center gap-4 text-on-surface-variant font-label-sm text-label-sm">
+<span class="flex items-center gap-1">Accuracy: <strong class="text-mastery-emerald">88.5%</strong></span>
+<span class="h-3 w-px bg-surface-variant"></span>
+<span class="flex items-center gap-1">SmartScore: <strong class="text-primary font-bold">89.2</strong></span>
+<span class="h-3 w-px bg-surface-variant hidden md:block"></span>
+<span class="hidden md:inline-flex items-center gap-1 text-on-surface-variant">Host: <code class="px-1.5 py-0.5 rounded bg-surface-container font-mono text-[11px]">sqlite3://rc_edu.db</code></span>
+</div>
+</div>
+<!-- Welcome & Milestone Hero Panel -->
+<section class="relative overflow-hidden rounded-2xl bg-surface-card shadow-sm p-6 lg:p-8">
+<div class="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-surface-tint pointer-events-none blur-3xl opacity-70"></div>
+<div class="absolute right-1/4 -bottom-20 w-64 h-64 rounded-full bg-streak-glow pointer-events-none blur-2xl opacity-60"></div>
+<div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+<!-- Left Column: Greeting & Actions -->
+<div class="lg:col-span-7 flex flex-col space-y-4">
+<div class="flex items-center gap-2.5">
+<span class="px-3 py-1 rounded-full bg-streak-glow text-on-surface font-label-sm text-label-sm font-bold flex items-center gap-1.5 shadow-sm">
+<span class="material-symbols-outlined text-streak-amber text-[18px]">local_fire_department</span>
+            5-Day Practice Streak
+          </span>
+<span class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm">
+            Year 4 Cohort Alpha
+          </span>
+</div>
+<div class="space-y-2">
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">
+            Welcome back, Alex! 👋
+          </h1>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-xl">
+            You are currently on a 5-day practice streak. Your next milestone is Level 6. Choose a track below or jump into the 8,264+ skills bank.
+          </p>
+</div>
+<div class="flex flex-wrap items-center gap-3 pt-2">
+<button class="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary-container text-on-primary font-label-lg text-label-lg shadow-md hover:bg-primary transition-all active:translate-y-0.5">
+<span>🚀</span>
+<span>Resume Practice</span>
+</button>
+<button class="flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-container-low text-primary font-label-lg text-label-lg hover:bg-surface-container transition-all">
+<span>📊</span>
+<span>View My Performance Report</span>
+</button>
+</div>
+</div>
+<!-- Right Column: Level Progress Widget -->
+<div class="lg:col-span-5 bg-surface-container-low rounded-xl p-5 sm:p-6 flex flex-col justify-between space-y-5 shadow-sm">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-sm text-label-sm text-primary uppercase font-bold tracking-wider">Level Target</span>
+<h3 class="font-headline-sm text-headline-sm text-on-surface mt-0.5 flex items-center gap-2">
+<span>Lv. 5 Maths Explorer</span>
+<span class="text-base">🧭</span>
+</h3>
+</div>
+<div class="w-12 h-12 rounded-xl bg-primary-container text-on-primary flex items-center justify-center font-headline-sm text-headline-sm font-extrabold shadow-sm">
+            5
+          </div>
+</div>
+<div class="space-y-2">
+<div class="flex items-center justify-between font-label-md text-label-md">
+<span class="text-on-surface-variant">XP Progress</span>
+<span class="text-on-surface font-bold">1,420 / 2,000 XP</span>
+</div>
+<div class="w-full h-3 rounded-full bg-surface-variant overflow-hidden p-0.5">
+<div class="h-full rounded-full bg-gradient-to-r from-primary-container via-secondary to-mastery-emerald transition-all duration-700 ease-out" style="width: 71%;"></div>
+</div>
+<div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm pt-1">
+<span>71% to Level 6</span>
+<span>580 XP Remaining</span>
+</div>
+</div>
+<div class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg bg-surface-card text-on-surface shadow-sm">
+<span class="material-symbols-outlined text-streak-amber text-[20px] shrink-0">military_tech</span>
+<span class="font-label-sm text-label-sm font-semibold">Solve 4 more questions to reach Level 6!</span>
+</div>
+</div>
+</div>
+<!-- Fast Daily Stats Strip -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-8 pt-6 bg-surface-container-lowest/70 rounded-xl p-4">
+<div class="flex items-center gap-3 p-2">
+<div class="w-10 h-10 rounded-xl bg-surface-tint flex items-center justify-center text-xl shrink-0">📚</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface leading-tight font-bold">142</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Questions Solved</span>
+</div>
+</div>
+<div class="flex items-center gap-3 p-2">
+<div class="w-10 h-10 rounded-xl bg-surface-tint flex items-center justify-center text-xl shrink-0">🎯</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface leading-tight font-bold">88.5%</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Accuracy Rate</span>
+</div>
+</div>
+<div class="flex items-center gap-3 p-2">
+<div class="w-10 h-10 rounded-xl bg-surface-tint flex items-center justify-center text-xl shrink-0">⏱️</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface leading-tight font-bold">1h 45m</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Practice Time</span>
+</div>
+</div>
+<div class="flex items-center gap-3 p-2">
+<div class="w-10 h-10 rounded-xl bg-surface-tint flex items-center justify-center text-xl shrink-0">🏆</div>
+<div class="flex flex-col">
+<span class="font-headline-sm text-headline-sm text-on-surface leading-tight font-bold">8</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Skills Mastered</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 2: Assigned by Miss Rania -->
+<section class="space-y-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="p-2 rounded-lg bg-surface-container text-primary">
+<span class="material-symbols-outlined text-[22px]">assignment</span>
+</div>
+<div>
+<span class="font-label-sm text-label-sm text-primary font-bold uppercase tracking-wider">📌 TEACHER ASSIGNMENTS • Assigned by Miss Rania</span>
+<h2 class="font-title-md text-title-md text-on-surface font-bold">Active Tasks (3)</h2>
+</div>
+</div>
+<a class="font-label-sm text-label-sm text-primary hover:underline font-bold flex items-center gap-1" href="#">
+        View All Homework 
+        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+<!-- Task Card 1 -->
+<div class="bg-surface-card rounded-xl p-5 shadow-sm flex flex-col justify-between space-y-4 hover:shadow-md transition-shadow">
+<div class="space-y-3">
+<div class="flex items-center justify-between">
+<span class="px-2.5 py-1 rounded-md bg-surface-container font-label-sm text-label-sm font-bold text-primary">Year 4 • Maths</span>
+<span class="px-2 py-0.5 rounded bg-error-container text-on-error-container font-label-sm text-label-sm font-semibold">Due Tomorrow</span>
+</div>
+<div>
+<h3 class="font-title-md text-title-md text-on-surface font-bold leading-snug">A.1 Maths: Place value models - up to thousands</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Focus on standard form conversion &amp; expanded notation.</p>
+</div>
+</div>
+<div class="space-y-3 pt-2">
+<div class="space-y-1.5">
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-on-surface-variant">SmartScore Progress</span>
+<span class="text-on-surface font-bold">89 / 100</span>
+</div>
+<div class="w-full h-2 rounded-full bg-surface-container-high overflow-hidden">
+<div class="h-full rounded-full bg-primary-container" style="width: 85%;"></div>
+</div>
+<div class="text-right font-label-sm text-label-sm text-on-surface-variant">85% Complete</div>
+</div>
+<button class="w-full py-2.5 px-4 rounded-xl bg-primary-container text-on-primary font-label-md text-label-md font-bold flex items-center justify-center gap-2 hover:bg-primary transition-all">
+<span>Continue Drill</span>
+<span>➜</span>
+</button>
+</div>
+</div>
+<!-- Task Card 2 -->
+<div class="bg-surface-card rounded-xl p-5 shadow-sm flex flex-col justify-between space-y-4 hover:shadow-md transition-shadow">
+<div class="space-y-3">
+<div class="flex items-center justify-between">
+<span class="px-2.5 py-1 rounded-md bg-surface-container font-label-sm text-label-sm font-bold text-tertiary">Year 4 • Science</span>
+<span class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold">Due: Friday</span>
+</div>
+<div>
+<h3 class="font-title-md text-title-md text-on-surface font-bold leading-snug">Science Inquiry: Ecosystems &amp; Food Chains</h3>
+<div class="flex items-center gap-1.5 mt-2 text-on-surface-variant font-label-sm text-label-sm">
+<span class="w-5 h-5 rounded-full bg-secondary-fixed flex items-center justify-center font-bold text-[10px] text-secondary">MR</span>
+<span>Assigned by Miss Rania</span>
+</div>
+</div>
+</div>
+<div class="space-y-3 pt-2">
+<div class="p-3 rounded-lg bg-surface-container-low flex items-center justify-between">
+<span class="font-label-sm text-label-sm text-on-surface-variant">Task Status</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-variant text-on-surface-variant font-label-sm text-label-sm font-bold">Pending</span>
+</div>
+<button class="w-full py-2.5 px-4 rounded-xl bg-surface-container-high text-primary font-label-md text-label-md font-bold flex items-center justify-center gap-2 hover:bg-surface-container transition-all">
+<span>Start Practice</span>
+<span>➜</span>
+</button>
+</div>
+</div>
+<!-- Task Card 3 -->
+<div class="bg-surface-card rounded-xl p-5 shadow-sm flex flex-col justify-between space-y-4 hover:shadow-md transition-shadow">
+<div class="space-y-3">
+<div class="flex items-center justify-between">
+<span class="px-2.5 py-1 rounded-md bg-surface-container font-label-sm text-label-sm font-bold text-secondary">Year 4 • English</span>
+<span class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm font-semibold">Due: Next Monday</span>
+</div>
+<div>
+<h3 class="font-title-md text-title-md text-on-surface font-bold leading-snug">English Reading: Inference &amp; Context Clues</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Passage analysis with text-dependent comprehension queries.</p>
+</div>
+</div>
+<div class="space-y-3 pt-2">
+<div class="p-3 rounded-lg bg-tertiary-container/10 flex items-center justify-between text-tertiary">
+<div class="flex items-center gap-1.5 font-label-sm text-label-sm font-bold">
+<span class="material-symbols-outlined text-[18px]">verified</span>
+<span>SmartScore: 92/100</span>
+</div>
+<span class="px-2 py-0.5 rounded bg-tertiary-container text-on-tertiary-container font-label-sm text-label-sm font-bold">Mastered</span>
+</div>
+<button class="w-full py-2.5 px-4 rounded-xl bg-surface-container-low text-on-surface font-label-md text-label-md font-bold flex items-center justify-center gap-2 hover:bg-surface-container transition-all">
+<span>Review</span>
+<span>➜</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 3: Structured Learning Pathways (Teacher Rania's Curated Tracks) -->
+<section class="space-y-5">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div class="space-y-1">
+<div class="flex items-center gap-2 text-primary font-label-sm text-label-sm font-bold">
+<span class="material-symbols-outlined text-[18px]">alt_route</span>
+<span>// TEACHER RANIA'S CURATED TRACKS • Structured Learning Pathways</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant max-w-2xl">
+          Complete units with pedagogical lecture notes, teacher tips, and direct drills connected to the 8,264+ skills engine.
+        </p>
+</div>
+<!-- Filter Pills -->
+<div class="flex items-center gap-1.5 bg-surface-card p-1 rounded-xl shadow-sm self-start">
+<button class="px-4 py-1.5 rounded-lg bg-primary-container text-on-primary font-label-sm text-label-sm font-bold shadow-sm">All</button>
+<button class="px-4 py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low font-label-sm text-label-sm transition-colors">Maths</button>
+<button class="px-4 py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low font-label-sm text-label-sm transition-colors">English</button>
+<button class="px-4 py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low font-label-sm text-label-sm transition-colors">Science</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Track Card 1 -->
+<div class="bg-surface-card rounded-2xl p-6 shadow-sm flex flex-col justify-between space-y-6 hover:shadow-md transition-all">
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<span class="px-3 py-1 rounded-full bg-surface-tint text-primary font-label-sm text-label-sm font-bold">Maths Mastery Track</span>
+<div class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-mastery-emerald/10 text-mastery-emerald font-label-sm text-label-sm font-bold">
+<span class="material-symbols-outlined text-[16px]">school</span>
+<span>Teacher Pick</span>
+</div>
+</div>
+<div>
+<h3 class="font-title-md text-title-md text-on-surface font-bold">Numbers, Decimals &amp; Place Value</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1.5">Foundational Year 4 unit covering 4-digit comparison, rounding, and decimal fractions.</p>
+</div>
+<div class="flex items-center gap-4 text-on-surface-variant font-label-sm text-label-sm">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">menu_book</span> 18 Lessons</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">quiz</span> 240+ Questions</span>
+</div>
+</div>
+<div class="space-y-3 pt-2">
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-on-surface-variant">Unit Completion</span>
+<span class="text-primary font-bold">14 / 18 (78%)</span>
+</div>
+<div class="w-full h-2.5 rounded-full bg-surface-container-high overflow-hidden">
+<div class="h-full rounded-full bg-primary-container" style="width: 78%;"></div>
+</div>
+<button class="w-full py-2.5 rounded-xl bg-surface-container-low text-primary font-label-md text-label-md font-bold hover:bg-surface-container transition-all flex items-center justify-center gap-2">
+<span>Resume Module 15</span>
+<span class="material-symbols-outlined text-[18px]">play_arrow</span>
+</button>
+</div>
+</div>
+<!-- Track Card 2 -->
+<div class="bg-surface-card rounded-2xl p-6 shadow-sm flex flex-col justify-between space-y-6 hover:shadow-md transition-all">
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<span class="px-3 py-1 rounded-full bg-secondary-fixed text-secondary font-label-sm text-label-sm font-bold">English Track</span>
+<div class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-streak-glow text-on-surface font-label-sm text-label-sm font-bold">
+<span class="material-symbols-outlined text-streak-amber text-[16px]">star</span>
+<span>Essential</span>
+</div>
+</div>
+<div>
+<h3 class="font-title-md text-title-md text-on-surface font-bold">Grammar Mechanics &amp; Creative Synthesis</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1.5">Sentence structure, fronted adverbials, expanded noun phrases, and punctuation mastery.</p>
+</div>
+<div class="flex items-center gap-4 text-on-surface-variant font-label-sm text-label-sm">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">menu_book</span> 14 Lessons</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">quiz</span> 190+ Questions</span>
+</div>
+</div>
+<div class="space-y-3 pt-2">
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-on-surface-variant">Unit Completion</span>
+<span class="text-secondary font-bold">6 / 14 (42%)</span>
+</div>
+<div class="w-full h-2.5 rounded-full bg-surface-container-high overflow-hidden">
+<div class="h-full rounded-full bg-secondary-container" style="width: 42%;"></div>
+</div>
+<button class="w-full py-2.5 rounded-xl bg-surface-container-low text-secondary font-label-md text-label-md font-bold hover:bg-surface-container transition-all flex items-center justify-center gap-2">
+<span>Resume Module 7</span>
+<span class="material-symbols-outlined text-[18px]">play_arrow</span>
+</button>
+</div>
+</div>
+<!-- Track Card 3 -->
+<div class="bg-surface-card rounded-2xl p-6 shadow-sm flex flex-col justify-between space-y-6 hover:shadow-md transition-all">
+<div class="space-y-4">
+<div class="flex items-center justify-between">
+<span class="px-3 py-1 rounded-full bg-tertiary-fixed text-tertiary font-label-sm text-label-sm font-bold">Science Inquiry Track</span>
+<div class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-mastery-emerald/10 text-mastery-emerald font-label-sm text-label-sm font-bold">
+<span class="material-symbols-outlined text-[16px]">biotech</span>
+<span>Lab Ready</span>
+</div>
+</div>
+<div>
+<h3 class="font-title-md text-title-md text-on-surface font-bold">Living Things, States of Matter &amp; Sound</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1.5">Interactive experiments, classification keys, solids/liquids/gases, and acoustic vibrations.</p>
+</div>
+<div class="flex items-center gap-4 text-on-surface-variant font-label-sm text-label-sm">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">menu_book</span> 16 Lessons</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">quiz</span> 210+ Questions</span>
+</div>
+</div>
+<div class="space-y-3 pt-2">
+<div class="flex items-center justify-between font-label-sm text-label-sm">
+<span class="text-on-surface-variant">Unit Completion</span>
+<span class="text-tertiary font-bold">12 / 16 (75%)</span>
+</div>
+<div class="w-full h-2.5 rounded-full bg-surface-container-high overflow-hidden">
+<div class="h-full rounded-full bg-tertiary-container" style="width: 75%;"></div>
+</div>
+<button class="w-full py-2.5 rounded-xl bg-surface-container-low text-tertiary font-label-md text-label-md font-bold hover:bg-surface-container transition-all flex items-center justify-center gap-2">
+<span>Resume Module 13</span>
+<span class="material-symbols-outlined text-[18px]">play_arrow</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 4: 8,264+ Interactive Skills Bank Explorer Preview -->
+<section class="bg-surface-card rounded-2xl p-6 lg:p-8 shadow-sm space-y-6">
+<div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+<div>
+<div class="flex items-center gap-2">
+<span class="px-2.5 py-0.5 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm font-bold">Engine v4.2</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">8,264+ Interactive Skills Bank Explorer</h2>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Instant query drill-down across curricula, competency codes, and diagnostic smart indicators.</p>
+</div>
+<!-- Grade Selector Dropdown -->
+<div class="flex items-center gap-3">
+<label class="font-label-sm text-label-sm text-on-surface-variant font-medium">Curriculum Tier:</label>
+<div class="relative">
+<select class="appearance-none bg-surface-container-low text-on-surface font-label-md text-label-md font-bold py-2.5 pl-4 pr-10 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer">
+<option>Reception</option>
+<option>Year 1</option>
+<option>Year 2</option>
+<option>Year 3</option>
+<option selected="">Year 4 (Active Student Cohort)</option>
+<option>Year 5</option>
+<option>Year 6</option>
+<option>Year 7</option>
+<option>Year 8</option>
+<option>Year 9</option>
+<option>Year 10</option>
+<option>Year 11</option>
+<option>Year 12</option>
+<option>Year 13</option>
+</select>
+<span class="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Search & Filter Controls -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-3 items-center">
+<!-- Search Input -->
+<div class="lg:col-span-6 relative">
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+<input class="w-full h-11 pl-10 pr-4 rounded-xl bg-surface-container-low text-on-surface placeholder:text-on-surface-variant font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all" placeholder="Search 8,264+ skills or skill codes (e.g. A.1)..." type="text"/>
+</div>
+<!-- Subject Chips -->
+<div class="lg:col-span-3 flex items-center gap-1.5 overflow-x-auto py-1">
+<button class="px-3 py-2 rounded-xl bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold whitespace-nowrap hover:bg-surface-container transition-colors">🌐 All</button>
+<button class="px-3 py-2 rounded-xl bg-primary-container text-on-primary font-label-sm text-label-sm font-bold whitespace-nowrap">📐 Maths</button>
+<button class="px-3 py-2 rounded-xl bg-surface-container-low text-on-surface font-label-sm text-label-sm font-semibold whitespace-nowrap hover:bg-surface-container transition-colors">📚 English</button>
+<button class="px-3 py-2 rounded-xl bg-surface-container-low text-on-surface font-label-sm text-label-sm font-semibold whitespace-nowrap hover:bg-surface-container transition-colors">🔬 Science</button>
+</div>
+<!-- Filter Toggles -->
+<div class="lg:col-span-3 flex items-center justify-end gap-1.5">
+<button class="px-3 py-2 rounded-xl bg-surface-container-high text-on-surface font-label-sm text-label-sm font-bold">All Skills</button>
+<button class="px-3 py-2 rounded-xl bg-surface-container-low text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm font-semibold flex items-center gap-1">
+<span class="text-streak-amber">★</span> Starred
+        </button>
+<button class="px-3 py-2 rounded-xl bg-surface-container-low text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm font-semibold flex items-center gap-1">
+<span class="text-mastery-emerald">✓</span> Mastered
+        </button>
+</div>
+</div>
+<!-- Skills Bank Interactive Rows (Preview) -->
+<div class="space-y-2.5">
+<!-- Skill Row 1 -->
+<div class="flex items-center justify-between p-4 rounded-xl bg-surface-container-low hover:bg-surface-container transition-all group cursor-pointer">
+<div class="flex items-center gap-4 min-w-0">
+<span class="w-10 h-10 rounded-lg bg-surface-card flex items-center justify-center font-label-md text-label-md font-bold text-primary shadow-sm shrink-0">A.1</span>
+<div class="flex flex-col truncate">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md font-bold text-on-surface truncate">Place value models - up to thousands</span>
+<span class="px-2 py-0.5 rounded bg-tertiary-container text-on-tertiary-container font-label-sm text-label-sm font-bold shrink-0">SmartScore 89</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Convert multi-base blocks into standard positional numerals and expanded sums</span>
+</div>
+</div>
+<div class="flex items-center gap-4 shrink-0 pl-3">
+<div class="hidden sm:flex flex-col text-right">
+<span class="font-label-sm text-label-sm font-bold text-on-surface">32 Answered</span>
+<span class="font-label-sm text-label-sm text-mastery-emerald">88.5% Accuracy</span>
+</div>
+<button class="px-3.5 py-1.5 rounded-lg bg-primary-container text-on-primary font-label-sm text-label-sm font-bold group-hover:bg-primary transition-all">Practice</button>
+</div>
+</div>
+<!-- Skill Row 2 -->
+<div class="flex items-center justify-between p-4 rounded-xl bg-surface-container-low hover:bg-surface-container transition-all group cursor-pointer">
+<div class="flex items-center gap-4 min-w-0">
+<span class="w-10 h-10 rounded-lg bg-surface-card flex items-center justify-center font-label-md text-label-md font-bold text-primary shadow-sm shrink-0">A.2</span>
+<div class="flex flex-col truncate">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md font-bold text-on-surface truncate">Identify value of underlined digit</span>
+<span class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm font-bold shrink-0">SmartScore 64</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Determine value based on placement (ones, tens, hundreds, thousands, ten-thousands)</span>
+</div>
+</div>
+<div class="flex items-center gap-4 shrink-0 pl-3">
+<div class="hidden sm:flex flex-col text-right">
+<span class="font-label-sm text-label-sm font-bold text-on-surface">18 Answered</span>
+<span class="font-label-sm text-label-sm text-primary">72.0% Accuracy</span>
+</div>
+<button class="px-3.5 py-1.5 rounded-lg bg-surface-container-high text-primary font-label-sm text-label-sm font-bold group-hover:bg-primary-container group-hover:text-on-primary transition-all">Practice</button>
+</div>
+</div>
+<!-- Skill Row 3 -->
+<div class="flex items-center justify-between p-4 rounded-xl bg-surface-container-low hover:bg-surface-container transition-all group cursor-pointer">
+<div class="flex items-center gap-4 min-w-0">
+<span class="w-10 h-10 rounded-lg bg-surface-card flex items-center justify-center font-label-md text-label-md font-bold text-secondary shadow-sm shrink-0">B.4</span>
+<div class="flex flex-col truncate">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md font-bold text-on-surface truncate">Multiplication facts up to 12 x 12 with speed drill</span>
+<span class="px-2 py-0.5 rounded bg-tertiary-container text-on-tertiary-container font-label-sm text-label-sm font-bold shrink-0">Mastered 100</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant truncate">Times tables mastery matrix with rapid 60-second challenge sprint</span>
+</div>
+</div>
+<div class="flex items-center gap-4 shrink-0 pl-3">
+<div class="hidden sm:flex flex-col text-right">
+<span class="font-label-sm text-label-sm font-bold text-on-surface">94 Answered</span>
+<span class="font-label-sm text-label-sm text-mastery-emerald">98.2% Accuracy</span>
+</div>
+<button class="px-3.5 py-1.5 rounded-lg bg-surface-card text-mastery-emerald font-label-sm text-label-sm font-bold flex items-center gap-1 group-hover:bg-tertiary-container group-hover:text-on-tertiary-container transition-all">
+<span>Review</span>
+<span class="material-symbols-outlined text-[14px]">refresh</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Bank Footer Status -->
+<div class="flex flex-wrap items-center justify-between gap-4 pt-2 text-on-surface-variant font-label-sm text-label-sm">
+<span class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-mastery-emerald"></span>
+        Displaying 3 of 8,264 curriculum skills mapped to UK National &amp; Cambridge frameworks.
+      </span>
+<button class="text-primary font-bold hover:underline flex items-center gap-1">
+        Browse Full 8,264+ Skills Matrix
+        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</section>
+</div>
+<script>
+  // Simple interactive filter logic for demonstration without external dependencies
+  document.addEventListener('DOMContentLoaded', () => {
+    const filterButtons = document.querySelectorAll('button');
+    filterButtons.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        if (btn.innerText.includes('Resume Practice') || btn.innerText.includes('View My Performance')) {
+          btn.classList.add('scale-95');
+          setTimeout(() => btn.classList.remove('scale-95'), 120);
+        }
+      });
+    });
+  });
+</script></main></div></body></html>

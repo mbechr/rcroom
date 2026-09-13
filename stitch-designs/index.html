@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RC Classroom — Stitch UI/UX Critique & Enhancement Gallery</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0062e3;
+      --bg: #faf8ff;
+      --card: #ffffff;
+      --border: #e2e8f0;
+      --text: #151b29;
+      --text-muted: #64748b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 2.5rem 1.5rem;
+      line-height: 1.5;
+    }
+    header {
+      max-width: 1200px;
+      margin: 0 auto 2.5rem;
+      text-align: center;
+    }
+    h1 {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+    .badge {
+      display: inline-block;
+      background: #eff6ff;
+      color: var(--primary);
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      margin-bottom: 1rem;
+      border: 1px solid #bfdbfe;
+    }
+    p.lead {
+      color: var(--text-muted);
+      font-size: 1.1rem;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1.25rem;
+      background: var(--primary);
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 0.6rem 1.25rem;
+      border-radius: 9999px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .back-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 98, 227, 0.25);
+    }
+    .grid {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 2rem;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      transition: transform 0.25s, box-shadow 0.25s;
+      display: flex;
+      flex-direction: column;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 24px -4px rgba(0, 98, 227, 0.12);
+    }
+    .card img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      object-position: top;
+      border-bottom: 1px solid var(--border);
+      background: #f1f5f9;
+    }
+    .card-body {
+      padding: 1.25rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .card-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .card-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 1.25rem;
+      flex: 1;
+    }
+    .card-link {
+      display: block;
+      text-align: center;
+      background: #f1f5f9;
+      color: var(--text);
+      font-weight: 600;
+      padding: 0.6rem 1rem;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      transition: background 0.2s, color 0.2s;
+    }
+    .card-link:hover {
+      background: var(--primary);
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="badge">Google Stitch UI/UX Design System</div>
+    <h1>Kinetic Academy Enhancement Suite</h1>
+    <p class="lead">Explore the high-fidelity UI critique, design specifications, and interactive page prototypes crafted for RC Classroom.</p>
+    <a href="../index.html" class="back-btn">&larr; Return to Main Interactive Platform</a>
+  </header>
+
+  <main class="grid">
+    <div class="card">
+      <img src="rc_classroom_student_dashboard/screen.png" alt="Student Dashboard">
+      <div class="card-body">
+        <h2 class="card-title">Student Dashboard</h2>
+        <p class="card-desc">Tactile level tracker, active streak milestone, and featured curriculum pathways.</p>
+        <a href="rc_classroom_student_dashboard/code.html" class="card-link">View Dashboard Prototype &rarr;</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <img src="rc_classroom_interactive_skills_bank_practice_engine/screen.png" alt="Skills Bank">
+      <div class="card-body">
+        <h2 class="card-title">Skills Bank & Practice Engine</h2>
+        <p class="card-desc">Clean 8,264+ skill directory with scratchpad tools, SmartScore, and multi-choice modals.</p>
+        <a href="rc_classroom_interactive_skills_bank_practice_engine/code.html" class="card-link">View Skills Bank Prototype &rarr;</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <img src="rc_classroom_miss_rania_s_teacher_console/screen.png" alt="Teacher Console">
+      <div class="card-body">
+        <h2 class="card-title">Miss Rania's Teacher Console</h2>
+        <p class="card-desc">Classroom roster, diagnostic mastery breakdown, assignment creator, and CSV exporter.</p>
+        <a href="rc_classroom_miss_rania_s_teacher_console/code.html" class="card-link">View Teacher Console &rarr;</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <img src="rc_classroom_student_performance_report_certificate/screen.png" alt="Student Report">
+      <div class="card-body">
+        <h2 class="card-title">Student Performance & Certificate</h2>
+        <p class="card-desc">Comprehensive analytics report and printable official Certificate of Mastery.</p>
+        <a href="rc_classroom_student_performance_report_certificate/code.html" class="card-link">View Report & Certificate &rarr;</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <img src="rc_classroom_classroom_leaderboard_xp_rankings/screen.png" alt="Leaderboard">
+      <div class="card-body">
+        <h2 class="card-title">Leaderboard & XP Rankings</h2>
+        <p class="card-desc">Gamified classroom standings, podium ranks, streak flames, and milestone badges.</p>
+        <a href="rc_classroom_classroom_leaderboard_xp_rankings/code.html" class="card-link">View Leaderboard Prototype &rarr;</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <img src="rc_classroom_brand_logo/screen.png" alt="Brand Logo">
+      <div class="card-body">
+        <h2 class="card-title">Official RC Brand Logo</h2>
+        <p class="card-desc">Modern geometric vector logo with royal blue gradient and gold achievement sparkle.</p>
+        <a href="rc_classroom_brand_logo/code.html" class="card-link">View Logo Code &rarr;</a>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
