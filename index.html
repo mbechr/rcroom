@@ -248,10 +248,10 @@
           <span class="material-symbols-outlined text-[20px]" id="sidebarToggleIcon">menu</span>
         </button>
 
-        <!-- Brand Logo -->
-        <div class="flex items-center gap-3 cursor-pointer group shrink-0" id="brandHomeBtn" title="Back to Dashboard">
-          <div class="w-10 h-10 shrink-0 flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="38" height="38" class="brand-svg-logo shrink-0" style="width:38px;height:38px;min-width:38px;min-height:38px;">
+        <!-- Brand Logo (Compact & Sleek) -->
+        <div class="flex items-center gap-2.5 cursor-pointer group shrink-0" id="brandHomeBtn" title="Back to Dashboard">
+          <div class="w-8 h-8 shrink-0 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="32" height="32" class="brand-svg-logo shrink-0" style="width:32px;height:32px;min-width:32px;min-height:32px;">
               <defs>
                 <linearGradient id="rcGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
                   <stop offset="0%" stop-color="#0062e3" />
@@ -262,15 +262,15 @@
                   <stop offset="100%" stop-color="#fbbf24" />
                 </linearGradient>
               </defs>
-              <rect width="48" height="48" rx="12" fill="url(#rcGrad1)" />
+              <rect width="48" height="48" rx="10" fill="url(#rcGrad1)" />
               <path d="M14 15h9a6 6 0 0 1 0 12h-9V15zm6 7h3a1 1 0 0 0 0-2h-3v2z" fill="#ffffff" />
               <path d="M22 27l5 9h-6l-4.5-8h4.5z" fill="#ffffff" />
               <path d="M34 16l1.2 3.8 3.8 1.2-3.8 1.2-1.2 3.8-1.2-3.8-3.8-1.2 3.8-1.2z" fill="url(#rcSparkGrad)" />
             </svg>
           </div>
           <div class="flex flex-col">
-            <span class="font-headline-sm text-headline-sm tracking-tight text-primary leading-none">RC CLASSROOM</span>
-            <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mt-1 hidden md:block">Student Portal • SQL Analytics</span>
+            <span class="font-bold text-base tracking-tight text-primary leading-none">RC CLASSROOM</span>
+            <span class="text-[10px] text-on-surface-variant uppercase tracking-wider mt-0.5 hidden lg:block">Student Portal</span>
           </div>
         </div>
 
@@ -302,14 +302,10 @@
 
       <!-- Right Actions: Search, Streak, Lang, Theme, Profile -->
       <div class="flex items-center gap-3 shrink-0">
-        <!-- Fast Dynamic Search Input -->
-        <div class="relative hidden sm:flex items-center">
-          <div class="absolute left-3 flex items-center pointer-events-none">
-            <span class="material-symbols-outlined text-on-surface-variant text-[18px]">search</span>
-          </div>
-          <input class="h-10 pl-9 pr-12 w-32 md:w-48 lg:w-60 focus:w-72 rounded-xl bg-surface-container-low text-on-surface placeholder:text-on-surface-variant font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-300" id="topFastSearchInput" placeholder="Search lessons, skills..." type="text"/>
-          <div class="absolute right-2 px-1.5 py-0.5 rounded bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm pointer-events-none">⌘K</div>
-        </div>
+        <!-- Quick Search Icon Button (Compact) -->
+        <button class="w-9 h-9 rounded-lg flex items-center justify-center bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer" id="topSearchIconBtn" title="Search Skills Bank (⌘K / Ctrl+K)" aria-label="Search Skills">
+          <span class="material-symbols-outlined text-[19px]">search</span>
+        </button>
 
         <!-- Streak Badge -->
         <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-streak-glow shadow-[0_0_12px_rgba(245,158,11,0.25)] cursor-pointer" id="navStudentStreakWrap" title="Practice Streak">
@@ -317,10 +313,9 @@
           <span class="font-label-md text-label-md text-on-surface font-bold" id="navStudentStreak">5 Streak</span>
         </div>
 
-        <!-- Language Switcher -->
-        <button class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors font-label-sm text-label-sm cursor-pointer" id="langToggleBtn" type="button" onclick="I18N.toggle()" title="Toggle Language (العربية / English)">
-          <span class="material-symbols-outlined text-[16px]">language</span>
-          <span data-i18n="switchLanguage">English</span>
+        <!-- Language Switcher (Icon Only) -->
+        <button class="w-9 h-9 rounded-lg flex items-center justify-center bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer" id="langToggleBtn" type="button" onclick="I18N.toggle()" title="Toggle Language / تبديل اللغة" aria-label="Toggle Language">
+          <span class="material-symbols-outlined text-[18px]">language</span>
         </button>
 
         <!-- Theme Toggle -->

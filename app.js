@@ -2853,20 +2853,32 @@ function setupEventListeners() {
     });
   });
 
-  const topFastSearch = document.getElementById('topFastSearchInput');
-  if (topFastSearch) {
-    topFastSearch.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && topFastSearch.value.trim()) {
-        AppState.searchQuery = topFastSearch.value.trim();
-        switchView('skills');
+  const topSearchBtn = document.getElementById('topSearchIconBtn');
+  if (topSearchBtn) {
+    topSearchBtn.addEventListener('click', () => {
+      switchView('skills');
+      setTimeout(() => {
         if (el.skillsSearchInput) {
-          el.skillsSearchInput.value = AppState.searchQuery;
-          if (el.skillsClearSearch) el.skillsClearSearch.style.display = 'inline-flex';
+          el.skillsSearchInput.focus();
+          el.skillsSearchInput.select();
         }
-        renderSkillsCanvas();
-      }
+      }, 100);
     });
   }
+
+  // Global Ctrl+K / Cmd+K shortcut
+  document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      switchView('skills');
+      setTimeout(() => {
+        if (el.skillsSearchInput) {
+          el.skillsSearchInput.focus();
+          el.skillsSearchInput.select();
+        }
+      }, 100);
+    }
+  });
 
   // Dynamic resize handler for sliding pill indicator
   window.addEventListener('resize', () => {

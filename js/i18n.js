@@ -154,10 +154,11 @@ const I18N = {
       }
     });
 
-    // Update lang toggle button text
+    // Update lang toggle button tooltip/title (icon-only button)
     const toggleBtn = document.getElementById('langToggleBtn');
     if (toggleBtn) {
-      toggleBtn.innerHTML = '🌐 <span>' + this.t('switchLanguage') + '</span>';
+      toggleBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">language</span>';
+      toggleBtn.title = isAr ? 'Switch to English' : 'التبديل إلى العربية';
     }
 
     // Refresh sliding nav indicator
