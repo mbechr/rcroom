@@ -175,7 +175,7 @@ const AppState = {
   searchQuery: '',
   favorites: new Set(JSON.parse(localStorage.getItem('rc_favorites') || localStorage.getItem('ixl_favorites') || '[]')),
   mastered: new Set(JSON.parse(localStorage.getItem('rc_mastered') || localStorage.getItem('ixl_mastered') || '[]')),
-  currentTheme: localStorage.getItem('rc_theme') || localStorage.getItem('ixl_theme') || 'dark',
+  currentTheme: localStorage.getItem('rc_theme') || 'light',
   collapsedCategories: new Set(),
 
   // Active Student State (Defaults to Alex Turner)
@@ -868,13 +868,29 @@ function buildFlatSkillsIndex() {
 function switchView(viewId) {
   AppState.currentView = viewId;
 
-  // Update tabs
-  el.navTabs.forEach(tab => {
-    tab.classList.toggle('active', tab.dataset.view === viewId);
+  // Update tabs (both top bar & persistent left sidebar)
+  document.querySelectorAll('.nav-tab').forEach(tab => {
+    const isActive = tab.dataset.view === viewId;
+    tab.classList.toggle('active', isActive);
+
+    if (tab.closest('#portalSidebar')) {
+      if (isActive) {
+        tab.className = 'nav-tab flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all bg-primary-container text-on-primary font-bold shadow-sm active text-left w-full cursor-pointer';
+      } else {
+        tab.className = 'nav-tab flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer';
+      }
+    } else if (tab.closest('#portalNavTabs')) {
+      const isTeacherTab = tab.classList.contains('teacher-nav-tab');
+      if (isActive) {
+        tab.className = 'nav-tab px-3.5 py-2 transition-all bg-primary-container text-on-primary font-label-md rounded-lg shadow-sm active cursor-pointer' + (isTeacherTab ? ' teacher-nav-tab' : '');
+      } else {
+        tab.className = 'nav-tab px-3.5 py-2 rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all cursor-pointer' + (isTeacherTab ? ' teacher-nav-tab' : '');
+      }
+    }
   });
 
   // Update views
-  el.views.forEach(v => {
+  document.querySelectorAll('.portal-view').forEach(v => {
     v.classList.toggle('active', v.id === `view-${viewId}`);
   });
 
@@ -977,19 +993,28 @@ function updateStudentHeader() {
 
   const isTeacher = user.role === 'teacher' || user.username === 'admin' || user.username === 'rania';
 
+  const sidebarTeacherTab = document.getElementById('sidebarTeacherTabBtn');
+  const studentLevelPill = document.getElementById('navStudentLevel');
+
   if (isTeacher) {
     if (el.teacherTabBtn) el.teacherTabBtn.style.display = 'inline-flex';
-    el.navStudentAvatar.textContent = user.avatar || '👩‍🏫';
-    el.navStudentName.textContent = user.full_name || 'Miss Rania';
-    el.navStudentGrade.innerHTML = `<span>Instructor &bull; Admin</span>`;
-    el.navStudentStreak.textContent = `Teacher 🌟`;
+    if (sidebarTeacherTab) sidebarTeacherTab.style.display = 'flex';
+    if (el.navStudentAvatar) el.navStudentAvatar.textContent = user.avatar || '👩‍🏫';
+    if (el.navStudentName) el.navStudentName.textContent = user.full_name || 'Miss Rania';
+    if (el.navStudentGrade) el.navStudentGrade.innerHTML = `<span>Instructor &bull; Admin</span>`;
+    if (el.navStudentStreak) el.navStudentStreak.textContent = `Teacher 🌟`;
+    if (studentLevelPill) studentLevelPill.textContent = 'Admin';
     if (el.navXpStripFill) el.navXpStripFill.style.width = '100%';
   } else {
     if (el.teacherTabBtn) el.teacherTabBtn.style.display = 'none';
-    el.navStudentAvatar.textContent = user.avatar || '🦊';
-    el.navStudentName.textContent = user.full_name;
-    el.navStudentGrade.innerHTML = `${user.grade_level} &bull; <span>${user.xp.toLocaleString()} XP</span>`;
-    el.navStudentStreak.textContent = `🔥 ${user.streak_days}`;
+    if (sidebarTeacherTab) sidebarTeacherTab.style.display = 'none';
+    if (el.navStudentAvatar) el.navStudentAvatar.textContent = user.avatar || '🦊';
+    if (el.navStudentName) el.navStudentName.textContent = user.full_name;
+    if (el.navStudentGrade) el.navStudentGrade.innerHTML = `(${user.grade_level})`;
+    if (el.navStudentXP) el.navStudentXP.textContent = `${user.xp.toLocaleString()} XP`;
+    if (el.navStudentStreak) el.navStudentStreak.textContent = `${user.streak_days} Streak`;
+    const rank = getStudentRank(user.xp);
+    if (studentLevelPill) studentLevelPill.textContent = `Lv. ${rank.level}`;
 
     // Automatic Level XP Progress Calculation
     if (el.navXpStripFill) {
@@ -1031,13 +1056,31 @@ async function renderDashboard() {
   el.dashStreakText.textContent = `${user.streak_days}-day practice streak`;
 
   const rank = getStudentRank(user.xp);
-  el.dashLevelBadge.textContent = `Lv. ${rank.level}`;
-  el.dashRankTitle.textContent = rank.title;
-  el.dashCurrentXP.textContent = user.xp.toLocaleString();
+  if (el.dashLevelBadge) el.dashLevelBadge.textContent = `${rank.level}`;
+  if (el.dashRankTitle) el.dashRankTitle.textContent = `Lv. ${rank.level} ${rank.title}`;
+  if (el.dashCurrentXP) el.dashCurrentXP.textContent = user.xp.toLocaleString();
 
-  const nextLevelXP = (rank.level + 1) * 350;
+  const targetLevelXP = (rank.level + 1) * 350;
   const progressPercent = Math.min(Math.round((user.xp % 350) / 350 * 100), 100);
-  el.dashXpFill.style.width = `${progressPercent}%`;
+  const remainingXP = Math.max(0, 350 - (user.xp % 350));
+  const questionsNeeded = Math.max(1, Math.ceil(remainingXP / 25));
+
+  if (el.dashXpFill) el.dashXpFill.style.width = `${progressPercent}%`;
+
+  const targetXpEl = document.getElementById('dashTargetXP');
+  if (targetXpEl) targetXpEl.textContent = targetLevelXP.toLocaleString();
+  const xpPercentTextEl = document.getElementById('dashXpPercentText');
+  if (xpPercentTextEl) xpPercentTextEl.textContent = `${progressPercent}% to Level ${rank.level + 1}`;
+  const xpRemainingEl = document.getElementById('dashXpRemainingText');
+  if (xpRemainingEl) xpRemainingEl.textContent = `${remainingXP} XP Remaining`;
+  const milestonePromptEl = document.getElementById('dashMilestonePrompt');
+  if (milestonePromptEl) milestonePromptEl.textContent = `Solve ${questionsNeeded} more questions to reach Level ${rank.level + 1}!`;
+  const streakBadgeTextEl = document.getElementById('dashStreakBadgeText');
+  if (streakBadgeTextEl) streakBadgeTextEl.textContent = `${user.streak_days}-Day Practice Streak`;
+  const cohortTagEl = document.getElementById('dashCohortTag');
+  if (cohortTagEl) cohortTagEl.textContent = `${user.grade_level} Cohort Alpha`;
+  const nextMilestoneEl = document.getElementById('dashNextMilestone');
+  if (nextMilestoneEl) nextMilestoneEl.textContent = `Level ${rank.level + 1}`;
 
   // Fetch student report summary for KPI counters
   try {
@@ -2562,10 +2605,29 @@ window.confirmDeleteStudent = async function(studentId, studentName) {
 
 
 function setupEventListeners() {
-  // Navigation Tabs
-  el.navTabs.forEach(tab => {
-    tab.addEventListener('click', () => switchView(tab.dataset.view));
+  // Navigation Tabs (Both Top Bar & Left Sidebar)
+  document.querySelectorAll('.nav-tab').forEach(tab => {
+    tab.addEventListener('click', (e) => {
+      e.preventDefault();
+      const v = tab.dataset.view;
+      if (v) switchView(v);
+    });
   });
+
+  const topFastSearch = document.getElementById('topFastSearchInput');
+  if (topFastSearch) {
+    topFastSearch.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && topFastSearch.value.trim()) {
+        AppState.searchQuery = topFastSearch.value.trim();
+        switchView('skills');
+        if (el.skillsSearchInput) {
+          el.skillsSearchInput.value = AppState.searchQuery;
+          if (el.skillsClearSearch) el.skillsClearSearch.style.display = 'inline-flex';
+        }
+        renderSkillsCanvas();
+      }
+    });
+  }
 
   // Dynamic resize handler for sliding pill indicator
   window.addEventListener('resize', () => {
@@ -2966,12 +3028,15 @@ function setupEventListeners() {
 function applyTheme(theme) {
   AppState.currentTheme = theme;
   document.documentElement.setAttribute('data-theme', theme);
+  const themeIcon = document.getElementById('themeIcon');
   if (theme === 'dark') {
+    document.documentElement.classList.add('dark');
     document.body.classList.remove('light-mode');
-    if (el.themeIcon) el.themeIcon.textContent = '☀️';
+    if (themeIcon) themeIcon.textContent = 'dark_mode';
   } else {
+    document.documentElement.classList.remove('dark');
     document.body.classList.add('light-mode');
-    if (el.themeIcon) el.themeIcon.textContent = '🌙';
+    if (themeIcon) themeIcon.textContent = 'light_mode';
   }
   localStorage.setItem('rc_theme', theme);
 }

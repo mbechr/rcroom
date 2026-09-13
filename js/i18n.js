@@ -4,7 +4,7 @@
  */
 
 const I18N = {
-  currentLang: localStorage.getItem('rc_lang') || localStorage.getItem('ixl_lang') || 'ar', // Default to Arabic for Miss Rania's students
+  currentLang: localStorage.getItem('rc_lang') || 'en',
 
   translations: {
     en: {

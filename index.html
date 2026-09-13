@@ -1,233 +1,810 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr" data-theme="dark">
+<html lang="en" dir="ltr" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>RC Classroom — Student Portal & Practice Infrastructure</title>
-  
-  <!-- Fonts: Inter (UI), Newsreader (Editorial Serif), Space Mono (Codes/Stats) -->
+  <title>RC Classroom — Student Portal &amp; Practice Infrastructure</title>
+
+  <!-- Google Fonts: Inter, Plus Jakarta Sans, Space Mono & Material Symbols Outlined -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Mono:wght@400;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS & Kinetic Academy Tokens -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "on-background": "#151b29",
+            "inverse-primary": "#b0c6ff",
+            "primary-fixed-dim": "#b0c6ff",
+            "surface-container-low": "#f1f3ff",
+            "tertiary-container": "#007954",
+            "surface-container": "#e9edff",
+            "on-primary": "#ffffff",
+            "secondary-container": "#6552ff",
+            "on-tertiary-container": "#9affce",
+            "surface-canvas": "#F8FAFC",
+            "on-error": "#ffffff",
+            "surface-tint": "#EFF6FF",
+            "on-primary-container": "#e5eaff",
+            "on-surface": "#151b29",
+            "outline": "#727786",
+            "tertiary-fixed-dim": "#68dba9",
+            "on-tertiary-fixed": "#002114",
+            "streak-amber": "#F59E0B",
+            "surface-bright": "#faf8ff",
+            "on-surface-variant": "#424654",
+            "secondary": "#4b32e7",
+            "error-container": "#ffdad6",
+            "on-secondary-fixed-variant": "#3912d8",
+            "tertiary": "#005e40",
+            "error": "#ba1a1a",
+            "secondary-fixed": "#e4dfff",
+            "surface-variant": "#dde2f6",
+            "on-secondary": "#ffffff",
+            "surface-container-highest": "#dde2f6",
+            "mastery-emerald": "#10B981",
+            "surface": "#faf8ff",
+            "tertiary-fixed": "#85f8c4",
+            "on-primary-fixed-variant": "#00419c",
+            "primary-container": "#0062e3",
+            "on-tertiary-fixed-variant": "#005137",
+            "danger-rose": "#EF4444",
+            "inverse-surface": "#2a303f",
+            "secondary-fixed-dim": "#c5c0ff",
+            "surface-container-lowest": "#ffffff",
+            "on-secondary-container": "#f7f2ff",
+            "on-primary-fixed": "#001945",
+            "on-tertiary": "#ffffff",
+            "on-error-container": "#93000a",
+            "streak-glow": "#FEF3C7",
+            "surface-container-high": "#e2e8fc",
+            "outline-variant": "#c2c6d7",
+            "border-subtle": "#E2E8F0",
+            "on-secondary-fixed": "#140067",
+            "surface-dim": "#d4d9ed",
+            "primary": "#004bb2",
+            "background": "#faf8ff",
+            "inverse-on-surface": "#edf0ff",
+            "primary-fixed": "#d9e2ff",
+            "surface-card": "#FFFFFF"
+          },
+          fontFamily: {
+            "headline-lg": ["Plus Jakarta Sans", "Inter", "sans-serif"],
+            "body-md": ["Inter", "sans-serif"],
+            "display-hero": ["Plus Jakarta Sans", "sans-serif"],
+            "headline-sm": ["Plus Jakarta Sans", "sans-serif"],
+            "body-lg": ["Inter", "sans-serif"],
+            "body-sm": ["Inter", "sans-serif"],
+            "title-md": ["Plus Jakarta Sans", "sans-serif"],
+            "label-lg": ["Plus Jakarta Sans", "sans-serif"],
+            "label-md": ["Plus Jakarta Sans", "sans-serif"],
+            "label-sm": ["Plus Jakarta Sans", "sans-serif"],
+            "headline-md": ["Plus Jakarta Sans", "sans-serif"]
+          },
+          fontSize: {
+            "headline-lg": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+            "display-hero": ["56px", { "lineHeight": "64px", "letterSpacing": "-0.03em", "fontWeight": "800" }],
+            "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+            "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+            "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "title-md": ["18px", { "lineHeight": "26px", "fontWeight": "600" }],
+            "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "700" }],
+            "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }],
+            "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "700" }],
+            "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700" }]
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Core Project Styles -->
   <link rel="stylesheet" href="style.css">
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><rect width='48' height='48' rx='12' fill='%231d4ed8'/><path d='M14 15h9a6 6 0 0 1 0 12h-9V15zm6 7h3a1 1 0 0 0 0-2h-3v2z' fill='%23ffffff'/><path d='M22 27l5 9h-6l-4.5-8h4.5z' fill='%23ffffff'/><path d='M34 16l1.2 3.8 3.8 1.2-3.8 1.2-1.2 3.8-1.2-3.8-3.8-1.2 3.8-1.2z' fill='%23f59e0b'/></svg>">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><rect width='48' height='48' rx='12' fill='%230062e3'/><path d='M14 15h9a6 6 0 0 1 0 12h-9V15zm6 7h3a1 1 0 0 0 0-2h-3v2z' fill='%23ffffff'/><path d='M22 27l5 9h-6l-4.5-8h4.5z' fill='%23ffffff'/><path d='M34 16l1.2 3.8 3.8 1.2-3.8 1.2-1.2 3.8-1.2-3.8-3.8-1.2 3.8-1.2z' fill='%23f59e0b'/></svg>">
+
+  <style>
+    /* Clean layout resets & Stitch view toggling */
+    .portal-view { display: none !important; }
+    .portal-view.active { display: block !important; }
+    
+    /* RTL adjustments for persistent left sidebar */
+    html[dir="rtl"] aside#portalSidebar {
+      left: auto !important;
+      right: 0 !important;
+      border-right: none !important;
+      border-left: 1px solid #E2E8F0 !important;
+    }
+    html[dir="rtl"] #mainContentWrapper {
+      padding-left: 0 !important;
+      padding-right: 16rem !important;
+    }
+    @media (max-width: 1024px) {
+      aside#portalSidebar { display: none !important; }
+      #mainContentWrapper { padding-left: 0 !important; padding-right: 0 !important; }
+    }
+  </style>
 </head>
-<body class="apple-style">
+<body class="bg-surface-canvas font-body-md text-body-md text-on-surface antialiased min-h-screen">
 
-  <!-- Ambient Floating Glow Atmosphere -->
-  <div class="ambient-glow-background" aria-hidden="true">
-    <div class="glow-orb orb-primary"></div>
-    <div class="glow-orb orb-secondary"></div>
-    <div class="glow-orb orb-accent"></div>
-  </div>
-
-  <!-- Main Navigation Header -->
-  <!-- Main Navigation Header (Floating Glass Island) -->
-  <header class="portal-navbar" id="portalNavbar">
-    <!-- Level XP Micro Progress Strip -->
-    <div class="nav-xp-strip" id="navXpStrip" title="Next Level Progress">
-      <div class="nav-xp-strip-fill" id="navXpStripFill" style="width: 45%;"></div>
-    </div>
-
-    <div class="navbar-inner">
-      <!-- Brand Logo -->
-      <div class="brand-group" id="brandHomeBtn" title="Back to Dashboard">
-        <div class="brand-logo-wrap">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="36" height="36" class="brand-svg-logo">
-            <defs>
-              <linearGradient id="rcGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#3b82f6" />
-                <stop offset="100%" stop-color="#1d4ed8" />
-              </linearGradient>
-              <linearGradient id="rcSparkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stop-color="#f59e0b" />
-                <stop offset="100%" stop-color="#fbbf24" />
-              </linearGradient>
-            </defs>
-            <rect width="48" height="48" rx="12" fill="url(#rcGrad1)" />
-            <path d="M14 15h9a6 6 0 0 1 0 12h-9V15zm6 7h3a1 1 0 0 0 0-2h-3v2z" fill="#ffffff" />
-            <path d="M22 27l5 9h-6l-4.5-8h4.5z" fill="#ffffff" />
-            <path d="M34 16l1.2 3.8 3.8 1.2-3.8 1.2-1.2 3.8-1.2-3.8-3.8-1.2 3.8-1.2z" fill="url(#rcSparkGrad)" />
-          </svg>
+  <!-- ====================================================================
+       TOP NAVIGATION BAR (Fixed h-20 with Kinetic Brand & Student Capsule)
+       ==================================================================== -->
+  <header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-b border-border-subtle" id="portalNavbar">
+    <div class="h-20 w-full px-6 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-6 shrink-0">
+        <!-- Brand Logo -->
+        <div class="flex items-center gap-3 cursor-pointer group shrink-0" id="brandHomeBtn" title="Back to Dashboard">
+          <div class="w-10 h-10 shrink-0 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="38" height="38" class="brand-svg-logo shrink-0" style="width:38px;height:38px;min-width:38px;min-height:38px;">
+              <defs>
+                <linearGradient id="rcGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#0062e3" />
+                  <stop offset="100%" stop-color="#004bb2" />
+                </linearGradient>
+                <linearGradient id="rcSparkGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#f59e0b" />
+                  <stop offset="100%" stop-color="#fbbf24" />
+                </linearGradient>
+              </defs>
+              <rect width="48" height="48" rx="12" fill="url(#rcGrad1)" />
+              <path d="M14 15h9a6 6 0 0 1 0 12h-9V15zm6 7h3a1 1 0 0 0 0-2h-3v2z" fill="#ffffff" />
+              <path d="M22 27l5 9h-6l-4.5-8h4.5z" fill="#ffffff" />
+              <path d="M34 16l1.2 3.8 3.8 1.2-3.8 1.2-1.2 3.8-1.2-3.8-3.8-1.2 3.8-1.2z" fill="url(#rcSparkGrad)" />
+            </svg>
+          </div>
+          <div class="flex flex-col">
+            <span class="font-headline-sm text-headline-sm tracking-tight text-primary leading-none">RC CLASSROOM</span>
+            <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mt-1">Student Portal • SQL Analytics</span>
+          </div>
         </div>
-        <div class="brand-info">
-          <span class="brand-name">RC CLASSROOM</span>
-          <span class="brand-tagline">Student Portal &bull; SQL Analytics</span>
-        </div>
+
+        <div class="h-7 w-px bg-surface-variant hidden xl:block"></div>
+
+        <!-- Top Navigation Links -->
+        <nav class="hidden lg:flex items-center gap-1" id="portalNavTabs">
+          <button class="nav-tab px-3.5 py-2 transition-all bg-primary-container text-on-primary font-label-md rounded-lg shadow-sm active cursor-pointer" data-view="dashboard">
+            <span data-i18n="navDashboard">Dashboard</span>
+          </button>
+          <button class="nav-tab px-3.5 py-2 rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all cursor-pointer" data-view="tracks">
+            <span data-i18n="navCurriculum">Curriculum Tracks</span>
+          </button>
+          <button class="nav-tab px-3.5 py-2 rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all flex items-center gap-1.5 cursor-pointer" data-view="skills">
+            <span data-i18n="navSkills">Skills Bank</span> 
+            <span class="px-1.5 py-0.5 rounded-full bg-surface-container text-primary font-label-sm text-label-sm font-bold" id="navSkillsCountBadge">8,264+</span>
+          </button>
+          <button class="nav-tab px-3.5 py-2 rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all cursor-pointer" data-view="reports">
+            <span data-i18n="navReports">Student Reports</span>
+          </button>
+          <button class="nav-tab px-3.5 py-2 rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all cursor-pointer" data-view="leaderboard">
+            <span data-i18n="navLeaderboard">Leaderboard</span>
+          </button>
+          <button class="nav-tab teacher-nav-tab px-3.5 py-2 rounded-lg font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all cursor-pointer" data-view="teacher" id="teacherTabBtn" style="display: none;">
+            <span data-i18n="navTeacher">Teacher Console</span>
+          </button>
+        </nav>
       </div>
 
-      <!-- Navigation Tabs with Sliding Magnetic Indicator -->
-      <nav class="portal-nav-tabs" id="portalNavTabs">
-        <!-- Floating Active Pill Tracker -->
-        <div class="nav-indicator-pill" id="navIndicatorPill"></div>
-
-        <button class="nav-tab active" data-view="dashboard">
-          <span class="tab-icon">🏠</span> <span data-i18n="navDashboard">Dashboard</span>
-        </button>
-        <button class="nav-tab" data-view="tracks">
-          <span class="tab-icon">🌟</span> <span data-i18n="navCurriculum">Curriculum Tracks</span>
-        </button>
-        <button class="nav-tab" data-view="skills">
-          <span class="tab-icon">📚</span> <span data-i18n="navSkills">Skills Bank</span> <span class="nav-skill-badge" id="navSkillsCountBadge">8K+</span>
-        </button>
-        <button class="nav-tab" data-view="reports">
-          <span class="tab-icon">📊</span> <span data-i18n="navReports">Student Reports</span>
-        </button>
-        <button class="nav-tab" data-view="leaderboard">
-          <span class="tab-icon">🏆</span> <span data-i18n="navLeaderboard">Leaderboard</span>
-        </button>
-        <button class="nav-tab teacher-nav-tab" data-view="teacher" id="teacherTabBtn" style="display: none;">
-          <span class="tab-icon">👩‍🏫</span> <span data-i18n="navTeacher">Teacher Console</span>
-        </button>
-      </nav>
-
-      <!-- Right Actions: Student Info & Controls -->
-      <div class="navbar-actions">
-        <!-- Active Student Pill (Click to view profile or switch) -->
-        <div class="student-active-pill" id="studentProfilePill" title="Click to switch student or log in">
-          <div class="student-avatar-wrap" id="navStudentAvatar">🦊</div>
-          <div class="student-meta-text">
-            <span class="student-name-label" id="navStudentName">Alex Turner</span>
-            <span class="student-grade-label" id="navStudentGrade">Year 4 &bull; <span id="navStudentXP">1,420 XP</span></span>
+      <!-- Right Actions: Search, Streak, Lang, Theme, Profile -->
+      <div class="flex items-center gap-3 shrink-0">
+        <!-- Fast Search Input -->
+        <div class="relative hidden 2xl:flex items-center">
+          <div class="absolute left-3 flex items-center pointer-events-none">
+            <span class="material-symbols-outlined text-on-surface-variant text-[18px]">search</span>
           </div>
-          <span class="streak-badge" id="navStudentStreak" title="Daily Practice Streak">🔥 5</span>
+          <input class="h-10 pl-9 pr-14 w-60 rounded-lg bg-surface-container-low text-on-surface placeholder:text-on-surface-variant font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary/20" id="topFastSearchInput" placeholder="Fast Search queries, lessons..." type="text"/>
+          <div class="absolute right-2 px-1.5 py-0.5 rounded bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm">⌘K</div>
         </div>
 
-        <button class="lang-toggle-btn" id="langToggleBtn" title="Toggle Language (عربي / English)" onclick="I18N.toggle()">
-          🌐 <span data-i18n="switchLanguage">English</span>
+        <!-- Streak Badge -->
+        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-streak-glow shadow-[0_0_12px_rgba(245,158,11,0.25)] cursor-pointer" id="navStudentStreakWrap" title="Practice Streak">
+          <span class="material-symbols-outlined text-streak-amber text-[18px]">local_fire_department</span>
+          <span class="font-label-md text-label-md text-on-surface font-bold" id="navStudentStreak">5 Streak</span>
+        </div>
+
+        <!-- Language Switcher -->
+        <button class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors font-label-sm text-label-sm cursor-pointer" id="langToggleBtn" type="button" onclick="I18N.toggle()" title="Toggle Language (العربية / English)">
+          <span class="material-symbols-outlined text-[16px]">language</span>
+          <span data-i18n="switchLanguage">English</span>
         </button>
 
-        <button class="icon-control-btn" id="switchStudentBtn" title="Switch Student or Log In">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+        <!-- Theme Toggle -->
+        <button aria-label="Theme toggle" class="w-9 h-9 rounded-lg flex items-center justify-center bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer" id="themeToggleBtn" type="button" title="Toggle Light / Dark Mode">
+          <span class="material-symbols-outlined text-[18px]" id="themeIcon">light_mode</span>
         </button>
 
-        <a href="stitch-designs/index.html" class="stitch-badge-link" target="_blank" title="View Stitch UI/UX Design System">
-          <span>✨</span> <span>Design Suite</span>
+        <!-- Stitch Suite Link -->
+        <a href="stitch-designs/index.html" target="_blank" title="View Stitch UI Design Suite" class="hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-primary font-label-sm text-label-sm font-bold transition-colors">
+          <span>✨</span>
+          <span>Suite</span>
         </a>
 
-        <button class="icon-control-btn" id="themeToggleBtn" title="Toggle Dark/Light Mode">
-          <span id="themeIcon">☀️</span>
-        </button>
+        <!-- Student Profile Capsule -->
+        <div class="flex items-center gap-2 pl-2">
+          <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-low cursor-pointer hover:bg-surface-container transition-all" id="studentProfilePill" title="Switch Student or View Profile">
+            <div class="w-7 h-7 rounded-full bg-streak-amber/20 flex items-center justify-center font-label-sm text-label-sm leading-none" id="navStudentAvatar">🦊</div>
+            <div class="hidden md:flex flex-col text-left">
+              <div class="flex items-center gap-1.5">
+                <span class="font-label-md text-label-md text-on-surface font-bold leading-none" id="navStudentName">Alex Turner</span>
+                <span class="font-label-sm text-label-sm text-on-surface-variant leading-none" id="navStudentGrade">(Year 4)</span>
+              </div>
+              <span class="font-label-sm text-label-sm text-primary font-semibold leading-none mt-1" id="navStudentXP">1,420 XP</span>
+            </div>
+            <span class="px-2 py-0.5 rounded-full bg-primary-fixed text-primary font-label-sm text-label-sm font-bold" id="navStudentLevel">Lv. 5</span>
+          </div>
+          <button class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-on-primary hover:opacity-90 transition-opacity cursor-pointer" id="switchStudentBtn" title="Switch Student / Log In">
+            <span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
+          </button>
+        </div>
       </div>
     </div>
   </header>
 
-  <!-- Main View Router Container -->
-  <main class="portal-main-content">
-
-    <!-- ====================================================================
-         VIEW 1: STUDENT DASHBOARD
-         ==================================================================== -->
-    <section id="view-dashboard" class="portal-view active">
-      <!-- Student Greeting Banner -->
-      <div class="dashboard-hero-card">
-        <div class="hero-greeting-content">
-          <div class="welcome-pill">
-            <span class="live-dot"></span>
-            <span id="dashGreetingTag">ACTIVE PRACTICE SESSION</span>
+  <!-- ====================================================================
+       PERSISTENT LEFT NAVIGATION SIDEBAR (Stitch Sidebar)
+       ==================================================================== -->
+  <aside class="fixed left-0 top-20 bottom-0 w-64 bg-surface-container-lowest z-40 flex flex-col justify-between py-6 border-r border-border-subtle shadow-[0_1px_8px_rgba(0,0,0,0.04)]" id="portalSidebar">
+    <div class="flex flex-col gap-6 px-4">
+      <div class="px-3 flex items-center justify-between">
+        <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Navigation Track</span>
+        <span class="px-2 py-0.5 rounded-full bg-mastery-emerald/15 text-mastery-emerald font-label-sm text-label-sm font-bold">Active Cohort</span>
+      </div>
+      <nav class="flex flex-col gap-1.5" id="sidebarNavTabs">
+        <button class="nav-tab flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all bg-primary-container text-on-primary font-bold shadow-sm active text-left w-full cursor-pointer" data-view="dashboard">
+          <span class="material-symbols-outlined text-[20px]">space_dashboard</span>
+          <span data-i18n="navDashboard">Dashboard</span>
+        </button>
+        <button class="nav-tab flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="tracks">
+          <span class="material-symbols-outlined text-[20px]">route</span>
+          <span data-i18n="navCurriculum">Curriculum Tracks</span>
+        </button>
+        <button class="nav-tab flex items-center justify-between px-3.5 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="skills">
+          <div class="flex items-center gap-3">
+            <span class="material-symbols-outlined text-[20px]">menu_book</span>
+            <span data-i18n="navSkills">Skills Bank</span>
           </div>
-          <h1 class="hero-greeting-title">Welcome back, <span id="dashStudentName">Alex</span>! 👋</h1>
-          <p class="hero-greeting-desc">
-            You are currently on a <strong id="dashStreakText">5-day practice streak</strong>. Your next milestone is <strong>Level 6</strong>. Choose a track below or jump into the 8,264+ skills bank.
-          </p>
+          <span class="font-label-sm text-label-sm font-bold text-primary">8.2k</span>
+        </button>
+        <button class="nav-tab flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="reports">
+          <span class="material-symbols-outlined text-[20px]">analytics</span>
+          <span data-i18n="navReports">Student Reports</span>
+        </button>
+        <button class="nav-tab flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="leaderboard">
+          <span class="material-symbols-outlined text-[20px]">emoji_events</span>
+          <span data-i18n="navLeaderboard">Leaderboard</span>
+        </button>
+        <button class="nav-tab teacher-nav-tab flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="teacher" id="sidebarTeacherTabBtn" style="display: none;">
+          <span class="material-symbols-outlined text-[20px]">cast_for_education</span>
+          <span data-i18n="navTeacher">Teacher Console</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Sidebar Footer Widgets: Daily XP Goal & SQL Status -->
+    <div class="px-4 flex flex-col gap-3">
+      <div class="p-4 rounded-xl bg-surface-container-low flex flex-col gap-2">
+        <div class="flex items-center justify-between">
+          <span class="font-label-sm text-label-sm text-on-surface-variant">Daily XP Goal</span>
+          <span class="font-label-sm text-label-sm text-primary font-bold" id="sidebarDailyXpText">350 / 500</span>
+        </div>
+        <div class="w-full h-2 rounded-full bg-surface-variant overflow-hidden">
+          <div class="h-full rounded-full bg-primary-container w-[70%]" id="sidebarDailyXpBar"></div>
+        </div>
+      </div>
+      <div class="px-3 flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+        <span>SQL Sandbox v4.1</span>
+        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-mastery-emerald"></span>Online</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ====================================================================
+       MAIN CONTENT WRAPPER (Offset pl-64 with bg-surface-canvas)
+       ==================================================================== -->
+  <div class="pl-64 min-h-screen bg-surface-canvas transition-all duration-300" id="mainContentWrapper">
+    <main class="relative pt-20 w-full min-h-screen bg-surface-canvas portal-main-content">
+      <div class="flex flex-col w-full px-6 py-8 space-y-8 max-w-[1400px] mx-auto">
+
+        <!-- ====================================================================
+             VIEW 1: STUDENT DASHBOARD (Exact Stitch Aesthetic & Functional Hub)
+             ==================================================================== -->
+        <section id="view-dashboard" class="portal-view active space-y-8">
           
-          <div class="hero-cta-group">
-            <button class="primary-glow-btn" id="dashStartPracticeBtn">
-              <span>🚀</span> <span>Resume Practice</span>
-            </button>
-            <button class="secondary-glass-btn" id="dashViewReportBtn">
-              <span>📊</span> <span>View My Performance Report</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Student Level & XP Card -->
-        <div class="student-level-card">
-          <div class="level-badge-large" id="dashLevelBadge">Lv. 5</div>
-          <div class="level-info-col">
-            <div class="level-title-row">
-              <span class="level-rank-name" id="dashRankTitle">Maths Explorer</span>
-              <span class="level-xp-counter"><strong id="dashCurrentXP">1,420</strong> / 2,000 XP</span>
+          <!-- Top Live Sync Status Bar -->
+          <div class="flex flex-wrap items-center justify-between gap-4 bg-surface-card rounded-xl p-4 shadow-sm border border-slate-100">
+            <div class="flex items-center gap-3">
+              <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-low text-on-surface">
+                <span class="w-2.5 h-2.5 rounded-full bg-mastery-emerald animate-pulse"></span>
+                <span class="font-label-sm text-label-sm font-semibold">🟢 SQLite Local Sync Active • Last session saved</span>
+              </div>
+              <div class="hidden sm:flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+                <span class="material-symbols-outlined text-[16px] text-primary">sync</span>
+                <span>Latest attempt: <strong class="text-on-surface font-semibold" id="dashLatestAttemptText">A.1 Place value models</strong></span>
+              </div>
             </div>
-            <div class="xp-progress-bar-wrap">
-              <div class="xp-progress-bar-fill" id="dashXpFill" style="width: 71%;"></div>
+            <div class="flex items-center gap-4 text-on-surface-variant font-label-sm text-label-sm">
+              <span class="flex items-center gap-1">Accuracy: <strong class="text-mastery-emerald" id="dashSyncAccuracy">88.5%</strong></span>
+              <span class="h-3 w-px bg-surface-variant"></span>
+              <span class="flex items-center gap-1">SmartScore: <strong class="text-primary font-bold" id="dashSyncSmartScore">89.2</strong></span>
+              <span class="h-3 w-px bg-surface-variant hidden md:block"></span>
+              <span class="hidden md:inline-flex items-center gap-1 text-on-surface-variant">Host: <code class="px-1.5 py-0.5 rounded bg-surface-container font-mono text-[11px]">sqlite3://rc_edu.db</code></span>
             </div>
-            <div class="level-footer-tip">Solve 4 more questions to reach Level 6!</div>
           </div>
-        </div>
-      </div>
 
-      <!-- Assigned Homework by Miss Rania -->
-      <div class="assignments-dashboard-section" id="dashAssignmentsSection">
-        <div class="section-title-row">
-          <div>
-            <div class="section-kicker">📌 TEACHER ASSIGNMENTS</div>
-            <h2 class="section-heading">Assigned by Miss Rania</h2>
-          </div>
-          <span class="assignment-count-pill" id="dashAssignmentBadge">Active Tasks</span>
-        </div>
-        <div class="assignments-grid" id="dashAssignmentsGrid">
-          <!-- Injected via JS -->
-        </div>
-      </div>
+          <!-- Welcome & Milestone Hero Panel -->
+          <section class="relative overflow-hidden rounded-2xl bg-surface-card shadow-sm p-6 lg:p-8 border border-slate-100">
+            <div class="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-surface-tint pointer-events-none blur-3xl opacity-70"></div>
+            <div class="absolute right-1/4 -bottom-20 w-64 h-64 rounded-full bg-streak-glow pointer-events-none blur-2xl opacity-60"></div>
+            <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+              <!-- Left Column: Greeting & Actions -->
+              <div class="lg:col-span-7 flex flex-col space-y-4">
+                <div class="flex items-center gap-2.5">
+                  <span class="px-3 py-1 rounded-full bg-streak-glow text-on-surface font-label-sm text-label-sm font-bold flex items-center gap-1.5 shadow-sm">
+                    <span class="material-symbols-outlined text-streak-amber text-[18px]">local_fire_department</span>
+                    <span id="dashStreakBadgeText">5-Day Practice Streak</span>
+                  </span>
+                  <span class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm" id="dashCohortTag">
+                    Year 4 Cohort Alpha
+                  </span>
+                </div>
+                <div class="space-y-2">
+                  <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">
+                    Welcome back, <span id="dashStudentName">Alex</span>! 👋
+                  </h1>
+                  <p class="font-body-md text-body-md text-on-surface-variant max-w-xl">
+                    You are currently on a <strong id="dashStreakText">5-day practice streak</strong>. Your next milestone is <strong id="dashNextMilestone">Level 6</strong>. Choose a track below or jump into the 8,264+ skills bank.
+                  </p>
+                </div>
+                <div class="flex flex-wrap items-center gap-3 pt-2">
+                  <button class="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary-container text-on-primary font-label-lg text-label-lg shadow-md hover:bg-primary transition-all active:translate-y-0.5 cursor-pointer" id="dashStartPracticeBtn">
+                    <span>🚀</span>
+                    <span>Resume Practice</span>
+                  </button>
+                  <button class="flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-container-low text-primary font-label-lg text-label-lg hover:bg-surface-container transition-all cursor-pointer" id="dashViewReportBtn">
+                    <span>📊</span>
+                    <span>View My Performance Report</span>
+                  </button>
+                </div>
+              </div>
+              <!-- Right Column: Level Progress Widget -->
+              <div class="lg:col-span-5 bg-surface-container-low rounded-xl p-5 sm:p-6 flex flex-col justify-between space-y-5 shadow-sm">
+                <div class="flex items-start justify-between">
+                  <div>
+                    <span class="font-label-sm text-label-sm text-primary uppercase font-bold tracking-wider">Level Target</span>
+                    <h3 class="font-headline-sm text-headline-sm text-on-surface mt-0.5 flex items-center gap-2">
+                      <span id="dashRankTitle">Lv. 5 Maths Explorer</span>
+                      <span class="text-base">🧭</span>
+                    </h3>
+                  </div>
+                  <div class="w-12 h-12 rounded-xl bg-primary-container text-on-primary flex items-center justify-center font-headline-sm text-headline-sm font-extrabold shadow-sm" id="dashLevelBadge">
+                    5
+                  </div>
+                </div>
+                <div class="space-y-2">
+                  <div class="flex items-center justify-between font-label-md text-label-md">
+                    <span class="text-on-surface-variant">XP Progress</span>
+                    <span class="text-on-surface font-bold"><span id="dashCurrentXP">1,420</span> / <span id="dashTargetXP">2,000</span> XP</span>
+                  </div>
+                  <div class="w-full h-3 rounded-full bg-surface-variant overflow-hidden p-0.5">
+                    <div class="h-full rounded-full bg-gradient-to-r from-primary-container via-secondary to-mastery-emerald transition-all duration-700 ease-out" id="dashXpFill" style="width: 71%;"></div>
+                  </div>
+                  <div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm pt-1">
+                    <span id="dashXpPercentText">71% to Level 6</span>
+                    <span id="dashXpRemainingText">580 XP Remaining</span>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg bg-surface-card text-on-surface shadow-sm">
+                  <span class="material-symbols-outlined text-streak-amber text-[20px] shrink-0">military_tech</span>
+                  <span class="font-label-sm text-label-sm font-semibold" id="dashMilestonePrompt">Solve 4 more questions to reach Level 6!</span>
+                </div>
+              </div>
+            </div>
 
-      <!-- Quick Metrics Strip -->
-      <div class="dashboard-kpi-grid">
-        <div class="kpi-card">
-          <div class="kpi-icon-wrap icon-blue">📚</div>
-          <div class="kpi-details">
-            <span class="kpi-value" id="kpiQuestionsAnswered">142</span>
-            <span class="kpi-label">Questions Solved</span>
-          </div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-icon-wrap icon-green">🎯</div>
-          <div class="kpi-details">
-            <span class="kpi-value" id="kpiAccuracyRate">88.5%</span>
-            <span class="kpi-label">Accuracy Rate</span>
-          </div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-icon-wrap icon-purple">⏱️</div>
-          <div class="kpi-details">
-            <span class="kpi-value" id="kpiTimeSpent">1h 45m</span>
-            <span class="kpi-label">Practice Time</span>
-          </div>
-        </div>
-        <div class="kpi-card">
-          <div class="kpi-icon-wrap icon-orange">🏆</div>
-          <div class="kpi-details">
-            <span class="kpi-value" id="kpiMasteredCount">8</span>
-            <span class="kpi-label">Skills Mastered</span>
-          </div>
-        </div>
-      </div>
+            <!-- Fast Daily Stats Strip -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-8 pt-6 bg-surface-container-lowest/70 rounded-xl p-4 border border-slate-100">
+              <div class="flex items-center gap-3 p-2">
+                <div class="w-10 h-10 rounded-xl bg-surface-tint flex items-center justify-center text-xl shrink-0">📚</div>
+                <div class="flex flex-col">
+                  <span class="font-headline-sm text-headline-sm text-on-surface leading-tight font-bold" id="kpiQuestionsAnswered">142</span>
+                  <span class="font-label-sm text-label-sm text-on-surface-variant">Questions Solved</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-3 p-2">
+                <div class="w-10 h-10 rounded-xl bg-surface-tint flex items-center justify-center text-xl shrink-0">🎯</div>
+                <div class="flex flex-col">
+                  <span class="font-headline-sm text-headline-sm text-on-surface leading-tight font-bold" id="kpiAccuracyRate">88.5%</span>
+                  <span class="font-label-sm text-label-sm text-on-surface-variant">Accuracy Rate</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-3 p-2">
+                <div class="w-10 h-10 rounded-xl bg-surface-tint flex items-center justify-center text-xl shrink-0">⏱️</div>
+                <div class="flex flex-col">
+                  <span class="font-headline-sm text-headline-sm text-on-surface leading-tight font-bold" id="kpiTimeSpent">1h 45m</span>
+                  <span class="font-label-sm text-label-sm text-on-surface-variant">Practice Time</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-3 p-2">
+                <div class="w-10 h-10 rounded-xl bg-surface-tint flex items-center justify-center text-xl shrink-0">🏆</div>
+                <div class="flex flex-col">
+                  <span class="font-headline-sm text-headline-sm text-on-surface leading-tight font-bold" id="kpiMasteredCount">8</span>
+                  <span class="font-label-sm text-label-sm text-on-surface-variant">Skills Mastered</span>
+                </div>
+              </div>
+            </div>
+          </section>
 
-      <!-- Quick Spotlight Search Capsule -->
-      <div class="search-capsule-section">
-        <div class="search-capsule-box">
-          <svg class="search-icon" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-          <input type="text" id="dashSpotlightInput" placeholder="Search 8,264+ skills by name, topic, or code (e.g. A.1)..." autocomplete="off">
-          <span class="kbd-badge">⌘K</span>
-        </div>
-      </div>
+          <!-- Section 2: Assigned by Miss Rania -->
+          <section class="space-y-4" id="dashAssignmentsSection">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div class="p-2 rounded-lg bg-surface-container text-primary">
+                  <span class="material-symbols-outlined text-[22px]">assignment</span>
+                </div>
+                <div>
+                  <span class="font-label-sm text-label-sm text-primary font-bold uppercase tracking-wider">📌 TEACHER ASSIGNMENTS • Assigned by Miss Rania</span>
+                  <h2 class="font-title-md text-title-md text-on-surface font-bold">Active Tasks (3)</h2>
+                </div>
+              </div>
+              <button class="font-label-sm text-label-sm text-primary hover:underline font-bold flex items-center gap-1 cursor-pointer" onclick="switchView('tracks')">
+                View All Homework 
+                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+              </button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5" id="dashAssignmentsGrid">
+              <!-- Task Card 1 -->
+              <div class="bg-surface-card rounded-xl p-5 shadow-sm border border-slate-100 flex flex-col justify-between space-y-4 hover:shadow-md transition-shadow">
+                <div class="space-y-3">
+                  <div class="flex items-center justify-between">
+                    <span class="px-2.5 py-1 rounded-md bg-surface-container font-label-sm text-label-sm font-bold text-primary">Year 4 • Maths</span>
+                    <span class="px-2 py-0.5 rounded bg-error-container text-on-error-container font-label-sm text-label-sm font-semibold">Due Tomorrow</span>
+                  </div>
+                  <div>
+                    <h3 class="font-title-md text-title-md text-on-surface font-bold leading-snug">A.1 Maths: Place value models - up to thousands</h3>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Focus on standard form conversion &amp; expanded notation.</p>
+                  </div>
+                </div>
+                <div class="space-y-3 pt-2">
+                  <div class="space-y-1.5">
+                    <div class="flex items-center justify-between font-label-sm text-label-sm">
+                      <span class="text-on-surface-variant">SmartScore Progress</span>
+                      <span class="text-on-surface font-bold">89 / 100</span>
+                    </div>
+                    <div class="w-full h-2 rounded-full bg-surface-container-high overflow-hidden">
+                      <div class="h-full rounded-full bg-primary-container" style="width: 85%;"></div>
+                    </div>
+                    <div class="text-right font-label-sm text-label-sm text-on-surface-variant">85% Complete</div>
+                  </div>
+                  <button class="w-full py-2.5 px-4 rounded-xl bg-primary-container text-on-primary font-label-md text-label-md font-bold flex items-center justify-center gap-2 hover:bg-primary transition-all cursor-pointer" onclick="openPracticeModal({code:'A.1', name:'Place value models - up to thousands', category_name:'Place Value', grade:'Year 4', subject:'Maths'})">
+                    <span>Continue Drill</span>
+                    <span>➜</span>
+                  </button>
+                </div>
+              </div>
+              <!-- Task Card 2 -->
+              <div class="bg-surface-card rounded-xl p-5 shadow-sm border border-slate-100 flex flex-col justify-between space-y-4 hover:shadow-md transition-shadow">
+                <div class="space-y-3">
+                  <div class="flex items-center justify-between">
+                    <span class="px-2.5 py-1 rounded-md bg-surface-container font-label-sm text-label-sm font-bold text-tertiary">Year 4 • Science</span>
+                    <span class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold">Due: Friday</span>
+                  </div>
+                  <div>
+                    <h3 class="font-title-md text-title-md text-on-surface font-bold leading-snug">Science Inquiry: Ecosystems &amp; Food Chains</h3>
+                    <div class="flex items-center gap-1.5 mt-2 text-on-surface-variant font-label-sm text-label-sm">
+                      <span class="w-5 h-5 rounded-full bg-secondary-fixed flex items-center justify-center font-bold text-[10px] text-secondary">MR</span>
+                      <span>Assigned by Miss Rania</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="space-y-3 pt-2">
+                  <div class="p-3 rounded-lg bg-surface-container-low flex items-center justify-between">
+                    <span class="font-label-sm text-label-sm text-on-surface-variant">Task Status</span>
+                    <span class="px-2 py-0.5 rounded-full bg-surface-variant text-on-surface-variant font-label-sm text-label-sm font-bold">Pending</span>
+                  </div>
+                  <button class="w-full py-2.5 px-4 rounded-xl bg-surface-container-high text-primary font-label-md text-label-md font-bold flex items-center justify-center gap-2 hover:bg-surface-container transition-all cursor-pointer" onclick="openPracticeModal({code:'S.1', name:'Ecosystems & Food Chains', category_name:'Biology', grade:'Year 4', subject:'Science'})">
+                    <span>Start Practice</span>
+                    <span>➜</span>
+                  </button>
+                </div>
+              </div>
+              <!-- Task Card 3 -->
+              <div class="bg-surface-card rounded-xl p-5 shadow-sm border border-slate-100 flex flex-col justify-between space-y-4 hover:shadow-md transition-shadow">
+                <div class="space-y-3">
+                  <div class="flex items-center justify-between">
+                    <span class="px-2.5 py-1 rounded-md bg-surface-container font-label-sm text-label-sm font-bold text-secondary">Year 4 • English</span>
+                    <span class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm font-semibold">Due: Next Monday</span>
+                  </div>
+                  <div>
+                    <h3 class="font-title-md text-title-md text-on-surface font-bold leading-snug">English Reading: Inference &amp; Context Clues</h3>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Passage analysis with text-dependent comprehension queries.</p>
+                  </div>
+                </div>
+                <div class="space-y-3 pt-2">
+                  <div class="p-3 rounded-lg bg-tertiary-container/10 flex items-center justify-between text-tertiary">
+                    <div class="flex items-center gap-1.5 font-label-sm text-label-sm font-bold">
+                      <span class="material-symbols-outlined text-[18px]">verified</span>
+                      <span>SmartScore: 92/100</span>
+                    </div>
+                    <span class="px-2 py-0.5 rounded bg-tertiary-container text-on-tertiary-container font-label-sm text-label-sm font-bold">Mastered</span>
+                  </div>
+                  <button class="w-full py-2.5 px-4 rounded-xl bg-surface-container-low text-on-surface font-label-md text-label-md font-bold flex items-center justify-center gap-2 hover:bg-surface-container transition-all cursor-pointer" onclick="openPracticeModal({code:'E.1', name:'Inference & Context Clues', category_name:'Reading Comprehension', grade:'Year 4', subject:'English'})">
+                    <span>Review</span>
+                    <span>➜</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
 
-      <!-- Featured Miss Rania Tracks Preview -->
-      <div class="dash-section-header">
-        <div>
-          <h2 class="section-title">Miss Rania's Active Tracks</h2>
-          <p class="section-subtitle">Curated course modules for your grade level</p>
-        </div>
-        <button class="text-link-btn" id="dashViewAllTracksBtn">View All Tracks &rarr;</button>
-      </div>
+          <!-- Section 3: Structured Learning Pathways (Teacher Rania's Curated Tracks) -->
+          <section class="space-y-5">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+              <div class="space-y-1">
+                <div class="flex items-center gap-2 text-primary font-label-sm text-label-sm font-bold">
+                  <span class="material-symbols-outlined text-[18px]">alt_route</span>
+                  <span>// TEACHER RANIA'S CURATED TRACKS • Structured Learning Pathways</span>
+                </div>
+                <p class="font-body-sm text-body-sm text-on-surface-variant max-w-2xl">
+                  Complete units with pedagogical lecture notes, teacher tips, and direct drills connected to the 8,264+ skills engine.
+                </p>
+              </div>
+              <!-- Filter Pills -->
+              <div class="flex items-center gap-1.5 bg-surface-card p-1 rounded-xl shadow-sm self-start border border-slate-100">
+                <button class="px-4 py-1.5 rounded-lg bg-primary-container text-on-primary font-label-sm text-label-sm font-bold shadow-sm cursor-pointer" onclick="switchView('tracks')">All</button>
+                <button class="px-4 py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low font-label-sm text-label-sm transition-colors cursor-pointer" onclick="switchView('tracks')">Maths</button>
+                <button class="px-4 py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low font-label-sm text-label-sm transition-colors cursor-pointer" onclick="switchView('tracks')">English</button>
+                <button class="px-4 py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low font-label-sm text-label-sm transition-colors cursor-pointer" onclick="switchView('tracks')">Science</button>
+              </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="dashTracksPreviewContainer">
+              <!-- Track Card 1 -->
+              <div class="bg-surface-card rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between space-y-6 hover:shadow-md transition-all">
+                <div class="space-y-4">
+                  <div class="flex items-center justify-between">
+                    <span class="px-3 py-1 rounded-full bg-surface-tint text-primary font-label-sm text-label-sm font-bold">Maths Mastery Track</span>
+                    <div class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-mastery-emerald/10 text-mastery-emerald font-label-sm text-label-sm font-bold">
+                      <span class="material-symbols-outlined text-[16px]">school</span>
+                      <span>Teacher Pick</span>
+                    </div>
+                  </div>
+                  <div>
+                    <h3 class="font-title-md text-title-md text-on-surface font-bold">Numbers, Decimals &amp; Place Value</h3>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant mt-1.5">Foundational Year 4 unit covering 4-digit comparison, rounding, and decimal fractions.</p>
+                  </div>
+                  <div class="flex items-center gap-4 text-on-surface-variant font-label-sm text-label-sm">
+                    <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">menu_book</span> 18 Lessons</span>
+                    <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">quiz</span> 240+ Questions</span>
+                  </div>
+                </div>
+                <div class="space-y-3 pt-2">
+                  <div class="flex items-center justify-between font-label-sm text-label-sm">
+                    <span class="text-on-surface-variant">Unit Completion</span>
+                    <span class="text-primary font-bold">14 / 18 (78%)</span>
+                  </div>
+                  <div class="w-full h-2.5 rounded-full bg-surface-container-high overflow-hidden">
+                    <div class="h-full rounded-full bg-primary-container" style="width: 78%;"></div>
+                  </div>
+                  <button class="w-full py-2.5 rounded-xl bg-surface-container-low text-primary font-label-md text-label-md font-bold hover:bg-surface-container transition-all flex items-center justify-center gap-2 cursor-pointer" onclick="switchView('tracks')">
+                    <span>Resume Module 15</span>
+                    <span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                  </button>
+                </div>
+              </div>
+              <!-- Track Card 2 -->
+              <div class="bg-surface-card rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between space-y-6 hover:shadow-md transition-all">
+                <div class="space-y-4">
+                  <div class="flex items-center justify-between">
+                    <span class="px-3 py-1 rounded-full bg-secondary-fixed text-secondary font-label-sm text-label-sm font-bold">English Track</span>
+                    <div class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-streak-glow text-on-surface font-label-sm text-label-sm font-bold">
+                      <span class="material-symbols-outlined text-streak-amber text-[16px]">star</span>
+                      <span>Essential</span>
+                    </div>
+                  </div>
+                  <div>
+                    <h3 class="font-title-md text-title-md text-on-surface font-bold">Grammar Mechanics &amp; Creative Synthesis</h3>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant mt-1.5">Sentence structure, fronted adverbials, expanded noun phrases, and punctuation mastery.</p>
+                  </div>
+                  <div class="flex items-center gap-4 text-on-surface-variant font-label-sm text-label-sm">
+                    <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">menu_book</span> 14 Lessons</span>
+                    <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">quiz</span> 190+ Questions</span>
+                  </div>
+                </div>
+                <div class="space-y-3 pt-2">
+                  <div class="flex items-center justify-between font-label-sm text-label-sm">
+                    <span class="text-on-surface-variant">Unit Completion</span>
+                    <span class="text-secondary font-bold">6 / 14 (42%)</span>
+                  </div>
+                  <div class="w-full h-2.5 rounded-full bg-surface-container-high overflow-hidden">
+                    <div class="h-full rounded-full bg-secondary-container" style="width: 42%;"></div>
+                  </div>
+                  <button class="w-full py-2.5 rounded-xl bg-surface-container-low text-secondary font-label-md text-label-md font-bold hover:bg-surface-container transition-all flex items-center justify-center gap-2 cursor-pointer" onclick="switchView('tracks')">
+                    <span>Resume Module 7</span>
+                    <span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                  </button>
+                </div>
+              </div>
+              <!-- Track Card 3 -->
+              <div class="bg-surface-card rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between space-y-6 hover:shadow-md transition-all">
+                <div class="space-y-4">
+                  <div class="flex items-center justify-between">
+                    <span class="px-3 py-1 rounded-full bg-tertiary-fixed text-tertiary font-label-sm text-label-sm font-bold">Science Inquiry Track</span>
+                    <div class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-mastery-emerald/10 text-mastery-emerald font-label-sm text-label-sm font-bold">
+                      <span class="material-symbols-outlined text-[16px]">biotech</span>
+                      <span>Lab Ready</span>
+                    </div>
+                  </div>
+                  <div>
+                    <h3 class="font-title-md text-title-md text-on-surface font-bold">Living Things, States of Matter &amp; Sound</h3>
+                    <p class="font-body-sm text-body-sm text-on-surface-variant mt-1.5">Interactive experiments, classification keys, solids/liquids/gases, and acoustic vibrations.</p>
+                  </div>
+                  <div class="flex items-center gap-4 text-on-surface-variant font-label-sm text-label-sm">
+                    <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">menu_book</span> 16 Lessons</span>
+                    <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">quiz</span> 210+ Questions</span>
+                  </div>
+                </div>
+                <div class="space-y-3 pt-2">
+                  <div class="flex items-center justify-between font-label-sm text-label-sm">
+                    <span class="text-on-surface-variant">Unit Completion</span>
+                    <span class="text-tertiary font-bold">12 / 16 (75%)</span>
+                  </div>
+                  <div class="w-full h-2.5 rounded-full bg-surface-container-high overflow-hidden">
+                    <div class="h-full rounded-full bg-tertiary-container" style="width: 75%;"></div>
+                  </div>
+                  <button class="w-full py-2.5 rounded-xl bg-surface-container-low text-tertiary font-label-md text-label-md font-bold hover:bg-surface-container transition-all flex items-center justify-center gap-2 cursor-pointer" onclick="switchView('tracks')">
+                    <span>Resume Module 13</span>
+                    <span class="material-symbols-outlined text-[18px]">play_arrow</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
 
-      <div class="dash-tracks-preview-grid" id="dashTracksPreviewContainer">
-        <!-- Injected via JavaScript -->
-      </div>
-    </section>
+          <!-- Section 4: 8,264+ Interactive Skills Bank Explorer Preview -->
+          <section class="bg-surface-card rounded-2xl p-6 lg:p-8 shadow-sm border border-slate-100 space-y-6">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="px-2.5 py-0.5 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm font-bold">Engine v4.2</span>
+                  <h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">8,264+ Interactive Skills Bank Explorer</h2>
+                </div>
+                <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Instant query drill-down across curricula, competency codes, and diagnostic smart indicators.</p>
+              </div>
+              <!-- Grade Selector Dropdown -->
+              <div class="flex items-center gap-3">
+                <label class="font-label-sm text-label-sm text-on-surface-variant font-medium">Curriculum Tier:</label>
+                <div class="relative">
+                  <select class="appearance-none bg-surface-container-low text-on-surface font-label-md text-label-md font-bold py-2.5 pl-4 pr-10 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer" onchange="switchView('skills')">
+                    <option>Reception</option>
+                    <option>Year 1</option>
+                    <option>Year 2</option>
+                    <option>Year 3</option>
+                    <option selected="">Year 4 (Active Student Cohort)</option>
+                    <option>Year 5</option>
+                    <option>Year 6</option>
+                    <option>Year 7</option>
+                    <option>Year 8</option>
+                    <option>Year 9</option>
+                    <option>Year 10</option>
+                    <option>Year 11</option>
+                    <option>Year 12</option>
+                    <option>Year 13</option>
+                  </select>
+                  <span class="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">expand_more</span>
+                </div>
+              </div>
+            </div>
+            <!-- Search & Filter Controls -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 items-center">
+              <!-- Search Input -->
+              <div class="lg:col-span-6 relative">
+                <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+                <input class="w-full h-11 pl-10 pr-4 rounded-xl bg-surface-container-low text-on-surface placeholder:text-on-surface-variant font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all" id="dashSpotlightInput" placeholder="Search 8,264+ skills or skill codes (e.g. A.1)..." type="text"/>
+              </div>
+              <!-- Subject Chips -->
+              <div class="lg:col-span-3 flex items-center gap-1.5 overflow-x-auto py-1">
+                <button class="px-3 py-2 rounded-xl bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold whitespace-nowrap hover:bg-surface-container transition-colors cursor-pointer" onclick="switchView('skills')">🌐 All</button>
+                <button class="px-3 py-2 rounded-xl bg-primary-container text-on-primary font-label-sm text-label-sm font-bold whitespace-nowrap cursor-pointer" onclick="switchView('skills')">📐 Maths</button>
+                <button class="px-3 py-2 rounded-xl bg-surface-container-low text-on-surface font-label-sm text-label-sm font-semibold whitespace-nowrap hover:bg-surface-container transition-colors cursor-pointer" onclick="switchView('skills')">📚 English</button>
+                <button class="px-3 py-2 rounded-xl bg-surface-container-low text-on-surface font-label-sm text-label-sm font-semibold whitespace-nowrap hover:bg-surface-container transition-colors cursor-pointer" onclick="switchView('skills')">🔬 Science</button>
+              </div>
+              <!-- Filter Toggles -->
+              <div class="lg:col-span-3 flex items-center justify-end gap-1.5">
+                <button class="px-3 py-2 rounded-xl bg-surface-container-high text-on-surface font-label-sm text-label-sm font-bold cursor-pointer" onclick="switchView('skills')">All Skills</button>
+                <button class="px-3 py-2 rounded-xl bg-surface-container-low text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm font-semibold flex items-center gap-1 cursor-pointer" onclick="switchView('skills')">
+                  <span class="text-streak-amber">★</span> Starred
+                </button>
+                <button class="px-3 py-2 rounded-xl bg-surface-container-low text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm font-semibold flex items-center gap-1 cursor-pointer" onclick="switchView('skills')">
+                  <span class="text-mastery-emerald">✓</span> Mastered
+                </button>
+              </div>
+            </div>
+            <!-- Skills Bank Interactive Rows (Preview) -->
+            <div class="space-y-2.5">
+              <!-- Skill Row 1 -->
+              <div class="flex items-center justify-between p-4 rounded-xl bg-surface-container-low hover:bg-surface-container transition-all group cursor-pointer" onclick="openPracticeModal({code:'A.1', name:'Place value models - up to thousands', category_name:'Place Value', grade:'Year 4', subject:'Maths'})">
+                <div class="flex items-center gap-4 min-w-0">
+                  <span class="w-10 h-10 rounded-lg bg-surface-card flex items-center justify-center font-label-md text-label-md font-bold text-primary shadow-sm shrink-0">A.1</span>
+                  <div class="flex flex-col truncate">
+                    <div class="flex items-center gap-2">
+                      <span class="font-label-md text-label-md font-bold text-on-surface truncate">Place value models - up to thousands</span>
+                      <span class="px-2 py-0.5 rounded bg-tertiary-container text-on-tertiary-container font-label-sm text-label-sm font-bold shrink-0">SmartScore 89</span>
+                    </div>
+                    <span class="font-body-sm text-body-sm text-on-surface-variant truncate">Convert multi-base blocks into standard positional numerals and expanded sums</span>
+                  </div>
+                </div>
+                <div class="flex items-center gap-4 shrink-0 pl-3">
+                  <div class="hidden sm:flex flex-col text-right">
+                    <span class="font-label-sm text-label-sm font-bold text-on-surface">32 Answered</span>
+                    <span class="font-label-sm text-label-sm text-mastery-emerald">88.5% Accuracy</span>
+                  </div>
+                  <button class="px-3.5 py-1.5 rounded-lg bg-primary-container text-on-primary font-label-sm text-label-sm font-bold group-hover:bg-primary transition-all cursor-pointer">Practice</button>
+                </div>
+              </div>
+              <!-- Skill Row 2 -->
+              <div class="flex items-center justify-between p-4 rounded-xl bg-surface-container-low hover:bg-surface-container transition-all group cursor-pointer" onclick="openPracticeModal({code:'A.2', name:'Identify value of underlined digit', category_name:'Place Value', grade:'Year 4', subject:'Maths'})">
+                <div class="flex items-center gap-4 min-w-0">
+                  <span class="w-10 h-10 rounded-lg bg-surface-card flex items-center justify-center font-label-md text-label-md font-bold text-primary shadow-sm shrink-0">A.2</span>
+                  <div class="flex flex-col truncate">
+                    <div class="flex items-center gap-2">
+                      <span class="font-label-md text-label-md font-bold text-on-surface truncate">Identify value of underlined digit</span>
+                      <span class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm font-bold shrink-0">SmartScore 64</span>
+                    </div>
+                    <span class="font-body-sm text-body-sm text-on-surface-variant truncate">Determine value based on placement (ones, tens, hundreds, thousands, ten-thousands)</span>
+                  </div>
+                </div>
+                <div class="flex items-center gap-4 shrink-0 pl-3">
+                  <div class="hidden sm:flex flex-col text-right">
+                    <span class="font-label-sm text-label-sm font-bold text-on-surface">18 Answered</span>
+                    <span class="font-label-sm text-label-sm text-primary">72.0% Accuracy</span>
+                  </div>
+                  <button class="px-3.5 py-1.5 rounded-lg bg-surface-container-high text-primary font-label-sm text-label-sm font-bold group-hover:bg-primary-container group-hover:text-on-primary transition-all cursor-pointer">Practice</button>
+                </div>
+              </div>
+              <!-- Skill Row 3 -->
+              <div class="flex items-center justify-between p-4 rounded-xl bg-surface-container-low hover:bg-surface-container transition-all group cursor-pointer" onclick="openPracticeModal({code:'B.4', name:'Multiplication facts up to 12 x 12 with speed drill', category_name:'Multiplication', grade:'Year 4', subject:'Maths'})">
+                <div class="flex items-center gap-4 min-w-0">
+                  <span class="w-10 h-10 rounded-lg bg-surface-card flex items-center justify-center font-label-md text-label-md font-bold text-secondary shadow-sm shrink-0">B.4</span>
+                  <div class="flex flex-col truncate">
+                    <div class="flex items-center gap-2">
+                      <span class="font-label-md text-label-md font-bold text-on-surface truncate">Multiplication facts up to 12 x 12 with speed drill</span>
+                      <span class="px-2 py-0.5 rounded bg-tertiary-container text-on-tertiary-container font-label-sm text-label-sm font-bold shrink-0">Mastered 100</span>
+                    </div>
+                    <span class="font-body-sm text-body-sm text-on-surface-variant truncate">Times tables mastery matrix with rapid 60-second challenge sprint</span>
+                  </div>
+                </div>
+                <div class="flex items-center gap-4 shrink-0 pl-3">
+                  <div class="hidden sm:flex flex-col text-right">
+                    <span class="font-label-sm text-label-sm font-bold text-on-surface">94 Answered</span>
+                    <span class="font-label-sm text-label-sm text-mastery-emerald">98.2% Accuracy</span>
+                  </div>
+                  <button class="px-3.5 py-1.5 rounded-lg bg-surface-card text-mastery-emerald font-label-sm text-label-sm font-bold flex items-center gap-1 group-hover:bg-tertiary-container group-hover:text-on-tertiary-container transition-all cursor-pointer">
+                    <span>Review</span>
+                    <span class="material-symbols-outlined text-[14px]">refresh</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <!-- Bank Footer Status -->
+            <div class="flex flex-wrap items-center justify-between gap-4 pt-2 text-on-surface-variant font-label-sm text-label-sm">
+              <span class="flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-mastery-emerald"></span>
+                Displaying 3 of 8,264 curriculum skills mapped to UK National &amp; Cambridge frameworks.
+              </span>
+              <button class="text-primary font-bold hover:underline flex items-center gap-1 cursor-pointer" onclick="switchView('skills')">
+                Browse Full 8,264+ Skills Matrix
+                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+              </button>
+            </div>
+          </section>
 
-    <!-- ====================================================================
+        </section>
+
+<!-- ====================================================================
          VIEW 2: CURRICULUM TRACKS (MISS RANIA'S COURSES)
          ==================================================================== -->
     <section id="view-tracks" class="portal-view">
@@ -586,7 +1163,11 @@
         </div>
       </div>
     </section>
-  </main>
+  
+      </div>
+    </main>
+  </div>
+
 
   <!-- ====================================================================
        INTERACTIVE PRACTICE ROOM MODAL
@@ -1126,3 +1707,4 @@
   <script src="app.js"></script>
 </body>
 </html>
+

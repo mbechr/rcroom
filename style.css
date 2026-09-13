@@ -55,7 +55,7 @@
 }
 
 [data-theme="light"], body.light-mode {
-  --bg-main: #f5f5f7;
+  --bg-main: #F8FAFC;
   --bg-surface: rgba(255, 255, 255, 0.85);
   --bg-surface-solid: #ffffff;
   --bg-card: rgba(255, 255, 255, 0.8);
@@ -256,8 +256,10 @@ body {
 }
 
 .brand-svg-logo {
-  width: 100%;
-  height: 100%;
+  width: 38px;
+  height: 38px;
+  max-width: 38px;
+  max-height: 38px;
   display: block;
   filter: drop-shadow(0 4px 10px rgba(0, 98, 227, 0.4));
   border-radius: 12px;
@@ -3818,3 +3820,30 @@ body {
   }
 }
 
+
+/* Stitch Kinetic Academy Canvas Enhancements */
+[data-theme="light"] .ambient-glow-background,
+body.light-mode .ambient-glow-background {
+  display: none !important;
+}
+
+[data-theme="light"] {
+  background-color: #F8FAFC !important;
+}
+
+[data-theme="light"] body {
+  background-color: #F8FAFC !important;
+}
+
+/* Sidebar RTL Support */
+html[dir="rtl"] aside#portalSidebar {
+  left: auto !important;
+  right: 0 !important;
+  border-right: none !important;
+  border-left: 1px solid #E2E8F0 !important;
+}
+
+html[dir="rtl"] #mainContentWrapper {
+  padding-left: 0 !important;
+  padding-right: 16rem !important;
+}
