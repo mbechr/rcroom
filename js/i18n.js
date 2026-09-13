@@ -4,7 +4,7 @@
  */
 
 const I18N = {
-  currentLang: localStorage.getItem('rc_lang') || 'en',
+  currentLang: (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('lang')) || localStorage.getItem('rc_lang') || 'en',
 
   translations: {
     en: {

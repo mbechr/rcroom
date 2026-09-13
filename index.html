@@ -114,20 +114,120 @@
     .portal-view { display: none !important; }
     .portal-view.active { display: block !important; }
     
-    /* RTL adjustments for persistent left sidebar */
-    html[dir="rtl"] aside#portalSidebar {
-      left: auto !important;
-      right: 0 !important;
-      border-right: none !important;
-      border-left: 1px solid #E2E8F0 !important;
+    /* Dynamic Responsive Sidebar & Header System (100% Zoom Optimization) */
+    aside#portalSidebar {
+      transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                  transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      scrollbar-width: thin;
+      scrollbar-color: rgba(148, 163, 184, 0.3) transparent;
     }
-    html[dir="rtl"] #mainContentWrapper {
-      padding-left: 0 !important;
-      padding-right: 16rem !important;
+    aside#portalSidebar::-webkit-scrollbar {
+      width: 4px;
     }
-    @media (max-width: 1024px) {
-      aside#portalSidebar { display: none !important; }
-      #mainContentWrapper { padding-left: 0 !important; padding-right: 0 !important; }
+    aside#portalSidebar::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.3);
+      border-radius: 4px;
+    }
+
+    #mainContentWrapper {
+      transition: padding 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Desktop Viewports (>= 1024px) */
+    @media (min-width: 1024px) {
+      aside#portalSidebar {
+        left: 0;
+        right: auto;
+        width: 16rem;
+        transform: none !important;
+        visibility: visible !important;
+      }
+      #mainContentWrapper {
+        padding-left: 16rem !important;
+        padding-right: 0 !important;
+      }
+
+      /* Collapsed Icon-Rail State */
+      body.sidebar-collapsed aside#portalSidebar {
+        width: 4.5rem !important;
+      }
+      body.sidebar-collapsed aside#portalSidebar .sidebar-text,
+      body.sidebar-collapsed aside#portalSidebar .sidebar-badge,
+      body.sidebar-collapsed aside#portalSidebar .sidebar-header-box,
+      body.sidebar-collapsed aside#portalSidebar .sidebar-bottom-box {
+        display: none !important;
+      }
+      body.sidebar-collapsed aside#portalSidebar .nav-tab {
+        justify-content: center !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        width: 2.75rem !important;
+        height: 2.75rem !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+      }
+      body.sidebar-collapsed aside#portalSidebar .nav-tab .material-symbols-outlined {
+        font-size: 22px !important;
+        margin: 0 !important;
+      }
+      body.sidebar-collapsed #mainContentWrapper {
+        padding-left: 4.5rem !important;
+        padding-right: 0 !important;
+      }
+
+      /* RTL Mode on Desktop */
+      html[dir="rtl"] aside#portalSidebar {
+        left: auto !important;
+        right: 0 !important;
+        border-right: none !important;
+        border-left: 1px solid #E2E8F0 !important;
+      }
+      html[dir="rtl"] #mainContentWrapper {
+        padding-left: 0 !important;
+        padding-right: 16rem !important;
+      }
+      html[dir="rtl"] body.sidebar-collapsed #mainContentWrapper {
+        padding-left: 0 !important;
+        padding-right: 4.5rem !important;
+      }
+    }
+
+    /* Mobile / Tablet Off-canvas Drawer (< 1024px) */
+    @media (max-width: 1023px) {
+      aside#portalSidebar {
+        left: 0;
+        right: auto;
+        width: 17rem !important;
+        max-width: 85vw !important;
+        transform: translateX(-100%);
+        z-index: 60 !important;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+      }
+      html[dir="rtl"] aside#portalSidebar {
+        left: auto !important;
+        right: 0 !important;
+        transform: translateX(100%) !important;
+        border-right: none !important;
+        border-left: 1px solid #E2E8F0 !important;
+      }
+      body.sidebar-mobile-open aside#portalSidebar {
+        transform: translateX(0) !important;
+      }
+      #sidebarBackdrop {
+        z-index: 55 !important;
+      }
+      body.sidebar-mobile-open #sidebarBackdrop {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+      }
+      #mainContentWrapper {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+      }
+      html[dir="rtl"] #mainContentWrapper {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+      }
     }
   </style>
 </head>
@@ -137,8 +237,13 @@
        TOP NAVIGATION BAR (Fixed h-20 with Kinetic Brand & Student Capsule)
        ==================================================================== -->
   <header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-b border-border-subtle" id="portalNavbar">
-    <div class="h-20 w-full px-6 flex items-center justify-between gap-4">
-      <div class="flex items-center gap-6 shrink-0">
+    <div class="h-20 w-full px-4 sm:px-6 flex items-center justify-between gap-2 sm:gap-4">
+      <div class="flex items-center gap-3 sm:gap-4 shrink-0">
+        <!-- Sidebar Toggle Button (Dynamic Menu) -->
+        <button id="sidebarToggleBtn" class="w-9 h-9 rounded-xl flex items-center justify-center bg-surface-container-low hover:bg-surface-container text-on-surface transition-all cursor-pointer shrink-0" title="Toggle Navigation Track" aria-label="Toggle Sidebar Menu">
+          <span class="material-symbols-outlined text-[20px]" id="sidebarToggleIcon">menu</span>
+        </button>
+
         <!-- Brand Logo -->
         <div class="flex items-center gap-3 cursor-pointer group shrink-0" id="brandHomeBtn" title="Back to Dashboard">
           <div class="w-10 h-10 shrink-0 flex items-center justify-center">
@@ -161,14 +266,14 @@
           </div>
           <div class="flex flex-col">
             <span class="font-headline-sm text-headline-sm tracking-tight text-primary leading-none">RC CLASSROOM</span>
-            <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mt-1">Student Portal • SQL Analytics</span>
+            <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mt-1 hidden md:block">Student Portal • SQL Analytics</span>
           </div>
         </div>
 
         <div class="h-7 w-px bg-surface-variant hidden xl:block"></div>
 
         <!-- Top Navigation Links -->
-        <nav class="hidden lg:flex items-center gap-1" id="portalNavTabs">
+        <nav class="hidden 2xl:flex items-center gap-1" id="portalNavTabs">
           <button class="nav-tab px-3.5 py-2 transition-all bg-primary-container text-on-primary font-label-md rounded-lg shadow-sm active cursor-pointer" data-view="dashboard">
             <span data-i18n="navDashboard">Dashboard</span>
           </button>
@@ -193,13 +298,13 @@
 
       <!-- Right Actions: Search, Streak, Lang, Theme, Profile -->
       <div class="flex items-center gap-3 shrink-0">
-        <!-- Fast Search Input -->
-        <div class="relative hidden 2xl:flex items-center">
+        <!-- Fast Dynamic Search Input -->
+        <div class="relative hidden sm:flex items-center">
           <div class="absolute left-3 flex items-center pointer-events-none">
             <span class="material-symbols-outlined text-on-surface-variant text-[18px]">search</span>
           </div>
-          <input class="h-10 pl-9 pr-14 w-60 rounded-lg bg-surface-container-low text-on-surface placeholder:text-on-surface-variant font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary/20" id="topFastSearchInput" placeholder="Fast Search queries, lessons..." type="text"/>
-          <div class="absolute right-2 px-1.5 py-0.5 rounded bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm">⌘K</div>
+          <input class="h-10 pl-9 pr-12 w-32 md:w-48 lg:w-60 focus:w-72 rounded-xl bg-surface-container-low text-on-surface placeholder:text-on-surface-variant font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-300" id="topFastSearchInput" placeholder="Search lessons, skills..." type="text"/>
+          <div class="absolute right-2 px-1.5 py-0.5 rounded bg-surface-container-highest text-on-surface-variant font-label-sm text-label-sm pointer-events-none">⌘K</div>
         </div>
 
         <!-- Streak Badge -->
@@ -249,46 +354,46 @@
   <!-- ====================================================================
        PERSISTENT LEFT NAVIGATION SIDEBAR (Stitch Sidebar)
        ==================================================================== -->
-  <aside class="fixed left-0 top-20 bottom-0 w-64 bg-surface-container-lowest z-40 flex flex-col justify-between py-6 border-r border-border-subtle shadow-[0_1px_8px_rgba(0,0,0,0.04)]" id="portalSidebar">
-    <div class="flex flex-col gap-6 px-4">
-      <div class="px-3 flex items-center justify-between">
-        <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Navigation Track</span>
-        <span class="px-2 py-0.5 rounded-full bg-mastery-emerald/15 text-mastery-emerald font-label-sm text-label-sm font-bold">Active Cohort</span>
+  <aside class="fixed left-0 top-20 bottom-0 w-64 bg-surface-container-lowest z-40 flex flex-col justify-between py-5 border-r border-border-subtle shadow-[0_1px_8px_rgba(0,0,0,0.04)] overflow-y-auto overflow-x-hidden" id="portalSidebar">
+    <div class="flex flex-col gap-5 px-3">
+      <div class="px-3 flex items-center justify-between sidebar-header-box">
+        <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold sidebar-text">Navigation Track</span>
+        <span class="px-2 py-0.5 rounded-full bg-mastery-emerald/15 text-mastery-emerald font-label-sm text-label-sm font-bold sidebar-badge">Active Cohort</span>
       </div>
       <nav class="flex flex-col gap-1.5" id="sidebarNavTabs">
-        <button class="nav-tab flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all bg-primary-container text-on-primary font-bold shadow-sm active text-left w-full cursor-pointer" data-view="dashboard">
-          <span class="material-symbols-outlined text-[20px]">space_dashboard</span>
-          <span data-i18n="navDashboard">Dashboard</span>
+        <button class="nav-tab flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all bg-primary-container text-on-primary font-bold shadow-sm active text-left w-full cursor-pointer" data-view="dashboard" title="Dashboard">
+          <span class="material-symbols-outlined text-[20px] shrink-0">space_dashboard</span>
+          <span class="sidebar-text truncate" data-i18n="navDashboard">Dashboard</span>
         </button>
-        <button class="nav-tab flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="tracks">
-          <span class="material-symbols-outlined text-[20px]">route</span>
-          <span data-i18n="navCurriculum">Curriculum Tracks</span>
+        <button class="nav-tab flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="tracks" title="Curriculum Tracks">
+          <span class="material-symbols-outlined text-[20px] shrink-0">route</span>
+          <span class="sidebar-text truncate" data-i18n="navCurriculum">Curriculum Tracks</span>
         </button>
-        <button class="nav-tab flex items-center justify-between px-3.5 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="skills">
-          <div class="flex items-center gap-3">
-            <span class="material-symbols-outlined text-[20px]">menu_book</span>
-            <span data-i18n="navSkills">Skills Bank</span>
+        <button class="nav-tab flex items-center justify-between px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="skills" title="Skills Bank (8,264+)">
+          <div class="flex items-center gap-3 min-w-0">
+            <span class="material-symbols-outlined text-[20px] shrink-0">menu_book</span>
+            <span class="sidebar-text truncate" data-i18n="navSkills">Skills Bank</span>
           </div>
-          <span class="font-label-sm text-label-sm font-bold text-primary">8.2k</span>
+          <span class="font-label-sm text-label-sm font-bold text-primary sidebar-badge shrink-0">8.2k</span>
         </button>
-        <button class="nav-tab flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="reports">
-          <span class="material-symbols-outlined text-[20px]">analytics</span>
-          <span data-i18n="navReports">Student Reports</span>
+        <button class="nav-tab flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="reports" title="Student Reports">
+          <span class="material-symbols-outlined text-[20px] shrink-0">analytics</span>
+          <span class="sidebar-text truncate" data-i18n="navReports">Student Reports</span>
         </button>
-        <button class="nav-tab flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="leaderboard">
-          <span class="material-symbols-outlined text-[20px]">emoji_events</span>
-          <span data-i18n="navLeaderboard">Leaderboard</span>
+        <button class="nav-tab flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="leaderboard" title="Leaderboard">
+          <span class="material-symbols-outlined text-[20px] shrink-0">emoji_events</span>
+          <span class="sidebar-text truncate" data-i18n="navLeaderboard">Leaderboard</span>
         </button>
-        <button class="nav-tab teacher-nav-tab flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="teacher" id="sidebarTeacherTabBtn" style="display: none;">
-          <span class="material-symbols-outlined text-[20px]">cast_for_education</span>
-          <span data-i18n="navTeacher">Teacher Console</span>
+        <button class="nav-tab teacher-nav-tab flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="teacher" id="sidebarTeacherTabBtn" style="display: none;" title="Teacher Console">
+          <span class="material-symbols-outlined text-[20px] shrink-0">cast_for_education</span>
+          <span class="sidebar-text truncate" data-i18n="navTeacher">Teacher Console</span>
         </button>
       </nav>
     </div>
 
     <!-- Sidebar Footer Widgets: Daily XP Goal & SQL Status -->
-    <div class="px-4 flex flex-col gap-3">
-      <div class="p-4 rounded-xl bg-surface-container-low flex flex-col gap-2">
+    <div class="px-3 flex flex-col gap-3 sidebar-bottom-box">
+      <div class="p-3.5 rounded-xl bg-surface-container-low flex flex-col gap-2">
         <div class="flex items-center justify-between">
           <span class="font-label-sm text-label-sm text-on-surface-variant">Daily XP Goal</span>
           <span class="font-label-sm text-label-sm text-primary font-bold" id="sidebarDailyXpText">350 / 500</span>
@@ -297,12 +402,15 @@
           <div class="h-full rounded-full bg-primary-container w-[70%]" id="sidebarDailyXpBar"></div>
         </div>
       </div>
-      <div class="px-3 flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
+      <div class="px-2 flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
         <span>SQL Sandbox v4.1</span>
         <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-mastery-emerald"></span>Online</span>
       </div>
     </div>
   </aside>
+
+  <!-- Mobile Sidebar Backdrop Overlay -->
+  <div id="sidebarBackdrop" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 opacity-0 pointer-events-none transition-opacity duration-300"></div>
 
   <!-- ====================================================================
        MAIN CONTENT WRAPPER (Offset pl-64 with bg-surface-canvas)

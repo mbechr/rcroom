@@ -2604,7 +2604,75 @@ window.confirmDeleteStudent = async function(studentId, studentName) {
 };
 
 
+
+// =============================================================================
+// Dynamic Sidebar & Navigation Controller (100% Zoom & Responsive Track)
+// =============================================================================
+
+function setupSidebarToggle() {
+  const toggleBtn = document.getElementById('sidebarToggleBtn');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  const sidebar = document.getElementById('portalSidebar');
+
+  // Restore saved desktop collapsed state or URL parameter
+  try {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('collapsed') === '1') {
+      document.body.classList.add('sidebar-collapsed');
+    } else if (urlParams.get('drawer') === '1') {
+      document.body.classList.add('sidebar-mobile-open');
+    } else {
+      const savedCollapsed = localStorage.getItem('rc_sidebar_collapsed');
+      if (savedCollapsed === 'true' && window.innerWidth >= 1024) {
+        document.body.classList.add('sidebar-collapsed');
+      }
+    }
+  } catch (e) {}
+
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (window.innerWidth < 1024) {
+        // Mobile off-canvas toggle
+        document.body.classList.toggle('sidebar-mobile-open');
+      } else {
+        // Desktop collapse/expand toggle
+        document.body.classList.toggle('sidebar-collapsed');
+        const isCollapsed = document.body.classList.contains('sidebar-collapsed');
+        try {
+          localStorage.setItem('rc_sidebar_collapsed', isCollapsed);
+        } catch (e) {}
+      }
+    });
+  }
+
+  if (backdrop) {
+    backdrop.addEventListener('click', () => {
+      document.body.classList.remove('sidebar-mobile-open');
+    });
+  }
+
+  // Close mobile sidebar on escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && document.body.classList.contains('sidebar-mobile-open')) {
+      document.body.classList.remove('sidebar-mobile-open');
+    }
+  });
+
+  // Auto close mobile sidebar when any nav item is clicked
+  if (sidebar) {
+    sidebar.querySelectorAll('.nav-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        if (window.innerWidth < 1024) {
+          document.body.classList.remove('sidebar-mobile-open');
+        }
+      });
+    });
+  }
+}
+
 function setupEventListeners() {
+  setupSidebarToggle();
   // Navigation Tabs (Both Top Bar & Left Sidebar)
   document.querySelectorAll('.nav-tab').forEach(tab => {
     tab.addEventListener('click', (e) => {
