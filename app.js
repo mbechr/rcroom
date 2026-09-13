@@ -237,11 +237,20 @@ const DB = {
 
   async login(username, password) {
     const cleanUser = (username || '').trim().toLowerCase();
+    const cleanPw = (password || '').trim();
+
+    if (!cleanUser) {
+      throw new Error('يرجى إدخال اسم المستخدم');
+    }
+    if (!cleanPw) {
+      throw new Error('يرجى إدخال كلمة المرور');
+    }
+
     try {
       const res = await fetch(this.apiUrl('/api/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: cleanUser, password })
+        body: JSON.stringify({ username: cleanUser, password: cleanPw })
       });
       if (res.ok) {
         const data = await res.json();
@@ -258,17 +267,25 @@ const DB = {
       }
     }
 
-    // Offline / Direct File Mode Fallback Matching
+    // Check custom registered students first from localStorage
+    const localStudents = JSON.parse(localStorage.getItem('rc_custom_students') || '[]');
+    const localFound = localStudents.find(s => s.username.toLowerCase() === cleanUser);
+    if (localFound) {
+      if (localFound.password && localFound.password !== cleanPw) {
+        throw new Error('كلمة المرور غير صحيحة');
+      }
+      return localFound;
+    }
+
+    // Offline / Fallback Matching
     const found = this.demoStudents.find(s => s.username.toLowerCase() === cleanUser);
     if (found) {
       const isTeacher = found.role === 'teacher' || cleanUser === 'admin' || cleanUser === 'rania';
-      if (password) {
-        const validPw = isTeacher
-          ? (password === 'admin123' || password === 'admin' || password === 'password123')
-          : (password === 'password123' || password === '123456');
-        if (!validPw) {
-          throw new Error('Incorrect password.');
-        }
+      const validPw = isTeacher
+        ? (cleanPw === 'admin123')
+        : (cleanPw === 'password123');
+      if (!validPw) {
+        throw new Error('كلمة المرور غير صحيحة');
       }
       return {
         ...found,
@@ -278,15 +295,20 @@ const DB = {
         ]
       };
     }
-    throw new Error(cleanUser === 'admin' || cleanUser === 'rania' ? 'Teacher / Admin account not found.' : 'Student account not found.');
+    throw new Error('اسم المستخدم أو كلمة المرور غير صحيحة');
   },
 
   async register(full_name, username, password, grade_level, avatar) {
+    const cleanUser = (username || '').trim().toLowerCase();
+    const cleanPw = (password || '').trim();
+    if (!cleanUser || !cleanPw || !full_name) {
+      throw new Error('يرجى ملء جميع الحقول المطلوبة');
+    }
     try {
       const res = await fetch(this.apiUrl('/api/register'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ full_name, username, password, grade_level, avatar })
+        body: JSON.stringify({ full_name, username: cleanUser, password: cleanPw, grade_level, avatar })
       });
       if (res.ok) {
         const data = await res.json();
@@ -294,21 +316,33 @@ const DB = {
           if (data.token) localStorage.setItem('rc_auth_token', data.token);
           return data.student;
         }
-        throw new Error(data.error || 'Registration failed');
+        throw new Error(data.error || 'فشل التسجيل');
       }
-    } catch (e) {}
+    } catch (e) {
+      if (e.message && e.message !== 'Failed to fetch' && !e.message.includes('NetworkError')) {
+        throw e;
+      }
+    }
 
-    // Local fallback registration
+    // Local fallback registration with persistent localStorage
+    const localStudents = JSON.parse(localStorage.getItem('rc_custom_students') || '[]');
+    if (localStudents.some(s => s.username.toLowerCase() === cleanUser) || this.demoStudents.some(s => s.username.toLowerCase() === cleanUser)) {
+      throw new Error('اسم المستخدم مستخدم بالفعل');
+    }
     const newStudent = {
       id: Date.now(),
-      username,
-      full_name,
-      grade_level,
-      avatar,
+      username: cleanUser,
+      password: cleanPw,
+      full_name: full_name.trim(),
+      grade_level: grade_level || 'Year 4',
+      avatar: avatar || '🦊',
       xp: 100,
       streak_days: 1,
+      role: 'student',
       badges: [{ badge_id: 'welcome', badge_name: 'Welcome Explorer', badge_icon: '🎓', badge_desc: 'Joined Rania Classroom' }]
     };
+    localStudents.push(newStudent);
+    localStorage.setItem('rc_custom_students', JSON.stringify(localStudents));
     this.demoStudents.push(newStudent);
     return newStudent;
   },
@@ -591,7 +625,6 @@ const el = {
   themeToggleBtn: document.getElementById('themeToggleBtn'),
   themeIcon: document.getElementById('themeIcon'),
   studentProfilePill: document.getElementById('studentProfilePill'),
-  switchStudentBtn: document.getElementById('switchStudentBtn'),
   navStudentAvatar: document.getElementById('navStudentAvatar'),
   navStudentName: document.getElementById('navStudentName'),
   navStudentGrade: document.getElementById('navStudentGrade'),
@@ -764,16 +797,28 @@ const el = {
 async function initPortal() {
   applyTheme(AppState.currentTheme);
   setupEventListeners();
-  updateStudentHeader();
 
   // Strict Authentication Gate Check
   if (!AppState.currentUser) {
-    setTimeout(() => openAuthModal(true), 120);
+    document.body.classList.add('auth-locked');
+    openAuthModal(true);
+    return; // STOP: Never render curriculum or student views until authenticated!
+  }
+
+  document.body.classList.remove('auth-locked');
+  updateStudentHeader();
+  await loadAndRenderPortal();
+}
+
+async function loadAndRenderPortal() {
+  const user = AppState.currentUser;
+  if (!user) return;
+
+  const isTeacher = user.role === 'teacher' || user.username === 'admin' || user.username === 'rania';
+  if (isTeacher) {
+    setTimeout(() => switchView('teacher'), 40);
   } else {
-    const isTeacher = AppState.currentUser.role === 'teacher' || AppState.currentUser.username === 'admin' || AppState.currentUser.username === 'rania';
-    if (isTeacher) {
-      setTimeout(() => switchView('teacher'), 50);
-    }
+    setTimeout(() => switchView('dashboard'), 40);
   }
 
   try {
@@ -794,9 +839,13 @@ async function initPortal() {
 
     buildFlatSkillsIndex();
     renderGradesSidebar();
-    renderDashboard();
-    renderTracksView();
-    renderSkillsCanvas();
+    if (isTeacher) {
+      renderTeacherConsole();
+    } else {
+      renderDashboard();
+      renderTracksView();
+      renderSkillsCanvas();
+    }
 
     // Initial position for magnetic sliding navbar indicator
     setTimeout(updateNavIndicator, 100);
@@ -990,12 +1039,8 @@ function updateStudentHeader() {
   if (!user) return;
 
   const isTeacher = user.role === 'teacher' || user.username === 'admin' || user.username === 'rania';
-
   const sidebarTeacherTab = document.getElementById('sidebarTeacherTabBtn');
   const studentLevelPill = document.getElementById('navStudentLevel');
-
-  const sidebarStudentSwitchBtn = document.getElementById('sidebarStudentSwitchBtn');
-  const sidebarTeacherBadge = document.getElementById('sidebarTeacherBadge');
 
   if (isTeacher) {
     if (el.teacherTabBtn) el.teacherTabBtn.style.display = 'inline-flex';
@@ -1003,30 +1048,24 @@ function updateStudentHeader() {
       sidebarTeacherTab.style.display = 'flex';
       sidebarTeacherTab.classList.add('bg-purple-600', 'text-white');
       sidebarTeacherTab.classList.remove('text-purple-700', 'hover:bg-purple-50');
-      if (sidebarTeacherBadge) sidebarTeacherBadge.textContent = 'Active ✓';
     }
-    if (sidebarStudentSwitchBtn) sidebarStudentSwitchBtn.style.display = 'flex';
     if (el.navStudentAvatar) el.navStudentAvatar.textContent = user.avatar || '👩‍🏫';
     if (el.navStudentName) el.navStudentName.textContent = user.full_name || 'Miss Rania';
     if (el.navStudentGrade) el.navStudentGrade.innerHTML = `<span>Instructor &bull; Admin</span>`;
-    if (el.navStudentStreak) el.navStudentStreak.textContent = `Teacher 🌟`;
+    if (el.navStudentXP) el.navStudentXP.textContent = 'Teacher Console';
     if (studentLevelPill) studentLevelPill.textContent = 'Admin';
     if (el.navXpStripFill) el.navXpStripFill.style.width = '100%';
   } else {
     if (el.teacherTabBtn) el.teacherTabBtn.style.display = 'none';
     if (sidebarTeacherTab) {
-      sidebarTeacherTab.style.display = 'flex'; // Always visible for 1-click admin access!
-      sidebarTeacherTab.classList.remove('bg-purple-600', 'text-white');
-      sidebarTeacherTab.classList.add('text-purple-700', 'hover:bg-purple-50');
-      if (sidebarTeacherBadge) sidebarTeacherBadge.textContent = 'Admin ⚡';
+      sidebarTeacherTab.style.display = 'none'; // Strictly hidden for students
     }
-    if (sidebarStudentSwitchBtn) sidebarStudentSwitchBtn.style.display = 'none';
     if (el.navStudentAvatar) el.navStudentAvatar.textContent = user.avatar || '🦊';
     if (el.navStudentName) el.navStudentName.textContent = user.full_name;
-    if (el.navStudentGrade) el.navStudentGrade.innerHTML = `(${user.grade_level})`;
-    if (el.navStudentXP) el.navStudentXP.textContent = `${user.xp.toLocaleString()} XP`;
-    if (el.navStudentStreak) el.navStudentStreak.textContent = `${user.streak_days} Streak`;
-    const rank = getStudentRank(user.xp);
+    if (el.navStudentGrade) el.navStudentGrade.innerHTML = `(${user.grade_level || 'Student'})`;
+    if (el.navStudentXP) el.navStudentXP.textContent = `${(user.xp || 0).toLocaleString()} XP`;
+    if (el.navStudentStreak) el.navStudentStreak.textContent = `${user.streak_days || 1} Streak`;
+    const rank = getStudentRank(user.xp || 0);
     if (studentLevelPill) studentLevelPill.textContent = `Lv. ${rank.level}`;
 
     // Automatic Level XP Progress Calculation
@@ -1608,23 +1647,6 @@ function exportClassroomCsv() {
     document.body.removeChild(link);
     showToast('Classroom CSV Report exported! 📥');
   });
-}
-
-async function loginAsTeacher() {
-  try {
-    let teacher;
-    try {
-      teacher = await DB.login('admin', 'admin123');
-    } catch (e) {
-      teacher = await DB.login('rania', 'admin123');
-    }
-    setCurrentStudent(teacher);
-    el.authModal.classList.remove('open');
-    switchView('teacher');
-    showToast('Welcome to Miss Rania\'s Teacher Console 👩‍🏫');
-  } catch (err) {
-    showToast(err.message || 'Could not log in as teacher.');
-  }
 }
 
 async function renderLeaderboardView() {
@@ -2446,22 +2468,13 @@ ${a} × ${b} = ?`,
 // Global Authentication Gate & Session Functions
 // =============================================================================
 
-window.autofillLogin = function(username, password) {
-  const uInput = document.getElementById('loginUsername');
-  const pInput = document.getElementById('loginPassword');
-  if (uInput) uInput.value = username;
-  if (pInput) pInput.value = password;
-  const errorMsg = document.getElementById('loginErrorMsg');
-  if (errorMsg) errorMsg.style.display = 'none';
-};
-
 window.logoutUser = function() {
   AppState.currentUser = null;
   localStorage.removeItem('current_student');
   localStorage.removeItem('rc_auth_token');
+  document.body.classList.add('auth-locked');
   showToast('تم تسجيل الخروج بنجاح 👋');
   updateStudentHeader();
-  toggleQuickSwitchDropdown(false);
   openAuthModal(true);
 };
 
@@ -2484,18 +2497,6 @@ async function openAuthModal(isMandatory = false) {
     const uInput = document.getElementById('loginUsername');
     if (uInput) uInput.focus();
   }, 200);
-}
-
-async function loginDemoStudent(username) {
-  try {
-    const pw = (username === 'admin' || username === 'rania') ? 'admin123' : 'password123';
-    const student = await DB.login(username, pw);
-    setCurrentStudent(student);
-    el.authModal.classList.remove('open');
-    showToast(`Logged in as ${student.full_name}! 👋`);
-  } catch (err) {
-    showToast(err.message || 'Login failed');
-  }
 }
 
 function setCurrentStudent(student) {
@@ -2712,162 +2713,19 @@ function setupSidebarToggle() {
 }
 
 
-// =============================================================================
-// Fast 1-Click Role & Student Account Switcher Controller
-// =============================================================================
-
-function toggleQuickSwitchDropdown(forceState) {
-  const dd = document.getElementById('quickSwitchDropdown');
-  if (!dd) return;
-  const isCurrentlyOpen = dd.classList.contains('opacity-100');
-  const shouldOpen = forceState !== undefined ? forceState : !isCurrentlyOpen;
-
-  if (shouldOpen) {
-    renderQuickDropdownStudents();
-    dd.classList.remove('opacity-0', 'pointer-events-none', '-translate-y-2');
-    dd.classList.add('opacity-100', 'pointer-events-auto', 'translate-y-0');
-  } else {
-    dd.classList.remove('opacity-100', 'pointer-events-auto', 'translate-y-0');
-    dd.classList.add('opacity-0', 'pointer-events-none', '-translate-y-2');
-  }
-}
-
-async function renderQuickDropdownStudents() {
-  const container = document.getElementById('dropdownStudentsList');
-  if (!container) return;
-  try {
-    const demos = await DB.getDemoStudents();
-    const currentId = AppState.currentUser ? AppState.currentUser.id : null;
-    const isTeacher = AppState.currentUser && (AppState.currentUser.role === 'teacher' || AppState.currentUser.username === 'admin' || AppState.currentUser.username === 'rania');
-    
-    // Update Teacher card active status in dropdown
-    const teacherCard = document.getElementById('dropdownTeacherBtn');
-    if (teacherCard) {
-      if (isTeacher) {
-        teacherCard.classList.add('ring-2', 'ring-purple-600');
-      } else {
-        teacherCard.classList.remove('ring-2', 'ring-purple-600');
-      }
-    }
-
-    container.innerHTML = demos.map(s => {
-      const isActive = !isTeacher && s.id === currentId;
-      return `
-        <div class="px-2.5 py-2 rounded-xl flex items-center justify-between cursor-pointer transition-all hover:bg-surface-container ${isActive ? 'bg-primary/10 font-bold' : ''}" onclick="quickSwitchToStudent('${s.username}')">
-          <div class="flex items-center gap-2 min-w-0">
-            <span class="text-base shrink-0">${s.avatar || '🦊'}</span>
-            <div class="truncate text-left">
-              <div class="text-xs text-on-surface font-bold leading-tight truncate">${s.full_name}</div>
-              <div class="text-[11px] text-on-surface-variant leading-tight">${s.grade_level} &bull; ${(s.xp || 0).toLocaleString()} XP</div>
-            </div>
-          </div>
-          ${isActive ? '<span class="text-[10px] px-1.5 py-0.5 rounded bg-primary text-on-primary font-bold shrink-0">Active</span>' : '<span class="text-xs text-primary font-bold shrink-0">Switch &rarr;</span>'}
-        </div>
-      `;
-    }).join('');
-  } catch (e) {
-    console.error('Failed to render dropdown students:', e);
-  }
-}
-
-window.quickSwitchToStudent = async function(username) {
-  toggleQuickSwitchDropdown(false);
-  await loginDemoStudent(username);
-};
-
-function setupFastAccountSwitcher() {
-  if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('dropdown') === '1') {
-    setTimeout(() => toggleQuickSwitchDropdown(true), 250);
-  }
-  const profilePill = document.getElementById('studentProfilePill');
-  const switchBtn = document.getElementById('switchStudentBtn');
-  const dropdownTeacherBtn = document.getElementById('dropdownTeacherBtn');
-  const dropdownOpenFullModalBtn = document.getElementById('dropdownOpenFullModalBtn');
-  const teacherSwitchStudentBtn = document.getElementById('teacherSwitchStudentBtn');
-  const sidebarStudentSwitchBtn = document.getElementById('sidebarStudentSwitchBtn');
+function setupEventListeners() {
+  // Sidebar Teacher Tab click
   const sidebarTeacherTabBtn = document.getElementById('sidebarTeacherTabBtn');
-
-  // Toggle dropdown on profile pill or switch button click
-  if (profilePill) {
-    profilePill.addEventListener('click', (e) => {
-      e.stopPropagation();
-      toggleQuickSwitchDropdown();
-    });
-  }
-
-  if (switchBtn) {
-    switchBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      toggleQuickSwitchDropdown();
-    });
-  }
-
-  // Teacher Card 1-Click inside dropdown
-  if (dropdownTeacherBtn) {
-    dropdownTeacherBtn.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      toggleQuickSwitchDropdown(false);
-      await loginAsTeacher();
-    });
-  }
-
-  // Open full modal for custom login/registration
-  if (dropdownOpenFullModalBtn) {
-    dropdownOpenFullModalBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      toggleQuickSwitchDropdown(false);
-      openAuthModal();
-    });
-  }
-
-  // Teacher Console header: 1-Click return to student
-  if (teacherSwitchStudentBtn) {
-    teacherSwitchStudentBtn.addEventListener('click', async () => {
-      await loginDemoStudent('alex');
-      switchView('dashboard');
-    });
-  }
-
-  // Sidebar student return button
-  if (sidebarStudentSwitchBtn) {
-    sidebarStudentSwitchBtn.addEventListener('click', async () => {
-      await loginDemoStudent('alex');
-      switchView('dashboard');
-    });
-  }
-
-  // Sidebar teacher tab click (intelligent 1-click role switcher)
   if (sidebarTeacherTabBtn) {
-    sidebarTeacherTabBtn.addEventListener('click', async (e) => {
+    sidebarTeacherTabBtn.addEventListener('click', (e) => {
       e.preventDefault();
       const user = AppState.currentUser;
       const isTeacher = user && (user.role === 'teacher' || user.username === 'admin' || user.username === 'rania');
-      if (!isTeacher) {
-        // Direct 1-Click sign in as Miss Rania
-        await loginAsTeacher();
-      } else {
+      if (isTeacher) {
         switchView('teacher');
       }
     });
   }
-
-  // Close dropdown on click outside or escape key
-  document.addEventListener('click', (e) => {
-    const wrapper = document.getElementById('profileMenuWrapper');
-    if (wrapper && !wrapper.contains(e.target)) {
-      toggleQuickSwitchDropdown(false);
-    }
-  });
-
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      toggleQuickSwitchDropdown(false);
-    }
-  });
-}
-
-function setupEventListeners() {
-  setupFastAccountSwitcher();
   setupSidebarToggle();
   // Navigation Tabs (Both Top Bar & Left Sidebar)
   document.querySelectorAll('.nav-tab').forEach(tab => {
@@ -2957,19 +2815,32 @@ function setupEventListeners() {
       const p = el.loginPassword.value;
       try {
         const student = await DB.login(u, p);
+        document.body.classList.remove('auth-locked');
         setCurrentStudent(student);
         el.authModal.classList.remove('open');
+        await loadAndRenderPortal();
         const isTeacher = student.role === 'teacher' || student.username === 'admin' || student.username === 'rania';
         if (isTeacher) {
           showToast('مرحباً بكِ معلمة رانيا (لوحة تحكم الإدارة) 👩‍🏫');
-          switchView('teacher');
         } else {
           showToast(`أهلاً بك يا ${student.full_name}! 👋`);
-          switchView('dashboard');
         }
       } catch (err) {
         el.loginErrorMsg.textContent = err.message || 'اسم المستخدم أو كلمة المرور غير صحيحة';
         el.loginErrorMsg.style.display = 'block';
+      }
+    });
+  }
+
+  // Backdrop click on AuthModal (Prevent closing when unauthenticated)
+  if (el.authModal) {
+    el.authModal.addEventListener('click', (e) => {
+      if (e.target === el.authModal) {
+        if (AppState.currentUser) {
+          el.authModal.classList.remove('open');
+        } else {
+          showToast('يرجى تسجيل الدخول أولاً للوصول للمنصة 🔒');
+        }
       }
     });
   }
@@ -2997,8 +2868,10 @@ function setupEventListeners() {
 
       try {
         const student = await DB.register(name, u, p, grade, avatar);
+        document.body.classList.remove('auth-locked');
         setCurrentStudent(student);
         el.authModal.classList.remove('open');
+        await loadAndRenderPortal();
         showToast(`Account created! Welcome, ${student.full_name}! 🎉`);
       } catch (err) {
         el.regErrorMsg.textContent = err.message || 'Registration failed';
@@ -3007,32 +2880,9 @@ function setupEventListeners() {
     });
   }
 
-  // Teacher Console & Login Events
-  if (el.quickTeacherLoginBtn) {
-    el.quickTeacherLoginBtn.addEventListener('click', loginAsTeacher);
-  }
-  if (el.teacherDirectLoginBtn) {
-    el.teacherDirectLoginBtn.addEventListener('click', loginAsTeacher);
-  }
+  // Teacher Console & Export Events
   if (el.exportClassroomCsvBtn) {
     el.exportClassroomCsvBtn.addEventListener('click', exportClassroomCsv);
-  }
-  if (el.teacherLoginForm) {
-    el.teacherLoginForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const u = el.teacherUsername.value.trim();
-      const p = el.teacherPassword.value;
-      try {
-        const teacher = await DB.login(u, p);
-        setCurrentStudent(teacher);
-        el.authModal.classList.remove('open');
-        switchView('teacher');
-        showToast('Welcome to Miss Rania\'s Teacher Console 👩‍🏫');
-      } catch (err) {
-        el.teacherErrorMsg.textContent = err.message || 'Login failed';
-        el.teacherErrorMsg.style.display = 'block';
-      }
-    });
   }
 
   // Interactive Practice Tools Listeners
@@ -3305,11 +3155,22 @@ function setupEventListeners() {
   window.addEventListener('keydown', (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
       e.preventDefault();
-      switchView('skills');
-      el.skillsSearchInput.focus();
+      if (AppState.currentUser) {
+        switchView('skills');
+        if (el.skillsSearchInput) el.skillsSearchInput.focus();
+      }
     } else if (e.key === 'Escape') {
-      if (el.practiceModal.classList.contains('open')) closePracticeModal();
-      if (el.authModal.classList.contains('open')) el.authModal.classList.remove('open');
+      if (el.practiceModal && el.practiceModal.classList.contains('open')) {
+        closePracticeModal();
+      }
+      if (el.authModal && el.authModal.classList.contains('open')) {
+        // STRICT: Escape can NEVER close the auth modal if unauthenticated!
+        if (AppState.currentUser) {
+          el.authModal.classList.remove('open');
+        } else {
+          showToast('يرجى تسجيل الدخول للوصول إلى المنصة 🔒');
+        }
+      }
     }
   });
 }

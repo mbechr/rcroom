@@ -2217,7 +2217,21 @@ body {
 
 /* ==========================================================================
    Authentication Modal
-   ========================================================================== */
+/* Auth Lock Gate: completely hide the app when unauthenticated */
+body.auth-locked #portalNavbar,
+body.auth-locked #portalSidebar,
+body.auth-locked #sidebarBackdrop,
+body.auth-locked #mainContentWrapper,
+body.auth-locked .ambient-glow-background {
+  display: none !important;
+}
+
+body.auth-locked #authModal {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
 .auth-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -3731,10 +3745,6 @@ body {
     order: 2;
     gap: 0.25rem;
     flex-shrink: 0;
-  }
-
-  #switchStudentBtn {
-    display: none;
   }
 
   .student-active-pill {
