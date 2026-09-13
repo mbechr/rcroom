@@ -190,6 +190,10 @@
         padding-left: 0 !important;
         padding-right: 4.5rem !important;
       }
+      html[dir="rtl"] #quickSwitchDropdown {
+        right: auto !important;
+        left: 0 !important;
+      }
     }
 
     /* Mobile / Tablet Off-canvas Drawer (< 1024px) */
@@ -324,22 +328,59 @@
           <span class="material-symbols-outlined text-[18px]" id="themeIcon">light_mode</span>
         </button>
 
-        <!-- Student Profile Capsule -->
-        <div class="flex items-center gap-2 pl-2">
-          <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-low cursor-pointer hover:bg-surface-container transition-all" id="studentProfilePill" title="Switch Student or View Profile">
-            <div class="w-7 h-7 rounded-full bg-streak-amber/20 flex items-center justify-center font-label-sm text-label-sm leading-none" id="navStudentAvatar">🦊</div>
-            <div class="hidden md:flex flex-col text-left">
-              <div class="flex items-center gap-1.5">
-                <span class="font-label-md text-label-md text-on-surface font-bold leading-none" id="navStudentName">Alex Turner</span>
-                <span class="font-label-sm text-label-sm text-on-surface-variant leading-none" id="navStudentGrade">(Year 4)</span>
+        <!-- Student Profile Capsule & 1-Click Fast Switcher -->
+        <div class="relative" id="profileMenuWrapper">
+          <div class="flex items-center gap-2 pl-2">
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-low cursor-pointer hover:bg-surface-container transition-all" id="studentProfilePill" title="Quick Role & Student Switcher">
+              <div class="w-7 h-7 rounded-full bg-streak-amber/20 flex items-center justify-center font-label-sm text-label-sm leading-none" id="navStudentAvatar">🦊</div>
+              <div class="hidden md:flex flex-col text-left">
+                <div class="flex items-center gap-1.5">
+                  <span class="font-label-md text-label-md text-on-surface font-bold leading-none" id="navStudentName">Alex Turner</span>
+                  <span class="font-label-sm text-label-sm text-on-surface-variant leading-none" id="navStudentGrade">(Year 4)</span>
+                </div>
+                <span class="font-label-sm text-label-sm text-primary font-semibold leading-none mt-1" id="navStudentXP">1,420 XP</span>
               </div>
-              <span class="font-label-sm text-label-sm text-primary font-semibold leading-none mt-1" id="navStudentXP">1,420 XP</span>
+              <span class="px-2 py-0.5 rounded-full bg-primary-fixed text-primary font-label-sm text-label-sm font-bold" id="navStudentLevel">Lv. 5</span>
             </div>
-            <span class="px-2 py-0.5 rounded-full bg-primary-fixed text-primary font-label-sm text-label-sm font-bold" id="navStudentLevel">Lv. 5</span>
+            <button class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-on-primary hover:opacity-90 transition-opacity cursor-pointer" id="switchStudentBtn" title="Switch Account / Role">
+              <span class="material-symbols-outlined text-on-primary text-[18px]">swap_horiz</span>
+            </button>
           </div>
-          <button class="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-on-primary hover:opacity-90 transition-opacity cursor-pointer" id="switchStudentBtn" title="Switch Student / Log In">
-            <span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
-          </button>
+
+          <!-- Quick 1-Click Role & Student Switcher Dropdown -->
+          <div id="quickSwitchDropdown" class="absolute right-0 top-12 mt-2 w-80 rounded-2xl bg-surface-container-lowest border border-border-subtle shadow-2xl p-3 z-50 transition-all duration-200 opacity-0 pointer-events-none transform -translate-y-2">
+            <!-- Header -->
+            <div class="px-2 py-1.5 flex items-center justify-between border-b border-border-subtle mb-2">
+              <span class="font-label-sm text-label-sm font-bold uppercase tracking-wider text-on-surface-variant" data-i18n="quickSwitchTitle">Fast Account Switch</span>
+              <span class="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold">1-Click ⚡</span>
+            </div>
+
+            <!-- Miss Rania Teacher Card (1-Click) -->
+            <div class="p-2.5 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/25 cursor-pointer transition-all flex items-center justify-between group mb-2" id="dropdownTeacherBtn" title="Instant Teacher & Admin Access">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-9 h-9 rounded-xl bg-purple-600 text-white flex items-center justify-center text-lg shrink-0 shadow-sm">👩‍🏫</div>
+                <div class="truncate text-left">
+                  <div class="font-bold text-sm text-purple-900 leading-tight">Miss Rania</div>
+                  <div class="text-xs text-purple-700 leading-tight">Teacher & Admin Console</div>
+                </div>
+              </div>
+              <span class="px-2.5 py-1 rounded-lg bg-purple-600 text-white font-bold text-xs shrink-0 group-hover:bg-purple-700 transition-colors shadow-sm">Admin ⚡</span>
+            </div>
+
+            <!-- Student Profiles List -->
+            <div class="px-2 pt-1 pb-1 font-label-sm text-xs font-semibold text-on-surface-variant text-left" data-i18n="quickSwitchStudents">Or Select Student:</div>
+            <div class="flex flex-col gap-1 max-h-52 overflow-y-auto" id="dropdownStudentsList">
+              <!-- Dynamically populated via JS -->
+            </div>
+
+            <!-- Footer: Custom Sign in or Register -->
+            <div class="pt-2 mt-2 border-t border-border-subtle flex items-center justify-between px-1">
+              <button class="text-xs text-on-surface-variant hover:text-primary transition-colors flex items-center gap-1 cursor-pointer font-semibold" id="dropdownOpenFullModalBtn">
+                <span class="material-symbols-outlined text-[15px]">manage_accounts</span>
+                <span data-i18n="moreLoginOptions">Login with Password / Add Student</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -378,9 +419,18 @@
           <span class="material-symbols-outlined text-[20px] shrink-0">emoji_events</span>
           <span class="sidebar-text truncate" data-i18n="navLeaderboard">Leaderboard</span>
         </button>
-        <button class="nav-tab teacher-nav-tab flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="teacher" id="sidebarTeacherTabBtn" style="display: none;" title="Teacher Console">
-          <span class="material-symbols-outlined text-[20px] shrink-0">cast_for_education</span>
-          <span class="sidebar-text truncate" data-i18n="navTeacher">Teacher Console</span>
+        <!-- Always-Visible 1-Click Teacher Console Access -->
+        <button class="nav-tab teacher-nav-tab flex items-center justify-between px-3 py-2.5 rounded-xl font-label-md text-label-md text-purple-700 hover:bg-purple-50 transition-all text-left w-full cursor-pointer border border-purple-200/60" data-view="teacher" id="sidebarTeacherTabBtn" title="1-Click Teacher Console Access">
+          <div class="flex items-center gap-3 min-w-0">
+            <span class="material-symbols-outlined text-[20px] shrink-0 text-purple-600">cast_for_education</span>
+            <span class="sidebar-text truncate font-bold" data-i18n="navTeacher">Teacher Console</span>
+          </div>
+          <span class="font-label-sm text-xs font-bold text-white bg-purple-600 px-1.5 py-0.5 rounded sidebar-badge shrink-0" id="sidebarTeacherBadge">Admin ⚡</span>
+        </button>
+        <!-- 1-Click Return to Student View (Visible when in Teacher Mode) -->
+        <button class="nav-tab flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-primary hover:bg-primary/10 transition-all text-left w-full cursor-pointer border border-primary/20" id="sidebarStudentSwitchBtn" style="display: none;" title="Switch back to Student Mode">
+          <span class="material-symbols-outlined text-[20px] shrink-0 text-primary">school</span>
+          <span class="sidebar-text truncate font-bold" data-i18n="switchToStudent">Student View (Alex)</span>
         </button>
       </nav>
     </div>
@@ -1148,6 +1198,10 @@
           <p class="view-lead-text">Monitor enrolled students, inspect individual progress reports, analyze mastery rates, and export classroom assessment data.</p>
         </div>
         <div class="view-actions-col">
+          <button class="action-btn flex items-center gap-1.5" id="teacherSwitchStudentBtn" style="background: rgba(0, 98, 227, 0.08); border-color: rgba(0, 98, 227, 0.25); color: var(--color-primary); font-weight: 700; margin-bottom: 0.5rem;" title="1-Click Return to Student View">
+            <span class="material-symbols-outlined text-[18px]">school</span>
+            <span>🎒 Student Mode (Alex)</span>
+          </button>
           <button class="primary-glow-btn" id="exportClassroomCsvBtn">
             <span>📥</span> <span>Export Classroom CSV</span>
           </button>

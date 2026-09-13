@@ -996,9 +996,18 @@ function updateStudentHeader() {
   const sidebarTeacherTab = document.getElementById('sidebarTeacherTabBtn');
   const studentLevelPill = document.getElementById('navStudentLevel');
 
+  const sidebarStudentSwitchBtn = document.getElementById('sidebarStudentSwitchBtn');
+  const sidebarTeacherBadge = document.getElementById('sidebarTeacherBadge');
+
   if (isTeacher) {
     if (el.teacherTabBtn) el.teacherTabBtn.style.display = 'inline-flex';
-    if (sidebarTeacherTab) sidebarTeacherTab.style.display = 'flex';
+    if (sidebarTeacherTab) {
+      sidebarTeacherTab.style.display = 'flex';
+      sidebarTeacherTab.classList.add('bg-purple-600', 'text-white');
+      sidebarTeacherTab.classList.remove('text-purple-700', 'hover:bg-purple-50');
+      if (sidebarTeacherBadge) sidebarTeacherBadge.textContent = 'Active ✓';
+    }
+    if (sidebarStudentSwitchBtn) sidebarStudentSwitchBtn.style.display = 'flex';
     if (el.navStudentAvatar) el.navStudentAvatar.textContent = user.avatar || '👩‍🏫';
     if (el.navStudentName) el.navStudentName.textContent = user.full_name || 'Miss Rania';
     if (el.navStudentGrade) el.navStudentGrade.innerHTML = `<span>Instructor &bull; Admin</span>`;
@@ -1007,7 +1016,13 @@ function updateStudentHeader() {
     if (el.navXpStripFill) el.navXpStripFill.style.width = '100%';
   } else {
     if (el.teacherTabBtn) el.teacherTabBtn.style.display = 'none';
-    if (sidebarTeacherTab) sidebarTeacherTab.style.display = 'none';
+    if (sidebarTeacherTab) {
+      sidebarTeacherTab.style.display = 'flex'; // Always visible for 1-click admin access!
+      sidebarTeacherTab.classList.remove('bg-purple-600', 'text-white');
+      sidebarTeacherTab.classList.add('text-purple-700', 'hover:bg-purple-50');
+      if (sidebarTeacherBadge) sidebarTeacherBadge.textContent = 'Admin ⚡';
+    }
+    if (sidebarStudentSwitchBtn) sidebarStudentSwitchBtn.style.display = 'none';
     if (el.navStudentAvatar) el.navStudentAvatar.textContent = user.avatar || '🦊';
     if (el.navStudentName) el.navStudentName.textContent = user.full_name;
     if (el.navStudentGrade) el.navStudentGrade.innerHTML = `(${user.grade_level})`;
@@ -2671,7 +2686,163 @@ function setupSidebarToggle() {
   }
 }
 
+
+// =============================================================================
+// Fast 1-Click Role & Student Account Switcher Controller
+// =============================================================================
+
+function toggleQuickSwitchDropdown(forceState) {
+  const dd = document.getElementById('quickSwitchDropdown');
+  if (!dd) return;
+  const isCurrentlyOpen = dd.classList.contains('opacity-100');
+  const shouldOpen = forceState !== undefined ? forceState : !isCurrentlyOpen;
+
+  if (shouldOpen) {
+    renderQuickDropdownStudents();
+    dd.classList.remove('opacity-0', 'pointer-events-none', '-translate-y-2');
+    dd.classList.add('opacity-100', 'pointer-events-auto', 'translate-y-0');
+  } else {
+    dd.classList.remove('opacity-100', 'pointer-events-auto', 'translate-y-0');
+    dd.classList.add('opacity-0', 'pointer-events-none', '-translate-y-2');
+  }
+}
+
+async function renderQuickDropdownStudents() {
+  const container = document.getElementById('dropdownStudentsList');
+  if (!container) return;
+  try {
+    const demos = await DB.getDemoStudents();
+    const currentId = AppState.currentUser ? AppState.currentUser.id : null;
+    const isTeacher = AppState.currentUser && (AppState.currentUser.role === 'teacher' || AppState.currentUser.username === 'admin' || AppState.currentUser.username === 'rania');
+    
+    // Update Teacher card active status in dropdown
+    const teacherCard = document.getElementById('dropdownTeacherBtn');
+    if (teacherCard) {
+      if (isTeacher) {
+        teacherCard.classList.add('ring-2', 'ring-purple-600');
+      } else {
+        teacherCard.classList.remove('ring-2', 'ring-purple-600');
+      }
+    }
+
+    container.innerHTML = demos.map(s => {
+      const isActive = !isTeacher && s.id === currentId;
+      return `
+        <div class="px-2.5 py-2 rounded-xl flex items-center justify-between cursor-pointer transition-all hover:bg-surface-container ${isActive ? 'bg-primary/10 font-bold' : ''}" onclick="quickSwitchToStudent('${s.username}')">
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="text-base shrink-0">${s.avatar || '🦊'}</span>
+            <div class="truncate text-left">
+              <div class="text-xs text-on-surface font-bold leading-tight truncate">${s.full_name}</div>
+              <div class="text-[11px] text-on-surface-variant leading-tight">${s.grade_level} &bull; ${(s.xp || 0).toLocaleString()} XP</div>
+            </div>
+          </div>
+          ${isActive ? '<span class="text-[10px] px-1.5 py-0.5 rounded bg-primary text-on-primary font-bold shrink-0">Active</span>' : '<span class="text-xs text-primary font-bold shrink-0">Switch &rarr;</span>'}
+        </div>
+      `;
+    }).join('');
+  } catch (e) {
+    console.error('Failed to render dropdown students:', e);
+  }
+}
+
+window.quickSwitchToStudent = async function(username) {
+  toggleQuickSwitchDropdown(false);
+  await loginDemoStudent(username);
+};
+
+function setupFastAccountSwitcher() {
+  if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('dropdown') === '1') {
+    setTimeout(() => toggleQuickSwitchDropdown(true), 250);
+  }
+  const profilePill = document.getElementById('studentProfilePill');
+  const switchBtn = document.getElementById('switchStudentBtn');
+  const dropdownTeacherBtn = document.getElementById('dropdownTeacherBtn');
+  const dropdownOpenFullModalBtn = document.getElementById('dropdownOpenFullModalBtn');
+  const teacherSwitchStudentBtn = document.getElementById('teacherSwitchStudentBtn');
+  const sidebarStudentSwitchBtn = document.getElementById('sidebarStudentSwitchBtn');
+  const sidebarTeacherTabBtn = document.getElementById('sidebarTeacherTabBtn');
+
+  // Toggle dropdown on profile pill or switch button click
+  if (profilePill) {
+    profilePill.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleQuickSwitchDropdown();
+    });
+  }
+
+  if (switchBtn) {
+    switchBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleQuickSwitchDropdown();
+    });
+  }
+
+  // Teacher Card 1-Click inside dropdown
+  if (dropdownTeacherBtn) {
+    dropdownTeacherBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      toggleQuickSwitchDropdown(false);
+      await loginAsTeacher();
+    });
+  }
+
+  // Open full modal for custom login/registration
+  if (dropdownOpenFullModalBtn) {
+    dropdownOpenFullModalBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleQuickSwitchDropdown(false);
+      openAuthModal();
+    });
+  }
+
+  // Teacher Console header: 1-Click return to student
+  if (teacherSwitchStudentBtn) {
+    teacherSwitchStudentBtn.addEventListener('click', async () => {
+      await loginDemoStudent('alex');
+      switchView('dashboard');
+    });
+  }
+
+  // Sidebar student return button
+  if (sidebarStudentSwitchBtn) {
+    sidebarStudentSwitchBtn.addEventListener('click', async () => {
+      await loginDemoStudent('alex');
+      switchView('dashboard');
+    });
+  }
+
+  // Sidebar teacher tab click (intelligent 1-click role switcher)
+  if (sidebarTeacherTabBtn) {
+    sidebarTeacherTabBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const user = AppState.currentUser;
+      const isTeacher = user && (user.role === 'teacher' || user.username === 'admin' || user.username === 'rania');
+      if (!isTeacher) {
+        // Direct 1-Click sign in as Miss Rania
+        await loginAsTeacher();
+      } else {
+        switchView('teacher');
+      }
+    });
+  }
+
+  // Close dropdown on click outside or escape key
+  document.addEventListener('click', (e) => {
+    const wrapper = document.getElementById('profileMenuWrapper');
+    if (wrapper && !wrapper.contains(e.target)) {
+      toggleQuickSwitchDropdown(false);
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      toggleQuickSwitchDropdown(false);
+    }
+  });
+}
+
 function setupEventListeners() {
+  setupFastAccountSwitcher();
   setupSidebarToggle();
   // Navigation Tabs (Both Top Bar & Left Sidebar)
   document.querySelectorAll('.nav-tab').forEach(tab => {
@@ -2710,11 +2881,11 @@ function setupEventListeners() {
   }
 
   if (el.studentProfilePill) {
-    el.studentProfilePill.addEventListener('click', openAuthModal);
+    // el.studentProfilePill now handled by setupFastAccountSwitcher
   }
 
   if (el.switchStudentBtn) {
-    el.switchStudentBtn.addEventListener('click', openAuthModal);
+    // el.switchStudentBtn now handled by setupFastAccountSwitcher
   }
 
   if (el.closeAuthModalBtn) {

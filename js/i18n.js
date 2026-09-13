@@ -57,7 +57,11 @@ const I18N = {
       certInstructorTitle: 'Lead Educator',
       certDate: 'Date of Achievement',
       certPrintBtn: '🖨️ Print / Save as PDF',
-      close: '✕ Close'
+      close: '✕ Close',
+      quickSwitchTitle: 'Fast Account Switch',
+      quickSwitchStudents: 'Or Select Student:',
+      moreLoginOptions: 'Login with Password / Add Student',
+      switchToStudent: 'Student View (Alex)'
     },
     ar: {
       appName: 'منصة مس رانيا التعليمية',
@@ -109,7 +113,11 @@ const I18N = {
       certInstructorTitle: 'معلمة المادة',
       certDate: 'تاريخ الإنجاز',
       certPrintBtn: '🖨️ طباعة / حفظ كـ PDF',
-      close: '✕ إغلاق'
+      close: '✕ إغلاق',
+      quickSwitchTitle: 'التبديل السريع للحسابات',
+      quickSwitchStudents: 'أو اختر حساب الطالب:',
+      moreLoginOptions: 'دخول بكلمة سر / إضافة طالب جديد',
+      switchToStudent: 'حساب الطالب (Alex)'
     }
   },
 
