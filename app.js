@@ -1731,19 +1731,19 @@ async function renderTeacherConsoleView() {
           <td>
             <div class="actions-cell">
               <button class="action-btn-sm" onclick="inspectStudentReport(${s.id})" title="Student Performance Report">
-                📊 Report
+                <span class="btn-icon">📊</span> Report
               </button>
               <button class="action-btn-sm print" onclick="printStudentReportCard(${s.id})" title="Print Student Report Card">
-                🖨️
+                <span class="btn-icon">🖨️</span>
               </button>
               <button class="action-btn-sm edit" onclick="openEditStudentModal(${s.id})" title="Edit Student Profile & Password">
-                ✏️ Edit
+                <span class="btn-icon">✏️</span> Edit
               </button>
               <button class="action-btn-sm key" onclick="openResetPasswordModal(${s.id}, '${safeName}')" title="Reset Student Password">
-                🔑 Pass
+                <span class="btn-icon">🔑</span> Pass
               </button>
               <button class="action-btn-sm delete" onclick="confirmDeleteStudent(${s.id}, '${safeName}')" title="Remove Student from Classroom">
-                🗑️ Delete
+                <span class="btn-icon">🗑️</span> Delete
               </button>
             </div>
           </td>
