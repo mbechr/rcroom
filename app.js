@@ -623,6 +623,7 @@ const DB = {
       return {
         id: s.id,
         username: s.username,
+        password: s.password || 'password123',
         full_name: s.full_name,
         grade_level: s.grade_level,
         avatar: s.avatar || '🦊',
@@ -1104,9 +1105,11 @@ function updateStudentHeader() {
 
   const isTeacher = user.role === 'teacher' || user.username === 'admin' || user.username === 'rania';
   const sidebarTeacherTab = document.getElementById('sidebarTeacherTabBtn');
+  const topTeacherBtn = document.getElementById('topTeacherQuickBtn');
   const studentLevelPill = document.getElementById('navStudentLevel');
 
   if (isTeacher) {
+    if (topTeacherBtn) topTeacherBtn.style.display = 'inline-flex';
     if (el.teacherTabBtn) el.teacherTabBtn.style.display = 'inline-flex';
     if (sidebarTeacherTab) {
       sidebarTeacherTab.style.display = 'flex';
@@ -1120,6 +1123,7 @@ function updateStudentHeader() {
     if (studentLevelPill) studentLevelPill.textContent = 'Admin';
     if (el.navXpStripFill) el.navXpStripFill.style.width = '100%';
   } else {
+    if (topTeacherBtn) topTeacherBtn.style.display = 'none';
     if (el.teacherTabBtn) el.teacherTabBtn.style.display = 'none';
     if (sidebarTeacherTab) {
       sidebarTeacherTab.style.display = 'none'; // Strictly hidden for students
@@ -1607,25 +1611,34 @@ async function renderTeacherConsoleView() {
             <div class="student-leader-cell">
               <div class="leader-avatar">${s.avatar || '🦊'}</div>
               <div>
-                <div class="leader-name">${s.full_name}</div>
-                <div style="font-size:0.75rem; color:var(--text-muted);">@${s.username}</div>
+                <div class="leader-name" style="font-weight:700;">${s.full_name}</div>
+                <div style="font-size:0.75rem; color:var(--text-muted);">${s.is_custom ? 'طالب مضاف' : 'طالب أساسي'}</div>
               </div>
             </div>
           </td>
-          <td>${s.grade_level}</td>
+          <td>
+            <code style="background:rgba(99,102,241,0.12); color:#4338ca; padding:3px 7px; border-radius:6px; font-weight:700; font-size:0.85rem;">@${s.username}</code>
+          </td>
+          <td>
+            <code style="background:rgba(16,185,129,0.12); color:#047857; padding:3px 7px; border-radius:6px; font-weight:700; font-size:0.85rem;">${s.password || 'password123'}</code>
+          </td>
+          <td><strong style="color:var(--text-main); font-size:0.85rem;">${s.grade_level}</strong></td>
+          <td>
+            ${s.is_custom
+              ? '<span style="background:rgba(59,130,246,0.12); color:#2563eb; padding:3px 8px; border-radius:12px; font-size:0.72rem; font-weight:700;">مضاف جديد ✨</span>'
+              : '<span style="background:rgba(100,116,139,0.12); color:#475569; padding:3px 8px; border-radius:12px; font-size:0.72rem; font-weight:700;">أساسي 📌</span>'}
+          </td>
           <td><strong>${s.questions_answered ? s.questions_answered.toLocaleString() : 0}</strong></td>
           <td><span class="accuracy-pill ${accClass}">${acc}%</span></td>
           <td><strong style="color:${s.avg_smart_score >= 90 ? 'var(--color-success)' : 'inherit'}">${s.avg_smart_score || 0}</strong></td>
           <td><strong style="color:var(--color-primary); font-family:var(--font-mono);">${(s.xp || 0).toLocaleString()} XP</strong></td>
-          <td>🔥 ${s.streak_days || 1}d</td>
-          <td><span style="font-size:0.8rem; color:var(--text-muted);">${s.last_active || 'Recent'}</span></td>
           <td>
             <div class="actions-cell">
               <button class="action-btn-sm" onclick="inspectStudentReport(${s.id})" title="تقرير أداء الطالب">
-                📊 Report
+                📊 تقرير
               </button>
               <button class="action-btn-sm print" onclick="printStudentReportCard(${s.id})" title="طباعة تقرير الطالب">
-                🖨️ Print
+                🖨️
               </button>
               <button class="action-btn-sm" onclick="openResetPasswordModal(${s.id}, '${s.full_name}')" title="إعادة تعيين كلمة المرور">
                 🔑
@@ -1638,7 +1651,7 @@ async function renderTeacherConsoleView() {
           </td>
         </tr>
       `;
-    }).join('') || '<tr><td colspan="9" style="text-align:center;">No students enrolled yet.</td></tr>';
+    }).join('') || '<tr><td colspan="10" style="text-align:center; padding:1.5rem;">لا يوجد طلاب مسجلين حالياً.</td></tr>';
 
     // Attention Needed Skills
     const attention = overview.attention_skills || [];
@@ -1689,6 +1702,95 @@ window.printStudentReportCard = async function(studentId) {
   AppState.viewingReportStudentId = studentId;
   await renderStudentReportView();
   setTimeout(() => window.print(), 300);
+};
+
+window.printStudentLoginCards = async function() {
+  const overview = await DB.getTeacherOverview();
+  if (!overview || !overview.roster || !overview.roster.length) {
+    showToast('لا يوجد طلاب مسجلين حالياً للطباعة');
+    return;
+  }
+
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    showToast('يرجى السماح بالنوافذ المنبثقة لطباعة كروت الدخول');
+    return;
+  }
+
+  const cardsHtml = overview.roster.map(s => `
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="school-name">RC Classroom 🏫</div>
+          <div class="student-name">${s.full_name}</div>
+        </div>
+        <div class="avatar">${s.avatar || '🦊'}</div>
+      </div>
+      <div class="card-body">
+        <div class="info-row">
+          <span class="lbl">الصف الدراسي:</span>
+          <span class="val">${s.grade_level}</span>
+        </div>
+        <div class="info-row">
+          <span class="lbl">اسم المستخدم (Username):</span>
+          <span class="val cred-user">${s.username}</span>
+        </div>
+        <div class="info-row">
+          <span class="lbl">كلمة المرور (Password):</span>
+          <span class="val cred-pass">${s.password || 'password123'}</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        رابط الموقع: https://mbechr.github.io/rcroom/
+      </div>
+    </div>
+  `).join('');
+
+  printWindow.document.open();
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html lang="ar" dir="rtl">
+    <head>
+      <meta charset="utf-8">
+      <title>كروت تسجيل دخول الطلاب — RC Classroom</title>
+      <style>
+        @page { size: A4 portrait; margin: 10mm; }
+        * { box-sizing: border-box; }
+        body { font-family: system-ui, -apple-system, sans-serif; background: #fff; color: #1e293b; margin: 0; padding: 12px; }
+        .no-print { text-align: center; margin-bottom: 20px; }
+        .print-btn { background: #4f46e5; color: white; padding: 10px 24px; border: none; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; }
+        h1 { text-align: center; font-size: 22px; color: #3730a3; margin: 0 0 4px 0; }
+        .sub { text-align: center; font-size: 13px; color: #64748b; margin: 0 0 20px 0; }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+        .card { border: 2px dashed #6366f1; border-radius: 12px; padding: 14px; background: #f8fafc; page-break-inside: avoid; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 10px; }
+        .school-name { font-size: 11px; font-weight: bold; color: #6366f1; text-transform: uppercase; }
+        .student-name { font-size: 16px; font-weight: bold; color: #0f172a; margin-top: 2px; }
+        .avatar { font-size: 26px; }
+        .info-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 13px; }
+        .lbl { color: #64748b; font-weight: 500; }
+        .val { font-weight: 700; color: #0f172a; }
+        .cred-user { color: #4338ca; font-family: monospace; font-size: 14px; }
+        .cred-pass { color: #059669; font-family: monospace; font-size: 14px; }
+        .card-footer { margin-top: 10px; padding: 6px; background: #e0e7ff; border-radius: 6px; font-size: 11px; text-align: center; color: #3730a3; font-weight: 600; }
+        @media print {
+          .no-print { display: none !important; }
+          body { padding: 0; }
+        }
+      </style>
+    </head>
+    <body>
+      <div class="no-print">
+        <button class="print-btn" onclick="window.print()">🖨️ طباعة الكروت الآن (Print All Cards)</button>
+      </div>
+      <h1>🏫 كروت بيانات دخول الطلاب — RC Classroom</h1>
+      <p class="sub">المعلمة رانيا • اقطع الكروت ووزعها على الطلاب للبدء في حل التدريبات فوراً</p>
+      <div class="grid">${cardsHtml}</div>
+      <script>window.onload = () => { setTimeout(() => window.print(), 350); };</script>
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
 };
 
 window.launchPracticeForSkill = function(skillCode) {
