@@ -6,6 +6,12 @@ echo   Uploading RC Classroom to GitHub
 echo   Repository: https://github.com/mbechr/rcroom
 echo ========================================================
 echo.
+echo Staging code updates (HTML, CSS, JS)...
+echo [NOTE] Database files (*.db) and student practice data are protected and will NOT be overwritten.
+git add index.html app.js style.css js/ data/curriculum_data.js data/teacher_curriculum.js README.md .gitignore upload_to_github.bat run_dashboard.bat
+git commit -m "Update classroom application and UI (preserve student data)" >nul 2>&1
+
+echo.
 echo Pushing updates to GitHub...
 git push origin main
 if %errorlevel% neq 0 (
@@ -20,6 +26,8 @@ if %errorlevel% neq 0 (
 )
 echo.
 echo ========================================================
-echo Done!
+echo [SUCCESS] Upload completed successfully!
+echo تم رفع كود وتعديلات الموقع بنجاح.
+echo سجلات ودرجات الطلاب محفوظة بالكامل ولن تتأثر.
 echo ========================================================
 pause

@@ -11,3 +11,11 @@ New folder/
 *.log
 .DS_Store
 Thumbs.db
+
+# Live SQLite Databases (Protected from Git overwrite)
+*.db
+*.sqlite
+*.sqlite3
+data/*.db
+data/*.sqlite
+data/*.sqlite3

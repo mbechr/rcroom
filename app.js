@@ -217,6 +217,48 @@ const DB = {
     return endpoint;
   },
 
+  getStudentStats(studentId) {
+    const numId = Number(studentId);
+    const logsKey = `practice_logs_${numId}`;
+    let logs = [];
+    try {
+      logs = JSON.parse(localStorage.getItem(logsKey) || '[]');
+    } catch (e) {
+      logs = [];
+    }
+
+    const totalQ = logs.reduce((acc, s) => acc + (s.questions_answered || 0), 0);
+    const totalCorrect = logs.reduce((acc, s) => acc + (s.questions_correct || 0), 0);
+    const totalTime = logs.reduce((acc, s) => acc + (s.duration_seconds || 0), 0);
+    const avgScore = logs.length ? Math.round(logs.reduce((acc, s) => acc + (s.smart_score || 0), 0) / logs.length) : 0;
+    const masteredCount = logs.filter(s => (s.smart_score || 0) >= 90).length;
+
+    let savedXp = Number(localStorage.getItem(`student_xp_${numId}`)) || 0;
+    if (AppState.currentUser && AppState.currentUser.id === numId && AppState.currentUser.xp) {
+      savedXp = Math.max(savedXp, AppState.currentUser.xp);
+    }
+    const logXp = logs.reduce((acc, s) => {
+      const qCorr = s.questions_correct || 0;
+      const score = s.smart_score || 0;
+      return acc + (s.xp_earned || (qCorr * 15) + (score >= 90 ? 50 : 20));
+    }, 0);
+    const xp = Math.max(savedXp, logXp);
+
+    const lastActive = logs.length > 0 ? (logs[0].completed_at || logs[0].queued_at || 'Recently') : 'Not started';
+
+    return {
+      questions_answered: totalQ,
+      questions_correct: totalCorrect,
+      accuracy_rate: totalQ ? Math.round((totalCorrect / totalQ) * 100) : 0,
+      avg_smart_score: avgScore,
+      mastered_skills: masteredCount,
+      total_time_spent: totalTime,
+      total_sessions: logs.length,
+      xp: xp,
+      last_active: lastActive
+    };
+  },
+
   async getDemoStudents() {
     try {
       const res = await fetch(this.apiUrl('/api/demo_students'));
@@ -225,7 +267,13 @@ const DB = {
         if (json.success && json.students) return json.students.filter(s => s.role !== 'teacher');
       }
     } catch (e) {}
-    return this.demoStudents.filter(s => s.role !== 'teacher');
+    return this.demoStudents.filter(s => s.role !== 'teacher').map(s => {
+      const stats = this.getStudentStats(s.id);
+      return {
+        ...s,
+        xp: Math.max(s.xp || 0, stats.xp)
+      };
+    });
   },
 
   getAuthHeaders() {
@@ -275,6 +323,8 @@ const DB = {
       if (localFound.password && localFound.password !== cleanPw) {
         throw new Error('Incorrect password');
       }
+      const stats = this.getStudentStats(localFound.id);
+      localFound.xp = Math.max(localFound.xp || 0, stats.xp);
       return localFound;
     }
 
@@ -284,12 +334,15 @@ const DB = {
       const isTeacher = found.role === 'teacher' || cleanUser === 'admin' || cleanUser === 'rania';
       const validPw = isTeacher
         ? (cleanPw === 'admin123')
-        : (cleanPw === 'password123');
+        : (cleanPw === (found.password || 'password123'));
       if (!validPw) {
         throw new Error('Incorrect password');
       }
+      const stats = this.getStudentStats(found.id);
+      const studentXp = Math.max(found.xp || 0, stats.xp);
       return {
         ...found,
+        xp: studentXp,
         badges: found.badges || [
           { badge_id: 'first_step', badge_name: 'First Step', badge_icon: '🎯', badge_desc: 'Completed your first practice session' },
           { badge_id: 'streak_hero', badge_name: 'Streak Hero', badge_icon: '🔥', badge_desc: 'Maintained a practice streak' }
@@ -397,8 +450,15 @@ const DB = {
       };
     }
 
+    const studentObj = this.findStudentById(studentId) || AppState.currentUser || {};
+    const stats = this.getStudentStats(studentId);
+    const resolvedStudent = {
+      ...studentObj,
+      xp: Math.max(studentObj.xp || 0, stats.xp)
+    };
+
     return {
-      student: this.findStudentById(studentId) || AppState.currentUser,
+      student: resolvedStudent,
       summary: {
         total_sessions: allSessions.length,
         total_questions: totalQ,
@@ -410,7 +470,7 @@ const DB = {
       },
       subjects: subjectsBreakdown,
       history: allSessions.slice(0, 30),
-      badges: AppState.currentUser.badges || [
+      badges: (resolvedStudent && resolvedStudent.badges && resolvedStudent.badges.length) ? resolvedStudent.badges : [
         { badge_id: 'first_step', badge_name: 'First Step', badge_icon: '🎯', badge_desc: 'Completed your first practice session' },
         { badge_id: 'streak_hero', badge_name: 'Streak Hero', badge_icon: '🔥', badge_desc: 'Maintained a practice streak for 3+ days' }
       ]
@@ -430,29 +490,54 @@ const DB = {
     } catch (e) {}
 
     // Fallback local persistence via SyncManager
+    const key = `practice_logs_${data.student_id}`;
+    const logs = JSON.parse(localStorage.getItem(key) || '[]');
+    const newSession = {
+      id: Date.now(),
+      ...data,
+      completed_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
+    };
+    logs.unshift(newSession);
+    localStorage.setItem(key, JSON.stringify(logs));
+
     if (window.SyncManager) {
       window.SyncManager.enqueue(data);
-    } else {
-      const key = `practice_logs_${data.student_id}`;
-      const logs = JSON.parse(localStorage.getItem(key) || '[]');
-      const newSession = {
-        id: Date.now(),
-        ...data,
-        completed_at: new Date().toISOString().replace('T', ' ').substring(0, 19)
-      };
-      logs.unshift(newSession);
-      localStorage.setItem(key, JSON.stringify(logs));
     }
 
-    // Update user XP locally
+    // Update user XP locally and persistently
     const xpGained = (data.questions_correct * 15) + (data.smart_score >= 90 ? 50 : 20);
-    AppState.currentUser.xp = (AppState.currentUser.xp || 0) + xpGained;
-    localStorage.setItem('current_student', JSON.stringify(AppState.currentUser));
+    const currentXp = (AppState.currentUser && AppState.currentUser.id === Number(data.student_id))
+      ? (AppState.currentUser.xp || 0)
+      : (Number(localStorage.getItem(`student_xp_${data.student_id}`)) || 0);
+    const newTotalXp = currentXp + xpGained;
+
+    if (AppState.currentUser && AppState.currentUser.id === Number(data.student_id)) {
+      AppState.currentUser.xp = newTotalXp;
+      localStorage.setItem('current_student', JSON.stringify(AppState.currentUser));
+    }
+    localStorage.setItem(`student_xp_${data.student_id}`, String(newTotalXp));
+
+    // Also update custom student entry in rc_custom_students if present
+    const localStudents = JSON.parse(localStorage.getItem('rc_custom_students') || '[]');
+    const stIndex = localStudents.findIndex(s => s.id === Number(data.student_id));
+    if (stIndex !== -1) {
+      localStudents[stIndex].xp = newTotalXp;
+      localStudents[stIndex].questions_answered = (localStudents[stIndex].questions_answered || 0) + (data.questions_answered || 0);
+      localStudents[stIndex].questions_correct = (localStudents[stIndex].questions_correct || 0) + (data.questions_correct || 0);
+      localStudents[stIndex].last_active = newSession.completed_at;
+      localStorage.setItem('rc_custom_students', JSON.stringify(localStudents));
+    }
+
+    // Also update demoStudents runtime cache if present
+    const demo = this.demoStudents.find(s => s.id === Number(data.student_id));
+    if (demo) {
+      demo.xp = newTotalXp;
+    }
 
     return {
       success: true,
       xp_earned: xpGained,
-      total_xp: AppState.currentUser.xp,
+      total_xp: newTotalXp,
       new_badges: []
     };
   },
@@ -706,8 +791,13 @@ const DB = {
     ];
 
     const students = allEnrolled.map(s => {
-      const q = s.questions_answered !== undefined ? s.questions_answered : (s.xp ? Math.round(s.xp / 22) : 0);
-      const c = s.questions_correct !== undefined ? s.questions_correct : 0;
+      const stats = this.getStudentStats(s.id);
+      const q = stats.questions_answered || s.questions_answered || 0;
+      const c = stats.questions_correct || s.questions_correct || 0;
+      const xp = Math.max(stats.xp, s.xp || 0);
+      const avgScore = stats.avg_smart_score || s.avg_smart_score || 0;
+      const lastActive = stats.last_active !== 'Not started' ? stats.last_active : (s.last_active || 'Not started');
+
       return {
         id: s.id,
         username: s.username,
@@ -715,20 +805,24 @@ const DB = {
         full_name: s.full_name,
         grade_level: s.grade_level,
         avatar: s.avatar || '🦊',
-        xp: s.xp || 0,
-        streak_days: s.streak_days || 0,
+        xp: xp,
+        streak_days: s.streak_days || (stats.total_sessions > 0 ? 1 : 0),
         questions_answered: q,
         questions_correct: c,
         accuracy_rate: q ? Math.round((c / q) * 100) : 0,
-        avg_smart_score: s.avg_smart_score || 0,
-        last_active: s.last_active || 'Not started',
-        badges_count: (s.badges && s.badges.length) || 0,
+        avg_smart_score: avgScore,
+        last_active: lastActive,
+        badges_count: (s.badges && s.badges.length) || (stats.total_sessions > 0 ? 1 : 0),
         is_custom: !!localStudents.some(ls => ls.id === s.id)
       };
     });
 
     const totQ = students.reduce((acc, s) => acc + s.questions_answered, 0);
     const totCorr = students.reduce((acc, s) => acc + s.questions_correct, 0);
+    const totTime = students.reduce((acc, s) => {
+      const stats = this.getStudentStats(s.id);
+      return acc + (stats.total_time_spent || 0);
+    }, 0);
 
     return {
       total_students: students.length,
@@ -736,7 +830,7 @@ const DB = {
         total_questions: totQ,
         total_correct: totCorr,
         accuracy_rate: totQ ? Math.round((totCorr / totQ) * 100) : 0,
-        total_hours: 0
+        total_hours: Math.round((totTime / 3600) * 10) / 10
       },
       roster: students,
       attention_skills: [],
@@ -752,7 +846,17 @@ const DB = {
         if (data.success && data.leaderboard) return data.leaderboard;
       }
     } catch (e) {}
-    return [...this.demoStudents].sort((a, b) => b.xp - a.xp);
+
+    const localStudents = JSON.parse(localStorage.getItem('rc_custom_students') || '[]');
+    const all = [...this.demoStudents.filter(s => s.role !== 'teacher'), ...localStudents];
+    const withLiveXp = all.map(s => {
+      const stats = this.getStudentStats(s.id);
+      return {
+        ...s,
+        xp: Math.max(s.xp || 0, stats.xp)
+      };
+    });
+    return withLiveXp.sort((a, b) => b.xp - a.xp);
   }
 };
 
@@ -962,6 +1066,15 @@ async function initPortal() {
     document.body.classList.add('auth-locked');
     openAuthModal(true);
     return; // STOP: Never render curriculum or student views until authenticated!
+  }
+
+  // Synchronize current user XP with real accumulated practice stats
+  if (AppState.currentUser && AppState.currentUser.role !== 'teacher') {
+    const stats = DB.getStudentStats(AppState.currentUser.id);
+    if (stats.xp > (AppState.currentUser.xp || 0)) {
+      AppState.currentUser.xp = stats.xp;
+      localStorage.setItem('current_student', JSON.stringify(AppState.currentUser));
+    }
   }
 
   document.body.classList.remove('auth-locked');
