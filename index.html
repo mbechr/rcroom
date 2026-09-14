@@ -1382,30 +1382,24 @@
        STUDENT AUTHENTICATION & SWITCHER MODAL
        ==================================================================== -->
   <div class="auth-modal-backdrop" id="authModal">
-    <div class="auth-modal-window">
+    <div class="auth-modal-window" style="max-width: 440px;">
       <div class="auth-modal-header">
         <div>
           <div class="flex items-center gap-2 mb-1">
             <span class="text-xl">🔐</span>
             <h2 class="auth-title">RC Classroom — تسجيل الدخول</h2>
           </div>
-          <p class="auth-subtitle">أدخل اسم المستخدم وكلمة المرور للوصول إلى حسابك (للطلاب والمعلمة)</p>
+          <p class="auth-subtitle">بوابة الدخول الموحدة للطلاب والمعلمة (المدير)</p>
         </div>
         <button class="modal-close-btn" id="closeAuthModalBtn">✕</button>
       </div>
 
-      <!-- Auth Tabs -->
-      <div class="auth-tabs">
-        <button class="auth-tab active" data-auth-tab="login">🔑 تسجيل الدخول (Sign In)</button>
-        <button class="auth-tab" data-auth-tab="register">✨ حساب طالب جديد (Register)</button>
-      </div>
-
-      <!-- TAB 1: UNIFIED SIGN IN (Students & Teacher) -->
-      <div class="auth-tab-content active" id="authTabLogin">
+      <!-- UNIFIED SIGN IN (Students & Teacher) -->
+      <div class="auth-tab-content active" id="authTabLogin" style="padding-top: 0.5rem;">
         <form id="loginForm" class="auth-form" onsubmit="return false;">
           <div class="form-group">
             <label for="loginUsername">اسم المستخدم (Username)</label>
-            <input type="text" id="loginUsername" placeholder="مثال: alex أو sophia أو للمعلمة admin" required autocomplete="username">
+            <input type="text" id="loginUsername" placeholder="مثال: sophia أو alex أو للمعلمة admin" required autocomplete="username">
           </div>
           <div class="form-group">
             <label for="loginPassword">كلمة المرور (Password)</label>
@@ -1415,60 +1409,9 @@
           <button type="submit" class="primary-glow-btn full-width" id="submitLoginBtn" style="font-weight: 700; font-size: 1rem; padding: 0.85rem;">
             تسجيل الدخول إلى المنصة →
           </button>
-
-        </form>
-      </div>
-
-      <!-- TAB 3: REGISTER NEW STUDENT -->
-      <div class="auth-tab-content" id="authTabRegister">
-        <form id="registerForm" class="auth-form" onsubmit="return false;">
-          <div class="form-group">
-            <label for="regFullName">Full Name</label>
-            <input type="text" id="regFullName" placeholder="e.g. James Wilson" required>
+          <div style="margin-top: 1.25rem; padding: 0.85rem 1rem; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; text-align: center;">
+            🔒 <strong>ملاحظة للمستخدم:</strong> تسجيل وإضافة الطلاب متاح حصرياً للمعلمة (Admin) من داخل لوحة التحكم المدرسية.
           </div>
-          <div class="form-group">
-            <label for="regUsername">Choose Username</label>
-            <input type="text" id="regUsername" placeholder="e.g. jwilson" required>
-          </div>
-          <div class="form-group">
-            <label for="regPassword">Create Password</label>
-            <input type="password" id="regPassword" placeholder="At least 6 characters" required>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="regGrade">Year Level</label>
-              <select id="regGrade">
-                <option value="Year 1">Year 1</option>
-                <option value="Year 2">Year 2</option>
-                <option value="Year 3">Year 3</option>
-                <option value="Year 4" selected>Year 4</option>
-                <option value="Year 5">Year 5</option>
-                <option value="Year 6">Year 6</option>
-                <option value="Year 7">Year 7</option>
-                <option value="Year 8">Year 8</option>
-                <option value="Year 9">Year 9</option>
-                <option value="Year 10">Year 10</option>
-                <option value="Year 11">Year 11</option>
-                <option value="Year 12">Year 12</option>
-                <option value="Year 13">Year 13</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Select Avatar</label>
-              <div class="avatar-selection-row" id="avatarPicker">
-                <button type="button" class="avatar-option-btn selected" data-avatar="🦊">🦊</button>
-                <button type="button" class="avatar-option-btn" data-avatar="🦄">🦄</button>
-                <button type="button" class="avatar-option-btn" data-avatar="🚀">🚀</button>
-                <button type="button" class="avatar-option-btn" data-avatar="🌟">🌟</button>
-                <button type="button" class="avatar-option-btn" data-avatar="🦁">🦁</button>
-                <button type="button" class="avatar-option-btn" data-avatar="🐼">🐼</button>
-                <button type="button" data-avatar="⚡" class="avatar-option-btn">⚡</button>
-                <button type="button" data-avatar="👑" class="avatar-option-btn">👑</button>
-              </div>
-            </div>
-          </div>
-          <div class="form-error-msg" id="regErrorMsg" style="display: none;"></div>
-          <button type="submit" class="primary-glow-btn full-width" id="submitRegisterBtn">Create Student Account</button>
         </form>
       </div>
     </div>
@@ -1533,39 +1476,50 @@
        MODAL 2: ADD NEW STUDENT MODAL (TEACHER CONSOLE)
        ==================================================================== -->
   <div class="auth-modal-backdrop" id="addStudentModal">
-    <div class="auth-modal-window" style="max-width: 480px;">
+    <div class="auth-modal-window" style="max-width: 500px;">
       <div class="auth-modal-header">
         <div>
-          <h2 class="auth-title">Add Student to Roster 👤</h2>
-          <p class="auth-subtitle">Create a new student account with credentials and grade assignment.</p>
+          <h2 class="auth-title">إضافة طالب جديد للفصل (Add Student) 👤</h2>
+          <p class="auth-subtitle">إنشاء حساب رسمي للطالب وتحديد الصف الدراسي وبيانات الدخول</p>
         </div>
         <button class="modal-close-btn" id="closeAddStudentModalBtn">✕</button>
       </div>
       <form id="addStudentForm" class="auth-form" onsubmit="return false;" style="padding: 1.5rem;">
         <div class="form-group">
-          <label for="tNewStudentName">Student Full Name</label>
-          <input type="text" id="tNewStudentName" placeholder="e.g. Maya Lin" required>
+          <label for="tNewStudentName">اسم الطالب (Student Full Name)</label>
+          <input type="text" id="tNewStudentName" placeholder="مثال: يوسف أحمد / Oliver Smith" required>
         </div>
         <div class="form-group">
-          <label for="tNewStudentUser">Student Username</label>
-          <input type="text" id="tNewStudentUser" placeholder="e.g. mayalin" required>
+          <label for="tNewStudentUser">اسم المستخدم للدخول (Username)</label>
+          <input type="text" id="tNewStudentUser" placeholder="مثال: oliver أو yusuf (حروف وأرقام فقط)" required>
         </div>
         <div class="form-group">
-          <label for="tNewStudentPass">Password</label>
+          <label for="tNewStudentPass">كلمة المرور (Password)</label>
           <input type="password" id="tNewStudentPass" value="password123" required>
+          <small style="color:var(--text-muted); font-size:0.75rem; margin-top:0.25rem; display:block;">كلمة المرور الافتراضية: password123 (يمكنك تغييرها)</small>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label for="tNewStudentGrade">Grade Level</label>
+            <label for="tNewStudentGrade">الصف الدراسي (Grade Level)</label>
             <select id="tNewStudentGrade">
-              <option value="Year 3">Year 3</option>
-              <option value="Year 4" selected>Year 4</option>
-              <option value="Year 5">Year 5</option>
-              <option value="Year 6">Year 6</option>
+              <option value="Reception">Early Years (Reception)</option>
+              <option value="Year 1">Year 1 (Key Stage 1)</option>
+              <option value="Year 2">Year 2 (Key Stage 1)</option>
+              <option value="Year 3">Year 3 (Lower KS2)</option>
+              <option value="Year 4" selected>Year 4 (Lower KS2)</option>
+              <option value="Year 5">Year 5 (Upper KS2)</option>
+              <option value="Year 6">Year 6 (Upper KS2)</option>
+              <option value="Year 7">Year 7 (Key Stage 3)</option>
+              <option value="Year 8">Year 8 (Key Stage 3)</option>
+              <option value="Year 9">Year 9 (Key Stage 3)</option>
+              <option value="Year 10">Year 10 (GCSE)</option>
+              <option value="Year 11">Year 11 (GCSE)</option>
+              <option value="Year 12">Year 12 (A-Level)</option>
+              <option value="Year 13">Year 13 (A-Level)</option>
             </select>
           </div>
           <div class="form-group">
-            <label for="tNewStudentAvatar">Avatar</label>
+            <label for="tNewStudentAvatar">الأيقونة (Avatar)</label>
             <select id="tNewStudentAvatar">
               <option value="🦊" selected>🦊 Fox</option>
               <option value="🦄">🦄 Unicorn</option>
@@ -1573,10 +1527,14 @@
               <option value="🦁">🦁 Lion</option>
               <option value="🐼">🐼 Panda</option>
               <option value="🌟">🌟 Star</option>
+              <option value="⚡">⚡ Lightning</option>
+              <option value="👑">👑 Crown</option>
             </select>
           </div>
         </div>
-        <button type="submit" class="primary-glow-btn full-width" id="submitAddStudentBtn">Create Student Profile</button>
+        <button type="submit" class="primary-glow-btn full-width" id="submitAddStudentBtn" style="font-weight: 700; padding: 0.85rem;">
+          إضافة الطالب واعتماد الحساب 👤
+        </button>
       </form>
     </div>
   </div>

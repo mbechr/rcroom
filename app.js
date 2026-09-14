@@ -262,7 +262,8 @@ const DB = {
         }
       }
     } catch (e) {
-      if (e.message && e.message !== 'Failed to fetch' && !e.message.includes('NetworkError') && !e.message.includes('Failed to load')) {
+      const msg = (e.message || '').toLowerCase();
+      if (!msg.includes('fetch') && !msg.includes('network') && !msg.includes('load') && !msg.includes('connection')) {
         throw e;
       }
     }
@@ -405,7 +406,7 @@ const DB = {
     }
 
     return {
-      student: AppState.currentUser,
+      student: this.findStudentById(studentId) || AppState.currentUser,
       summary: {
         total_sessions: allSessions.length,
         total_questions: totalQ,
@@ -506,6 +507,12 @@ const DB = {
     return { success: true };
   },
 
+  findStudentById(studentId) {
+    const numId = Number(studentId);
+    const localStudents = JSON.parse(localStorage.getItem('rc_custom_students') || '[]');
+    return localStudents.find(s => s.id === numId) || this.demoStudents.find(s => s.id === numId);
+  },
+
   async teacherCreateStudent(data) {
     try {
       const res = await fetch(this.apiUrl('/api/teacher/student/create'), {
@@ -513,9 +520,46 @@ const DB = {
         headers: this.getAuthHeaders(),
         body: JSON.stringify(data)
       });
-      if (res.ok) return await res.json();
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.student) return json;
+      }
     } catch (e) {}
-    return { success: true, student_id: Date.now() };
+
+    // Persistent storage for custom students (always works on GitHub Pages & offline)
+    const fullName = (data.full_name || data.name || '').trim();
+    const cleanUser = (data.username || '').trim().toLowerCase();
+    const cleanPw = (data.password || '').trim() || 'password123';
+    if (!fullName || !cleanUser) {
+      return { success: false, error: 'يرجى إدخال اسم الطالب واسم المستخدم' };
+    }
+
+    const localStudents = JSON.parse(localStorage.getItem('rc_custom_students') || '[]');
+    if (localStudents.some(s => s.username.toLowerCase() === cleanUser) || this.demoStudents.some(s => s.username.toLowerCase() === cleanUser)) {
+      return { success: false, error: 'اسم المستخدم مسجل مسبقاً، يرجى اختيار اسم مستخدم آخر' };
+    }
+
+    const newStudent = {
+      id: Date.now(),
+      username: cleanUser,
+      password: cleanPw,
+      full_name: fullName,
+      grade_level: data.grade_level || 'Year 4',
+      avatar: data.avatar || '🦊',
+      xp: 100,
+      streak_days: 1,
+      role: 'student',
+      questions_answered: 0,
+      questions_correct: 0,
+      accuracy_rate: 100,
+      avg_smart_score: 100,
+      last_active: 'Just now',
+      badges: [{ badge_id: 'welcome', badge_name: 'Classroom Explorer', badge_icon: '🎓', badge_desc: 'Added by Miss Rania' }]
+    };
+
+    localStudents.push(newStudent);
+    localStorage.setItem('rc_custom_students', JSON.stringify(localStudents));
+    return { success: true, student: newStudent, student_id: newStudent.id };
   },
 
   async teacherResetPassword(studentId, newPassword) {
@@ -527,6 +571,14 @@ const DB = {
       });
       if (res.ok) return await res.json();
     } catch (e) {}
+
+    const numId = Number(studentId);
+    const localStudents = JSON.parse(localStorage.getItem('rc_custom_students') || '[]');
+    const s = localStudents.find(st => st.id === numId);
+    if (s) {
+      s.password = newPassword;
+      localStorage.setItem('rc_custom_students', JSON.stringify(localStudents));
+    }
     return { success: true };
   },
 
@@ -539,6 +591,11 @@ const DB = {
       });
       if (res.ok) return await res.json();
     } catch (e) {}
+
+    const numId = Number(studentId);
+    let localStudents = JSON.parse(localStorage.getItem('rc_custom_students') || '[]');
+    localStudents = localStudents.filter(s => s.id !== numId);
+    localStorage.setItem('rc_custom_students', JSON.stringify(localStudents));
     return { success: true };
   },
 
@@ -553,24 +610,31 @@ const DB = {
       }
     } catch (e) {}
 
-    // Fallback overview calculation
-    const students = this.demoStudents.filter(s => s.role !== 'teacher').map(s => {
-      const q = s.xp ? Math.round(s.xp / 22) : 50;
-      const c = Math.round(q * 0.92);
+    // Combine pre-loaded demo students and custom students created by teacher
+    const localStudents = JSON.parse(localStorage.getItem('rc_custom_students') || '[]');
+    const allEnrolled = [
+      ...this.demoStudents.filter(s => s.role !== 'teacher'),
+      ...localStudents
+    ];
+
+    const students = allEnrolled.map(s => {
+      const q = s.questions_answered !== undefined ? s.questions_answered : (s.xp ? Math.round(s.xp / 22) : 50);
+      const c = s.questions_correct !== undefined ? s.questions_correct : Math.round(q * 0.92);
       return {
         id: s.id,
         username: s.username,
         full_name: s.full_name,
         grade_level: s.grade_level,
-        avatar: s.avatar,
-        xp: s.xp,
-        streak_days: s.streak_days,
+        avatar: s.avatar || '🦊',
+        xp: s.xp || 100,
+        streak_days: s.streak_days || 1,
         questions_answered: q,
         questions_correct: c,
-        accuracy_rate: Math.round((c / q) * 100),
-        avg_smart_score: 91.5,
-        last_active: 'Today',
-        badges_count: 5
+        accuracy_rate: q ? Math.round((c / q) * 100) : 100,
+        avg_smart_score: s.avg_smart_score || 91.5,
+        last_active: s.last_active || 'Today',
+        badges_count: (s.badges && s.badges.length) || 2,
+        is_custom: !!localStudents.some(ls => ls.id === s.id)
       };
     });
 
@@ -583,7 +647,7 @@ const DB = {
         total_questions: totQ,
         total_correct: totCorr,
         accuracy_rate: totQ ? Math.round((totCorr / totQ) * 100) : 92,
-        total_hours: 12.8
+        total_hours: (12.8 + (localStudents.length * 0.5)).toFixed(1)
       },
       roster: students,
       attention_skills: [
@@ -1557,12 +1621,19 @@ async function renderTeacherConsoleView() {
           <td><span style="font-size:0.8rem; color:var(--text-muted);">${s.last_active || 'Recent'}</span></td>
           <td>
             <div class="actions-cell">
-              <button class="action-btn-sm" onclick="inspectStudentReport(${s.id})" title="Inspect student report card">
+              <button class="action-btn-sm" onclick="inspectStudentReport(${s.id})" title="تقرير أداء الطالب">
                 📊 Report
               </button>
-              <button class="action-btn-sm print" onclick="printStudentReportCard(${s.id})" title="Print student report">
+              <button class="action-btn-sm print" onclick="printStudentReportCard(${s.id})" title="طباعة تقرير الطالب">
                 🖨️ Print
               </button>
+              <button class="action-btn-sm" onclick="openResetPasswordModal(${s.id}, '${s.full_name}')" title="إعادة تعيين كلمة المرور">
+                🔑
+              </button>
+              ${s.is_custom ? `
+              <button class="action-btn-sm delete" onclick="confirmDeleteStudent(${s.id}, '${s.full_name}')" title="حذف الطالب من الفصل" style="color:var(--color-danger); border-color:rgba(239, 68, 68, 0.3);">
+                🗑️
+              </button>` : ''}
             </div>
           </td>
         </tr>
@@ -2796,19 +2867,19 @@ function setupEventListeners() {
     });
   }
 
-  // Auth Tabs
-  el.authTabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      el.authTabs.forEach(t => t.classList.remove('active'));
-      el.authTabContents.forEach(c => c.classList.remove('active'));
-      tab.classList.add('active');
-      const targetId = tab.dataset.authTab;
-      if (targetId === 'demo') document.getElementById('authTabDemo').classList.add('active');
-      if (targetId === 'login') document.getElementById('authTabLogin').classList.add('active');
-      if (targetId === 'register') document.getElementById('authTabRegister').classList.add('active');
-      if (targetId === 'teacher') document.getElementById('authTabTeacher').classList.add('active');
+  // Auth Tabs (if any tab exists)
+  if (el.authTabs && el.authTabs.length) {
+    el.authTabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        el.authTabs.forEach(t => t.classList.remove('active'));
+        el.authTabContents.forEach(c => c.classList.remove('active'));
+        tab.classList.add('active');
+        const targetId = tab.dataset.authTab;
+        const targetEl = document.getElementById(`authTab${targetId.charAt(0).toUpperCase() + targetId.slice(1)}`);
+        if (targetEl) targetEl.classList.add('active');
+      });
     });
-  });
+  }
 
   // Login Form (Unified Authentication for Students and Teacher/Admin)
   if (el.loginForm) {
@@ -2993,11 +3064,13 @@ function setupEventListeners() {
       });
 
       if (res.success) {
+        el.addStudentForm.reset();
+        if (el.tNewStudentPass) el.tNewStudentPass.value = 'password123';
         el.addStudentModal.classList.remove('open');
-        showToast(`Student ${name} added to classroom! 👤`);
+        showToast(`تمت إضافة الطالب ${name} بنجاح واعتماد حسابه! 👤`);
         renderTeacherConsoleView();
       } else {
-        showToast(res.error || 'Failed to add student');
+        showToast(res.error || 'تعذرت إضافة الطالب');
       }
     });
   }
