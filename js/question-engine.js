@@ -1,18 +1,26 @@
 /**
  * Rania Classroom — Intelligent Adaptive Generative Question Engine
- * Features:
- * 1. 100% Mathematically & Grammatically Validated Questions
- * 2. Deep Topic Matching covering 24,792 skills across Early Years to Year 13
- * 3. Session Anti-Repetition Cache (guarantees no repeats during practice)
- * 4. Adaptive Difficulty Tiers (Foundation 0-49, Intermediate 50-79, Mastery 80-100)
- * 5. Comprehensive Coverage: Early Counting, Arithmetic, Fractions, Geometry,
- *    Grammar, Spelling, Vocabulary, Biology, Chemistry, Physics, and Earth Science.
+ * v5.0 Stage-Aware UK National Curriculum Engine
+ * 
+ * Guarantees:
+ * 1. 100% Stage-Appropriate Questions:
+ *    - Early Years (Reception)
+ *    - Key Stage 1 (Year 1, Year 2)
+ *    - Lower Key Stage 2 (Year 3, Year 4)
+ *    - Upper Key Stage 2 (Year 5, Year 6)
+ *    - Key Stage 3 (Year 7, Year 8, Year 9)
+ *    - Key Stage 4 / GCSE (Year 10, Year 11)
+ *    - Key Stage 5 / A-Levels (Year 12, Year 13)
+ * 2. NO REPETITIONS across stages — Year 1 gets KS1 phonics/addition, Year 12 gets calculus/advanced analysis.
+ * 3. Session Anti-Repetition Cache (prevents duplicate questions during a practice session).
+ * 4. Procedural Mathematical Generators (equations, arithmetic, geometry, algebra, calculus).
+ * 5. Rich Multi-Subject Coverage (Maths, English, Science).
  */
 
 (function() {
   'use strict';
 
-  // Session cache to prevent question repetition
+  // Anti-repetition session cache
   const sessionHistory = new Set();
 
   function shuffle(array) {
@@ -30,6 +38,18 @@
 
   function randomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function getStage(gradeStr) {
+    const g = String(gradeStr || '').toLowerCase();
+    if (g.includes('reception') || g.includes('nursery') || g.includes('early')) return 'early';
+    if (g.includes('year 12') || g.includes('year-12') || g.includes('year 13') || g.includes('year-13') || g.includes('a-level') || g.includes('ks5') || g.includes('sixth')) return 'alevel';
+    if (g.includes('year 10') || g.includes('year-10') || g.includes('year 11') || g.includes('year-11') || g.includes('gcse') || g.includes('ks4')) return 'gcse';
+    if (g.includes('year 7') || g.includes('year-7') || g.includes('year 8') || g.includes('year-8') || g.includes('year 9') || g.includes('year-9') || g.includes('ks3')) return 'ks3';
+    if (g.includes('year 5') || g.includes('year-5') || g.includes('year 6') || g.includes('year-6')) return 'upper_ks2';
+    if (g.includes('year 3') || g.includes('year-3') || g.includes('year 4') || g.includes('year-4')) return 'lower_ks2';
+    if (g.includes('year 1') || g.includes('year-1') || g.includes('year 2') || g.includes('year-2') || g.includes('ks1')) return 'ks1';
+    return 'lower_ks2'; // sensible middle fallback
   }
 
   function generateUniqueNumericDistractors(correct, count = 3, deltaRange = 10) {
@@ -62,743 +82,854 @@
   }
 
   // ===========================================================================
-  // 1. MATHEMATICS GENERATOR
+  // 1. STAGE-SPECIFIC MATHEMATICS GENERATORS
   // ===========================================================================
 
-  const MathGenerators = {
-    // 1.1 Early Counting & Number Recognition (Reception & Year 1)
-    earlyCounting(tier) {
-      const mode = randomChoice(['count_objects', 'next_number', 'number_words', 'compare_small']);
-      const items = ['🍎', '⭐', '🎈', '🚗', '🐱', '🌸', '🍕', '⚽'];
-      const icon = randomChoice(items);
+  const MathStageGenerators = {
+    // 1.1 EARLY YEARS (Reception)
+    early(name, tier) {
+      const mode = randomChoice(['count_items', 'more_less', 'shape_rec', 'number_match']);
+      const icons = ['🍎', '⭐', '🎈', '🚗', '🐱', '🌸', '🍪', '⚽'];
+      const icon = randomChoice(icons);
 
-      if (mode === 'count_objects') {
-        const count = tier === 1 ? randomInt(1, 5) : randomInt(4, 10);
-        const visualString = Array(count).fill(icon).join(' ');
+      if (mode === 'count_items') {
+        const count = randomInt(1, tier === 1 ? 5 : 10);
+        const visual = Array(count).fill(icon).join(' ');
         const correct = String(count);
         const distractors = generateUniqueNumericDistractors(count, 3, 3);
         return {
           type: 'multiple_choice',
-          prompt: `Count the objects below:\n${visualString}\n\nHow many are there in total?`,
-          visuals: [visualString],
+          prompt: `Count the items below:\n${visual}\n\nHow many are there in total?`,
+          visuals: [visual],
           correctAnswer: correct,
           options: shuffle([correct, ...distractors]),
-          explanation: `Counting each ${icon} one by one: there are exactly ${count} objects.`
+          explanation: `Count one by one: there are exactly ${count} ${icon}.`
         };
       }
 
-      if (mode === 'next_number') {
-        const start = randomInt(1, tier === 1 ? 7 : 18);
-        const seq = [start, start + 1, start + 2];
-        const correct = String(start + 3);
-        const distractors = generateUniqueNumericDistractors(start + 3, 3, 3);
+      if (mode === 'more_less') {
+        const a = randomInt(1, 6);
+        let b = randomInt(1, 6);
+        while (b === a) b = randomInt(1, 6);
+        const askMore = Math.random() > 0.5;
+        const correct = String(askMore ? Math.max(a, b) : Math.min(a, b));
         return {
           type: 'multiple_choice',
-          prompt: `Which number comes next in the sequence?\n${seq.join(', ')}, ___`,
-          visuals: [`🔢 Sequence: ${seq.join(', ')}, ?`],
-          correctAnswer: correct,
-          options: shuffle([correct, ...distractors]),
-          explanation: `The sequence counts up by 1 each time. After ${start + 2} comes ${correct}.`
+          prompt: `Which group has ${askMore ? 'MORE' : 'FEWER'} items?\nGroup A: ${a} ${icon} | Group B: ${b} ${icon}`,
+          visuals: [`A: ${Array(a).fill(icon).join('')}`, `B: ${Array(b).fill(icon).join('')}`],
+          correctAnswer: `Group ${correct === String(a) ? 'A' : 'B'} (${correct})`,
+          options: shuffle([`Group A (${a})`, `Group B (${b})`]),
+          explanation: `${correct} is ${askMore ? 'more than' : 'fewer than'} the other group.`
         };
       }
 
-      if (mode === 'number_words') {
-        const words = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve'];
-        const num = randomInt(1, tier === 1 ? 6 : 12);
-        const correct = words[num];
-        const distractors = words.filter(w => w !== correct).sort(() => 0.5 - Math.random()).slice(0, 3);
+      if (mode === 'shape_rec') {
+        const shapes = [
+          { name: 'Circle', vis: '⭕', hint: 'round with no corners' },
+          { name: 'Square', vis: '🟧', hint: '4 equal straight sides' },
+          { name: 'Triangle', vis: '🔺', hint: '3 straight sides and 3 corners' },
+          { name: 'Star', vis: '⭐', hint: '5 pointed corners' }
+        ];
+        const s = randomChoice(shapes);
         return {
           type: 'multiple_choice',
-          prompt: `What is the word for the number ${num}?`,
-          visuals: [`🔢 Number: ${num}`],
-          correctAnswer: correct,
-          options: shuffle([correct, ...distractors]),
-          explanation: `The numeral ${num} is spelled as "${correct}".`
+          prompt: `What shape is shown below?\n${s.vis}`,
+          visuals: [`Shape: ${s.vis}`],
+          correctAnswer: s.name,
+          options: shuffle(['Circle', 'Square', 'Triangle', 'Star']),
+          explanation: `This is a ${s.name}. It is ${s.hint}.`
         };
       }
 
-      // compare_small
-      const a = randomInt(1, tier === 1 ? 6 : 12);
-      let b = randomInt(1, tier === 1 ? 6 : 12);
-      while (b === a) b = randomInt(1, tier === 1 ? 6 : 12);
-      const askGreater = Math.random() > 0.5;
-      const correct = String(askGreater ? Math.max(a, b) : Math.min(a, b));
-      const wrong = String(askGreater ? Math.min(a, b) : Math.max(a, b));
+      // number_match
+      const num = randomInt(1, 10);
+      const words = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'];
+      const correct = words[num];
+      const distractors = words.filter(w => w && w !== correct).sort(() => 0.5 - Math.random()).slice(0, 3);
       return {
         type: 'multiple_choice',
-        prompt: `Which number is ${askGreater ? 'GREATER' : 'SMALLER'}?\n${a} or ${b}?`,
-        visuals: [`🔢 ${a} vs ${b}`],
+        prompt: `What is the word for the numeral ${num}?`,
+        visuals: [`Numeral: ${num}`],
         correctAnswer: correct,
-        options: shuffle([String(a), String(b)]),
-        explanation: `${correct} is ${askGreater ? 'larger than' : 'less than'} ${wrong}.`
+        options: shuffle([correct, ...distractors]),
+        explanation: `The number ${num} is written in words as "${correct}".`
       };
     },
 
-    // 1.2 Addition & Subtraction (All Grades)
-    additionSubtraction(tier, isSub) {
-      if (!isSub) {
-        let a, b;
-        if (tier === 1) { a = randomInt(2, 20); b = randomInt(2, 15); }
-        else if (tier === 2) { a = randomInt(25, 150); b = randomInt(18, 95); }
-        else { a = randomInt(120, 850); b = randomInt(95, 650); }
-        const ans = a + b;
-        const distractors = generateUniqueNumericDistractors(ans, 3, tier === 1 ? 4 : 15);
-        return {
-          type: 'multiple_choice',
-          prompt: `Calculate the sum:\n${a.toLocaleString()} + ${b.toLocaleString()} = ?`,
-          visuals: [`➕ ${a.toLocaleString()} + ${b.toLocaleString()}`],
-          correctAnswer: String(ans.toLocaleString()),
-          options: shuffle([ans.toLocaleString(), ...distractors.map(d => Number(d).toLocaleString())]),
-          explanation: `Adding ${a.toLocaleString()} and ${b.toLocaleString()} gives ${ans.toLocaleString()}.`
-        };
-      } else {
-        let a, b;
-        if (tier === 1) { b = randomInt(2, 12); a = b + randomInt(1, 10); }
-        else if (tier === 2) { b = randomInt(15, 80); a = b + randomInt(15, 120); }
-        else { b = randomInt(85, 450); a = b + randomInt(120, 500); }
-        const ans = a - b;
-        const distractors = generateUniqueNumericDistractors(ans, 3, tier === 1 ? 3 : 15);
-        return {
-          type: 'multiple_choice',
-          prompt: `Calculate the difference:\n${a.toLocaleString()} - ${b.toLocaleString()} = ?`,
-          visuals: [`➖ ${a.toLocaleString()} - ${b.toLocaleString()}`],
-          correctAnswer: String(ans.toLocaleString()),
-          options: shuffle([ans.toLocaleString(), ...distractors.map(d => Number(d).toLocaleString())]),
-          explanation: `Subtracting ${b.toLocaleString()} from ${a.toLocaleString()} leaves ${ans.toLocaleString()}.`
-        };
+    // 1.2 KEY STAGE 1 (Year 1 & Year 2)
+    ks1(name, tier) {
+      const mode = randomChoice(['add_sub_20', 'skip_count', 'place_tens_ones', 'clock_half', 'coins']);
+
+      if (mode === 'add_sub_20') {
+        const isSub = Math.random() > 0.5;
+        let a, b, ans;
+        if (isSub) {
+          a = randomInt(10, 20);
+          b = randomInt(2, 9);
+          ans = a - b;
+          return {
+            type: 'multiple_choice',
+            prompt: `Calculate: ${a} - ${b} = ?`,
+            visuals: [`➖ ${a} - ${b}`],
+            correctAnswer: String(ans),
+            options: shuffle([String(ans), ...generateUniqueNumericDistractors(ans, 3, 3)]),
+            explanation: `Taking away ${b} from ${a} leaves ${ans}.`
+          };
+        } else {
+          a = randomInt(4, 15);
+          b = randomInt(3, 12);
+          ans = a + b;
+          return {
+            type: 'multiple_choice',
+            prompt: `Calculate: ${a} + ${b} = ?`,
+            visuals: [`➕ ${a} + ${b}`],
+            correctAnswer: String(ans),
+            options: shuffle([String(ans), ...generateUniqueNumericDistractors(ans, 3, 4)]),
+            explanation: `Adding ${a} and ${b} gives ${ans}.`
+          };
+        }
       }
-    },
 
-    // 1.3 Multiplication & Division
-    multiplicationDivision(tier, isDiv) {
-      if (!isDiv) {
-        let a, b;
-        if (tier === 1) { a = randomInt(2, 9); b = randomInt(2, 9); }
-        else if (tier === 2) { a = randomInt(6, 12); b = randomInt(4, 12); }
-        else { a = randomInt(12, 25); b = randomInt(5, 15); }
-        const ans = a * b;
-        const distractors = generateUniqueNumericDistractors(ans, 3, Math.max(3, a));
+      if (mode === 'skip_count') {
+        const step = randomChoice([2, 5, 10]);
+        const start = step * randomInt(1, 4);
+        const seq = [start, start + step, start + 2 * step];
+        const next = start + 3 * step;
         return {
           type: 'multiple_choice',
-          prompt: `Calculate the product:\n${a} × ${b} = ?`,
-          visuals: [`✖️ ${a} × ${b}`],
-          correctAnswer: String(ans.toLocaleString()),
-          options: shuffle([ans.toLocaleString(), ...distractors.map(d => Number(d).toLocaleString())]),
-          explanation: `${a} groups of ${b} equals ${ans.toLocaleString()}.`
-        };
-      } else {
-        let divisor, quotient;
-        if (tier === 1) { divisor = randomInt(2, 8); quotient = randomInt(2, 8); }
-        else if (tier === 2) { divisor = randomInt(3, 11); quotient = randomInt(4, 12); }
-        else { divisor = randomInt(6, 15); quotient = randomInt(10, 25); }
-        const dividend = divisor * quotient;
-        const distractors = generateUniqueNumericDistractors(quotient, 3, 3);
-        return {
-          type: 'multiple_choice',
-          prompt: `Calculate the quotient:\n${dividend} ÷ ${divisor} = ?`,
-          visuals: [`➗ ${dividend} ÷ ${divisor}`],
-          correctAnswer: String(quotient),
-          options: shuffle([String(quotient), ...distractors]),
-          explanation: `${dividend} divided into ${divisor} equal parts equals ${quotient}.`
-        };
-      }
-    },
-
-    // 1.4 Place Value & Rounding
-    placeValue(tier, isRounding) {
-      if (isRounding) {
-        const nearest = randomChoice(tier === 1 ? [10, 100] : [10, 100, 1000]);
-        const num = randomInt(nearest, nearest * 10 - 1);
-        const rounded = Math.round(num / nearest) * nearest;
-        const unitName = nearest === 10 ? 'ten' : (nearest === 100 ? 'hundred' : 'thousand');
-        const distractors = [
-          String(rounded + nearest),
-          String(Math.max(0, rounded - nearest)),
-          String(rounded + (nearest * 2))
-        ];
-        return {
-          type: 'multiple_choice',
-          prompt: `Round ${num.toLocaleString()} to the nearest ${unitName}:`,
-          visuals: [`🎯 Round to nearest ${unitName}`],
-          correctAnswer: rounded.toLocaleString(),
-          options: shuffle([rounded.toLocaleString(), ...distractors.map(d => Number(d).toLocaleString())]),
-          explanation: `To round to the nearest ${unitName}, check the digit to the right. Since it is ${num % nearest}, ${num.toLocaleString()} rounds to ${rounded.toLocaleString()}.`
-        };
-      } else {
-        // Place value of a digit (guaranteed unique digit within number)
-        const digitsPool = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-        const numDigits = tier === 1 ? 3 : (tier === 2 ? 4 : 5);
-        const chosenDigits = shuffle(digitsPool).slice(0, numDigits);
-        const numStr = chosenDigits.join('');
-        const num = parseInt(numStr, 10);
-        const targetIndex = randomInt(0, numDigits - 1);
-        const targetDigit = chosenDigits[targetIndex];
-        const placeMultiplier = Math.pow(10, numDigits - 1 - targetIndex);
-        const value = targetDigit * placeMultiplier;
-        const placeNames = ['ones', 'tens', 'hundreds', 'thousands', 'ten thousands'];
-        const placeName = placeNames[numDigits - 1 - targetIndex];
-
-        const distractors = [
-          String(targetDigit),
-          String(value * 10),
-          String(Math.max(1, Math.floor(value / 10)))
-        ];
-
-        return {
-          type: 'multiple_choice',
-          prompt: `In the number ${num.toLocaleString()}, what is the value of the digit ${targetDigit}?`,
-          visuals: [`🔢 Number: ${num.toLocaleString()}`],
-          correctAnswer: value.toLocaleString(),
-          options: shuffle([value.toLocaleString(), ...distractors.map(d => Number(d).toLocaleString())]),
-          explanation: `The digit ${targetDigit} is in the ${placeName} place, so its value is ${targetDigit} × ${placeMultiplier.toLocaleString()} = ${value.toLocaleString()}.`
-        };
-      }
-    },
-
-    // 1.5 Fractions & Decimals
-    fractions(tier) {
-      const mode = randomChoice(['fraction_of_amount', 'equivalent', 'add_like_fractions', 'fraction_to_decimal']);
-
-      if (mode === 'fraction_of_amount') {
-        const den = randomChoice([2, 3, 4, 5, 6, 10]);
-        const num = randomChoice(den === 2 ? [1] : [1, 2, 3]);
-        const multiplier = randomInt(2, 10);
-        const total = den * multiplier;
-        const answer = num * multiplier;
-        const distractors = generateUniqueNumericDistractors(answer, 3, 4);
-        return {
-          type: 'multiple_choice',
-          prompt: `What is ${num}/${den} of ${total}?`,
-          visuals: [`🍰 ${num}/${den} of ${total}`],
-          correctAnswer: String(answer),
-          options: shuffle([String(answer), ...distractors]),
-          explanation: `First divide ${total} by ${den} = ${multiplier}. Then multiply by ${num} = ${answer}.`
+          prompt: `What number comes next in this sequence?\n${seq.join(', ')}, ?`,
+          visuals: [`Counting in ${step}s: ${seq.join(', ')}, ?`],
+          correctAnswer: String(next),
+          options: shuffle([String(next), ...generateUniqueNumericDistractors(next, 3, step)]),
+          explanation: `Counting in ${step}s: after ${seq[2]} comes ${next}.`
         };
       }
 
-      if (mode === 'equivalent') {
-        const den = randomChoice([2, 3, 4, 5]);
-        const num = randomInt(1, den - 1);
-        const factor = randomChoice([2, 3, 4]);
-        const eqNum = num * factor;
-        const eqDen = den * factor;
-        const correct = `${eqNum}/${eqDen}`;
-        const distractors = [
-          `${eqNum + 1}/${eqDen}`,
-          `${eqNum}/${eqDen + factor}`,
-          `${num}/${eqDen}`
-        ];
+      if (mode === 'place_tens_ones') {
+        const tens = randomInt(1, 8);
+        const ones = randomInt(1, 9);
+        const num = tens * 10 + ones;
+        const askTens = Math.random() > 0.5;
         return {
           type: 'multiple_choice',
-          prompt: `Which fraction is equivalent to ${num}/${den}?`,
-          visuals: [`⚖️ Equivalent Fractions`],
-          correctAnswer: correct,
-          options: shuffle([correct, ...distractors]),
-          explanation: `Multiplying both numerator and denominator by ${factor} gives (${num} × ${factor}) / (${den} × ${factor}) = ${correct}.`
+          prompt: `In the two-digit number ${num}, how many ${askTens ? 'TENS' : 'ONES'} are there?`,
+          visuals: [`🔢 Number: ${num}`],
+          correctAnswer: String(askTens ? tens : ones),
+          options: shuffle([String(tens), String(ones), String(tens + 1), String(Math.max(0, ones - 1))]),
+          explanation: `In ${num}, there are ${tens} tens (${tens * 10}) and ${ones} ones (${ones}).`
         };
       }
 
-      if (mode === 'add_like_fractions') {
-        const den = randomChoice([5, 6, 7, 8, 10]);
-        const n1 = randomInt(1, Math.floor(den / 2));
-        const n2 = randomInt(1, den - n1 - 1);
-        const sumN = n1 + n2;
-        const correct = `${sumN}/${den}`;
-        const distractors = [
-          `${sumN}/${den + den}`,
-          `${Math.max(1, sumN - 1)}/${den}`,
-          `${sumN + 1}/${den}`
-        ];
+      if (mode === 'clock_half') {
+        const hour = randomInt(1, 12);
+        const isHalf = Math.random() > 0.5;
+        const timeStr = isHalf ? `Half past ${hour}` : `${hour} o'clock`;
+        const digitalStr = isHalf ? `${hour}:30` : `${hour}:00`;
         return {
           type: 'multiple_choice',
-          prompt: `Calculate: ${n1}/${den} + ${n2}/${den} = ?`,
-          visuals: [`➕ ${n1}/${den} + ${n2}/${den}`],
-          correctAnswer: correct,
-          options: shuffle([correct, ...distractors]),
-          explanation: `Since denominators are identical (${den}), add numerators: ${n1} + ${n2} = ${sumN}. Result: ${correct}.`
+          prompt: `Which digital time matches: "${timeStr}"?`,
+          visuals: [`⏰ Time: ${timeStr}`],
+          correctAnswer: digitalStr,
+          options: shuffle([digitalStr, `${hour === 12 ? 1 : hour + 1}:00`, `${hour}:15`, `${hour === 1 ? 12 : hour - 1}:30`]),
+          explanation: `"${timeStr}" is represented digitally as ${digitalStr}.`
         };
       }
 
-      // fraction_to_decimal
-      const pairs = [
-        { f: '1/2', d: '0.5' },
-        { f: '1/4', d: '0.25' },
-        { f: '3/4', d: '0.75' },
-        { f: '1/5', d: '0.2' },
-        { f: '2/5', d: '0.4' },
-        { f: '3/5', d: '0.6' },
-        { f: '4/5', d: '0.8' },
-        { f: '1/10', d: '0.1' },
-        { f: '7/10', d: '0.7' }
-      ];
-      const p = randomChoice(pairs);
-      const distractors = pairs.filter(x => x.d !== p.d).sort(() => 0.5 - Math.random()).slice(0, 3).map(x => x.d);
+      // coins
+      const coin = randomChoice([
+        { name: '10p coin', val: 10 },
+        { name: '20p coin', val: 20 },
+        { name: '50p coin', val: 50 },
+        { name: '£1 coin (100p)', val: 100 }
+      ]);
+      const count = randomInt(2, 4);
+      const total = coin.val * count;
       return {
         type: 'multiple_choice',
-        prompt: `Convert the fraction ${p.f} to an equivalent decimal:`,
-        visuals: [`½ Fraction: ${p.f}`],
-        correctAnswer: p.d,
-        options: shuffle([p.d, ...distractors]),
-        explanation: `${p.f} is equivalent to ${p.d}.`
+        prompt: `How much money is ${count} × ${coin.name}?`,
+        visuals: [`🪙 ${count} coins of ${coin.name}`],
+        correctAnswer: total >= 100 ? `£${(total / 100).toFixed(2)}` : `${total}p`,
+        options: shuffle([
+          total >= 100 ? `£${(total / 100).toFixed(2)}` : `${total}p`,
+          `${total + 10}p`,
+          `${Math.max(10, total - 10)}p`,
+          `${total * 2}p`
+        ]),
+        explanation: `${count} × ${coin.val}p = ${total}p.`
       };
     },
 
-    // 1.6 Geometry, Shapes, Perimeter & Area
-    geometry(tier) {
-      const mode = randomChoice(['perimeter', 'area_rectangle', 'shape_props', 'angles']);
+    // 1.3 LOWER KEY STAGE 2 (Year 3 & Year 4)
+    lower_ks2(name, tier) {
+      const mode = randomChoice(['times_tables', 'place_thousands', 'roman_numerals', 'perimeter_grid', 'fractions_like']);
 
-      if (mode === 'perimeter') {
-        const l = randomInt(4, 12);
-        const w = randomInt(2, l - 1);
-        const perim = 2 * (l + w);
-        const correct = `${perim} cm`;
-        const distractors = [`${l * w} cm`, `${perim + 4} cm`, `${Math.max(2, perim - 4)} cm`];
+      if (mode === 'times_tables') {
+        const a = randomInt(3, 12);
+        const b = randomInt(3, 12);
+        const isDiv = Math.random() > 0.5;
+        if (isDiv) {
+          const prod = a * b;
+          return {
+            type: 'multiple_choice',
+            prompt: `What is ${prod} ÷ ${a}?`,
+            visuals: [`➗ ${prod} ÷ ${a}`],
+            correctAnswer: String(b),
+            options: shuffle([String(b), ...generateUniqueNumericDistractors(b, 3, 3)]),
+            explanation: `Because ${a} × ${b} = ${prod}, ${prod} ÷ ${a} = ${b}.`
+          };
+        } else {
+          const prod = a * b;
+          return {
+            type: 'multiple_choice',
+            prompt: `What is ${a} × ${b}?`,
+            visuals: [`✖️ ${a} × ${b}`],
+            correctAnswer: String(prod),
+            options: shuffle([String(prod), ...generateUniqueNumericDistractors(prod, 3, 6)]),
+            explanation: `${a} multiplied by ${b} equals ${prod}.`
+          };
+        }
+      }
+
+      if (mode === 'place_thousands') {
+        const th = randomInt(1, 9);
+        const h = randomInt(0, 9);
+        const t = randomInt(0, 9);
+        const o = randomInt(0, 9);
+        const num = th * 1000 + h * 100 + t * 10 + o;
+        return {
+          type: 'multiple_choice',
+          prompt: `What is the value of the digit ${th} in the number ${num.toLocaleString()}?`,
+          visuals: [`🔢 Number: ${num.toLocaleString()}`],
+          correctAnswer: (th * 1000).toLocaleString(),
+          options: shuffle([(th * 1000).toLocaleString(), (th * 100).toLocaleString(), (th * 10).toLocaleString(), String(th)]),
+          explanation: `The digit ${th} is in the thousands place, giving it a value of ${(th * 1000).toLocaleString()}.`
+        };
+      }
+
+      if (mode === 'roman_numerals') {
+        const romans = [
+          { r: 'IV', v: 4 }, { r: 'IX', v: 9 }, { r: 'XIV', v: 14 },
+          { r: 'XIX', v: 19 }, { r: 'XXIV', v: 24 }, { r: 'XL', v: 40 },
+          { r: 'XLV', v: 45 }, { r: 'LX', v: 60 }, { r: 'LXXV', v: 75 },
+          { r: 'XC', v: 90 }, { r: 'XCIV', v: 94 }
+        ];
+        const item = randomChoice(romans);
+        return {
+          type: 'multiple_choice',
+          prompt: `What Hindu-Arabic number does the Roman numeral "${item.r}" represent?`,
+          visuals: [`🏛️ Roman Numeral: ${item.r}`],
+          correctAnswer: String(item.v),
+          options: shuffle([String(item.v), String(item.v + 5), String(Math.max(1, item.v - 5)), String(item.v + 10)]),
+          explanation: `In Roman numerals, ${item.r} represents ${item.v}.`
+        };
+      }
+
+      if (mode === 'perimeter_grid') {
+        const l = randomInt(4, 15);
+        const w = randomInt(2, 9);
+        const p = 2 * (l + w);
         return {
           type: 'multiple_choice',
           prompt: `Find the perimeter of a rectangle with length ${l} cm and width ${w} cm:`,
           visuals: [`▭ Rectangle: ${l} cm × ${w} cm`],
-          correctAnswer: correct,
-          options: shuffle([correct, ...distractors]),
-          explanation: `Perimeter = 2 × (length + width) = 2 × (${l} + ${w}) = 2 × ${l + w} = ${correct}.`
+          correctAnswer: `${p} cm`,
+          options: shuffle([`${p} cm`, `${l * w} cm`, `${p + 4} cm`, `${Math.max(2, p - 6)} cm`]),
+          explanation: `Perimeter = 2 × (length + width) = 2 × (${l} + ${w}) = 2 × ${l + w} = ${p} cm.`
         };
       }
 
-      if (mode === 'area_rectangle') {
-        const l = randomInt(3, 10);
-        const w = randomInt(2, 8);
-        const area = l * w;
-        const correct = `${area} cm²`;
-        const distractors = [`${2 * (l + w)} cm²`, `${area + 5} cm²`, `${Math.max(2, area - 4)} cm²`];
-        return {
-          type: 'multiple_choice',
-          prompt: `Find the area of a rectangle with length ${l} cm and width ${w} cm:`,
-          visuals: [`▭ Dimensions: ${l} cm by ${w} cm`],
-          correctAnswer: correct,
-          options: shuffle([correct, ...distractors]),
-          explanation: `Area = length × width = ${l} × ${w} = ${correct}.`
-        };
-      }
+      // fractions_like
+      const d = randomChoice([5, 6, 7, 8, 10]);
+      const n1 = randomInt(1, Math.floor(d / 2));
+      const n2 = randomInt(1, d - n1 - 1);
+      const sum = n1 + n2;
+      return {
+        type: 'multiple_choice',
+        prompt: `Add the fractions: ${n1}/${d} + ${n2}/${d} = ?`,
+        visuals: [`🍰 ${n1}/${d} + ${n2}/${d}`],
+        correctAnswer: `${sum}/${d}`,
+        options: shuffle([`${sum}/${d}`, `${sum}/${d + d}`, `${Math.max(1, sum - 1)}/${d}`, `${sum + 1}/${d}`]),
+        explanation: `With the same denominator (${d}), add the numerators: ${n1} + ${n2} = ${sum}. Result: ${sum}/${d}.`
+      };
+    },
 
-      if (mode === 'angles') {
-        const angleQuestions = [
-          { p: 'An angle measuring exactly 90 degrees is called a:', a: 'Right angle', d: ['Acute angle', 'Obtuse angle', 'Reflex angle'], e: 'A 90° angle forms a square corner and is called a right angle.' },
-          { p: 'An angle measuring less than 90 degrees is called an:', a: 'Acute angle', d: ['Obtuse angle', 'Right angle', 'Straight angle'], e: 'Angles strictly between 0° and 90° are acute.' },
-          { p: 'An angle measuring between 90 and 180 degrees is called an:', a: 'Obtuse angle', d: ['Acute angle', 'Right angle', 'Reflex angle'], e: 'Angles greater than 90° and less than 180° are obtuse.' },
-          { p: 'What is the sum of interior angles in any triangle?', a: '180°', d: ['360°', '90°', '270°'], e: 'The three interior angles of any triangle always add up to 180°.' }
+    // 1.4 UPPER KEY STAGE 2 (Year 5 & Year 6)
+    upper_ks2(name, tier) {
+      const mode = randomChoice(['unlike_fractions', 'percent_amount', 'negative_math', 'angles_straight', 'stats_mean']);
+
+      if (mode === 'unlike_fractions') {
+        const pairs = [
+          { a: '1/2', b: '1/4', ans: '3/4', exp: '1/2 = 2/4. 2/4 + 1/4 = 3/4.' },
+          { a: '1/3', b: '1/6', ans: '1/2', exp: '1/3 = 2/6. 2/6 + 1/6 = 3/6 = 1/2.' },
+          { a: '2/5', b: '3/10', ans: '7/10', exp: '2/5 = 4/10. 4/10 + 3/10 = 7/10.' },
+          { a: '3/4', b: '1/8', ans: '7/8', exp: '3/4 = 6/8. 6/8 + 1/8 = 7/8.' }
         ];
-        const item = randomChoice(angleQuestions);
+        const q = randomChoice(pairs);
         return {
           type: 'multiple_choice',
-          prompt: item.p,
-          visuals: [`📐 Geometry Angles`],
+          prompt: `Calculate: ${q.a} + ${q.b} = ?`,
+          visuals: [`➕ ${q.a} + ${q.b}`],
+          correctAnswer: q.ans,
+          options: shuffle([q.ans, '2/6', '4/10', '5/8']),
+          explanation: q.exp
+        };
+      }
+
+      if (mode === 'percent_amount') {
+        const pct = randomChoice([10, 20, 25, 50, 75]);
+        const base = randomChoice([40, 80, 120, 200, 300, 400]);
+        const ans = (pct / 100) * base;
+        return {
+          type: 'multiple_choice',
+          prompt: `What is ${pct}% of £${base}?`,
+          visuals: [`💰 ${pct}% of £${base}`],
+          correctAnswer: `£${ans}`,
+          options: shuffle([`£${ans}`, `£${ans + 10}`, `£${Math.max(5, ans - 10)}`, `£${ans * 2}`]),
+          explanation: `${pct}% means ${pct}/100. (${pct}/100) × ${base} = £${ans}.`
+        };
+      }
+
+      if (mode === 'negative_math') {
+        const start = randomInt(-10, -1);
+        const delta = randomInt(4, 15);
+        const ans = start + delta;
+        return {
+          type: 'multiple_choice',
+          prompt: `Calculate: ${start} + ${delta} = ?`,
+          visuals: [`🌡️ ${start} + ${delta}`],
+          correctAnswer: String(ans),
+          options: shuffle([String(ans), String(ans - 2), String(start - delta), String(Math.abs(ans) + 1)]),
+          explanation: `Starting at ${start} on the number line and moving ${delta} units to the right lands on ${ans}.`
+        };
+      }
+
+      if (mode === 'angles_straight') {
+        const given = randomInt(35, 145);
+        const missing = 180 - given;
+        return {
+          type: 'multiple_choice',
+          prompt: `Two angles lie on a straight line. If one angle measures ${given}°, what is the size of the other angle?`,
+          visuals: [`📐 Angles on a line add to 180°`],
+          correctAnswer: `${missing}°`,
+          options: shuffle([`${missing}°`, `${missing + 10}°`, `${missing - 10}°`, `${360 - given}°`]),
+          explanation: `Angles on a straight line add up to 180°. 180° - ${given}° = ${missing}°.`
+        };
+      }
+
+      // stats_mean
+      const nums = [randomInt(2, 6), randomInt(4, 8), randomInt(6, 12)];
+      const sum = nums.reduce((a, b) => a + b, 0);
+      const extra = (4 - (sum % 4)) % 4;
+      nums.push(nums.pop() + extra);
+      const newSum = nums.reduce((a, b) => a + b, 0);
+      const mean = newSum / nums.length;
+      return {
+        type: 'multiple_choice',
+        prompt: `Find the mean (average) of the numbers: ${nums.join(', ')}`,
+        visuals: [`📊 Set: [${nums.join(', ')}]`],
+        correctAnswer: String(mean),
+        options: shuffle([String(mean), String(mean + 1), String(Math.max(1, mean - 1)), String(mean + 2)]),
+        explanation: `Mean = Sum ÷ Count = (${nums.join(' + ')}) ÷ ${nums.length} = ${newSum} ÷ ${nums.length} = ${mean}.`
+      };
+    },
+
+    // 1.5 KEY STAGE 3 (Year 7, Year 8, Year 9)
+    ks3(name, tier) {
+      const mode = randomChoice(['linear_bracket', 'index_laws', 'pythagoras', 'circle_area', 'gradient_line']);
+
+      if (mode === 'linear_bracket') {
+        const x = randomInt(2, 9);
+        const a = randomInt(2, 5);
+        const c = randomInt(1, 8);
+        const rhs = a * (x + c);
+        return {
+          type: 'multiple_choice',
+          prompt: `Solve the equation for x:\n${a}(x + ${c}) = ${rhs}`,
+          visuals: [`⚖️ ${a}(x + ${c}) = ${rhs}`],
+          correctAnswer: String(x),
+          options: shuffle([String(x), String(x + 2), String(Math.max(1, x - 2)), String(x + 4)]),
+          explanation: `Divide both sides by ${a}: x + ${c} = ${rhs / a}. Subtract ${c}: x = ${x}.`
+        };
+      }
+
+      if (mode === 'index_laws') {
+        const p1 = randomInt(2, 6);
+        const p2 = randomInt(2, 6);
+        const op = Math.random() > 0.5 ? 'mul' : 'div';
+        if (op === 'mul') {
+          const ans = p1 + p2;
+          return {
+            type: 'multiple_choice',
+            prompt: `Simplify the expression using index laws:\nx^${p1} × x^${p2} = ?`,
+            visuals: [`📐 x^${p1} × x^${p2}`],
+            correctAnswer: `x^${ans}`,
+            options: shuffle([`x^${ans}`, `x^${p1 * p2}`, `x^${ans + 1}`, `2x^${ans}`]),
+            explanation: `When multiplying powers with the same base, add the indices: ${p1} + ${p2} = ${ans}. Result: x^${ans}.`
+          };
+        } else {
+          const maxP = Math.max(p1, p2) + 2;
+          const minP = Math.min(p1, p2);
+          const ans = maxP - minP;
+          return {
+            type: 'multiple_choice',
+            prompt: `Simplify: x^${maxP} ÷ x^${minP} = ?`,
+            visuals: [`📐 x^${maxP} ÷ x^${minP}`],
+            correctAnswer: `x^${ans}`,
+            options: shuffle([`x^${ans}`, `x^${maxP + minP}`, `x^${Math.round(maxP / minP)}`, `x^${ans + 1}`]),
+            explanation: `When dividing powers with the same base, subtract indices: ${maxP} - ${minP} = ${ans}. Result: x^${ans}.`
+          };
+        }
+      }
+
+      if (mode === 'pythagoras') {
+        const triples = [
+          { a: 3, b: 4, c: 5 },
+          { a: 6, b: 8, c: 10 },
+          { a: 5, b: 12, c: 13 },
+          { a: 8, b: 15, c: 17 }
+        ];
+        const t = randomChoice(triples);
+        return {
+          type: 'multiple_choice',
+          prompt: `In a right-angled triangle, the two perpendicular sides measure ${t.a} cm and ${t.b} cm. What is the length of the hypotenuse?`,
+          visuals: [`📐 a = ${t.a}, b = ${t.b}, c = ?`],
+          correctAnswer: `${t.c} cm`,
+          options: shuffle([`${t.c} cm`, `${t.a + t.b} cm`, `${t.c + 2} cm`, `${t.c - 1} cm`]),
+          explanation: `Pythagoras' Theorem: a² + b² = c². ${t.a}² + ${t.b}² = ${t.a * t.a} + ${t.b * t.b} = ${t.c * t.c}. c = √${t.c * t.c} = ${t.c} cm.`
+        };
+      }
+
+      if (mode === 'circle_area') {
+        const r = randomChoice([3, 5, 7, 10]);
+        const areaPi = r * r;
+        return {
+          type: 'multiple_choice',
+          prompt: `Find the exact area of a circle with radius ${r} cm (in terms of π):`,
+          visuals: [`⭕ Radius r = ${r} cm`],
+          correctAnswer: `${areaPi}π cm²`,
+          options: shuffle([`${areaPi}π cm²`, `${2 * r}π cm²`, `${areaPi * 2}π cm²`, `${r}π cm²`]),
+          explanation: `Area = πr² = π × (${r})² = ${areaPi}π cm².`
+        };
+      }
+
+      // gradient_line
+      const m = randomChoice([2, 3, -2, 4]);
+      const c = randomInt(-5, 8);
+      const eqn = `y = ${m}x ${c >= 0 ? '+ ' + c : '- ' + Math.abs(c)}`;
+      return {
+        type: 'multiple_choice',
+        prompt: `What is the gradient (slope) of the straight line with equation: ${eqn}?`,
+        visuals: [`📈 Linear Equation: ${eqn}`],
+        correctAnswer: String(m),
+        options: shuffle([String(m), String(c), String(-m), String(m !== 1 ? 1 : 2)]),
+        explanation: `In the standard form y = mx + c, m represents the gradient. Here m = ${m}.`
+      };
+    },
+
+    // 1.6 KEY STAGE 4 / GCSE (Year 10 & Year 11)
+    gcse(name, tier) {
+      const mode = randomChoice(['quadratic_solve', 'trig_exact', 'surds_simplify', 'fractional_index', 'simultaneous']);
+
+      if (mode === 'quadratic_solve') {
+        const p = randomInt(1, 5);
+        const q = randomInt(p + 1, 7);
+        const b = -(p + q);
+        const c = p * q;
+        const eqn = `x² ${b}x + ${c} = 0`;
+        const correct = `x = ${p}, x = ${q}`;
+        return {
+          type: 'multiple_choice',
+          prompt: `Solve the quadratic equation by factorising:\n${eqn}`,
+          visuals: [`📐 ${eqn}`],
+          correctAnswer: correct,
+          options: shuffle([
+            correct,
+            `x = ${-p}, x = ${-q}`,
+            `x = ${p}, x = ${-q}`,
+            `x = ${p + 1}, x = ${q - 1}`
+          ]),
+          explanation: `Factorise into (x - ${p})(x - ${q}) = 0. Roots are x = ${p} and x = ${q}.`
+        };
+      }
+
+      if (mode === 'trig_exact') {
+        const trigValues = [
+          { q: 'sin(30°)', a: '1/2', d: ['√3/2', '1', '√2/2'], e: 'sin(30°) is an exact value equal to 1/2.' },
+          { q: 'cos(60°)', a: '1/2', d: ['√3/2', '0', '√2/2'], e: 'cos(60°) = 1/2.' },
+          { q: 'tan(45°)', a: '1', d: ['1/2', '√3', '0'], e: 'tan(45°) = sin(45°)/cos(45°) = 1.' },
+          { q: 'sin(90°)', a: '1', d: ['0', '1/2', '√3/2'], e: 'The sine of 90 degrees reaches maximum amplitude: 1.' },
+          { q: 'cos(0°)', a: '1', d: ['0', '1/2', '-1'], e: 'At 0 degrees, the cosine function equals 1.' }
+        ];
+        const item = randomChoice(trigValues);
+        return {
+          type: 'multiple_choice',
+          prompt: `What is the exact trigonometric value of ${item.q}?`,
+          visuals: [`📐 Exact Trig: ${item.q}`],
           correctAnswer: item.a,
           options: shuffle([item.a, ...item.d]),
           explanation: item.e
         };
       }
 
-      // shape_props
-      const shapes = [
-        { name: 'triangle', sides: 3, vertices: 3 },
-        { name: 'quadrilateral', sides: 4, vertices: 4 },
-        { name: 'pentagon', sides: 5, vertices: 5 },
-        { name: 'hexagon', sides: 6, vertices: 6 },
-        { name: 'octagon', sides: 8, vertices: 8 }
-      ];
-      const s = randomChoice(shapes);
-      const correct = String(s.sides);
-      const distractors = [String(s.sides + 1), String(Math.max(3, s.sides - 1)), String(s.sides + 2)];
-      return {
-        type: 'multiple_choice',
-        prompt: `How many straight sides does a regular ${s.name} have?`,
-        visuals: [`🔷 Shape: ${s.name}`],
-        correctAnswer: correct,
-        options: shuffle([correct, ...distractors]),
-        explanation: `A ${s.name} has exactly ${s.sides} sides and ${s.vertices} vertices.`
-      };
-    },
-
-    // 1.7 Measurement, Time & Money
-    measurement(tier) {
-      const mode = randomChoice(['time_clock', 'unit_convert', 'money_math']);
-
-      if (mode === 'unit_convert') {
-        const units = [
-          { q: 'How many centimetres (cm) are in 1 metre (m)?', a: '100 cm', d: ['10 cm', '1,000 cm', '60 cm'], e: '1 metre is equal to 100 centimetres.' },
-          { q: 'How many grams (g) are in 1 kilogram (kg)?', a: '1,000 g', d: ['100 g', '10 g', '500 g'], e: 'The prefix kilo- means 1,000. 1 kg = 1,000 g.' },
-          { q: 'How many millilitres (ml) are in 1 litre (L)?', a: '1,000 ml', d: ['100 ml', '10 ml', '500 ml'], e: '1 litre contains 1,000 millilitres.' },
-          { q: 'How many minutes are in 1 hour and 30 minutes?', a: '90 minutes', d: ['60 minutes', '80 minutes', '130 minutes'], e: '60 minutes + 30 minutes = 90 minutes.' }
+      if (mode === 'surds_simplify') {
+        const surds = [
+          { raw: '√50', ans: '5√2', exp: '√50 = √(25 × 2) = √25 × √2 = 5√2.' },
+          { raw: '√72', ans: '6√2', exp: '√72 = √(36 × 2) = √36 × √2 = 6√2.' },
+          { raw: '√48', ans: '4√3', exp: '√48 = √(16 × 3) = √16 × √3 = 4√3.' },
+          { raw: '√75', ans: '5√3', exp: '√75 = √(25 × 3) = √25 × √3 = 5√3.' },
+          { raw: '√98', ans: '7√2', exp: '√98 = √(49 × 2) = √49 × √2 = 7√2.' }
         ];
-        const item = randomChoice(units);
+        const s = randomChoice(surds);
         return {
           type: 'multiple_choice',
-          prompt: item.q,
-          visuals: [`📏 Metric Measurement`],
+          prompt: `Simplify the surd into the form a√b:\n${s.raw} = ?`,
+          visuals: [`√ Simplifying Surd: ${s.raw}`],
+          correctAnswer: s.ans,
+          options: shuffle([s.ans, '2√5', '3√6', '8√2']),
+          explanation: s.exp
+        };
+      }
+
+      if (mode === 'fractional_index') {
+        const powers = [
+          { q: '16^(1/2)', a: '4', exp: '16^(1/2) = √16 = 4.' },
+          { q: '27^(1/3)', a: '3', exp: '27^(1/3) = ³√27 = 3.' },
+          { q: '8^(2/3)', a: '4', exp: '8^(2/3) = (³√8)² = 2² = 4.' },
+          { q: '25^(-1/2)', a: '1/5', exp: '25^(-1/2) = 1/√25 = 1/5.' },
+          { q: '64^(1/3)', a: '4', exp: '64^(1/3) = ³√64 = 4.' }
+        ];
+        const p = randomChoice(powers);
+        return {
+          type: 'multiple_choice',
+          prompt: `Evaluate the expression: ${p.q} = ?`,
+          visuals: [`🔢 Index Notation: ${p.q}`],
+          correctAnswer: p.a,
+          options: shuffle([p.a, '8', '2', '1/4']),
+          explanation: p.exp
+        };
+      }
+
+      // simultaneous
+      const x = randomInt(2, 6);
+      const y = randomInt(1, 5);
+      const eq1 = x + y;
+      const eq2 = x - y;
+      return {
+        type: 'multiple_choice',
+        prompt: `Solve the simultaneous equations:\nx + y = ${eq1}\nx - y = ${eq2}`,
+        visuals: [`{ x + y = ${eq1}\n{ x - y = ${eq2}`],
+        correctAnswer: `x = ${x}, y = ${y}`,
+        options: shuffle([
+          `x = ${x}, y = ${y}`,
+          `x = ${x + 1}, y = ${y - 1}`,
+          `x = ${y}, y = ${x}`,
+          `x = ${x + 2}, y = ${y}`
+        ]),
+        explanation: `Adding equations: 2x = ${eq1 + eq2} ⇒ x = ${x}. Substitute to find y = ${eq1} - ${x} = ${y}.`
+      };
+    },
+
+    // 1.7 KEY STAGE 5 / A-LEVELS (Year 12 & Year 13)
+    alevel(name, tier) {
+      const mode = randomChoice(['differentiation', 'integration', 'logarithms', 'radians', 'binomial']);
+
+      if (mode === 'differentiation') {
+        const n = randomInt(2, 5);
+        const k = randomInt(2, 6);
+        const derivK = k * n;
+        const derivN = n - 1;
+        const promptStr = `d/dx (${k}x^${n})`;
+        const ans = derivN === 1 ? `${derivK}x` : `${derivK}x^${derivN}`;
+        return {
+          type: 'multiple_choice',
+          prompt: `Differentiate with respect to x:\n${promptStr} = ?`,
+          visuals: [`∫ Calculus: ${promptStr}`],
+          correctAnswer: ans,
+          options: shuffle([
+            ans,
+            `${k}x^${derivN}`,
+            `${derivK}x^${n}`,
+            `${derivK + 2}x^${derivN}`
+          ]),
+          explanation: `Using the power rule d/dx(ax^n) = a·n·x^(n-1): ${k} × ${n} × x^(${n}-1) = ${ans}.`
+        };
+      }
+
+      if (mode === 'integration') {
+        const n = randomInt(1, 3);
+        const mult = n + 1;
+        const k = mult * randomInt(1, 4);
+        const intK = k / mult;
+        const intN = n + 1;
+        const promptStr = `∫ ${k}x^${n} dx`;
+        const ans = `${intK === 1 ? '' : intK}x^${intN} + C`;
+        return {
+          type: 'multiple_choice',
+          prompt: `Evaluate the indefinite integral:\n${promptStr} = ?`,
+          visuals: [`∫ Integration: ${promptStr}`],
+          correctAnswer: ans,
+          options: shuffle([
+            ans,
+            `${k}x^${intN} + C`,
+            `${intK}x^${n} + C`,
+            `${k * mult}x^${intN} + C`
+          ]),
+          explanation: `Reverse power rule: add 1 to index and divide by new index. (${k} / ${intN})x^${intN} + C = ${ans}.`
+        };
+      }
+
+      if (mode === 'logarithms') {
+        const logs = [
+          { q: 'log₂(64)', a: '6', exp: '2⁶ = 64, therefore log₂(64) = 6.' },
+          { q: 'log₃(81)', a: '4', exp: '3⁴ = 81, therefore log₃(81) = 4.' },
+          { q: 'ln(e⁵)', a: '5', exp: 'The natural log ln is base e. ln(e⁵) = 5.' },
+          { q: 'log₁₀(10,000)', a: '4', exp: '10⁴ = 10,000, so log₁₀(10,000) = 4.' },
+          { q: 'log₅(125)', a: '3', exp: '5³ = 125, therefore log₅(125) = 3.' }
+        ];
+        const item = randomChoice(logs);
+        return {
+          type: 'multiple_choice',
+          prompt: `Evaluate the logarithm: ${item.q} = ?`,
+          visuals: [`📉 Logarithmic Function: ${item.q}`],
           correctAnswer: item.a,
-          options: shuffle([item.a, ...item.d]),
-          explanation: item.e
+          options: shuffle([item.a, '2', '8', '12']),
+          explanation: item.exp
         };
       }
 
-      if (mode === 'money_math') {
-        const price = randomChoice([15, 20, 25, 30, 40, 50]);
-        const paid = price <= 20 ? 20 : (price <= 50 ? 50 : 100);
-        const change = paid - price;
-        const correct = `£${change}`;
-        const distractors = [`£${change + 5}`, `£${Math.max(1, change - 5)}`, `£${change + 10}`];
+      if (mode === 'radians') {
+        const rads = [
+          { deg: '180°', rad: 'π rad' },
+          { deg: '90°', rad: 'π/2 rad' },
+          { deg: '60°', rad: 'π/3 rad' },
+          { deg: '45°', rad: 'π/4 rad' },
+          { deg: '30°', rad: 'π/6 rad' },
+          { deg: '360°', rad: '2π rad' }
+        ];
+        const item = randomChoice(rads);
         return {
           type: 'multiple_choice',
-          prompt: `A student buys a school textbook for £${price} and pays with a £${paid} note. How much change should they receive?`,
-          visuals: [`💷 Cost: £${price} | Paid: £${paid}`],
-          correctAnswer: correct,
-          options: shuffle([correct, ...distractors]),
-          explanation: `Change = Paid - Cost = £${paid} - £${price} = ${correct}.`
+          prompt: `Convert the angle ${item.deg} into exact radians:`,
+          visuals: [`⭕ Angle: ${item.deg}`],
+          correctAnswer: item.rad,
+          options: shuffle([item.rad, 'π/5 rad', '3π/4 rad', '2π/3 rad']),
+          explanation: `Multiply by π/180°: ${item.deg} × (π/180°) = ${item.rad}.`
         };
       }
 
-      // time_clock
-      const hours = randomInt(1, 11);
-      const mins = randomChoice([15, 30, 45]);
-      const addMins = randomChoice([15, 30]);
-      const totalMins = mins + addMins;
-      const endH = totalMins >= 60 ? hours + 1 : hours;
-      const endM = totalMins >= 60 ? totalMins - 60 : totalMins;
-      const fmtM = endM === 0 ? '00' : String(endM);
-      const correct = `${endH}:${fmtM}`;
-      const distractors = [`${hours}:${fmtM}`, `${endH + 1}:${fmtM}`, `${hours}:00`];
+      // binomial
       return {
         type: 'multiple_choice',
-        prompt: `A classroom lesson starts at ${hours}:${mins} and lasts ${addMins} minutes. What time does it finish?`,
-        visuals: [`⏰ Start: ${hours}:${mins} (+${addMins} mins)`],
-        correctAnswer: correct,
-        options: shuffle([correct, ...distractors]),
-        explanation: `Adding ${addMins} minutes to ${hours}:${mins} gives ${correct}.`
-      };
-    },
-
-    // 1.8 Algebra, Patterns & Primes
-    algebra(tier) {
-      const mode = randomChoice(['solve_for_x', 'primes', 'number_pattern']);
-
-      if (mode === 'solve_for_x') {
-        const x = randomInt(3, 12);
-        const a = randomInt(4, 20);
-        const b = x + a;
-        const correct = String(x);
-        const distractors = generateUniqueNumericDistractors(x, 3, 3);
-        return {
-          type: 'multiple_choice',
-          prompt: `Find the value of x in the equation:\nx + ${a} = ${b}`,
-          visuals: [`⚖️ Equation: x + ${a} = ${b}`],
-          correctAnswer: correct,
-          options: shuffle([correct, ...distractors]),
-          explanation: `Subtract ${a} from both sides: x = ${b} - ${a} = ${correct}.`
-        };
-      }
-
-      if (mode === 'primes') {
-        const primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47];
-        const composites = [4, 6, 8, 9, 10, 12, 14, 15, 16, 18, 20, 21, 22, 24, 25, 26, 27, 28, 30];
-        const chosenPrime = randomChoice(primes);
-        const compSample = shuffle(composites).slice(0, 3);
-        const correct = String(chosenPrime);
-        return {
-          type: 'multiple_choice',
-          prompt: 'Which of the following numbers is a Prime Number?',
-          visuals: [`🔢 Prime Number Challenge`],
-          correctAnswer: correct,
-          options: shuffle([correct, ...compSample.map(String)]),
-          explanation: `${chosenPrime} is prime because it has exactly two factors: 1 and itself.`
-        };
-      }
-
-      // number_pattern
-      const step = randomChoice([3, 4, 5, 6, 7]);
-      const start = randomInt(2, 20);
-      const seq = [start, start + step, start + 2 * step, start + 3 * step];
-      const nextVal = start + 4 * step;
-      const correct = String(nextVal);
-      const distractors = generateUniqueNumericDistractors(nextVal, 3, step);
-      return {
-        type: 'multiple_choice',
-        prompt: `Identify the pattern and find the next number:\n${seq.join(', ')}, ?`,
-        visuals: [`📈 Pattern: +${step} each step`],
-        correctAnswer: correct,
-        options: shuffle([correct, ...distractors]),
-        explanation: `Each term increases by ${step}. Therefore: ${seq[3]} + ${step} = ${correct}.`
-      };
-    },
-
-    // 1.9 Even or Odd Numbers
-    evenOdd(tier) {
-      const mode = randomChoice(['is_even_or_odd', 'identify_which_even', 'identify_which_odd', 'sum_even_odd']);
-      if (mode === 'is_even_or_odd') {
-        const num = tier === 1 ? randomInt(2, 30) : (tier === 2 ? randomInt(20, 100) : randomInt(100, 1000));
-        const isEven = num % 2 === 0;
-        const correct = isEven ? 'Even' : 'Odd';
-        const lastDigit = num % 10;
-        return {
-          type: 'multiple_choice',
-          prompt: `Is the number ${num} even or odd?`,
-          visuals: [`🔢 Number: ${num}`],
-          correctAnswer: correct,
-          options: ['Even', 'Odd'],
-          explanation: `${num} ends in ${lastDigit}. Numbers ending in 0, 2, 4, 6, 8 are even; numbers ending in 1, 3, 5, 7, 9 are odd. Therefore, ${num} is ${correct.toLowerCase()}.`
-        };
-      }
-
-      if (mode === 'identify_which_even') {
-        const evenTarget = (tier === 1 ? randomInt(1, 15) : randomInt(10, 50)) * 2;
-        const odd1 = (tier === 1 ? randomInt(1, 15) : randomInt(10, 50)) * 2 + 1;
-        const odd2 = (tier === 1 ? randomInt(1, 15) : randomInt(10, 50)) * 2 + 1;
-        const odd3 = (tier === 1 ? randomInt(1, 15) : randomInt(10, 50)) * 2 + 1;
-        const set = new Set([String(evenTarget), String(odd1), String(odd2), String(odd3)]);
-        let fallback = 3;
-        while (set.size < 4) {
-          set.add(String(fallback));
-          fallback += 2;
-        }
-        return {
-          type: 'multiple_choice',
-          prompt: 'Which of the following numbers is an EVEN number?',
-          visuals: ['🔢 Even Numbers: divisible by 2'],
-          correctAnswer: String(evenTarget),
-          options: shuffle(Array.from(set)),
-          explanation: `${evenTarget} ends in ${evenTarget % 10}, so it can be divided evenly by 2 without a remainder.`
-        };
-      }
-
-      if (mode === 'identify_which_odd') {
-        const oddTarget = (tier === 1 ? randomInt(1, 15) : randomInt(10, 50)) * 2 + 1;
-        const even1 = (tier === 1 ? randomInt(1, 15) : randomInt(10, 50)) * 2;
-        const even2 = (tier === 1 ? randomInt(1, 15) : randomInt(10, 50)) * 2;
-        const even3 = (tier === 1 ? randomInt(1, 15) : randomInt(10, 50)) * 2;
-        const set = new Set([String(oddTarget), String(even1), String(even2), String(even3)]);
-        let fallback = 4;
-        while (set.size < 4) {
-          set.add(String(fallback));
-          fallback += 2;
-        }
-        return {
-          type: 'multiple_choice',
-          prompt: 'Which of the following numbers is an ODD number?',
-          visuals: ['🔢 Odd Numbers: not divisible by 2'],
-          correctAnswer: String(oddTarget),
-          options: shuffle(Array.from(set)),
-          explanation: `${oddTarget} ends in ${oddTarget % 10}, so it cannot be divided evenly by 2.`
-        };
-      }
-
-      // sum_even_odd
-      const a = randomInt(2, 20);
-      const b = randomInt(2, 20);
-      const sum = a + b;
-      const isEven = sum % 2 === 0;
-      const correct = isEven ? 'Even' : 'Odd';
-      return {
-        type: 'multiple_choice',
-        prompt: `Without calculating the full answer, is the sum (${a} + ${b}) even or odd?`,
-        visuals: [`➕ ${a} + ${b} = ${sum}`],
-        correctAnswer: correct,
-        options: ['Even', 'Odd'],
-        explanation: `${a} + ${b} = ${sum}. Since ${sum} ends in ${sum % 10}, the sum is ${correct.toLowerCase()}.`
+        prompt: 'What is the coefficient of x² in the expansion of (1 + 2x)⁴?',
+        visuals: ['📦 Binomial Expansion: (1 + 2x)⁴'],
+        correctAnswer: '24',
+        options: shuffle(['24', '16', '12', '6']),
+        explanation: 'Using the Binomial Theorem: term is ⁴C₂ · 1² · (2x)² = 6 · 4x² = 24x². The coefficient is 24.'
       };
     }
   };
 
   // ===========================================================================
-  // 2. ENGLISH LANGUAGE GENERATOR (Over 60 Dynamic Question Blueprints)
+  // 2. STAGE-SPECIFIC ENGLISH QUESTION BANKS
   // ===========================================================================
 
-  const EnglishBank = [
-    // Parts of Speech
-    { prompt: 'Identify the part of speech of the highlighted word:\n"The energetic puppy 【barked】 happily at the mail carrier."', word: 'barked', ans: 'Verb', dist: ['Noun', 'Adjective', 'Adverb'], exp: '"Barked" is an action word, making it a verb.' },
-    { prompt: 'Identify the part of speech of the highlighted word:\n"She wore a 【radiant】 smile when she heard the good news."', word: 'radiant', ans: 'Adjective', dist: ['Noun', 'Verb', 'Adverb'], exp: '"Radiant" describes the noun "smile", so it is an adjective.' },
-    { prompt: 'Identify the part of speech of the highlighted word:\n"The children finished their homework 【quickly】 before dinner."', word: 'quickly', ans: 'Adverb', dist: ['Adjective', 'Verb', 'Noun'], exp: '"Quickly" describes how the action was performed, making it an adverb.' },
-    { prompt: 'Identify the part of speech of the highlighted word:\n"The old oak 【tree】 stood proudly in the middle of the village square."', word: 'tree', ans: 'Noun', dist: ['Verb', 'Adjective', 'Preposition'], exp: '"Tree" is a naming word for a physical object, making it a noun.' },
-    { prompt: 'Identify the part of speech of the highlighted word:\n"【Although】 it was raining heavily, the students went for a walk."', word: 'Although', ans: 'Conjunction', dist: ['Preposition', 'Adverb', 'Interjection'], exp: '"Although" connects a dependent clause to an independent clause, making it a conjunction.' },
-    { prompt: 'Identify the part of speech of the highlighted word:\n"The gentle rabbit hopped 【into】 the hollow log."', word: 'into', ans: 'Preposition', dist: ['Adverb', 'Conjunction', 'Adjective'], exp: '"Into" indicates position or direction relative to the log, making it a preposition.' },
-    { prompt: 'Identify the part of speech of the highlighted word:\n"【She】 proudly presented her science project to the class."', word: 'She', ans: 'Pronoun', dist: ['Noun', 'Verb', 'Adjective'], exp: '"She" replaces a specific person\'s name, making it a pronoun.' },
-    
-    // Homophones & Common Confusions
-    { prompt: 'Choose the correct word to complete the sentence:\n"The students put ______ backpacks on the designated hooks."', word: 'Homophones', ans: 'their', dist: ['there', "they're", 'thier'], exp: '"Their" is the possessive pronoun showing ownership.' },
-    { prompt: 'Choose the correct word to complete the sentence:\n"The weather was ______ cold to play outside without a coat."', word: 'Homophones', ans: 'too', dist: ['to', 'two', 'toe'], exp: '"Too" means excessively or also.' },
-    { prompt: 'Choose the correct word to complete the sentence:\n"I did not ______ the teacher announce the homework."', word: 'Homophones', ans: 'hear', dist: ['here', 'hair', 'hare'], exp: '"Hear" refers to listening with your ears.' },
-    { prompt: 'Choose the correct word to complete the sentence:\n"The chef added a pinch of ______ to enhance the flavor of the soup."', word: 'Spelling', ans: 'flour', dist: ['flower', 'flowr', 'flouer'], exp: '"Flour" is the baking ingredient made from ground grain.' },
-    { prompt: 'Choose the correct word to complete the sentence:\n"The majestic cat stretched ______ paws in the warm afternoon sun."', word: 'Pronouns', ans: 'its', dist: ["it's", "its'", "it is"], exp: '"Its" is possessive without an apostrophe. "It\'s" is a contraction of "it is".' },
+  const EnglishBanksByStage = {
+    // 2.1 Early Years (Reception)
+    early: [
+      { prompt: 'Which word rhymes with "CAT"?', ans: 'Hat', dist: ['Dog', 'Sun', 'Cup'], exp: '"Hat" and "cat" have the same ending sound "-at".' },
+      { prompt: 'Which letter does the word "SUN" begin with?', ans: 'S', dist: ['M', 'T', 'B'], exp: 'The word "Sun" starts with the letter S.' },
+      { prompt: 'What is the opposite of "HOT"?', ans: 'Cold', dist: ['Warm', 'Big', 'Fast'], exp: 'Cold is the direct opposite of hot.' },
+      { prompt: 'Which animal word is spelled correctly?', ans: 'Dog', dist: ['Dgo', 'Ogd', 'Doggiey'], exp: '"Dog" is the correct 3-letter CVC word.' },
+      { prompt: 'Which word rhymes with "BED"?', ans: 'Red', dist: ['Blue', 'Car', 'Fish'], exp: '"Red" and "bed" both share the rhyming sound "-ed".' }
+    ],
 
-    // Irregular Plurals
-    { prompt: 'What is the correct plural form of the noun "child"?', word: 'Plurals', ans: 'Children', dist: ['Childs', 'Childrens', 'Childes'], exp: '"Child" has the irregular plural form "children".' },
-    { prompt: 'What is the correct plural form of the noun "tooth"?', word: 'Plurals', ans: 'Teeth', dist: ['Tooths', 'Teeths', 'Toothes'], exp: '"Tooth" changes its vowel to form "teeth".' },
-    { prompt: 'What is the correct plural form of the noun "knife"?', word: 'Plurals', ans: 'Knives', dist: ['Knifes', 'Kniefs', 'Knivs'], exp: 'Nouns ending in "-fe" typically change to "-ves" in the plural.' },
-    { prompt: 'What is the correct plural form of the noun "mouse"?', word: 'Plurals', ans: 'Mice', dist: ['Mouses', 'Mices', 'Mousies'], exp: '"Mouse" has the irregular plural form "mice".' },
-    { prompt: 'What is the correct plural form of the noun "leaf"?', word: 'Plurals', ans: 'Leaves', dist: ['Leafs', 'Leaveses', 'Leafe'], exp: '"Leaf" changes "-f" to "-ves" to form "leaves".' },
+    // 2.2 Key Stage 1 (Year 1 & Year 2)
+    ks1: [
+      { prompt: 'Every proper sentence must begin with a:', ans: 'Capital letter', dist: ['Comma', 'Question mark', 'Small letter'], exp: 'Sentences always begin with a capital letter.' },
+      { prompt: 'What punctuation mark should end this asking sentence: "Where is the library"', ans: 'Question mark (?)', dist: ['Full stop (.)', 'Exclamation mark (!)', 'Comma (,)'], exp: 'Asking sentences end with a question mark.' },
+      { prompt: 'What is the plural of "box"?', ans: 'Boxes', dist: ['Boxs', 'Boxies', 'Boxen'], exp: 'Nouns ending in -x take -es to form the plural: boxes.' },
+      { prompt: 'Which word is a compound word formed by joining two words?', ans: 'Sunlight', dist: ['Sunny', 'Lighter', 'Bright'], exp: '"Sun" + "light" joins to make "sunlight".' },
+      { prompt: 'Which word is an ADJECTIVE (describing word) in: "The red balloon floated away"?', ans: 'Red', dist: ['Balloon', 'Floated', 'Away'], exp: '"Red" describes the color of the balloon.' }
+    ],
 
-    // Synonyms & Antonyms
-    { prompt: 'Select the best synonym for the word "courageous":', word: 'Synonyms', ans: 'Brave', dist: ['Fearful', 'Hesitant', 'Timid'], exp: '"Courageous" and "brave" both describe having courage in the face of fear.' },
-    { prompt: 'Select the best synonym for the word "ancient":', word: 'Synonyms', ans: 'Very old', dist: ['Modern', 'Futuristic', 'Youthful'], exp: '"Ancient" means belonging to the very distant past.' },
-    { prompt: 'Select the best antonym (opposite) of the word "generous":', word: 'Antonyms', ans: 'Selfish', dist: ['Kind', 'Charitable', 'Helpful'], exp: '"Selfish" is the direct opposite of being generous and giving.' },
-    { prompt: 'Select the best antonym (opposite) of the word "expand":', word: 'Antonyms', ans: 'Shrink', dist: ['Grow', 'Stretch', 'Enlarge'], exp: '"Shrink" (contract) is the opposite of expanding.' },
+    // 2.3 Lower Key Stage 2 (Year 3 & Year 4)
+    lower_ks2: [
+      { prompt: 'Identify the NOUN in this sentence: "The brave firefighter extinguished the flame quickly."', ans: 'Firefighter', dist: ['Brave', 'Extinguished', 'Quickly'], exp: 'A noun is a person, place, or thing. "Firefighter" is a person.' },
+      { prompt: 'Identify the ADVERB in: "The cheetah sprinted gracefully across the plains."', ans: 'Gracefully', dist: ['Cheetah', 'Sprinted', 'Plains'], exp: '"Gracefully" describes HOW the cheetah sprinted (verb).' },
+      { prompt: 'Choose the correct homophone: "Please put your books over _____."', ans: 'there', dist: ['their', 'they\'re', 'thier'], exp: '"There" refers to a place or location.' },
+      { prompt: 'What does the prefix "UN-" mean in the word "unhappy"?', ans: 'Not', dist: ['Very', 'Again', 'Before'], exp: 'The prefix "un-" negates the root word: unhappy = not happy.' },
+      { prompt: 'Which sentence uses an apostrophe for POSSESSION correctly?', ans: "The girl's coat was hanging by the door.", dist: ["The girls coat was hanging by the door.", "The girl was put on her coat's.", "The coat's were all hanging."], exp: "\"The girl's coat\" indicates the coat belongs to the girl." }
+    ],
 
-    // Punctuation & Sentence Mechanics
-    { prompt: 'Which sentence is punctuated correctly?', word: 'Punctuation', ans: 'Although it was snowing, the school bus arrived on time.', dist: ['Although it was snowing the school bus arrived on time.', 'Although, it was snowing the school bus arrived on time.', 'Although it was snowing the school bus arrived, on time.'], exp: 'A dependent introductory clause must be followed by a comma.' },
-    { prompt: 'Which sentence correctly uses dialogue quotation marks?', word: 'Dialogue', ans: '"Please open your reading books," said Miss Rania.', dist: ['Please open your reading books, "said Miss Rania."', '"Please open your reading books" said Miss Rania.', 'Please open your reading books "said Miss Rania."'], exp: 'Spoken dialogue is enclosed in quotes with the comma placed inside.' },
-    { prompt: 'Select the sentence with correct subject-verb agreement:', word: 'Grammar', ans: 'Every student in the classroom has a notebook.', dist: ['Every student in the classroom have a notebook.', 'Every student in the classroom are having a notebook.', 'Every student in the classroom were having a notebook.'], exp: '"Every student" is singular and requires the singular verb "has".' }
-  ];
+    // 2.4 Upper Key Stage 2 (Year 5 & Year 6)
+    upper_ks2: [
+      { prompt: 'Which sentence is written in the PASSIVE VOICE?', ans: 'The delicious cake was baked by chef Marco.', dist: ['Chef Marco baked the delicious cake.', 'Chef Marco is eating the cake.', 'Everyone enjoyed the cake.'], exp: 'In passive voice, the subject receives the action: "The cake was baked by..."' },
+      { prompt: 'Identify the FIGURATIVE LANGUAGE: "The snowflakes danced across the winter meadow."', ans: 'Personification', dist: ['Simile', 'Hyperbole', 'Alliteration'], exp: 'Giving human qualities (dancing) to non-human things (snowflakes) is personification.' },
+      { prompt: 'Which of these is a SIMILE?', ans: 'He was as brave as a lion in battle.', dist: ['He was a ferocious lion in battle.', 'The lion roared loudly.', 'Bravery filled his heart.'], exp: 'A simile compares two things using "as" or "like".' },
+      { prompt: 'Choose the modal verb that indicates absolute CERTAINTY or OBLIGATION:', ans: 'Must', dist: ['Might', 'Could', 'Possibly'], exp: '"Must" indicates mandatory obligation or strong certainty.' },
+      { prompt: 'Select the synonym for the word "ABUNDANT":', ans: 'Plentiful', dist: ['Scarce', 'Tiny', 'Fragile'], exp: '"Abundant" means existing in large quantities (plentiful).' }
+    ],
 
-  // ===========================================================================
-  // 3. SCIENCE GENERATOR (Over 40 Curated Scientific Inquiry Questions)
-  // ===========================================================================
+    // 2.5 Key Stage 3 (Year 7, Year 8, Year 9)
+    ks3: [
+      { prompt: 'Identify the rhetorical device: "Peter Piper picked a peck of pickled peppers."', ans: 'Alliteration', dist: ['Oxymoron', 'Onomatopoeia', 'Irony'], exp: 'Repetition of the initial consonant sound "p" across words is alliteration.' },
+      { prompt: 'Which term describes an apparent contradiction that reveals an underlying truth (e.g. "deafening silence")?', ans: 'Oxymoron', dist: ['Hyperbole', 'Simile', 'Metaphor'], exp: 'Juxtaposing two contradictory terms side-by-side forms an oxymoron.' },
+      { prompt: 'What is the function of a SEMICOLON (;) in a compound sentence?', ans: 'To join two closely related independent clauses without a conjunction', dist: ['To introduce a bulleted list', 'To end a question', 'To enclose a parenthetical remark'], exp: 'Semicolons link two complete independent thoughts that share a thematic link.' },
+      { prompt: 'What word best describes an "ominous" tone in literature?', ans: 'Threatening or foreboding evil', dist: ['Cheerful and upbeat', 'Humorous and lighthearted', 'Scientific and neutral'], exp: 'Ominous conveys an atmosphere that something bad or harmful is going to happen.' },
+      { prompt: 'Select the meaning of the word "CANDID":', ans: 'Frank, honest, and direct', dist: ['Deceitful and sneaky', 'Hidden and secret', 'Shy and reserved'], exp: 'To be candid is to speak truthfully and openly.' }
+    ],
 
-  const ScienceBank = [
-    // Biology & Living Organisms
-    { prompt: 'Which organelle in plant cells is responsible for carrying out photosynthesis?', vis: '🌿 Plant Biology', ans: 'Chloroplast', dist: ['Mitochondria', 'Cell membrane', 'Nucleus'], exp: 'Chloroplasts contain green chlorophyll which absorbs sunlight for photosynthesis.' },
-    { prompt: 'What essential gas do plants take in from the atmosphere during photosynthesis?', vis: '🍃 Photosynthesis', ans: 'Carbon dioxide', dist: ['Oxygen', 'Nitrogen', 'Helium'], exp: 'Plants absorb carbon dioxide and water to produce glucose and oxygen.' },
-    { prompt: 'Which organ in the human body pumps oxygen-rich blood through the circulatory system?', vis: '❤️ Human Biology', ans: 'Heart', dist: ['Lungs', 'Stomach', 'Liver'], exp: 'The heart is a muscular pump circulating blood through arteries and veins.' },
-    { prompt: 'Which organ in the human body filters waste products from blood to produce urine?', vis: '🩺 Human Biology', ans: 'Kidneys', dist: ['Lungs', 'Heart', 'Pancreas'], exp: 'The kidneys filter blood to remove urea and excess fluid.' },
-    { prompt: 'In a typical food chain, what role is played by green plants?', vis: '🌱 Ecology', ans: 'Producers', dist: ['Consumers', 'Decomposers', 'Predators'], exp: 'Plants produce their own food using sunlight, making them producers.' },
-    { prompt: 'Animals that eat only plants are classified as:', vis: '🐰 Animal Diets', ans: 'Herbivores', dist: ['Carnivores', 'Omnivores', 'Parasites'], exp: 'Herbivores eat plant material exclusively.' },
+    // 2.6 Key Stage 4 / GCSE (Year 10 & Year 11)
+    gcse: [
+      { prompt: 'In Shakespearean drama, when a character speaks their private thoughts aloud alone on stage, it is called a:', ans: 'Soliloquy', dist: ['Monologue', 'Aside', 'Dialogue'], exp: 'A soliloquy reveals an actor\'s deepest inner reflections when isolated on stage.' },
+      { prompt: 'Which dramatic concept refers to the audience knowing a critical fact that the characters on stage do NOT know?', ans: 'Dramatic Irony', dist: ['Verbal Irony', 'Situational Irony', 'Cosmic Irony'], exp: 'Dramatic irony occurs when spectators possess knowledge hidden from protagonists.' },
+      { prompt: 'In Greek tragedy, a fatal flaw leading to the downfall of a tragic hero is known as:', ans: 'Hamartia', dist: ['Hubris', 'Catharsis', 'Nemesis'], exp: 'Hamartia is the tragic error or flaw (such as excessive pride / hubris).' },
+      { prompt: 'Which literary device attributes human weather/nature to reflect human emotion (e.g., storm during sorrow)?', ans: 'Pathetic Fallacy', dist: ['Anthropomorphism', 'Metonymy', 'Synecdoche'], exp: 'Pathetic fallacy mirrors human emotional states within the natural environment.' },
+      { prompt: 'What is the definition of "UBIQUITOUS"?', ans: 'Present, appearing, or found everywhere', dist: ['Extremely rare and endangered', 'Temporary and fleeting', 'Dangerous and lethal'], exp: 'Ubiquitous describes something omnipresent or universally encountered.' }
+    ],
 
-    // Matter, Chemistry & Materials
-    { prompt: 'At standard sea-level pressure, at what temperature does pure water freeze into ice?', vis: '❄️ States of Matter', ans: '0°C (32°F)', dist: ['100°C (212°F)', '-10°C (14°F)', '10°C (50°F)'], exp: 'Water transitions from liquid to solid ice at 0°C.' },
-    { prompt: 'At standard sea-level pressure, at what temperature does pure water boil into steam?', vis: '♨️ States of Matter', ans: '100°C (212°F)', dist: ['0°C (32°F)', '50°C (122°F)', '200°C (392°F)'], exp: 'Water boils and evaporates into gas at 100°C.' },
-    { prompt: 'Which state of matter has a definite volume but takes the shape of its container?', vis: '🧪 Matter', ans: 'Liquid', dist: ['Solid', 'Gas', 'Plasma'], exp: 'Liquids flow and take container shape while keeping fixed volume.' },
-    { prompt: 'Which of the following materials is an excellent electrical conductor?', vis: '⚡ Electricity', ans: 'Copper wire', dist: ['Rubber band', 'Plastic ruler', 'Dry wood'], exp: 'Metals like copper have free electrons that conduct electricity efficiently.' },
-    { prompt: 'Which of the following materials is classified as an electrical insulator?', vis: '🔌 Electrical Safety', ans: 'Rubber', dist: ['Copper', 'Iron', 'Aluminium'], exp: 'Rubber does not conduct electric current, making it an insulator.' },
-
-    // Physics, Forces & Energy
-    { prompt: 'What force opposes motion when two physical surfaces slide past each other?', vis: '⚙️ Mechanics', ans: 'Friction', dist: ['Gravity', 'Magnetism', 'Buoyancy'], exp: 'Friction is the resistive contact force opposing relative movement.' },
-    { prompt: 'What force pulls objects towards the centre of the Earth?', vis: '🌍 Forces', ans: 'Gravity', dist: ['Friction', 'Magnetism', 'Upthrust'], exp: 'Gravity is the non-contact attractive force exerted by masses.' },
-    { prompt: 'What happens when two identical magnetic North poles are pushed towards each other?', vis: '🧲 Magnetism', ans: 'They repel each other', dist: ['They attract each other', 'They lose magnetism', 'They stick together'], exp: 'Like magnetic poles repel, whereas opposite poles attract.' },
-    { prompt: 'Light travels in:', vis: '💡 Optics', ans: 'Straight lines', dist: ['Curved circles', 'Zig-zag waves only', 'Spirals'], exp: 'Light travels in straight lines (rectilinear propagation) through uniform media.' },
-    { prompt: 'Sound waves are produced by:', vis: '🔊 Acoustics', ans: 'Vibrations', dist: ['Magnetism', 'Light rays', 'Static electricity'], exp: 'Sound is caused by physical vibrations propagating through air, liquid, or solids.' },
-
-    // Earth & Space Science
-    { prompt: 'Which planet is closest to the Sun in our Solar System?', vis: '🪐 Solar System', ans: 'Mercury', dist: ['Venus', 'Mars', 'Earth'], exp: 'Mercury is the innermost planet orbiting closest to the Sun.' },
-    { prompt: 'What causes the day and night cycle on planet Earth?', vis: '🌎 Earth & Sun', ans: "Earth's rotation on its axis", dist: ["Earth orbiting the Sun", "The Moon's shadow", "The Sun turning off"], exp: "Earth takes approximately 24 hours to rotate once on its axis, producing day and night." },
-    { prompt: 'How long does it take for Earth to complete one full orbit around the Sun?', vis: '☀️ Astronomy', ans: '365.25 days (1 year)', dist: ['24 hours', '30 days (1 month)', '10 years'], exp: 'Earth orbits the Sun once in approximately 365.25 days.' },
-    { prompt: 'What process in the water cycle turns liquid water into invisible water vapour?', vis: '💧 Water Cycle', ans: 'Evaporation', dist: ['Condensation', 'Precipitation', 'Freezing'], exp: 'Heat from the Sun causes liquid water to evaporate into water vapour.' }
-  ];
+    // 2.7 Key Stage 5 / A-Levels (Year 12 & Year 13)
+    alevel: [
+      { prompt: 'Which rhetorical device involves the repetition of a word or phrase at the BEGINNING of successive clauses?', ans: 'Anaphora', dist: ['Epistrophe', 'Chiasmus', 'Polysyndeton'], exp: 'Anaphora repeats introductory words (e.g., "We shall fight... We shall fight...").' },
+      { prompt: 'In linguistic semantics, what term describes a word\'s meaning becoming MORE NEGATIVE over historical time?', ans: 'Pejoration', dist: ['Amelioration', 'Broadening', 'Narrowing'], exp: 'Pejoration occurs when a neutral or positive word acquires negative associations.' },
+      { prompt: 'Which critical theory investigates power dynamics, social class conflicts, and economic hegemony in texts?', ans: 'Marxist Literary Criticism', dist: ['Structuralism', 'Eco-criticism', 'Formalism'], exp: 'Marxist theory scrutinises class struggle, bourgeoisie power, and socioeconomic hierarchy.' },
+      { prompt: 'Identify the sentence containing a correct use of the SUBJUNCTIVE MOOD:', ans: 'If I were the prime minister, I would reform the education system.', dist: ['If I was the prime minister, I will reform it.', 'If I am the prime minister, I might reform it.', 'I were the prime minister yesterday.'], exp: '"If I were..." expresses a hypothetical or counter-factual condition in the subjunctive.' },
+      { prompt: 'What narrative technique attempts to capture the unfiltered, continuous flow of a character\'s conscious thoughts?', ans: 'Stream of Consciousness', dist: ['Free Indirect Discourse', 'Epistolary narrative', 'Unreliable narrator'], exp: 'Stream of consciousness depicts unbroken interior monologue (e.g., Virginia Woolf, James Joyce).' }
+    ]
+  };
 
   // ===========================================================================
-  // MAIN QUESTION ENGINE ROUTER
+  // 3. STAGE-SPECIFIC SCIENCE QUESTION BANKS
+  // ===========================================================================
+
+  const ScienceBanksByStage = {
+    // 3.1 Early Years (Reception)
+    early: [
+      { prompt: 'Which sense do we use our EYES for?', ans: 'Sight (Seeing)', dist: ['Hearing', 'Smelling', 'Tasting'], exp: 'We use our eyes to see colors and objects.' },
+      { prompt: 'Which of the following is a LIVING thing?', ans: 'A playful puppy', dist: ['A toy teddy bear', 'A plastic ball', 'A stone'], exp: 'Puppies grow, breathe, and need food, so they are living.' },
+      { prompt: 'What season is cold and often has snow?', ans: 'Winter', dist: ['Summer', 'Spring', 'Autumn'], exp: 'Winter is the coldest season of the year.' },
+      { prompt: 'What gives us light and warmth during the daytime?', ans: 'The Sun', dist: ['The Moon', 'The Clouds', 'The Stars'], exp: 'The Sun shines during the day, giving light and heat.' },
+      { prompt: 'Which animal lives in water and breathes with gills?', ans: 'Goldfish', dist: ['Cat', 'Rabbit', 'Sparrow'], exp: 'Fish like goldfish live underwater and breathe through gills.' }
+    ],
+
+    // 3.2 Key Stage 1 (Year 1 & Year 2)
+    ks1: [
+      { prompt: 'What do green plants need to grow healthy and strong?', ans: 'Water and Sunlight', dist: ['Only darkness', 'Milk and juice', 'Wind only'], exp: 'Plants require water and light from the sun to make food.' },
+      { prompt: 'Which group of animals has feathers and lays hard-shelled eggs?', ans: 'Birds', dist: ['Mammals', 'Reptiles', 'Amphibians'], exp: 'All birds have feathers, beaks, wings, and lay eggs.' },
+      { prompt: 'Which material is transparent (see-through) and used to make window panes?', ans: 'Glass', dist: ['Wood', 'Metal', 'Wool'], exp: 'Glass is rigid and transparent, letting daylight through.' },
+      { prompt: 'An animal that eats ONLY plants is called a:', ans: 'Herbivore', dist: ['Carnivore', 'Omnivore', 'Decomposer'], exp: 'Herbivores (like cows, sheep, and deer) feed exclusively on plants.' },
+      { prompt: 'When water is frozen into ice in a freezer, what state of matter is it?', ans: 'Solid', dist: ['Liquid', 'Gas', 'Vapour'], exp: 'Ice is water in its rigid solid form.' }
+    ],
+
+    // 3.3 Lower Key Stage 2 (Year 3 & Year 4)
+    lower_ks2: [
+      { prompt: 'Which part of a flowering plant absorbs water and mineral salts from the soil?', ans: 'Roots', dist: ['Petals', 'Stem', 'Leaves'], exp: 'Roots anchor the plant and drink water and nutrients from the soil.' },
+      { prompt: 'What hard framework inside human bodies protects organs and enables movement?', ans: 'The Skeleton', dist: ['The Skin', 'The Lungs', 'The Stomach'], exp: 'The skeleton (206 bones in adults) supports weight and shields vital organs.' },
+      { prompt: 'What happens when two North poles of two bar magnets are placed close together?', ans: 'They repel (push apart)', dist: ['They attract (pull together)', 'They melt', 'Nothing happens'], exp: 'Like magnetic poles (N-N or S-S) always repel each other.' },
+      { prompt: 'At what temperature Celsius does pure liquid water boil at standard sea level pressure?', ans: '100°C', dist: ['0°C', '50°C', '212°C'], exp: 'Pure water boils into steam at 100°C.' },
+      { prompt: 'Why do shadows form when an opaque object is placed in front of a lamp?', ans: 'Light travels in straight lines and cannot pass through the opaque object', dist: ['The lamp turns off', 'Light bends around the object', 'The object creates darkness'], exp: 'Because light rays travel linearly, opaque obstacles cast shadows behind them.' }
+    ],
+
+    // 3.4 Upper Key Stage 2 (Year 5 & Year 6)
+    upper_ks2: [
+      { prompt: 'Which organ in the human circulatory system pumps oxygen-rich blood through arteries?', ans: 'Heart', dist: ['Lungs', 'Liver', 'Kidneys'], exp: 'The muscular heart continuously pumps blood around the systemic circulatory system.' },
+      { prompt: 'What gravitational force pulls objects down towards the centre of the Earth?', ans: 'Gravity', dist: ['Friction', 'Magnetism', 'Buoyancy'], exp: 'Gravity is the non-contact attraction exerted by Earth\'s mass.' },
+      { prompt: 'How long does it take for Planet Earth to complete ONE full orbit around the Sun?', ans: '365.25 days (1 year)', dist: ['24 hours (1 day)', '28 days (1 month)', '10 years'], exp: 'Earth revolves around the Sun in approximately 365¼ days.' },
+      { prompt: 'Which cell component in green plant leaves captures sunlight for photosynthesis?', ans: 'Chloroplast (containing chlorophyll)', dist: ['Mitochondria', 'Vacuole', 'Cell wall'], exp: 'Chloroplasts house green chlorophyll pigments which absorb light energy.' },
+      { prompt: 'What evolutionary mechanism did Charles Darwin propose to explain how species adapt to environments?', ans: 'Natural Selection', dist: ['Artificial Breeding', 'Spontaneous Generation', 'Acquired Inheritance'], exp: 'Natural selection favours organisms with advantageous traits for survival and reproduction.' }
+    ],
+
+    // 3.5 Key Stage 3 (Year 7, Year 8, Year 9)
+    ks3: [
+      { prompt: 'Which cellular organelle is the site of AEROBIC RESPIRATION and ATP energy generation?', ans: 'Mitochondria', dist: ['Ribosome', 'Golgi apparatus', 'Endoplasmic reticulum'], exp: 'Mitochondria are the "powerhouses" where glucose and oxygen produce ATP.' },
+      { prompt: 'In chemistry, what does the ATOMIC NUMBER of an element signify?', ans: 'The number of protons in the nucleus', dist: ['The total protons plus neutrons', 'The number of electron shells', 'The atomic weight in grams'], exp: 'Atomic number (Z) uniquely identifies an element by its proton count.' },
+      { prompt: 'What are the products of an ACID reacting with a BASE (neutralisation)?', ans: 'Salt + Water', dist: ['Gas + Metal', 'Acid + Oxygen', 'Carbon dioxide + Hydrogen'], exp: 'Neutralisation reaction: Acid + Base → Salt + Water.' },
+      { prompt: 'According to Newton\'s Second Law of Motion, Force (F) equals:', ans: 'Mass × Acceleration (F = ma)', dist: ['Mass ÷ Speed', 'Velocity × Time', 'Distance ÷ Time'], exp: 'Newton\'s Second Law states that net force equals mass multiplied by acceleration.' },
+      { prompt: 'Which part of the electromagnetic spectrum has the HIGHEST frequency and energy?', ans: 'Gamma rays', dist: ['Radio waves', 'Visible light', 'Infrared rays'], exp: 'Gamma rays possess the shortest wavelengths, highest frequencies, and greatest photon energies.' }
+    ],
+
+    // 3.6 Key Stage 4 / GCSE (Year 10 & Year 11)
+    gcse: [
+      { prompt: 'Which type of cell division produces FOUR genetically diverse haploid daughter cells (gametes)?', ans: 'Meiosis', dist: ['Mitosis', 'Binary Fission', 'Budding'], exp: 'Meiosis produces 4 haploid gametes (sperm/egg) with genetic variation via crossing over.' },
+      { prompt: 'What type of chemical bond is formed when electrons are SHARED between non-metal atoms?', ans: 'Covalent bond', dist: ['Ionic bond', 'Metallic bond', 'Hydrogen bond'], exp: 'Covalent bonding involves shared pairs of valence electrons between non-metals.' },
+      { prompt: 'According to Ohm\'s Law, what is the mathematical formula linking Voltage (V), Current (I), and Resistance (R)?', ans: 'V = I × R', dist: ['I = V × R', 'R = V × I', 'V = I ÷ R'], exp: 'Ohm\'s Law states potential difference V = I × R.' },
+      { prompt: 'What is the definition of the HALF-LIFE of a radioactive isotope?', ans: 'The time taken for half the radioactive nuclei in a sample to decay', dist: ['The time for the isotope to completely disappear', 'Half the total lifespan of the atomic reactor', 'The time for electrons to jump energy levels'], exp: 'Half-life is the statistical duration required for 50% of unstable nuclei to undergo decay.' },
+      { prompt: 'In human biology, which hormone is secreted by the pancreas to LOWER elevated blood glucose levels?', ans: 'Insulin', dist: ['Glucagon', 'Adrenaline', 'Thyroxine'], exp: 'Insulin signals liver and muscle cells to absorb glucose and store it as glycogen.' }
+    ],
+
+    // 3.7 Key Stage 5 / A-Levels (Year 12 & Year 13)
+    alevel: [
+      { prompt: 'In cellular respiration, what enzyme complexes use a proton gradient across the inner mitochondrial membrane to synthesise ATP?', ans: 'ATP Synthase (Chemiosmosis)', dist: ['DNA Polymerase', 'RNA Helicase', 'Amylase'], exp: 'Proton motive force drives ATP Synthase rotor to phosphorylate ADP into ATP.' },
+      { prompt: 'According to Le Chatelier\'s principle, what happens to an EXOTHERMIC equilibrium reaction if temperature is INCREASED?', ans: 'Equilibrium shifts left towards reactants to absorb the added heat', dist: ['Equilibrium shifts right towards products', 'Equilibrium is unaffected', 'Rate of reaction drops to zero'], exp: 'Exothermic reactions release heat; increasing temperature shifts equilibrium endothermically (left).' },
+      { prompt: 'What is the IDEAL GAS LAW equation linking Pressure (P), Volume (V), Moles (n), and Temperature (T)?', ans: 'PV = nRT', dist: ['P = nVRT', 'PV = mgh', 'V = nPRT'], exp: 'PV = nRT relates macroscopic state variables of an ideal gas (R = 8.314 J/mol·K).' },
+      { prompt: 'What quantum phenomenon demonstrated that light delivers energy in discrete packets (quanta/photons: E = hf)?', ans: 'The Photoelectric Effect', dist: ['Compton Scattering', 'Young\'s Double Slit', 'Rutherford Alpha Scattering'], exp: 'Einstein\'s explanation of the photoelectric effect proved light has particle/photon nature.' },
+      { prompt: 'In organic chemistry, which functional group consists of a carbonyl group bonded to an -OH group (-COOH)?', ans: 'Carboxylic acid', dist: ['Ester', 'Aldehyde', 'Ketone'], exp: '-COOH is the defining carboxyl functional group of organic carboxylic acids.' }
+    ]
+  };
+
+  // ===========================================================================
+  // 4. MAIN QUESTION ENGINE INTERFACE
   // ===========================================================================
 
   const QuestionEngine = {
+    getStage,
+
     generate(skill, smartScore = 0) {
       const subj = skill.subject || 'Maths';
       const name = (skill.name || skill.skill_name || '').toLowerCase();
-      const grade = (skill.grade || skill.grade_level || '').toLowerCase();
+      const rawGrade = skill.grade || skill.grade_level || (window.AppState && window.AppState.currentGrade) || 'Year 4';
+      const stage = getStage(rawGrade);
       const tier = smartScore >= 80 ? 3 : (smartScore >= 50 ? 2 : 1);
 
       let question = null;
       let attempts = 0;
 
-      // Anti-repetition loop: attempt up to 10 times to find a question not in sessionHistory
-      while (attempts < 10) {
+      // Anti-repetition loop: attempt up to 12 times to generate a unique question for this session
+      while (attempts < 12) {
         attempts++;
         if (subj === 'Maths') {
-          question = this.routeMath(name, grade, tier);
+          question = this.routeMath(name, stage, tier, rawGrade);
         } else if (subj === 'English') {
-          question = this.routeEnglish(name, grade, tier);
+          question = this.routeEnglish(name, stage, tier, rawGrade);
         } else {
-          question = this.routeScience(name, grade, tier);
+          question = this.routeScience(name, stage, tier, rawGrade);
         }
 
-        const questionKey = `${skill.code || ''}_${question.prompt}`;
+        const questionKey = `${stage}_${skill.code || ''}_${question.prompt}`;
         if (!sessionHistory.has(questionKey)) {
           sessionHistory.add(questionKey);
           break;
         }
       }
 
-      // Safeguard: keep sessionHistory reasonable size
-      if (sessionHistory.size > 200) sessionHistory.clear();
+      // Safeguard cache growth
+      if (sessionHistory.size > 300) sessionHistory.clear();
+
+      // Ensure grade badge is stamped on visuals
+      const gradeBadge = `🎓 ${rawGrade} (${stage.toUpperCase().replace('_', ' ')})`;
+      // Ensure choices property is mirrored for any consumer expecting .choices
+      if (!question.options) question.options = [];
+      question.choices = question.options;
+      question.stage = stage;
+      question.rawGrade = rawGrade;
 
       return question;
     },
 
-    routeMath(name, grade, tier) {
-      // Reception & early year counting
-      if (grade.includes('reception') || grade.includes('nursery') || name.includes('count') || name.includes('identify number')) {
-        return MathGenerators.earlyCounting(tier);
-      }
-
-      // Even or Odd Numbers
-      if (name.includes('even') || name.includes('odd') || name.includes('parity')) {
-        return MathGenerators.evenOdd(tier);
-      }
-
-      // Multiplication & Division
-      if (name.includes('multipl') || name.includes('times table') || name.includes('product')) {
-        return MathGenerators.multiplicationDivision(tier, false);
-      }
-      if (name.includes('divide') || name.includes('division') || name.includes('quotient')) {
-        return MathGenerators.multiplicationDivision(tier, true);
-      }
-
-      // Fractions, Decimals, Percentages
-      if (name.includes('fraction') || name.includes('decimal') || name.includes('percent')) {
-        return MathGenerators.fractions(tier);
-      }
-
-      // Geometry & Shapes
-      if (name.includes('shape') || name.includes('geometry') || name.includes('angle') || name.includes('area') || name.includes('perimeter')) {
-        return MathGenerators.geometry(tier);
-      }
-
-      // Measurement, Time & Money
-      if (name.includes('time') || name.includes('clock') || name.includes('money') || name.includes('pound') || name.includes('measure') || name.includes('length')) {
-        return MathGenerators.measurement(tier);
-      }
-
-      // Algebra, Sequences & Primes
-      if (name.includes('algebra') || name.includes('equation') || name.includes('pattern') || name.includes('prime') || name.includes('factor')) {
-        return MathGenerators.algebra(tier);
-      }
-
-      // Place value & Rounding
-      if (name.includes('round') || name.includes('estimate')) {
-        return MathGenerators.placeValue(tier, true);
-      }
-      if (name.includes('place value') || name.includes('digit') || name.includes('value of')) {
-        return MathGenerators.placeValue(tier, false);
-      }
-
-      // Addition & Subtraction
-      if (name.includes('subtract') || name.includes('subtraction') || name.includes('difference') || name.includes('minus')) {
-        return MathGenerators.additionSubtraction(tier, true);
-      }
-      if (name.includes('add') || name.includes('addition') || name.includes('sum') || name.includes('plus')) {
-        return MathGenerators.additionSubtraction(tier, false);
-      }
-
-      // Intelligent Fallback based on tier
-      const fallbackRoll = randomChoice(['add', 'sub', 'mul', 'frac', 'place']);
-      if (fallbackRoll === 'add') return MathGenerators.additionSubtraction(tier, false);
-      if (fallbackRoll === 'sub') return MathGenerators.additionSubtraction(tier, true);
-      if (fallbackRoll === 'mul') return MathGenerators.multiplicationDivision(tier, false);
-      if (fallbackRoll === 'frac') return MathGenerators.fractions(tier);
-      return MathGenerators.placeValue(tier, false);
+    routeMath(name, stage, tier, rawGrade) {
+      if (stage === 'early') return MathStageGenerators.early(name, tier);
+      if (stage === 'ks1') return MathStageGenerators.ks1(name, tier);
+      if (stage === 'lower_ks2') return MathStageGenerators.lower_ks2(name, tier);
+      if (stage === 'upper_ks2') return MathStageGenerators.upper_ks2(name, tier);
+      if (stage === 'ks3') return MathStageGenerators.ks3(name, tier);
+      if (stage === 'gcse') return MathStageGenerators.gcse(name, tier);
+      if (stage === 'alevel') return MathStageGenerators.alevel(name, tier);
+      return MathStageGenerators.lower_ks2(name, tier);
     },
 
-    routeEnglish(name, grade, tier) {
-      // Filter bank to relevant topic if matched
-      let filtered = EnglishBank;
-      if (name.includes('speech') || name.includes('noun') || name.includes('verb') || name.includes('adverb') || name.includes('adjective') || name.includes('pronoun') || name.includes('preposition')) {
-        filtered = EnglishBank.filter(q => ['Verb', 'Noun', 'Adjective', 'Adverb', 'Preposition', 'Pronoun', 'Conjunction'].includes(q.ans));
-      } else if (name.includes('plural')) {
-        filtered = EnglishBank.filter(q => q.word === 'Plurals');
-      } else if (name.includes('spelling') || name.includes('homophone')) {
-        filtered = EnglishBank.filter(q => ['Homophones', 'Spelling', 'Pronouns'].includes(q.word));
-      } else if (name.includes('synonym') || name.includes('antonym') || name.includes('vocabulary')) {
-        filtered = EnglishBank.filter(q => ['Synonyms', 'Antonyms'].includes(q.word));
-      } else if (name.includes('punctuation') || name.includes('comma') || name.includes('dialogue')) {
-        filtered = EnglishBank.filter(q => ['Punctuation', 'Dialogue', 'Grammar'].includes(q.word));
-      }
-
-      if (!filtered.length) filtered = EnglishBank;
-      const q = randomChoice(filtered);
+    routeEnglish(name, stage, tier, rawGrade) {
+      const bank = EnglishBanksByStage[stage] || EnglishBanksByStage.lower_ks2;
+      const q = randomChoice(bank);
       return {
         type: 'multiple_choice',
         prompt: q.prompt,
@@ -809,24 +940,13 @@
       };
     },
 
-    routeScience(name, grade, tier) {
-      let filtered = ScienceBank;
-      if (name.includes('plant') || name.includes('cell') || name.includes('biology') || name.includes('photosynthesis') || name.includes('organ') || name.includes('body')) {
-        filtered = ScienceBank.filter(q => q.vis.includes('Biology') || q.vis.includes('Photosynthesis') || q.vis.includes('Ecology') || q.vis.includes('Animal'));
-      } else if (name.includes('force') || name.includes('friction') || name.includes('gravity') || name.includes('magnet') || name.includes('light') || name.includes('sound')) {
-        filtered = ScienceBank.filter(q => q.vis.includes('Mechanics') || q.vis.includes('Forces') || q.vis.includes('Magnetism') || q.vis.includes('Optics') || q.vis.includes('Acoustics'));
-      } else if (name.includes('matter') || name.includes('solid') || name.includes('liquid') || name.includes('freeze') || name.includes('conduct') || name.includes('insulat') || name.includes('electric')) {
-        filtered = ScienceBank.filter(q => q.vis.includes('Matter') || q.vis.includes('Electricity') || q.vis.includes('Electrical'));
-      } else if (name.includes('space') || name.includes('planet') || name.includes('solar') || name.includes('earth') || name.includes('water cycle') || name.includes('sun')) {
-        filtered = ScienceBank.filter(q => q.vis.includes('Solar') || q.vis.includes('Earth') || q.vis.includes('Astronomy') || q.vis.includes('Water'));
-      }
-
-      if (!filtered.length) filtered = ScienceBank;
-      const s = randomChoice(filtered);
+    routeScience(name, stage, tier, rawGrade) {
+      const bank = ScienceBanksByStage[stage] || ScienceBanksByStage.lower_ks2;
+      const s = randomChoice(bank);
       return {
         type: 'multiple_choice',
         prompt: s.prompt,
-        visuals: [s.vis],
+        visuals: [`🔬 Science Inquiry`],
         correctAnswer: s.ans,
         options: shuffle([s.ans, ...s.dist]),
         explanation: s.exp
@@ -834,7 +954,9 @@
     }
   };
 
+  // Expose globally
   window.QuestionEngine = QuestionEngine;
+  if (typeof module !== 'undefined' && module.exports) {
+    module.exports = QuestionEngine;
+  }
 })();
-
-

@@ -1959,6 +1959,9 @@ function submitAnswer() {
 // =============================================================================
 
 function generateQuestion(skill) {
+  if (typeof window !== 'undefined' && window.QuestionEngine && window.QuestionEngine.generate) {
+    return window.QuestionEngine.generate(skill);
+  }
   const subj = skill.subject || 'Maths';
   const name = (skill.name || skill.skill_name || '').toLowerCase();
   const code = skill.code || skill.skill_code || '';
