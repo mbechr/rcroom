@@ -34,6 +34,17 @@ def init_auth_db():
         FOREIGN KEY(user_id) REFERENCES users(id)
     )
     ''')
+    # Ensure plain_password column exists for teacher dashboard management
+    cursor = conn.cursor()
+    cursor.execute("PRAGMA table_info(users)")
+    cols = [r['name'] for r in cursor.fetchall()]
+    if 'plain_password' not in cols:
+        try:
+            conn.execute("ALTER TABLE users ADD COLUMN plain_password TEXT")
+            conn.execute("UPDATE users SET plain_password = 'password123' WHERE role != 'teacher' AND plain_password IS NULL")
+            conn.execute("UPDATE users SET plain_password = 'admin123' WHERE role = 'teacher' AND plain_password IS NULL")
+        except Exception:
+            pass
     conn.commit()
     conn.close()
 
@@ -422,9 +433,9 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
             try:
                 salted_hash = hash_pw(password)
                 cursor.execute('''
-                INSERT INTO users (username, password_hash, full_name, grade_level, avatar, xp, streak_days, role)
-                VALUES (?, ?, ?, ?, ?, 100, 1, 'student')
-                ''', (username, salted_hash, full_name, grade, avatar))
+                INSERT INTO users (username, password_hash, full_name, grade_level, avatar, xp, streak_days, role, plain_password)
+                VALUES (?, ?, ?, ?, ?, 100, 1, 'student', ?)
+                ''', (username, salted_hash, full_name, grade, avatar, password))
                 student_id = cursor.lastrowid
                 cursor.execute('''
                 INSERT INTO student_badges (student_id, badge_id, badge_name, badge_icon, badge_desc)
@@ -436,6 +447,54 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
             except sqlite3.IntegrityError:
                 conn.close()
                 return self.send_json({'success': False, 'error': 'Username already exists.'}, status=409)
+
+        elif path == '/api/teacher/student/update':
+            auth_user = get_authenticated_user(self.headers)
+            if not auth_user or auth_user.get('role') != 'teacher':
+                return self.send_json({'success': False, 'error': 'Teacher authorization required.'}, status=403)
+
+            data = self.parse_body()
+            student_id = data.get('student_id')
+            full_name = data.get('full_name', '').strip()
+            username = data.get('username', '').strip().lower()
+            grade = data.get('grade_level', '').strip()
+            avatar = data.get('avatar', '').strip()
+            password = data.get('password', '').strip()
+
+            if not student_id or not full_name or not username:
+                return self.send_json({'success': False, 'error': 'student_id, full_name, and username are required'}, status=400)
+
+            conn = get_db()
+            cursor = conn.cursor()
+
+            # Check if username is taken by another student
+            cursor.execute('SELECT id FROM users WHERE LOWER(username) = ? AND id != ?', (username, student_id))
+            if cursor.fetchone():
+                conn.close()
+                return self.send_json({'success': False, 'error': 'Username is already taken by another student.'}, status=409)
+
+            if password:
+                salted_hash = hash_pw(password)
+                cursor.execute('''
+                UPDATE users 
+                SET full_name = ?, username = ?, 
+                    grade_level = CASE WHEN ? != '' THEN ? ELSE grade_level END,
+                    avatar = CASE WHEN ? != '' THEN ? ELSE avatar END,
+                    password_hash = ?, plain_password = ?
+                WHERE id = ? AND role != 'teacher'
+                ''', (full_name, username, grade, grade, avatar, avatar, salted_hash, password, student_id))
+            else:
+                cursor.execute('''
+                UPDATE users 
+                SET full_name = ?, username = ?, 
+                    grade_level = CASE WHEN ? != '' THEN ? ELSE grade_level END,
+                    avatar = CASE WHEN ? != '' THEN ? ELSE avatar END
+                WHERE id = ? AND role != 'teacher'
+                ''', (full_name, username, grade, grade, avatar, avatar, student_id))
+
+            conn.commit()
+            conn.close()
+            return self.send_json({'success': True})
 
         elif path == '/api/teacher/student/reset_password':
             auth_user = get_authenticated_user(self.headers)
@@ -451,7 +510,7 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
 
             conn = get_db()
             cursor = conn.cursor()
-            cursor.execute('UPDATE users SET password_hash = ? WHERE id = ?', (hash_pw(new_password), student_id))
+            cursor.execute('UPDATE users SET password_hash = ?, plain_password = ? WHERE id = ? AND role != \'teacher\'', (hash_pw(new_password), new_password, student_id))
             conn.commit()
             conn.close()
             return self.send_json({'success': True})
@@ -631,6 +690,7 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
             cursor.execute('''
             SELECT 
                 u.id, u.username, u.full_name, u.grade_level, u.avatar, u.xp, u.streak_days,
+                COALESCE(u.plain_password, 'password123') as password,
                 COUNT(p.id) as sessions_count,
                 COALESCE(SUM(p.questions_answered), 0) as questions_answered,
                 COALESCE(SUM(p.questions_correct), 0) as questions_correct,

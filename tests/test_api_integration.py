@@ -98,6 +98,75 @@ def run_integration_tests():
     assert res.status == 200 and body['success'], 'Offline sync should succeed'
     print('  [PASS] Offline sync endpoint accepted and persisted practice session')
 
+    print('=== 8. Testing Teacher Student Management Endpoints (Create, Update, Delete) ===')
+    # 8a: Create student
+    create_payload = json.dumps({
+        'full_name': 'Test Student Roster',
+        'username': 'test_roster_user',
+        'password': 'InitialPass123!',
+        'grade_level': 'Year 4',
+        'avatar': '🦊'
+    })
+    conn.request('POST', '/api/teacher/student/create', body=create_payload, headers={
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {teacher_token}'
+    })
+    res = conn.getresponse()
+    body = json.loads(res.read().decode('utf-8'))
+    assert res.status == 200 and body['success'], 'Teacher create student should succeed'
+    new_student_id = body['student_id']
+    print('  [PASS] Teacher student creation via API succeeded')
+
+    # 8b: Update student name, grade, avatar, and password
+    update_payload = json.dumps({
+        'student_id': new_student_id,
+        'full_name': 'Test Student Updated Name',
+        'username': 'test_roster_user_renamed',
+        'password': 'UpdatedPass456!',
+        'grade_level': 'Year 6',
+        'avatar': '👑'
+    })
+    conn.request('POST', '/api/teacher/student/update', body=update_payload, headers={
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {teacher_token}'
+    })
+    res = conn.getresponse()
+    body = json.loads(res.read().decode('utf-8'))
+    assert res.status == 200 and body['success'], 'Teacher update student should succeed'
+    print('  [PASS] Teacher student update (name, username, grade, avatar, password) succeeded')
+
+    # 8c: Verify in teacher overview
+    conn.request('GET', '/api/teacher/overview', headers={'Authorization': f'Bearer {teacher_token}'})
+    res = conn.getresponse()
+    body = json.loads(res.read().decode('utf-8'))
+    roster = body['overview']['roster']
+    matching = next((s for s in roster if s['id'] == new_student_id), None)
+    assert matching is not None, 'Updated student must appear in roster'
+    assert matching['full_name'] == 'Test Student Updated Name', 'Roster must show updated name'
+    assert matching['username'] == 'test_roster_user_renamed', 'Roster must show updated username'
+    assert matching['password'] == 'UpdatedPass456!', 'Roster must show updated password'
+    assert matching['grade_level'] == 'Year 6', 'Roster must show updated grade level'
+    assert matching['avatar'] == '👑', 'Roster must show updated avatar'
+    print('  [PASS] Roster reflects updated student details and password')
+
+    # 8d: Delete student
+    delete_payload = json.dumps({'student_id': new_student_id})
+    conn.request('POST', '/api/teacher/student/delete', body=delete_payload, headers={
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {teacher_token}'
+    })
+    res = conn.getresponse()
+    body = json.loads(res.read().decode('utf-8'))
+    assert res.status == 200 and body['success'], 'Teacher delete student should succeed'
+
+    # Verify deletion in overview
+    conn.request('GET', '/api/teacher/overview', headers={'Authorization': f'Bearer {teacher_token}'})
+    res = conn.getresponse()
+    body = json.loads(res.read().decode('utf-8'))
+    roster = body['overview']['roster']
+    assert not any(s['id'] == new_student_id for s in roster), 'Student must be removed from roster'
+    print('  [PASS] Student deleted and removed from classroom roster')
+
     conn.close()
     httpd.shutdown()
     print('\n=== ALL API INTEGRATION TESTS PASSED PERFECTLY ===')

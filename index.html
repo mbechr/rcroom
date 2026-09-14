@@ -105,8 +105,12 @@
     };
   </script>
 
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+
   <!-- Core Project Styles -->
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=2.6.0">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><rect width='48' height='48' rx='12' fill='%230062e3'/><path d='M14 15h9a6 6 0 0 1 0 12h-9V15zm6 7h3a1 1 0 0 0 0-2h-3v2z' fill='%23ffffff'/><path d='M22 27l5 9h-6l-4.5-8h4.5z' fill='%23ffffff'/><path d='M34 16l1.2 3.8 3.8 1.2-3.8 1.2-1.2 3.8-1.2-3.8-3.8-1.2 3.8-1.2z' fill='%23f59e0b'/></svg>">
 
   <style>
@@ -284,6 +288,11 @@
           <span class="material-symbols-outlined text-streak-amber text-[18px]">local_fire_department</span>
           <span class="font-label-md text-label-md text-on-surface font-bold" id="navStudentStreak">0 Streak</span>
         </div>
+
+        <!-- Language Switcher (EN / AR) -->
+        <button aria-label="Language toggle" class="w-9 h-9 rounded-lg flex items-center justify-center bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer font-bold text-xs" id="langToggleBtn" type="button" title="Switch Language (English / العربية)">
+          <span id="langToggleText">عربي</span>
+        </button>
 
         <!-- Theme Toggle -->
         <button aria-label="Theme toggle" class="w-9 h-9 rounded-lg flex items-center justify-center bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer" id="themeToggleBtn" type="button" title="Toggle Light / Dark Mode">
@@ -1574,6 +1583,74 @@
   </div>
 
   <!-- ====================================================================
+       MODAL 4: EDIT STUDENT MODAL
+       ==================================================================== -->
+  <div class="auth-modal-backdrop" id="editStudentModal">
+    <div class="auth-modal-window" style="max-width: 500px;">
+      <div class="auth-modal-header">
+        <div>
+          <h2 class="auth-title">Edit Student Profile ✏️</h2>
+          <p class="auth-subtitle" id="editStudentSubtitle">Update student name, username, grade level, or password</p>
+        </div>
+        <button class="modal-close-btn" id="closeEditStudentModalBtn">✕</button>
+      </div>
+      <form id="editStudentForm" class="auth-form" onsubmit="return false;" style="padding: 1.5rem;">
+        <input type="hidden" id="editStudentId">
+        <div class="form-group">
+          <label for="editStudentName">Student Full Name</label>
+          <input type="text" id="editStudentName" placeholder="e.g. Oliver Smith" required>
+        </div>
+        <div class="form-group">
+          <label for="editStudentUser">Login Username</label>
+          <input type="text" id="editStudentUser" placeholder="e.g. oliver (letters and numbers)" required>
+        </div>
+        <div class="form-group">
+          <label for="editStudentPass">New Password (optional)</label>
+          <input type="text" id="editStudentPass" placeholder="Leave empty to keep current password">
+          <small style="color:var(--text-muted); font-size:0.75rem; margin-top:0.25rem; display:block;">Leave empty to keep existing password</small>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="editStudentGrade">Grade Level</label>
+            <select id="editStudentGrade">
+              <option value="Reception">Early Years (Reception)</option>
+              <option value="Year 1">Year 1 (Key Stage 1)</option>
+              <option value="Year 2">Year 2 (Key Stage 1)</option>
+              <option value="Year 3">Year 3 (Lower KS2)</option>
+              <option value="Year 4" selected>Year 4 (Lower KS2)</option>
+              <option value="Year 5">Year 5 (Upper KS2)</option>
+              <option value="Year 6">Year 6 (Upper KS2)</option>
+              <option value="Year 7">Year 7 (Key Stage 3)</option>
+              <option value="Year 8">Year 8 (Key Stage 3)</option>
+              <option value="Year 9">Year 9 (Key Stage 3)</option>
+              <option value="Year 10">Year 10 (GCSE)</option>
+              <option value="Year 11">Year 11 (GCSE)</option>
+              <option value="Year 12">Year 12 (A-Level)</option>
+              <option value="Year 13">Year 13 (A-Level)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="editStudentAvatar">Avatar</label>
+            <select id="editStudentAvatar">
+              <option value="🦊" selected>🦊 Fox</option>
+              <option value="🦄">🦄 Unicorn</option>
+              <option value="🚀">🚀 Rocket</option>
+              <option value="🦁">🦁 Lion</option>
+              <option value="🐼">🐼 Panda</option>
+              <option value="🌟">🌟 Star</option>
+              <option value="⚡">⚡ Lightning</option>
+              <option value="👑">👑 Crown</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="primary-glow-btn full-width" id="submitEditStudentBtn" style="font-weight: 700; padding: 0.85rem;">
+          Save Changes 💾
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================
        CLASSROOM TOOL 1: SCHOOL CALCULATOR
        ==================================================================== -->
   <div class="classroom-tool-panel" id="calculatorWidget">
@@ -1711,7 +1788,7 @@
   <script src="js/question-engine.js"></script>
   <script src="js/classroom-tools.js"></script>
   <script src="js/certificate.js"></script>
-  <script src="app.js"></script>
+  <script src="app.js?v=2.6.0"></script>
 </body>
 </html>
 

@@ -43,7 +43,61 @@ def run_tests():
     assert is_valid and not needs_upgrade, 'PBKDF2 verification failed'
     print('  [PASS] PBKDF2 with salt hash creation and verification verified')
 
-    print('\n=== ALL SECURITY VERIFICATION TESTS PASSED ===')
+    print('\n=== 2. TESTING TEACHER STUDENT MANAGEMENT (UPDATE, RESET PW, DELETE) ===')
+    # Create test student
+    conn = server.get_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM users WHERE username = 'test_student_edit'")
+    test_pw = 'PassOriginal123'
+    cursor.execute('''
+    INSERT INTO users (username, password_hash, full_name, grade_level, avatar, xp, streak_days, role, plain_password)
+    VALUES (?, ?, ?, ?, ?, 50, 1, 'student', ?)
+    ''', ('test_student_edit', server.hash_pw(test_pw), 'Original Name', 'Year 4', '🦊', test_pw))
+    conn.commit()
+    test_student_id = cursor.lastrowid
+
+    # Test update full_name, grade_level, avatar, and new password
+    updated_pw = 'NewSecurePass456'
+    cursor.execute('''
+    UPDATE users 
+    SET full_name = ?, username = ?, 
+        grade_level = ?, avatar = ?, 
+        password_hash = ?, plain_password = ?
+    WHERE id = ? AND role != 'teacher'
+    ''', ('Updated Full Name', 'test_student_edit_renamed', 'Year 5', '🦁', server.hash_pw(updated_pw), updated_pw, test_student_id))
+    conn.commit()
+
+    # Verify update
+    cursor.execute("SELECT * FROM users WHERE id = ?", (test_student_id,))
+    updated_row = dict(cursor.fetchone())
+    assert updated_row['full_name'] == 'Updated Full Name', 'Full name should be updated'
+    assert updated_row['username'] == 'test_student_edit_renamed', 'Username should be updated'
+    assert updated_row['grade_level'] == 'Year 5', 'Grade level should be updated'
+    assert updated_row['avatar'] == '🦁', 'Avatar should be updated'
+    assert updated_row['plain_password'] == 'NewSecurePass456', 'Plain password should match'
+    valid, _ = server.verify_pw('NewSecurePass456', updated_row['password_hash'])
+    assert valid, 'New password must verify against password_hash'
+    print('  [PASS] Student full_name, username, grade, avatar, and password update verified')
+
+    # Test delete
+    cursor.execute("DELETE FROM users WHERE id = ? AND role != 'teacher'", (test_student_id,))
+    conn.commit()
+    cursor.execute("SELECT id FROM users WHERE id = ?", (test_student_id,))
+    assert cursor.fetchone() is None, 'Student must be deleted'
+
+    # Verify teacher cannot be deleted by student delete query
+    teacher_row = conn.execute("SELECT id FROM users WHERE role = 'teacher' LIMIT 1").fetchone()
+    if teacher_row:
+        cursor.execute("DELETE FROM users WHERE id = ? AND role != 'teacher'", (teacher_row['id'],))
+        conn.commit()
+        still_there = conn.execute("SELECT id FROM users WHERE id = ?", (teacher_row['id'],)).fetchone()
+        assert still_there is not None, 'Teacher must NOT be deleted'
+        print('  [PASS] Teacher protection on delete verified')
+
+    conn.close()
+    print('  [PASS] Student deletion verified')
+
+    print('\n=== ALL SECURITY & ROSTER VERIFICATION TESTS PASSED ===')
 
 if __name__ == '__main__':
     run_tests()

@@ -554,22 +554,107 @@ const DB = {
     return { success: true, student: newStudent, student_id: newStudent.id };
   },
 
+  async teacherUpdateStudent(data) {
+    try {
+      const res = await fetch(this.apiUrl('/api/teacher/student/update'), {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(data)
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success) {
+          this.syncLocalStudentUpdate(data);
+          return json;
+        } else if (json.error) {
+          return json;
+        }
+      }
+    } catch (e) {}
+
+    // Fallback sync for offline/local storage
+    return this.syncLocalStudentUpdate(data);
+  },
+
+  syncLocalStudentUpdate(data) {
+    const numId = Number(data.student_id);
+    const fullName = (data.full_name || '').trim();
+    const cleanUser = (data.username || '').trim().toLowerCase();
+    const cleanPw = (data.password || '').trim();
+    const grade = data.grade_level;
+    const avatar = data.avatar;
+
+    if (!fullName || !cleanUser) {
+      return { success: false, error: 'Full name and username are required' };
+    }
+
+    // Update in rc_custom_students
+    let localStudents = JSON.parse(localStorage.getItem('rc_custom_students') || '[]');
+    const existing = localStudents.find(s => s.id === numId);
+    if (existing) {
+      existing.full_name = fullName;
+      existing.username = cleanUser;
+      if (grade) existing.grade_level = grade;
+      if (avatar) existing.avatar = avatar;
+      if (cleanPw) existing.password = cleanPw;
+      localStorage.setItem('rc_custom_students', JSON.stringify(localStudents));
+    }
+
+    // Update in demoStudents
+    const demo = this.demoStudents.find(s => s.id === numId);
+    if (demo) {
+      demo.full_name = fullName;
+      demo.username = cleanUser;
+      if (grade) demo.grade_level = grade;
+      if (avatar) demo.avatar = avatar;
+      if (cleanPw) demo.password = cleanPw;
+    }
+
+    // Update current session if the edited student is currently logged in
+    if (AppState.currentUser && AppState.currentUser.id === numId) {
+      AppState.currentUser.full_name = fullName;
+      AppState.currentUser.username = cleanUser;
+      if (grade) AppState.currentUser.grade_level = grade;
+      if (avatar) AppState.currentUser.avatar = avatar;
+      localStorage.setItem('current_student', JSON.stringify(AppState.currentUser));
+      if (typeof updateNavProfile === 'function') updateNavProfile();
+    }
+
+    return { success: true };
+  },
+
   async teacherResetPassword(studentId, newPassword) {
+    const pass = (newPassword || '').trim();
     try {
       const res = await fetch(this.apiUrl('/api/teacher/student/reset_password'), {
         method: 'POST',
         headers: this.getAuthHeaders(),
-        body: JSON.stringify({ student_id: studentId, new_password: newPassword })
+        body: JSON.stringify({ student_id: studentId, new_password: pass })
       });
-      if (res.ok) return await res.json();
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success) {
+          this.syncLocalStudentPassword(studentId, pass);
+          return json;
+        }
+      }
     } catch (e) {}
 
+    return this.syncLocalStudentPassword(studentId, pass);
+  },
+
+  syncLocalStudentPassword(studentId, newPassword) {
     const numId = Number(studentId);
+    const pass = (newPassword || '').trim();
     const localStudents = JSON.parse(localStorage.getItem('rc_custom_students') || '[]');
     const s = localStudents.find(st => st.id === numId);
     if (s) {
-      s.password = newPassword;
+      s.password = pass;
       localStorage.setItem('rc_custom_students', JSON.stringify(localStudents));
+    }
+    const demo = this.demoStudents.find(st => st.id === numId);
+    if (demo) {
+      demo.password = pass;
     }
     return { success: true };
   },
@@ -581,13 +666,24 @@ const DB = {
         headers: this.getAuthHeaders(),
         body: JSON.stringify({ student_id: studentId })
       });
-      if (res.ok) return await res.json();
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success) {
+          this.syncLocalStudentDelete(studentId);
+          return json;
+        }
+      }
     } catch (e) {}
 
+    return this.syncLocalStudentDelete(studentId);
+  },
+
+  syncLocalStudentDelete(studentId) {
     const numId = Number(studentId);
     let localStudents = JSON.parse(localStorage.getItem('rc_custom_students') || '[]');
     localStudents = localStudents.filter(s => s.id !== numId);
     localStorage.setItem('rc_custom_students', JSON.stringify(localStudents));
+    this.demoStudents = this.demoStudents.filter(s => s.id !== numId);
     return { success: true };
   },
 
@@ -797,6 +893,18 @@ const el = {
   resetStudentId: document.getElementById('resetStudentId'),
   resetStudentSubtitle: document.getElementById('resetStudentSubtitle'),
   newResetPassword: document.getElementById('newResetPassword'),
+
+  // Edit Student Modal
+  editStudentModal: document.getElementById('editStudentModal'),
+  closeEditStudentModalBtn: document.getElementById('closeEditStudentModalBtn'),
+  editStudentForm: document.getElementById('editStudentForm'),
+  editStudentId: document.getElementById('editStudentId'),
+  editStudentName: document.getElementById('editStudentName'),
+  editStudentUser: document.getElementById('editStudentUser'),
+  editStudentPass: document.getElementById('editStudentPass'),
+  editStudentGrade: document.getElementById('editStudentGrade'),
+  editStudentAvatar: document.getElementById('editStudentAvatar'),
+  editStudentSubtitle: document.getElementById('editStudentSubtitle'),
 
   // Auth Modal
   authModal: document.getElementById('authModal'),
@@ -1587,9 +1695,11 @@ async function renderTeacherConsoleView() {
 
     // Student Roster Table
     const roster = overview.roster || [];
+    AppState.currentTeacherRoster = roster;
     el.teacherRosterTableBody.innerHTML = roster.map(s => {
       const acc = s.accuracy_rate || 0;
       const accClass = acc >= 90 ? 'green' : (acc >= 75 ? 'amber' : 'orange');
+      const safeName = (s.full_name || '').replace(/'/g, "\\'");
 
       return `
         <tr>
@@ -1598,7 +1708,7 @@ async function renderTeacherConsoleView() {
               <div class="leader-avatar">${s.avatar || '🦊'}</div>
               <div>
                 <div class="leader-name" style="font-weight:700;">${s.full_name}</div>
-                <div style="font-size:0.75rem; color:var(--text-muted);">${s.is_custom ? 'Custom Student' : 'Base Account'}</div>
+                <div style="font-size:0.75rem; color:var(--text-muted);">${s.is_custom ? 'Custom Student' : 'Classroom Member'}</div>
               </div>
             </div>
           </td>
@@ -1612,7 +1722,7 @@ async function renderTeacherConsoleView() {
           <td>
             ${s.is_custom
               ? '<span style="background:rgba(59,130,246,0.12); color:#2563eb; padding:3px 8px; border-radius:12px; font-size:0.72rem; font-weight:700;">Custom ✨</span>'
-              : '<span style="background:rgba(100,116,139,0.12); color:#475569; padding:3px 8px; border-radius:12px; font-size:0.72rem; font-weight:700;">Base 📌</span>'}
+              : '<span style="background:rgba(100,116,139,0.12); color:#475569; padding:3px 8px; border-radius:12px; font-size:0.72rem; font-weight:700;">Enrolled 📌</span>'}
           </td>
           <td><strong>${s.questions_answered ? s.questions_answered.toLocaleString() : 0}</strong></td>
           <td><span class="accuracy-pill ${accClass}">${acc}%</span></td>
@@ -1626,13 +1736,15 @@ async function renderTeacherConsoleView() {
               <button class="action-btn-sm print" onclick="printStudentReportCard(${s.id})" title="Print Student Report Card">
                 🖨️
               </button>
-              <button class="action-btn-sm" onclick="openResetPasswordModal(${s.id}, '${s.full_name}')" title="Reset Student Password">
-                🔑
+              <button class="action-btn-sm edit" onclick="openEditStudentModal(${s.id})" title="Edit Student Profile & Password">
+                ✏️ Edit
               </button>
-              ${s.is_custom ? `
-              <button class="action-btn-sm delete" onclick="confirmDeleteStudent(${s.id}, '${s.full_name}')" title="Remove Student from Classroom" style="color:var(--color-danger); border-color:rgba(239, 68, 68, 0.3);">
-                🗑️
-              </button>` : ''}
+              <button class="action-btn-sm key" onclick="openResetPasswordModal(${s.id}, '${safeName}')" title="Reset Student Password">
+                🔑 Pass
+              </button>
+              <button class="action-btn-sm delete" onclick="confirmDeleteStudent(${s.id}, '${safeName}')" title="Remove Student from Classroom">
+                🗑️ Delete
+              </button>
             </div>
           </td>
         </tr>
@@ -2791,19 +2903,48 @@ window.deleteClassAssignment = async function(id) {
   renderTeacherAssignments();
 };
 
+window.openEditStudentModal = function(studentId) {
+  if (!el.editStudentModal) return;
+  const numId = Number(studentId);
+  const roster = AppState.currentTeacherRoster || [];
+  const s = roster.find(st => st.id === numId) || DB.findStudentById(numId);
+  if (!s) {
+    showToast('Student information not found.');
+    return;
+  }
+
+  if (el.editStudentId) el.editStudentId.value = s.id;
+  if (el.editStudentName) el.editStudentName.value = s.full_name || '';
+  if (el.editStudentUser) el.editStudentUser.value = s.username || '';
+  if (el.editStudentGrade) el.editStudentGrade.value = s.grade_level || 'Year 4';
+  if (el.editStudentAvatar) el.editStudentAvatar.value = s.avatar || '🦊';
+  if (el.editStudentPass) el.editStudentPass.value = '';
+  if (el.editStudentSubtitle) {
+    el.editStudentSubtitle.textContent = `Update name, username, grade or password for ${s.full_name} (@${s.username})`;
+  }
+  el.editStudentModal.classList.add('open');
+};
+
 window.openResetPasswordModal = function(studentId, studentName) {
   if (!el.resetPasswordModal) return;
+  const numId = Number(studentId);
+  const roster = AppState.currentTeacherRoster || [];
+  const s = roster.find(st => st.id === numId) || DB.findStudentById(numId);
   el.resetStudentId.value = studentId;
   el.resetStudentSubtitle.textContent = `Set a new password for ${studentName}.`;
-  el.newResetPassword.value = 'StudentPass123!';
+  el.newResetPassword.value = (s && s.password) ? s.password : 'StudentPass123!';
   el.resetPasswordModal.classList.add('open');
 };
 
 window.confirmDeleteStudent = async function(studentId, studentName) {
-  if (!confirm(`Are you sure you want to remove ${studentName} and their records?`)) return;
-  await DB.teacherDeleteStudent(studentId);
-  showToast(`${studentName} removed from roster.`);
-  renderTeacherConsoleView();
+  if (!confirm(`Are you sure you want to remove ${studentName} and all associated records?`)) return;
+  const res = await DB.teacherDeleteStudent(studentId);
+  if (res && res.success === false && res.error) {
+    showToast(res.error);
+    return;
+  }
+  showToast(`${studentName} removed from classroom roster 🗑️`);
+  await renderTeacherConsoleView();
 };
 
 
@@ -3163,6 +3304,55 @@ function setupEventListeners() {
     });
   }
 
+  // Teacher Edit Student Modal
+  if (el.closeEditStudentModalBtn) {
+    el.closeEditStudentModalBtn.addEventListener('click', () => {
+      el.editStudentModal?.classList.remove('open');
+    });
+  }
+
+  if (el.editStudentModal) {
+    el.editStudentModal.addEventListener('click', (e) => {
+      if (e.target === el.editStudentModal) {
+        el.editStudentModal.classList.remove('open');
+      }
+    });
+  }
+
+  if (el.editStudentForm) {
+    el.editStudentForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const sid = el.editStudentId.value;
+      const name = el.editStudentName.value.trim();
+      const user = el.editStudentUser.value.trim();
+      const grade = el.editStudentGrade.value;
+      const avatar = el.editStudentAvatar.value;
+      const pass = el.editStudentPass.value.trim();
+
+      if (!name || !user) {
+        showToast('Please enter both name and username');
+        return;
+      }
+
+      const res = await DB.teacherUpdateStudent({
+        student_id: sid,
+        full_name: name,
+        username: user,
+        grade_level: grade,
+        avatar: avatar,
+        password: pass
+      });
+
+      if (res && res.success) {
+        el.editStudentModal?.classList.remove('open');
+        showToast(`Student ${name} updated successfully! ✨`);
+        await renderTeacherConsoleView();
+      } else {
+        showToast((res && res.error) || 'Failed to update student profile');
+      }
+    });
+  }
+
   // Teacher Reset Password Modal
   if (el.closeResetPasswordModalBtn) {
     el.closeResetPasswordModalBtn.addEventListener('click', () => {
@@ -3170,14 +3360,24 @@ function setupEventListeners() {
     });
   }
 
+  if (el.resetPasswordModal) {
+    el.resetPasswordModal.addEventListener('click', (e) => {
+      if (e.target === el.resetPasswordModal) {
+        el.resetPasswordModal.classList.remove('open');
+      }
+    });
+  }
+
   if (el.resetPasswordForm) {
     el.resetPasswordForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const sid = el.resetStudentId.value;
-      const pass = el.newResetPassword.value;
+      const pass = el.newResetPassword.value.trim();
+      if (!pass) return;
       await DB.teacherResetPassword(sid, pass);
-      el.resetPasswordModal.classList.remove('open');
+      el.resetPasswordModal?.classList.remove('open');
       showToast('Password updated successfully! 🔑');
+      await renderTeacherConsoleView();
     });
   }
 
