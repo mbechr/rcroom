@@ -202,13 +202,36 @@ window.AppState = AppState;
 const DB = {
   // Preloaded Demo Students & Teacher for instant client-side offline fallback
   demoStudents: [
-    { id: 1, username: 'alex', full_name: 'Alex Turner', grade_level: 'Year 4', avatar: '🦊', xp: 0, streak_days: 0, role: 'student' },
-    { id: 2, username: 'sophia', full_name: 'Sophia Chen', grade_level: 'Year 5', avatar: '🦄', xp: 0, streak_days: 0, role: 'student' },
-    { id: 3, username: 'liam', full_name: 'Liam Johnson', grade_level: 'Year 3', avatar: '🚀', xp: 0, streak_days: 0, role: 'student' },
-    { id: 4, username: 'emma', full_name: 'Emma Watson', grade_level: 'Year 6', avatar: '🌟', xp: 0, streak_days: 0, role: 'student' },
+    { id: 101, username: 'beshr', full_name: 'beshr', grade_level: 'Year 4', avatar: '🦊', password: '123456', xp: 0, streak_days: 0, role: 'student' },
     { id: 5, username: 'admin', full_name: 'Miss Rania', grade_level: 'Instructor', avatar: '👩‍🏫', xp: 0, streak_days: 0, role: 'teacher' },
     { id: 6, username: 'rania', full_name: 'Miss Rania', grade_level: 'Instructor', avatar: '👩‍🏫', xp: 0, streak_days: 0, role: 'teacher' }
   ],
+
+  getActiveDemoStudents() {
+    let deletedIds = [];
+    try {
+      deletedIds = JSON.parse(localStorage.getItem('rc_deleted_student_ids') || '[]');
+    } catch (e) {
+      deletedIds = [];
+    }
+    const allDeleted = new Set([...deletedIds, 1, 2, 3, 4]);
+
+    let modifiedDemo = {};
+    try {
+      modifiedDemo = JSON.parse(localStorage.getItem('rc_modified_demo_students') || '{}');
+    } catch (e) {
+      modifiedDemo = {};
+    }
+
+    return this.demoStudents
+      .filter(s => !allDeleted.has(s.id))
+      .map(s => {
+        if (modifiedDemo[s.id]) {
+          return { ...s, ...modifiedDemo[s.id] };
+        }
+        return { ...s };
+      });
+  },
 
   apiUrl(endpoint) {
     if (window.location.protocol === 'file:') {
@@ -267,7 +290,24 @@ const DB = {
         if (json.success && json.students) return json.students.filter(s => s.role !== 'teacher');
       }
     } catch (e) {}
-    return this.demoStudents.filter(s => s.role !== 'teacher').map(s => {
+
+    let deletedIds = [];
+    try {
+      deletedIds = JSON.parse(localStorage.getItem('rc_deleted_student_ids') || '[]');
+    } catch (e) {
+      deletedIds = [];
+    }
+    const allDeleted = new Set([...deletedIds, 1, 2, 3, 4]);
+
+    const localStudents = (JSON.parse(localStorage.getItem('rc_custom_students') || '[]'))
+      .filter(s => !allDeleted.has(s.id));
+    const activeDemo = this.getActiveDemoStudents().filter(s => s.role !== 'teacher');
+
+    const map = new Map();
+    activeDemo.forEach(s => map.set(s.username.toLowerCase(), s));
+    localStudents.forEach(s => map.set(s.username.toLowerCase(), s));
+
+    return Array.from(map.values()).map(s => {
       const stats = this.getStudentStats(s.id);
       return {
         ...s,
@@ -317,7 +357,16 @@ const DB = {
     }
 
     // Check custom registered students first from localStorage
-    const localStudents = JSON.parse(localStorage.getItem('rc_custom_students') || '[]');
+    let deletedIds = [];
+    try {
+      deletedIds = JSON.parse(localStorage.getItem('rc_deleted_student_ids') || '[]');
+    } catch (e) {
+      deletedIds = [];
+    }
+    const allDeleted = new Set([...deletedIds, 1, 2, 3, 4]);
+
+    const localStudents = (JSON.parse(localStorage.getItem('rc_custom_students') || '[]'))
+      .filter(s => !allDeleted.has(s.id));
     const localFound = localStudents.find(s => s.username.toLowerCase() === cleanUser);
     if (localFound) {
       if (localFound.password && localFound.password !== cleanPw) {
@@ -328,13 +377,14 @@ const DB = {
       return localFound;
     }
 
-    // Offline / Fallback Matching
-    const found = this.demoStudents.find(s => s.username.toLowerCase() === cleanUser);
+    // Offline / Fallback Matching with active demo students (ignoring deleted)
+    const activeDemo = this.getActiveDemoStudents();
+    const found = activeDemo.find(s => s.username.toLowerCase() === cleanUser);
     if (found) {
       const isTeacher = found.role === 'teacher' || cleanUser === 'admin' || cleanUser === 'rania';
       const validPw = isTeacher
         ? (cleanPw === 'admin123')
-        : (cleanPw === (found.password || 'password123'));
+        : (cleanPw === (found.password || '123456'));
       if (!validPw) {
         throw new Error('Incorrect password');
       }
@@ -586,8 +636,18 @@ const DB = {
 
   findStudentById(studentId) {
     const numId = Number(studentId);
-    const localStudents = JSON.parse(localStorage.getItem('rc_custom_students') || '[]');
-    return localStudents.find(s => s.id === numId) || this.demoStudents.find(s => s.id === numId);
+    let deletedIds = [];
+    try {
+      deletedIds = JSON.parse(localStorage.getItem('rc_deleted_student_ids') || '[]');
+    } catch (e) {
+      deletedIds = [];
+    }
+    const allDeleted = new Set([...deletedIds, 1, 2, 3, 4]);
+    if (allDeleted.has(numId)) return null;
+
+    const localStudents = (JSON.parse(localStorage.getItem('rc_custom_students') || '[]'))
+      .filter(s => !allDeleted.has(s.id));
+    return localStudents.find(s => s.id === numId) || this.getActiveDemoStudents().find(s => s.id === numId);
   },
 
   async teacherCreateStudent(data) {
@@ -685,7 +745,7 @@ const DB = {
       localStorage.setItem('rc_custom_students', JSON.stringify(localStudents));
     }
 
-    // Update in demoStudents
+    // Update in demoStudents and persist to rc_modified_demo_students
     const demo = this.demoStudents.find(s => s.id === numId);
     if (demo) {
       demo.full_name = fullName;
@@ -693,6 +753,21 @@ const DB = {
       if (grade) demo.grade_level = grade;
       if (avatar) demo.avatar = avatar;
       if (cleanPw) demo.password = cleanPw;
+
+      let modifiedDemo = {};
+      try {
+        modifiedDemo = JSON.parse(localStorage.getItem('rc_modified_demo_students') || '{}');
+      } catch (e) {
+        modifiedDemo = {};
+      }
+      modifiedDemo[numId] = {
+        full_name: fullName,
+        username: cleanUser,
+        grade_level: grade || demo.grade_level,
+        avatar: avatar || demo.avatar,
+        ...(cleanPw ? { password: cleanPw } : (demo.password ? { password: demo.password } : {}))
+      };
+      localStorage.setItem('rc_modified_demo_students', JSON.stringify(modifiedDemo));
     }
 
     // Update current session if the edited student is currently logged in
@@ -731,7 +806,7 @@ const DB = {
   syncLocalStudentPassword(studentId, newPassword) {
     const numId = Number(studentId);
     const pass = (newPassword || '').trim();
-    const localStudents = JSON.parse(localStorage.getItem('rc_custom_students') || '[]');
+    let localStudents = JSON.parse(localStorage.getItem('rc_custom_students') || '[]');
     const s = localStudents.find(st => st.id === numId);
     if (s) {
       s.password = pass;
@@ -740,6 +815,15 @@ const DB = {
     const demo = this.demoStudents.find(st => st.id === numId);
     if (demo) {
       demo.password = pass;
+      let modifiedDemo = {};
+      try {
+        modifiedDemo = JSON.parse(localStorage.getItem('rc_modified_demo_students') || '{}');
+      } catch (e) {
+        modifiedDemo = {};
+      }
+      if (!modifiedDemo[numId]) modifiedDemo[numId] = {};
+      modifiedDemo[numId].password = pass;
+      localStorage.setItem('rc_modified_demo_students', JSON.stringify(modifiedDemo));
     }
     return { success: true };
   },
@@ -765,9 +849,34 @@ const DB = {
 
   syncLocalStudentDelete(studentId) {
     const numId = Number(studentId);
+    // 1. Permanently record deletion in localStorage so they never reappear
+    let deleted = [];
+    try {
+      deleted = JSON.parse(localStorage.getItem('rc_deleted_student_ids') || '[]');
+    } catch (e) {
+      deleted = [];
+    }
+    if (!deleted.includes(numId)) {
+      deleted.push(numId);
+      localStorage.setItem('rc_deleted_student_ids', JSON.stringify(deleted));
+    }
+
+    // 2. Remove from custom students in localStorage
     let localStudents = JSON.parse(localStorage.getItem('rc_custom_students') || '[]');
     localStudents = localStudents.filter(s => s.id !== numId);
     localStorage.setItem('rc_custom_students', JSON.stringify(localStudents));
+
+    // 3. Remove from modified demo cache
+    let modifiedDemo = {};
+    try {
+      modifiedDemo = JSON.parse(localStorage.getItem('rc_modified_demo_students') || '{}');
+    } catch (e) {
+      modifiedDemo = {};
+    }
+    delete modifiedDemo[numId];
+    localStorage.setItem('rc_modified_demo_students', JSON.stringify(modifiedDemo));
+
+    // 4. Update memory array
     this.demoStudents = this.demoStudents.filter(s => s.id !== numId);
     return { success: true };
   },
@@ -784,11 +893,24 @@ const DB = {
     } catch (e) {}
 
     // Combine pre-loaded demo students and custom students created by teacher
-    const localStudents = JSON.parse(localStorage.getItem('rc_custom_students') || '[]');
-    const allEnrolled = [
-      ...this.demoStudents.filter(s => s.role !== 'teacher'),
-      ...localStudents
-    ];
+    let deletedIds = [];
+    try {
+      deletedIds = JSON.parse(localStorage.getItem('rc_deleted_student_ids') || '[]');
+    } catch (e) {
+      deletedIds = [];
+    }
+    const allDeleted = new Set([...deletedIds, 1, 2, 3, 4]);
+
+    const localStudents = (JSON.parse(localStorage.getItem('rc_custom_students') || '[]'))
+      .filter(s => !allDeleted.has(s.id));
+    const activeDemo = this.getActiveDemoStudents().filter(s => s.role !== 'teacher');
+
+    // Deduplicate by username (case-insensitive) and ID
+    const studentMap = new Map();
+    activeDemo.forEach(s => studentMap.set(s.username.toLowerCase(), s));
+    localStudents.forEach(s => studentMap.set(s.username.toLowerCase(), { ...s, is_custom: true }));
+
+    const allEnrolled = Array.from(studentMap.values());
 
     const students = allEnrolled.map(s => {
       const stats = this.getStudentStats(s.id);
@@ -801,7 +923,7 @@ const DB = {
       return {
         id: s.id,
         username: s.username,
-        password: s.password || 'password123',
+        password: s.password || '123456',
         full_name: s.full_name,
         grade_level: s.grade_level,
         avatar: s.avatar || '🦊',
@@ -813,7 +935,7 @@ const DB = {
         avg_smart_score: avgScore,
         last_active: lastActive,
         badges_count: (s.badges && s.badges.length) || (stats.total_sessions > 0 ? 1 : 0),
-        is_custom: !!localStudents.some(ls => ls.id === s.id)
+        is_custom: s.is_custom !== undefined ? s.is_custom : true
       };
     });
 
@@ -847,9 +969,23 @@ const DB = {
       }
     } catch (e) {}
 
-    const localStudents = JSON.parse(localStorage.getItem('rc_custom_students') || '[]');
-    const all = [...this.demoStudents.filter(s => s.role !== 'teacher'), ...localStudents];
-    const withLiveXp = all.map(s => {
+    let deletedIds = [];
+    try {
+      deletedIds = JSON.parse(localStorage.getItem('rc_deleted_student_ids') || '[]');
+    } catch (e) {
+      deletedIds = [];
+    }
+    const allDeleted = new Set([...deletedIds, 1, 2, 3, 4]);
+
+    const localStudents = (JSON.parse(localStorage.getItem('rc_custom_students') || '[]'))
+      .filter(s => !allDeleted.has(s.id));
+    const activeDemo = this.getActiveDemoStudents().filter(s => s.role !== 'teacher');
+
+    const map = new Map();
+    activeDemo.forEach(s => map.set(s.username.toLowerCase(), s));
+    localStudents.forEach(s => map.set(s.username.toLowerCase(), s));
+
+    const withLiveXp = Array.from(map.values()).map(s => {
       const stats = this.getStudentStats(s.id);
       return {
         ...s,
