@@ -6,7 +6,7 @@ echo ========================================================
 echo.
 echo Starting Rania Classroom Portal with SQLite Database...
 echo Opening portal in your default web browser...
-start "" "index.html"
+start "" "http://localhost:8000"
 python server.py
 
 pause
