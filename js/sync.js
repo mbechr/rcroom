@@ -84,10 +84,7 @@ const SyncManager = {
           // Clear queue
           this.saveQueue([]);
           if (window.showToast) {
-            const msg = (window.I18N && window.I18N.currentLang === 'ar') 
-              ? '✅ تمت مزامنة التمارين المحفوظة مع السيرفر بنجاح!' 
-              : '✅ Offline practice sessions synced to server!';
-            window.showToast(msg);
+            window.showToast('✅ Offline practice sessions synced to server!');
           }
         }
       }

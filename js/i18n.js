@@ -49,7 +49,7 @@ const I18N = {
       addStudent: '+ Add Student',
       resetPassword: 'Reset Password',
       deleteStudent: 'Delete',
-      switchLanguage: 'عربي',
+      switchLanguage: 'English',
       certificateTitle: 'CERTIFICATE OF MASTERY',
       certPresentedTo: 'This certifies that',
       certReason: 'has demonstrated outstanding academic excellence and achieved 100% mastery in',
@@ -61,91 +61,32 @@ const I18N = {
       quickSwitchTitle: 'Fast Account Switch',
       quickSwitchStudents: 'Or Select Student:',
       moreLoginOptions: 'Login with Password / Add Student',
-      switchToStudent: 'Student View (Alex)'
-    },
-    ar: {
-      appName: 'منصة مس رانيا التعليمية',
-      tagline: 'منصة التدريب والتقييم التفاعلي لطلاب الصفوف الأساسية',
-      navDashboard: 'الرئيسية',
-      navCurriculum: 'المنهج الدراسي',
-      navSkills: 'بنك المهارات',
-      navReports: 'تقرير الطالب',
-      navTeacher: 'لوحة المعلمة',
-      navLeaderboard: 'المتصدرون',
-      searchPlaceholder: 'ابحث عن مهارة بالاسم، الموضوع، أو الرمز (مثال: A.1، الكسور)...',
-      allSubjects: 'جميع المواد',
-      maths: 'الرياضيات',
-      english: 'اللغة الإنجليزية',
-      science: 'العلوم',
-      smartScore: 'درجة الإتقان',
-      questionsAnswered: 'الأسئلة المجابة',
-      timeSpent: 'الوقت المستغرق',
-      accuracy: 'نسبة الدقة',
-      masteredSkills: 'المهارات المتقنة',
-      practiceStreak: 'أيام التتابع',
-      practiceRoom: 'غرفة التدريب التفاعلية',
-      submitAnswer: 'إرسال الإجابة',
-      nextQuestion: 'السؤال التالي ←',
-      scratchpad: 'لوحة الرسم',
-      readAloud: 'قراءة صوتية',
-      calculator: 'الآلة الحاسبة',
-      numberLine: 'خط الأعداد',
-      fractionModel: 'نماذج الكسور',
-      excellentCorrect: '🌟 أحسنت! إجابة صحيحة وممتازة!',
-      reviewSolution: '💡 راجع خطوات الحل التفصيلية:',
-      correctAnswerLabel: 'الإجابة الصحيحة:',
-      masteryTitle: '🎉 مبروك! حققت درجة الإتقان الكاملة 100!',
-      masteryDesc: 'لقد أتقنت هذه المهارة بنجاح باهر! منحتك المعلمة رانيا شهادة تميز رسمية.',
-      viewCertificate: '🎓 استعراض وطباعة الشهادة',
-      exportCsv: '📥 تصدير كشف الدرجات (CSV)',
-      strugglingTitle: '⚠️ مهارات تحتاج دعم ومراجعة جماعية',
-      teacherRosterTitle: 'قائمة طلاب الفصل والمتابعة',
-      assignmentsTitle: 'الواجبات والمهام المدرسية',
-      newAssignment: '+ تكليف جديد',
-      addStudent: '+ إضافة طالب',
-      resetPassword: 'تغيير كلمة المرور',
-      deleteStudent: 'حذف',
-      switchLanguage: 'English',
-      certificateTitle: 'شهادة إتقان وتميز',
-      certPresentedTo: 'تشهد المعلمة رانيا بأن الطالبـ/ـة',
-      certReason: 'قد أتمـ/ـت بنجاح متفوق وحققـ/ـت درجة الإتقان الكاملة (100%) في المهارة:',
-      certInstructor: 'المعلمة رانيا',
-      certInstructorTitle: 'معلمة المادة',
-      certDate: 'تاريخ الإنجاز',
-      certPrintBtn: '🖨️ طباعة / حفظ كـ PDF',
-      close: '✕ إغلاق',
-      quickSwitchTitle: 'التبديل السريع للحسابات',
-      quickSwitchStudents: 'أو اختر حساب الطالب:',
-      moreLoginOptions: 'دخول بكلمة سر / إضافة طالب جديد',
-      switchToStudent: 'حساب الطالب (Alex)'
     }
   },
 
   t(key) {
-    const lang = this.translations[this.currentLang] || this.translations.en;
-    return lang[key] || this.translations.en[key] || key;
+    return (this.translations.en && this.translations.en[key]) || key;
   },
 
   setLang(lang) {
-    this.currentLang = lang;
-    localStorage.setItem('rc_lang', lang);
+    this.currentLang = 'en';
+    localStorage.setItem('rc_lang', 'en');
     this.apply();
   },
 
   toggle() {
-    this.setLang(this.currentLang === 'ar' ? 'en' : 'ar');
+    this.setLang('en');
   },
 
   apply() {
-    const isAr = this.currentLang === 'ar';
-    document.documentElement.lang = isAr ? 'ar' : 'en';
-    document.documentElement.dir = isAr ? 'rtl' : 'ltr';
-    document.body.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+    document.documentElement.lang = 'en';
+    document.documentElement.dir = 'ltr';
+    document.body.setAttribute('dir', 'ltr');
 
     // Update all elements with data-i18n
     document.querySelectorAll('[data-i18n]').forEach(el => {
       const key = el.dataset.i18n;
-      if (key && this.translations[this.currentLang] && this.translations[this.currentLang][key]) {
+      if (key && this.translations.en && this.translations.en[key]) {
         if (el.tagName === 'INPUT' && el.getAttribute('placeholder')) {
           el.placeholder = this.t(key);
         } else {
@@ -158,7 +99,7 @@ const I18N = {
     const toggleBtn = document.getElementById('langToggleBtn');
     if (toggleBtn) {
       toggleBtn.innerHTML = '<span class="material-symbols-outlined text-[18px]">language</span>';
-      toggleBtn.title = isAr ? 'Switch to English' : 'التبديل إلى العربية';
+      toggleBtn.title = 'English';
     }
 
     // Refresh sliding nav indicator

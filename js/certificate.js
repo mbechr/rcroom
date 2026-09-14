@@ -16,14 +16,12 @@ const MasteryCertificate = {
     const reasonEl = document.getElementById('certReason');
     const instructorEl = document.getElementById('certInstructor');
 
-    const isAr = window.I18N && window.I18N.currentLang === 'ar';
-
     const sName = (student && student.full_name) ? student.full_name : 'Alex Turner';
     const sCode = skill ? (skill.code || skill.skill_code || 'A.1') : 'A.1';
     const sTitle = skill ? (skill.name || skill.skill_name || 'Curriculum Skill') : 'Curriculum Skill';
 
     const today = new Date();
-    const dateStr = today.toLocaleDateString(isAr ? 'ar-EG' : 'en-US', {
+    const dateStr = today.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
@@ -33,14 +31,12 @@ const MasteryCertificate = {
     if (skillNameEl) skillNameEl.textContent = `${sCode}: ${sTitle}`;
     if (dateEl) dateEl.textContent = dateStr;
 
-    if (titleEl) titleEl.textContent = isAr ? 'شهادة إتقان وتفوق' : 'CERTIFICATE OF MASTERY';
-    if (introEl) introEl.textContent = isAr ? 'تشهد المعلمة رانيا بأن الطالبـ/ـة المتميز/ة' : 'This certifies that';
+    if (titleEl) titleEl.textContent = 'CERTIFICATE OF MASTERY';
+    if (introEl) introEl.textContent = 'This certifies that';
     if (reasonEl) {
-      reasonEl.innerHTML = isAr
-        ? `قد أتمـ/ـت بنجاح باهر تدريبات المهارة وحققـ/ـت درجة الإتقان الكاملة <span class="cert-skill-highlight">(100 SmartScore)</span> في مادة <span class="cert-skill-highlight">${skill.subject || 'الرياضيات'}</span>.`
-        : `has demonstrated exceptional diligence and achieved a perfect <span class="cert-skill-highlight">100 SmartScore</span> in <span class="cert-skill-highlight">${skill.subject || 'Maths'}</span>.`;
+      reasonEl.innerHTML = `has demonstrated exceptional diligence and achieved a perfect <span class="cert-skill-highlight">100 SmartScore</span> in <span class="cert-skill-highlight">${skill.subject || 'Maths'}</span>.`;
     }
-    if (instructorEl) instructorEl.textContent = isAr ? 'أ. رانيا' : 'Miss Rania';
+    if (instructorEl) instructorEl.textContent = 'Miss Rania';
 
     modal.classList.add('open');
     if (window.ConfettiFX) ConfettiFX.fire(4000);

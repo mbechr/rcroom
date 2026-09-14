@@ -202,12 +202,12 @@ window.AppState = AppState;
 const DB = {
   // Preloaded Demo Students & Teacher for instant client-side offline fallback
   demoStudents: [
-    { id: 1, username: 'alex', full_name: 'Alex Turner', grade_level: 'Year 4', avatar: '🦊', xp: 1420, streak_days: 5, role: 'student' },
-    { id: 2, username: 'sophia', full_name: 'Sophia Chen', grade_level: 'Year 5', avatar: '🦄', xp: 2850, streak_days: 12, role: 'student' },
-    { id: 3, username: 'liam', full_name: 'Liam Johnson', grade_level: 'Year 3', avatar: '🚀', xp: 890, streak_days: 3, role: 'student' },
-    { id: 4, username: 'emma', full_name: 'Emma Watson', grade_level: 'Year 6', avatar: '🌟', xp: 3450, streak_days: 18, role: 'student' },
-    { id: 5, username: 'admin', full_name: 'Miss Rania', grade_level: 'Instructor', avatar: '👩‍🏫', xp: 9999, streak_days: 100, role: 'teacher' },
-    { id: 6, username: 'rania', full_name: 'Miss Rania', grade_level: 'Instructor', avatar: '👩‍🏫', xp: 9999, streak_days: 100, role: 'teacher' }
+    { id: 1, username: 'alex', full_name: 'Alex Turner', grade_level: 'Year 4', avatar: '🦊', xp: 0, streak_days: 0, role: 'student' },
+    { id: 2, username: 'sophia', full_name: 'Sophia Chen', grade_level: 'Year 5', avatar: '🦄', xp: 0, streak_days: 0, role: 'student' },
+    { id: 3, username: 'liam', full_name: 'Liam Johnson', grade_level: 'Year 3', avatar: '🚀', xp: 0, streak_days: 0, role: 'student' },
+    { id: 4, username: 'emma', full_name: 'Emma Watson', grade_level: 'Year 6', avatar: '🌟', xp: 0, streak_days: 0, role: 'student' },
+    { id: 5, username: 'admin', full_name: 'Miss Rania', grade_level: 'Instructor', avatar: '👩‍🏫', xp: 0, streak_days: 0, role: 'teacher' },
+    { id: 6, username: 'rania', full_name: 'Miss Rania', grade_level: 'Instructor', avatar: '👩‍🏫', xp: 0, streak_days: 0, role: 'teacher' }
   ],
 
   apiUrl(endpoint) {
@@ -240,10 +240,10 @@ const DB = {
     const cleanPw = (password || '').trim();
 
     if (!cleanUser) {
-      throw new Error('يرجى إدخال اسم المستخدم');
+      throw new Error('Please enter username');
     }
     if (!cleanPw) {
-      throw new Error('يرجى إدخال كلمة المرور');
+      throw new Error('Please enter password');
     }
 
     try {
@@ -273,7 +273,7 @@ const DB = {
     const localFound = localStudents.find(s => s.username.toLowerCase() === cleanUser);
     if (localFound) {
       if (localFound.password && localFound.password !== cleanPw) {
-        throw new Error('كلمة المرور غير صحيحة');
+        throw new Error('Incorrect password');
       }
       return localFound;
     }
@@ -286,7 +286,7 @@ const DB = {
         ? (cleanPw === 'admin123')
         : (cleanPw === 'password123');
       if (!validPw) {
-        throw new Error('كلمة المرور غير صحيحة');
+        throw new Error('Incorrect password');
       }
       return {
         ...found,
@@ -296,14 +296,14 @@ const DB = {
         ]
       };
     }
-    throw new Error('اسم المستخدم أو كلمة المرور غير صحيحة');
+    throw new Error('Invalid username or password');
   },
 
   async register(full_name, username, password, grade_level, avatar) {
     const cleanUser = (username || '').trim().toLowerCase();
     const cleanPw = (password || '').trim();
     if (!cleanUser || !cleanPw || !full_name) {
-      throw new Error('يرجى ملء جميع الحقول المطلوبة');
+      throw new Error('Please fill in all required fields');
     }
     try {
       const res = await fetch(this.apiUrl('/api/register'), {
@@ -317,7 +317,7 @@ const DB = {
           if (data.token) localStorage.setItem('rc_auth_token', data.token);
           return data.student;
         }
-        throw new Error(data.error || 'فشل التسجيل');
+        throw new Error(data.error || 'Registration failed');
       }
     } catch (e) {
       if (e.message && e.message !== 'Failed to fetch' && !e.message.includes('NetworkError')) {
@@ -328,7 +328,7 @@ const DB = {
     // Local fallback registration with persistent localStorage
     const localStudents = JSON.parse(localStorage.getItem('rc_custom_students') || '[]');
     if (localStudents.some(s => s.username.toLowerCase() === cleanUser) || this.demoStudents.some(s => s.username.toLowerCase() === cleanUser)) {
-      throw new Error('اسم المستخدم مستخدم بالفعل');
+      throw new Error('Username is already taken');
     }
     const newStudent = {
       id: Date.now(),
@@ -337,10 +337,10 @@ const DB = {
       full_name: full_name.trim(),
       grade_level: grade_level || 'Year 4',
       avatar: avatar || '🦊',
-      xp: 100,
-      streak_days: 1,
+      xp: 0,
+      streak_days: 0,
       role: 'student',
-      badges: [{ badge_id: 'welcome', badge_name: 'Welcome Explorer', badge_icon: '🎓', badge_desc: 'Joined Rania Classroom' }]
+      badges: []
     };
     localStudents.push(newStudent);
     localStorage.setItem('rc_custom_students', JSON.stringify(localStudents));
@@ -362,16 +362,8 @@ const DB = {
     // Fallback dynamic report computation from local storage or mock
     const localLogs = JSON.parse(localStorage.getItem(`practice_logs_${studentId}`) || '[]');
     
-    // Sample base sessions if no local sessions exist
-    const baseSessions = [
-      { id: 1, skill_code: 'A.1', skill_name: 'Place value models - up to thousands', subject: 'Maths', grade: 'Year 4', smart_score: 100, questions_answered: 10, questions_correct: 10, duration_seconds: 240, completed_at: '2026-09-08 14:30:00' },
-      { id: 2, skill_code: 'C.4', skill_name: 'Add two two-digit numbers - with regrouping', subject: 'Maths', grade: 'Year 4', smart_score: 92, questions_answered: 12, questions_correct: 11, duration_seconds: 310, completed_at: '2026-09-07 16:15:00' },
-      { id: 3, skill_code: 'E.2', skill_name: 'Multiplication tables up to 12', subject: 'Maths', grade: 'Year 4', smart_score: 85, questions_answered: 15, questions_correct: 13, duration_seconds: 380, completed_at: '2026-09-05 11:20:00' },
-      { id: 4, skill_code: 'B.3', skill_name: 'Identify nouns – common and proper', subject: 'English', grade: 'Year 4', smart_score: 96, questions_answered: 8, questions_correct: 8, duration_seconds: 190, completed_at: '2026-09-04 15:40:00' },
-      { id: 5, skill_code: 'D.1', skill_name: 'Sentence structures and punctuation', subject: 'English', grade: 'Year 4', smart_score: 78, questions_answered: 10, questions_correct: 8, duration_seconds: 260, completed_at: '2026-09-02 10:10:00' },
-      { id: 6, skill_code: 'S.1', skill_name: 'Photosynthesis and plant energy flow', subject: 'Science', grade: 'Year 4', smart_score: 90, questions_answered: 10, questions_correct: 9, duration_seconds: 290, completed_at: '2026-08-30 13:00:00' },
-      { id: 7, skill_code: 'S.3', skill_name: 'Forces, friction and gravity', subject: 'Science', grade: 'Year 4', smart_score: 100, questions_answered: 12, questions_correct: 12, duration_seconds: 340, completed_at: '2026-08-28 17:25:00' }
-    ];
+    // Fresh classroom sessions start from zero
+    const baseSessions = [];
 
     const allSessions = [...localLogs, ...baseSessions];
     const totalQ = allSessions.reduce((acc, s) => acc + s.questions_answered, 0);
@@ -477,9 +469,9 @@ const DB = {
 
     // Fallback sample assignments
     return [
-      { id: 1, skill_code: 'A.1', skill_name: 'Place value models - up to thousands', subject: 'Maths', grade: 'Year 4', due_date: 'Tomorrow', instructions: 'Reach SmartScore 80 before tomorrow!', is_completed: 1, completions_count: 3, total_students: 4 },
-      { id: 2, skill_code: 'B.3', skill_name: 'Identify nouns – common and proper', subject: 'English', grade: 'Year 4', due_date: 'Tomorrow', instructions: 'Identify capital letters and proper names.', is_completed: 0, completions_count: 1, total_students: 4 },
-      { id: 3, skill_code: 'S.1', skill_name: 'Photosynthesis and plant energy flow', subject: 'Science', grade: 'Year 4', due_date: 'In 3 days', instructions: 'Weekly science inquiry assignment.', is_completed: 0, completions_count: 1, total_students: 4 }
+      { id: 1, skill_code: 'A.1', skill_name: 'Place value models - up to thousands', subject: 'Maths', grade: 'Year 4', due_date: 'Tomorrow', instructions: 'Reach SmartScore 80 before tomorrow!', is_completed: 0, completions_count: 0, total_students: 4 },
+      { id: 2, skill_code: 'B.3', skill_name: 'Identify nouns – common and proper', subject: 'English', grade: 'Year 4', due_date: 'Tomorrow', instructions: 'Identify capital letters and proper names.', is_completed: 0, completions_count: 0, total_students: 4 },
+      { id: 3, skill_code: 'S.1', skill_name: 'Photosynthesis and plant energy flow', subject: 'Science', grade: 'Year 4', due_date: 'In 3 days', instructions: 'Weekly science inquiry assignment.', is_completed: 0, completions_count: 0, total_students: 4 }
     ];
   },
 
@@ -531,12 +523,12 @@ const DB = {
     const cleanUser = (data.username || '').trim().toLowerCase();
     const cleanPw = (data.password || '').trim() || 'password123';
     if (!fullName || !cleanUser) {
-      return { success: false, error: 'يرجى إدخال اسم الطالب واسم المستخدم' };
+      return { success: false, error: 'Please enter student full name and username' };
     }
 
     const localStudents = JSON.parse(localStorage.getItem('rc_custom_students') || '[]');
     if (localStudents.some(s => s.username.toLowerCase() === cleanUser) || this.demoStudents.some(s => s.username.toLowerCase() === cleanUser)) {
-      return { success: false, error: 'اسم المستخدم مسجل مسبقاً، يرجى اختيار اسم مستخدم آخر' };
+      return { success: false, error: 'Username already registered. Please choose another username' };
     }
 
     const newStudent = {
@@ -546,15 +538,15 @@ const DB = {
       full_name: fullName,
       grade_level: data.grade_level || 'Year 4',
       avatar: data.avatar || '🦊',
-      xp: 100,
-      streak_days: 1,
+      xp: 0,
+      streak_days: 0,
       role: 'student',
       questions_answered: 0,
       questions_correct: 0,
-      accuracy_rate: 100,
-      avg_smart_score: 100,
-      last_active: 'Just now',
-      badges: [{ badge_id: 'welcome', badge_name: 'Classroom Explorer', badge_icon: '🎓', badge_desc: 'Added by Miss Rania' }]
+      accuracy_rate: 0,
+      avg_smart_score: 0,
+      last_active: 'Not started',
+      badges: []
     };
 
     localStudents.push(newStudent);
@@ -618,8 +610,8 @@ const DB = {
     ];
 
     const students = allEnrolled.map(s => {
-      const q = s.questions_answered !== undefined ? s.questions_answered : (s.xp ? Math.round(s.xp / 22) : 50);
-      const c = s.questions_correct !== undefined ? s.questions_correct : Math.round(q * 0.92);
+      const q = s.questions_answered !== undefined ? s.questions_answered : (s.xp ? Math.round(s.xp / 22) : 0);
+      const c = s.questions_correct !== undefined ? s.questions_correct : 0;
       return {
         id: s.id,
         username: s.username,
@@ -627,14 +619,14 @@ const DB = {
         full_name: s.full_name,
         grade_level: s.grade_level,
         avatar: s.avatar || '🦊',
-        xp: s.xp || 100,
-        streak_days: s.streak_days || 1,
+        xp: s.xp || 0,
+        streak_days: s.streak_days || 0,
         questions_answered: q,
         questions_correct: c,
-        accuracy_rate: q ? Math.round((c / q) * 100) : 100,
-        avg_smart_score: s.avg_smart_score || 91.5,
-        last_active: s.last_active || 'Today',
-        badges_count: (s.badges && s.badges.length) || 2,
+        accuracy_rate: q ? Math.round((c / q) * 100) : 0,
+        avg_smart_score: s.avg_smart_score || 0,
+        last_active: s.last_active || 'Not started',
+        badges_count: (s.badges && s.badges.length) || 0,
         is_custom: !!localStudents.some(ls => ls.id === s.id)
       };
     });
@@ -647,18 +639,12 @@ const DB = {
       class_stats: {
         total_questions: totQ,
         total_correct: totCorr,
-        accuracy_rate: totQ ? Math.round((totCorr / totQ) * 100) : 92,
-        total_hours: (12.8 + (localStudents.length * 0.5)).toFixed(1)
+        accuracy_rate: totQ ? Math.round((totCorr / totQ) * 100) : 0,
+        total_hours: 0
       },
       roster: students,
-      attention_skills: [
-        { skill_code: 'D.1', skill_name: 'Sentence structures and punctuation', subject: 'English', grade: 'Year 4', attempts: 6, avg_score: 74.0 },
-        { skill_code: 'C.4', skill_name: 'Add two two-digit numbers - with regrouping', subject: 'Maths', grade: 'Year 4', attempts: 8, avg_score: 82.5 }
-      ],
-      mastered_skills: [
-        { skill_code: 'A.1', skill_name: 'Place value models - up to thousands', subject: 'Maths', grade: 'Year 4', attempts: 14, avg_score: 99.0 },
-        { skill_code: 'S.3', skill_name: 'Forces, friction and gravity', subject: 'Science', grade: 'Year 4', attempts: 10, avg_score: 96.0 }
-      ]
+      attention_skills: [],
+      mastered_skills: []
     };
   },
 
@@ -1206,10 +1192,10 @@ async function renderDashboard() {
   try {
     const reportData = await DB.getReport(user.id);
     if (reportData && reportData.summary) {
-      animateNumber(el.kpiQuestionsAnswered, reportData.summary.total_questions || 142);
-      el.kpiAccuracyRate.textContent = `${reportData.summary.accuracy_rate || 88.5}%`;
-      el.kpiTimeSpent.textContent = formatDuration(reportData.summary.total_time_spent || 6300);
-      animateNumber(el.kpiMasteredCount, reportData.summary.mastered_skills || 8);
+      animateNumber(el.kpiQuestionsAnswered, reportData.summary.total_questions || 0);
+      el.kpiAccuracyRate.textContent = `${reportData.summary.accuracy_rate || 0}%`;
+      el.kpiTimeSpent.textContent = formatDuration(reportData.summary.total_time_spent || 0);
+      animateNumber(el.kpiMasteredCount, reportData.summary.mastered_skills || 0);
     }
   } catch (e) {}
 
@@ -1612,7 +1598,7 @@ async function renderTeacherConsoleView() {
               <div class="leader-avatar">${s.avatar || '🦊'}</div>
               <div>
                 <div class="leader-name" style="font-weight:700;">${s.full_name}</div>
-                <div style="font-size:0.75rem; color:var(--text-muted);">${s.is_custom ? 'طالب مضاف' : 'طالب أساسي'}</div>
+                <div style="font-size:0.75rem; color:var(--text-muted);">${s.is_custom ? 'Custom Student' : 'Base Account'}</div>
               </div>
             </div>
           </td>
@@ -1625,8 +1611,8 @@ async function renderTeacherConsoleView() {
           <td><strong style="color:var(--text-main); font-size:0.85rem;">${s.grade_level}</strong></td>
           <td>
             ${s.is_custom
-              ? '<span style="background:rgba(59,130,246,0.12); color:#2563eb; padding:3px 8px; border-radius:12px; font-size:0.72rem; font-weight:700;">مضاف جديد ✨</span>'
-              : '<span style="background:rgba(100,116,139,0.12); color:#475569; padding:3px 8px; border-radius:12px; font-size:0.72rem; font-weight:700;">أساسي 📌</span>'}
+              ? '<span style="background:rgba(59,130,246,0.12); color:#2563eb; padding:3px 8px; border-radius:12px; font-size:0.72rem; font-weight:700;">Custom ✨</span>'
+              : '<span style="background:rgba(100,116,139,0.12); color:#475569; padding:3px 8px; border-radius:12px; font-size:0.72rem; font-weight:700;">Base 📌</span>'}
           </td>
           <td><strong>${s.questions_answered ? s.questions_answered.toLocaleString() : 0}</strong></td>
           <td><span class="accuracy-pill ${accClass}">${acc}%</span></td>
@@ -1634,24 +1620,24 @@ async function renderTeacherConsoleView() {
           <td><strong style="color:var(--color-primary); font-family:var(--font-mono);">${(s.xp || 0).toLocaleString()} XP</strong></td>
           <td>
             <div class="actions-cell">
-              <button class="action-btn-sm" onclick="inspectStudentReport(${s.id})" title="تقرير أداء الطالب">
-                📊 تقرير
+              <button class="action-btn-sm" onclick="inspectStudentReport(${s.id})" title="Student Performance Report">
+                📊 Report
               </button>
-              <button class="action-btn-sm print" onclick="printStudentReportCard(${s.id})" title="طباعة تقرير الطالب">
+              <button class="action-btn-sm print" onclick="printStudentReportCard(${s.id})" title="Print Student Report Card">
                 🖨️
               </button>
-              <button class="action-btn-sm" onclick="openResetPasswordModal(${s.id}, '${s.full_name}')" title="إعادة تعيين كلمة المرور">
+              <button class="action-btn-sm" onclick="openResetPasswordModal(${s.id}, '${s.full_name}')" title="Reset Student Password">
                 🔑
               </button>
               ${s.is_custom ? `
-              <button class="action-btn-sm delete" onclick="confirmDeleteStudent(${s.id}, '${s.full_name}')" title="حذف الطالب من الفصل" style="color:var(--color-danger); border-color:rgba(239, 68, 68, 0.3);">
+              <button class="action-btn-sm delete" onclick="confirmDeleteStudent(${s.id}, '${s.full_name}')" title="Remove Student from Classroom" style="color:var(--color-danger); border-color:rgba(239, 68, 68, 0.3);">
                 🗑️
               </button>` : ''}
             </div>
           </td>
         </tr>
       `;
-    }).join('') || '<tr><td colspan="10" style="text-align:center; padding:1.5rem;">لا يوجد طلاب مسجلين حالياً.</td></tr>';
+    }).join('') || '<tr><td colspan="10" style="text-align:center; padding:1.5rem;">No registered students found.</td></tr>';
 
     // Attention Needed Skills
     const attention = overview.attention_skills || [];
@@ -1707,13 +1693,13 @@ window.printStudentReportCard = async function(studentId) {
 window.printStudentLoginCards = async function() {
   const overview = await DB.getTeacherOverview();
   if (!overview || !overview.roster || !overview.roster.length) {
-    showToast('لا يوجد طلاب مسجلين حالياً للطباعة');
+    showToast('No enrolled students available to print');
     return;
   }
 
   const printWindow = window.open('', '_blank');
   if (!printWindow) {
-    showToast('يرجى السماح بالنوافذ المنبثقة لطباعة كروت الدخول');
+    showToast('Please allow popup windows to print student login cards');
     return;
   }
 
@@ -1728,20 +1714,20 @@ window.printStudentLoginCards = async function() {
       </div>
       <div class="card-body">
         <div class="info-row">
-          <span class="lbl">الصف الدراسي:</span>
+          <span class="lbl">Grade Level:</span>
           <span class="val">${s.grade_level}</span>
         </div>
         <div class="info-row">
-          <span class="lbl">اسم المستخدم (Username):</span>
+          <span class="lbl">Username:</span>
           <span class="val cred-user">${s.username}</span>
         </div>
         <div class="info-row">
-          <span class="lbl">كلمة المرور (Password):</span>
+          <span class="lbl">Password:</span>
           <span class="val cred-pass">${s.password || 'password123'}</span>
         </div>
       </div>
       <div class="card-footer">
-        رابط الموقع: https://mbechr.github.io/rcroom/
+        Portal URL: https://mbechr.github.io/rcroom/
       </div>
     </div>
   `).join('');
@@ -1749,10 +1735,10 @@ window.printStudentLoginCards = async function() {
   printWindow.document.open();
   printWindow.document.write(`
     <!DOCTYPE html>
-    <html lang="ar" dir="rtl">
+    <html lang="en" dir="ltr">
     <head>
       <meta charset="utf-8">
-      <title>كروت تسجيل دخول الطلاب — RC Classroom</title>
+      <title>Student Login Credentials — RC Classroom</title>
       <style>
         @page { size: A4 portrait; margin: 10mm; }
         * { box-sizing: border-box; }
@@ -1781,10 +1767,10 @@ window.printStudentLoginCards = async function() {
     </head>
     <body>
       <div class="no-print">
-        <button class="print-btn" onclick="window.print()">🖨️ طباعة الكروت الآن (Print All Cards)</button>
+        <button class="print-btn" onclick="window.print()">🖨️ Print Login Cards Now</button>
       </div>
-      <h1>🏫 كروت بيانات دخول الطلاب — RC Classroom</h1>
-      <p class="sub">المعلمة رانيا • اقطع الكروت ووزعها على الطلاب للبدء في حل التدريبات فوراً</p>
+      <h1>🏫 Student Access & Login Cards — RC Classroom</h1>
+      <p class="sub">Teacher Suite • Distribute cards to students to begin curriculum practice immediately</p>
       <div class="grid">${cardsHtml}</div>
       <script>window.onload = () => { setTimeout(() => window.print(), 350); };</script>
     </body>
@@ -2649,7 +2635,7 @@ window.logoutUser = function() {
   localStorage.removeItem('current_student');
   localStorage.removeItem('rc_auth_token');
   document.body.classList.add('auth-locked');
-  showToast('تم تسجيل الخروج بنجاح 👋');
+  showToast('Signed out successfully 👋');
   updateStudentHeader();
   openAuthModal(true);
 };
@@ -2964,7 +2950,7 @@ function setupEventListeners() {
       if (AppState.currentUser) {
         el.authModal.classList.remove('open');
       } else {
-        showToast('يرجى تسجيل الدخول أولاً للمتابعة 🔒');
+        showToast('Please sign in first to continue 🔒');
       }
     });
   }
@@ -2997,12 +2983,12 @@ function setupEventListeners() {
         await loadAndRenderPortal();
         const isTeacher = student.role === 'teacher' || student.username === 'admin' || student.username === 'rania';
         if (isTeacher) {
-          showToast('مرحباً بكِ معلمة رانيا (لوحة تحكم الإدارة) 👩‍🏫');
+          showToast('Welcome Teacher (Admin Console) 👩‍🏫');
         } else {
-          showToast(`أهلاً بك يا ${student.full_name}! 👋`);
+          showToast(`Welcome back, ${student.full_name}! 👋`);
         }
       } catch (err) {
-        el.loginErrorMsg.textContent = err.message || 'اسم المستخدم أو كلمة المرور غير صحيحة';
+        el.loginErrorMsg.textContent = err.message || 'Invalid username or password';
         el.loginErrorMsg.style.display = 'block';
       }
     });
@@ -3015,7 +3001,7 @@ function setupEventListeners() {
         if (AppState.currentUser) {
           el.authModal.classList.remove('open');
         } else {
-          showToast('يرجى تسجيل الدخول أولاً للوصول للمنصة 🔒');
+          showToast('Please sign in to access the classroom portal 🔒');
         }
       }
     });
@@ -3169,10 +3155,10 @@ function setupEventListeners() {
         el.addStudentForm.reset();
         if (el.tNewStudentPass) el.tNewStudentPass.value = 'password123';
         el.addStudentModal.classList.remove('open');
-        showToast(`تمت إضافة الطالب ${name} بنجاح واعتماد حسابه! 👤`);
+        showToast(`Student ${name} registered successfully! 👤`);
         renderTeacherConsoleView();
       } else {
-        showToast(res.error || 'تعذرت إضافة الطالب');
+        showToast(res.error || 'Failed to add student');
       }
     });
   }
@@ -3346,7 +3332,7 @@ function setupEventListeners() {
         if (AppState.currentUser) {
           el.authModal.classList.remove('open');
         } else {
-          showToast('يرجى تسجيل الدخول للوصول إلى المنصة 🔒');
+          showToast('Please sign in to access the classroom portal 🔒');
         }
       }
     }

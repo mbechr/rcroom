@@ -282,13 +282,8 @@
         <!-- Streak Badge -->
         <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-streak-glow shadow-[0_0_12px_rgba(245,158,11,0.25)] cursor-pointer" id="navStudentStreakWrap" title="Practice Streak">
           <span class="material-symbols-outlined text-streak-amber text-[18px]">local_fire_department</span>
-          <span class="font-label-md text-label-md text-on-surface font-bold" id="navStudentStreak">5 Streak</span>
+          <span class="font-label-md text-label-md text-on-surface font-bold" id="navStudentStreak">0 Streak</span>
         </div>
-
-        <!-- Language Switcher (Icon Only) -->
-        <button class="w-9 h-9 rounded-lg flex items-center justify-center bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer" id="langToggleBtn" type="button" onclick="I18N.toggle()" title="Toggle Language / تبديل اللغة" aria-label="Toggle Language">
-          <span class="material-symbols-outlined text-[18px]">language</span>
-        </button>
 
         <!-- Theme Toggle -->
         <button aria-label="Theme toggle" class="w-9 h-9 rounded-lg flex items-center justify-center bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer" id="themeToggleBtn" type="button" title="Toggle Light / Dark Mode">
@@ -296,9 +291,9 @@
         </button>
 
         <!-- Quick Teacher Dashboard Button (Only visible when logged in as teacher) -->
-        <button type="button" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs transition-all shadow-sm cursor-pointer" id="topTeacherQuickBtn" onclick="switchView('teacher')" style="display: none;" title="لوحة إدارة جميع الطلاب">
+        <button type="button" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs transition-all shadow-sm cursor-pointer" id="topTeacherQuickBtn" onclick="switchView('teacher')" style="display: none;" title="All Students Management Dashboard">
           <span class="material-symbols-outlined text-[17px]">group</span>
-          <span>لوحة الطلاب 👥</span>
+          <span>Students Dashboard 👥</span>
         </button>
 
         <!-- User Profile Pill & Explicit Logout Button -->
@@ -315,9 +310,9 @@
             <span class="px-2 py-0.5 rounded-full bg-primary-fixed text-primary font-label-sm text-label-sm font-bold" id="navStudentLevel">Admin</span>
           </div>
 
-          <button type="button" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-600 font-bold text-xs transition-colors cursor-pointer border border-red-500/20 shadow-sm" onclick="logoutUser()" title="تسجيل الخروج من المنصة">
+          <button type="button" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-600 font-bold text-xs transition-colors cursor-pointer border border-red-500/20 shadow-sm" onclick="logoutUser()" title="Sign Out">
             <span class="material-symbols-outlined text-[17px]">logout</span>
-            <span class="hidden sm:inline">تسجيل الخروج</span>
+            <span class="hidden sm:inline">Sign Out</span>
           </button>
         </div>
       </div>
@@ -358,10 +353,10 @@
           <span class="sidebar-text truncate" data-i18n="navLeaderboard">Leaderboard</span>
         </button>
         <!-- Teacher Console & Students Dashboard Access (Only visible when logged in as Teacher) -->
-        <button class="nav-tab teacher-nav-tab flex items-center justify-between px-3 py-2.5 rounded-xl font-label-md text-label-md text-purple-700 hover:bg-purple-50 transition-all text-left w-full cursor-pointer border border-purple-200/60" data-view="teacher" id="sidebarTeacherTabBtn" style="display: none;" title="لوحة إدارة جميع الطلاب (Students Dashboard)">
+        <button class="nav-tab teacher-nav-tab flex items-center justify-between px-3 py-2.5 rounded-xl font-label-md text-label-md text-purple-700 hover:bg-purple-50 transition-all text-left w-full cursor-pointer border border-purple-200/60" data-view="teacher" id="sidebarTeacherTabBtn" style="display: none;" title="All Students Management Dashboard">
           <div class="flex items-center gap-3 min-w-0">
             <span class="material-symbols-outlined text-[20px] shrink-0 text-purple-600">group</span>
-            <span class="sidebar-text truncate font-bold">داش بورد الطلاب 👥</span>
+            <span class="sidebar-text truncate font-bold">Students Dashboard 👥</span>
           </div>
           <span class="font-label-sm text-xs font-bold text-white bg-purple-600 px-2 py-0.5 rounded-full sidebar-badge shrink-0" id="sidebarTeacherBadge">Admin</span>
         </button>
@@ -1106,19 +1101,19 @@
     <section id="view-teacher" class="portal-view">
       <div class="view-header-row">
         <div>
-          <div class="view-kicker">// لوحة الإدارة والمعلمة (ADMIN CONSOLE)</div>
-          <h1 class="view-main-title">داش بورد إدارة جميع الطلاب 👥</h1>
-          <p class="view-lead-text">إدارة ومتابعة جميع الطلاب (الأساسيون والجدد)، إضافة طلاب جدد، طباعة كروت الدخول، ومتابعة أداء الفصل.</p>
+          <div class="view-kicker">// INSTRUCTOR CONTROL CENTER</div>
+          <h1 class="view-main-title">All Students Management Dashboard 👥</h1>
+          <p class="view-lead-text">Monitor enrolled students, inspect progress reports, print student login cards, and assign curriculum skills.</p>
         </div>
         <div class="view-actions-col flex flex-wrap gap-2">
           <button class="primary-glow-btn" id="openAddStudentModalTopBtn" onclick="document.getElementById('addStudentModal').classList.add('open')">
-            <span>👤+</span> <span>إضافة طالب جديد</span>
+            <span>👤+</span> <span>Add New Student</span>
           </button>
           <button class="secondary-glass-btn" onclick="printStudentLoginCards()">
-            <span>🖨️</span> <span>طباعة كروت الدخول</span>
+            <span>🖨️</span> <span>Print Login Cards</span>
           </button>
           <button class="secondary-glass-btn" id="exportClassroomCsvBtn">
-            <span>📥</span> <span>تصدير CSV</span>
+            <span>📥</span> <span>Export CSV</span>
           </button>
         </div>
       </div>
@@ -1129,16 +1124,16 @@
           <div class="space-y-1.5">
             <div class="flex items-center gap-2">
               <span class="text-xl">💡</span>
-              <h3 class="font-bold text-base text-primary">دليل المعلمة لإدارة ودخول الطلاب (الحاليين والجدد):</h3>
+              <h3 class="font-bold text-base text-primary">Teacher Guide: Student Accounts & Login Credentials</h3>
             </div>
             <p class="text-sm text-on-surface-variant max-w-4xl leading-relaxed" style="line-height: 1.7;">
-              1. <strong>الطلاب القدامى (الأساسيون):</strong> تم تسجيلهم مسبقاً (Alex, Sophia, Liam, Emma) بكلمة مرور موحدة <code class="px-1.5 py-0.5 rounded bg-surface-container font-mono text-primary font-bold">password123</code>.<br>
-              2. <strong>إضافة طلاب جدد:</strong> اضغطي على زر <strong>"إضافة طالب جديد"</strong> واكتبي اسمه، اسم المستخدم، وكلمة المرور، وحددي المرحلة الدراسية (من الروضة حتى Year 13). سيتم إنشاء الحساب فوراً.<br>
-              3. <strong>توزيع الحسابات على الطلاب:</strong> اضغطي على زر <strong>"طباعة كروت الدخول"</strong> لطباعة بطاقات أنيقة لكل طالب بها اسمه وبيانات دخوله لتسليمها له أو لولي أمره.
+              1. <strong>Pre-Registered Students (Base Roster):</strong> Accounts (Alex, Sophia, Liam, Emma) use universal default password <code class="px-1.5 py-0.5 rounded bg-surface-container font-mono text-primary font-bold">password123</code>.<br>
+              2. <strong>Adding New Students:</strong> Click <strong>"Add New Student"</strong> above, enter their name, username, and password, and select their grade level (Reception through Year 13).<br>
+              3. <strong>Distributing Credentials:</strong> Click <strong>"Print Login Cards"</strong> to print student credential slips for students to take home.
             </p>
           </div>
           <button class="primary-glow-btn shrink-0" onclick="document.getElementById('addStudentModal').classList.add('open')" style="padding: 0.65rem 1.2rem; font-size: 0.9rem;">
-            <span>➕</span> <span>إضافة طالب الآن</span>
+            <span>➕</span> <span>Add Student Now</span>
           </button>
         </div>
       </div>
@@ -1149,28 +1144,28 @@
           <div class="kpi-icon-wrap blue">👥</div>
           <div class="kpi-data-col">
             <span class="kpi-value" id="tTotalStudents">0</span>
-            <span class="kpi-label">إجمالي الطلاب المسجلين</span>
+            <span class="kpi-label">Enrolled Students</span>
           </div>
         </div>
         <div class="kpi-card glass-panel">
           <div class="kpi-icon-wrap purple">📝</div>
           <div class="kpi-data-col">
             <span class="kpi-value" id="tTotalQuestions">0</span>
-            <span class="kpi-label">إجمالي الأسئلة المحلولة</span>
+            <span class="kpi-label">Questions Solved</span>
           </div>
         </div>
         <div class="kpi-card glass-panel">
           <div class="kpi-icon-wrap green">🎯</div>
           <div class="kpi-data-col">
             <span class="kpi-value" id="tClassAccuracy">0%</span>
-            <span class="kpi-label">متوسط دقة الفصل</span>
+            <span class="kpi-label">Class Accuracy</span>
           </div>
         </div>
         <div class="kpi-card glass-panel">
           <div class="kpi-icon-wrap amber">⏱️</div>
           <div class="kpi-data-col">
             <span class="kpi-value" id="tTotalHours">0h</span>
-            <span class="kpi-label">ساعات التدريب</span>
+            <span class="kpi-label">Practice Hours</span>
           </div>
         </div>
       </div>
@@ -1179,15 +1174,15 @@
       <div class="report-section-card glass-panel" style="margin-bottom: 2rem;">
         <div class="section-card-header flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h3 class="card-title">كشف جميع الطلاب وبيانات الدخول 📋</h3>
-            <p class="card-subtitle">البيانات الكاملة لكل طالب (اسم المستخدم وكلمة المرور المسلمة له، الصف الدراسي، ونسبة الإنجاز والدقة).</p>
+            <h3 class="card-title">Enrolled Students Roster & Login Credentials 📋</h3>
+            <p class="card-subtitle">Complete credentials directory (usernames, passwords, grade assignments, and live progress stats).</p>
           </div>
           <div class="flex items-center gap-2">
             <button class="secondary-glass-btn" onclick="printStudentLoginCards()" style="font-size:0.85rem; padding: 0.45rem 0.9rem;">
-              <span>🖨️</span> <span>طباعة كروت الدخول</span>
+              <span>🖨️</span> <span>Print Login Cards</span>
             </button>
             <button class="primary-glow-btn" id="openAddStudentModalBtn" style="font-size:0.85rem; padding: 0.45rem 0.9rem;">
-              <span>👤+</span> <span>إضافة طالب جديد</span>
+              <span>👤+</span> <span>Add New Student</span>
             </button>
           </div>
         </div>
@@ -1196,16 +1191,16 @@
           <table class="report-history-table">
             <thead>
               <tr>
-                <th>الطالب (Student)</th>
-                <th>اسم المستخدم (Username)</th>
-                <th>كلمة المرور (Password)</th>
-                <th>الصف (Grade)</th>
-                <th>نوع الحساب</th>
-                <th>الأسئلة المحلولة</th>
-                <th>الدقة</th>
+                <th>Student</th>
+                <th>Username</th>
+                <th>Password</th>
+                <th>Grade</th>
+                <th>Account Type</th>
+                <th>Questions Done</th>
+                <th>Accuracy</th>
                 <th>SmartScore</th>
-                <th>XP</th>
-                <th>الإجراءات (Actions)</th>
+                <th>Total XP</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody id="teacherRosterTableBody">
@@ -1219,11 +1214,11 @@
       <div class="report-section-card glass-panel" style="margin-bottom: 2rem;">
         <div class="section-card-header">
           <div>
-            <h3 class="card-title">📌 واجبات وتكليفات الفصل (Classroom Assignments)</h3>
-            <p class="card-subtitle">المهارات والواجبات المخصصة للطلاب ومواعيد التسليم ومتابعة الإنجاز.</p>
+            <h3 class="card-title">📌 Classroom Assignments & Homework</h3>
+            <p class="card-subtitle">Active assigned skills, target due dates, and student completion tracking.</p>
           </div>
           <button class="primary-glow-btn" id="openCreateAssignmentModalBtn">
-            <span>+</span> <span>إضافة واجب جديد</span>
+            <span>+</span> <span>Create New Assignment</span>
           </button>
         </div>
         <div class="assignments-teacher-grid" id="teacherAssignmentsGrid">
@@ -1403,9 +1398,9 @@
         <div>
           <div class="flex items-center gap-2 mb-1">
             <span class="text-xl">🔐</span>
-            <h2 class="auth-title">RC Classroom — تسجيل الدخول</h2>
+            <h2 class="auth-title">RC Classroom — Sign In</h2>
           </div>
-          <p class="auth-subtitle">بوابة الدخول الموحدة للطلاب والمعلمة (المدير)</p>
+          <p class="auth-subtitle">Unified login portal for students and teacher (admin)</p>
         </div>
         <button class="modal-close-btn" id="closeAuthModalBtn">✕</button>
       </div>
@@ -1414,19 +1409,19 @@
       <div class="auth-tab-content active" id="authTabLogin" style="padding-top: 0.5rem;">
         <form id="loginForm" class="auth-form" onsubmit="return false;">
           <div class="form-group">
-            <label for="loginUsername">اسم المستخدم (Username)</label>
-            <input type="text" id="loginUsername" placeholder="مثال: sophia أو alex أو للمعلمة admin" required autocomplete="username">
+            <label for="loginUsername">Username</label>
+            <input type="text" id="loginUsername" placeholder="e.g. alex, sophia, or teacher admin" required autocomplete="username">
           </div>
           <div class="form-group">
-            <label for="loginPassword">كلمة المرور (Password)</label>
-            <input type="password" id="loginPassword" placeholder="أدخل كلمة المرور الخاصة بحسابك" required autocomplete="current-password">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" placeholder="Enter your account password" required autocomplete="current-password">
           </div>
           <div class="form-error-msg" id="loginErrorMsg" style="display: none;"></div>
           <button type="submit" class="primary-glow-btn full-width" id="submitLoginBtn" style="font-weight: 700; font-size: 1rem; padding: 0.85rem;">
-            تسجيل الدخول إلى المنصة →
+            Sign In to Classroom &rarr;
           </button>
           <div style="margin-top: 1.25rem; padding: 0.85rem 1rem; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; text-align: center;">
-            🔒 <strong>ملاحظة للمستخدم:</strong> تسجيل وإضافة الطلاب متاح حصرياً للمعلمة (Admin) من داخل لوحة التحكم المدرسية.
+            🔒 <strong>Note:</strong> Student enrollment is managed exclusively by the Teacher (Admin) inside the Teacher Dashboard.
           </div>
         </form>
       </div>
@@ -1495,28 +1490,28 @@
     <div class="auth-modal-window" style="max-width: 500px;">
       <div class="auth-modal-header">
         <div>
-          <h2 class="auth-title">إضافة طالب جديد للفصل (Add Student) 👤</h2>
-          <p class="auth-subtitle">إنشاء حساب رسمي للطالب وتحديد الصف الدراسي وبيانات الدخول</p>
+          <h2 class="auth-title">Add New Student to Classroom 👤</h2>
+          <p class="auth-subtitle">Create a student account with grade level and login credentials</p>
         </div>
         <button class="modal-close-btn" id="closeAddStudentModalBtn">✕</button>
       </div>
       <form id="addStudentForm" class="auth-form" onsubmit="return false;" style="padding: 1.5rem;">
         <div class="form-group">
-          <label for="tNewStudentName">اسم الطالب (Student Full Name)</label>
-          <input type="text" id="tNewStudentName" placeholder="مثال: يوسف أحمد / Oliver Smith" required>
+          <label for="tNewStudentName">Student Full Name</label>
+          <input type="text" id="tNewStudentName" placeholder="e.g. Oliver Smith" required>
         </div>
         <div class="form-group">
-          <label for="tNewStudentUser">اسم المستخدم للدخول (Username)</label>
-          <input type="text" id="tNewStudentUser" placeholder="مثال: oliver أو yusuf (حروف وأرقام فقط)" required>
+          <label for="tNewStudentUser">Login Username</label>
+          <input type="text" id="tNewStudentUser" placeholder="e.g. oliver (letters and numbers only)" required>
         </div>
         <div class="form-group">
-          <label for="tNewStudentPass">كلمة المرور (Password)</label>
+          <label for="tNewStudentPass">Password</label>
           <input type="password" id="tNewStudentPass" value="password123" required>
-          <small style="color:var(--text-muted); font-size:0.75rem; margin-top:0.25rem; display:block;">كلمة المرور الافتراضية: password123 (يمكنك تغييرها)</small>
+          <small style="color:var(--text-muted); font-size:0.75rem; margin-top:0.25rem; display:block;">Default password: password123 (can be changed)</small>
         </div>
         <div class="form-row">
           <div class="form-group">
-            <label for="tNewStudentGrade">الصف الدراسي (Grade Level)</label>
+            <label for="tNewStudentGrade">Grade Level</label>
             <select id="tNewStudentGrade">
               <option value="Reception">Early Years (Reception)</option>
               <option value="Year 1">Year 1 (Key Stage 1)</option>
@@ -1535,7 +1530,7 @@
             </select>
           </div>
           <div class="form-group">
-            <label for="tNewStudentAvatar">الأيقونة (Avatar)</label>
+            <label for="tNewStudentAvatar">Avatar</label>
             <select id="tNewStudentAvatar">
               <option value="🦊" selected>🦊 Fox</option>
               <option value="🦄">🦄 Unicorn</option>
@@ -1549,7 +1544,7 @@
           </div>
         </div>
         <button type="submit" class="primary-glow-btn full-width" id="submitAddStudentBtn" style="font-weight: 700; padding: 0.85rem;">
-          إضافة الطالب واعتماد الحساب 👤
+          Add Student & Create Account 👤
         </button>
       </form>
     </div>

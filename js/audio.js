@@ -27,11 +27,9 @@ const SpeechAudio = {
       .replace(/\s+/g, ' ')
       .trim();
 
-    const isArabic = /[؀-ۿ]/.test(cleanText) || (window.I18N && window.I18N.currentLang === 'ar');
-
     const utter = new SpeechSynthesisUtterance(cleanText);
-    utter.lang = isArabic ? 'ar-SA' : 'en-US';
-    utter.rate = isArabic ? 0.9 : 0.95; // Measured pace for student comprehension
+    utter.lang = 'en-US';
+    utter.rate = 0.95; // Measured pace for student comprehension
 
     // Retain global reference to avoid Chromium Garbage Collector freeze
     window._currentSpeechUtterance = utter;
@@ -107,8 +105,7 @@ const SpeechAudio = {
       if (q && q.prompt) {
         let fullSpeech = q.prompt;
         if (q.options && q.options.length) {
-          const choicesLabel = (window.I18N && window.I18N.currentLang === 'ar') ? '. الخيارات: ' : '. Choices: ';
-          fullSpeech += choicesLabel + q.options.join(', ');
+          fullSpeech += '. Choices: ' + q.options.join(', ');
         }
         this.speak(fullSpeech);
       }
