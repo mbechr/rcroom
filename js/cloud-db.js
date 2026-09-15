@@ -12,12 +12,12 @@
 
   const STORAGE_KEY_CONFIG = 'rc_firebase_config';
   const DEFAULT_CONFIG = {
-    apiKey: '',
-    authDomain: '',
-    projectId: '',
-    storageBucket: '',
-    messagingSenderId: '',
-    appId: ''
+    apiKey: "AIzaSyDuuQLTYmnSclZMVHeOosMgYVX6QSULRXs",
+    authDomain: "rania-classroom.firebaseapp.com",
+    projectId: "rania-classroom",
+    storageBucket: "rania-classroom.firebasestorage.app",
+    messagingSenderId: "558538973625",
+    appId: "1:558538973625:web:f15fd948c715c8e5555668"
   };
 
   const CloudDB = {
@@ -39,9 +39,13 @@
     getConfig() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY_CONFIG);
-        return raw ? JSON.parse(raw) : null;
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.projectId && parsed.apiKey) return parsed;
+        }
+        return DEFAULT_CONFIG;
       } catch (e) {
-        return null;
+        return DEFAULT_CONFIG;
       }
     },
 
@@ -135,6 +139,9 @@
             if (window.AppState && window.AppState.currentView === 'teacher' && typeof window.renderTeacherConsoleView === 'function') {
               window.renderTeacherConsoleView();
             }
+          } else {
+            // First time connection: automatically seed Firestore with local student roster (beshr)
+            this.syncAllLocalStudentsToCloud().catch(err => console.warn('Auto-seed cloud error:', err));
           }
         }, err => {
           console.warn('Students realtime listener error:', err.message);
