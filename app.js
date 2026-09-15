@@ -553,6 +553,9 @@ const DB = {
     if (window.SyncManager) {
       window.SyncManager.enqueue(data);
     }
+    if (window.CloudDB) {
+      window.CloudDB.logPracticeSession(newSession);
+    }
 
     // Update user XP locally and persistently
     const xpGained = (data.questions_correct * 15) + (data.smart_score >= 90 ? 50 : 20);
@@ -696,6 +699,9 @@ const DB = {
 
     localStudents.push(newStudent);
     localStorage.setItem('rc_custom_students', JSON.stringify(localStudents));
+    if (window.CloudDB) {
+      window.CloudDB.saveStudent(newStudent);
+    }
     return { success: true, student: newStudent, student_id: newStudent.id };
   },
 
@@ -780,6 +786,19 @@ const DB = {
       if (typeof updateNavProfile === 'function') updateNavProfile();
     }
 
+    // Sync updated student to Google Cloud Firebase
+    if (window.CloudDB) {
+      const updatedStudent = this.findStudentById(numId) || {
+        id: numId,
+        full_name: fullName,
+        username: cleanUser,
+        grade_level: grade,
+        avatar: avatar,
+        password: cleanPw
+      };
+      window.CloudDB.saveStudent(updatedStudent);
+    }
+
     return { success: true };
   },
 
@@ -825,6 +844,12 @@ const DB = {
       modifiedDemo[numId].password = pass;
       localStorage.setItem('rc_modified_demo_students', JSON.stringify(modifiedDemo));
     }
+
+    if (window.CloudDB) {
+      const studentObj = this.findStudentById(numId);
+      if (studentObj) window.CloudDB.saveStudent(studentObj);
+    }
+
     return { success: true };
   },
 
@@ -878,6 +903,12 @@ const DB = {
 
     // 4. Update memory array
     this.demoStudents = this.demoStudents.filter(s => s.id !== numId);
+
+    // Delete student from Google Cloud Firebase Firestore
+    if (window.CloudDB) {
+      window.CloudDB.deleteStudent(numId);
+    }
+
     return { success: true };
   },
 
@@ -1196,6 +1227,11 @@ const el = {
 async function initPortal() {
   applyTheme(AppState.currentTheme);
   setupEventListeners();
+
+  // Initialize Real-time Google Cloud Database Sync (Firebase)
+  if (window.CloudDB) {
+    window.CloudDB.init();
+  }
 
   // Strict Authentication Gate Check
   if (!AppState.currentUser) {
@@ -3630,6 +3666,16 @@ function setupEventListeners() {
     });
   }
 
+  // Cloud Sync Modal Backdrop Click
+  const cloudModal = document.getElementById('cloudSyncModal');
+  if (cloudModal) {
+    cloudModal.addEventListener('click', (e) => {
+      if (e.target === cloudModal) {
+        closeCloudSyncModal();
+      }
+    });
+  }
+
   // Initialize Scratchpad & Confetti & Tools & Sync
   if (window.Scratchpad) window.Scratchpad.init();
   ConfettiFX.init();
@@ -3876,6 +3922,83 @@ function generateFormattedNumericChoices(correctNum, count = 4, step = 10) {
   }
   return shuffle(Array.from(s).map(n => n.toLocaleString()));
 }
+
+// =============================================================================
+// Cloud Synchronization Modal Handlers (Google Cloud / Firebase)
+// =============================================================================
+
+function openCloudSyncModal() {
+  const modal = document.getElementById('cloudSyncModal');
+  if (!modal) return;
+  modal.classList.add('open');
+
+  // Pre-fill existing config if available
+  if (window.CloudDB) {
+    const cfg = window.CloudDB.getConfig() || {};
+    const apiKeyInput = document.getElementById('firebaseApiKey');
+    const projectIdInput = document.getElementById('firebaseProjectId');
+    const authDomainInput = document.getElementById('firebaseAuthDomain');
+    const appIdInput = document.getElementById('firebaseAppId');
+    if (apiKeyInput && cfg.apiKey) apiKeyInput.value = cfg.apiKey;
+    if (projectIdInput && cfg.projectId) projectIdInput.value = cfg.projectId;
+    if (authDomainInput && cfg.authDomain) authDomainInput.value = cfg.authDomain;
+    if (appIdInput && cfg.appId) appIdInput.value = cfg.appId;
+  }
+}
+
+function closeCloudSyncModal() {
+  const modal = document.getElementById('cloudSyncModal');
+  if (modal) modal.classList.remove('open');
+}
+
+async function handleSaveCloudConfig(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const apiKey = document.getElementById('firebaseApiKey')?.value.trim();
+  const projectId = document.getElementById('firebaseProjectId')?.value.trim();
+  const authDomain = document.getElementById('firebaseAuthDomain')?.value.trim() || `${projectId}.firebaseapp.com`;
+  const appId = document.getElementById('firebaseAppId')?.value.trim() || '';
+
+  if (!apiKey || !projectId) {
+    showToast('⚠️ يرجى إدخال Firebase API Key و Project ID');
+    return;
+  }
+
+  if (window.CloudDB) {
+    try {
+      const ok = window.CloudDB.saveConfig({ apiKey, projectId, authDomain, appId });
+      if (ok) {
+        showToast('⚡ تم ربط Google Cloud Firebase بنجاح! المزامنة الفورية نشطة الآن.');
+        closeCloudSyncModal();
+        setTimeout(() => {
+          handleSyncAllToCloud(true);
+        }, 500);
+      } else {
+        showToast('⚠️ تعذر الاتصال بـ Firebase. يرجى التحقق من المفاتيح.');
+      }
+    } catch (err) {
+      showToast('❌ خطأ: ' + err.message);
+    }
+  }
+}
+
+async function handleSyncAllToCloud(isSilent = false) {
+  if (!window.CloudDB || !window.CloudDB.isConfigured) {
+    if (!isSilent) showToast('⚠️ يرجى أولاً إدخال بيانات Firebase وحفظها.');
+    return;
+  }
+  try {
+    const count = await window.CloudDB.syncAllLocalStudentsToCloud();
+    showToast(`☁️ تم رفع ${count} طالب إلى السحابة بنجاح!`);
+    if (!isSilent) closeCloudSyncModal();
+  } catch (err) {
+    showToast('❌ فشل الرفع للسحابة: ' + err.message);
+  }
+}
+
+window.openCloudSyncModal = openCloudSyncModal;
+window.closeCloudSyncModal = closeCloudSyncModal;
+window.handleSaveCloudConfig = handleSaveCloudConfig;
+window.handleSyncAllToCloud = handleSyncAllToCloud;
 
 // Kickoff
 window.addEventListener('DOMContentLoaded', initPortal);

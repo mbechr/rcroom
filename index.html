@@ -1187,6 +1187,9 @@
             <p class="card-subtitle">Complete credentials directory (usernames, passwords, grade assignments, and live progress stats).</p>
           </div>
           <div class="flex items-center gap-2">
+            <button type="button" class="cloud-status-pill" id="cloudSyncStatusBadge" onclick="openCloudSyncModal()" title="إعداد المزامنة السحابية الفورية مع Google Cloud">
+              <span class="status-dot amber"></span> ☁️ Google Cloud
+            </button>
             <button class="secondary-glass-btn" onclick="printStudentLoginCards()" style="font-size:0.85rem; padding: 0.45rem 0.9rem;">
               <span>🖨️</span> <span>Print Login Cards</span>
             </button>
@@ -1651,6 +1654,70 @@
   </div>
 
   <!-- ====================================================================
+       MODAL 5: CLOUD SYNCHRONIZATION MODAL (Google Cloud / Firebase)
+       ==================================================================== -->
+  <div class="auth-modal-backdrop" id="cloudSyncModal">
+    <div class="auth-modal-window" style="max-width: 560px;">
+      <div class="auth-modal-header">
+        <div>
+          <h2 class="auth-title">☁️ Google Cloud Live Synchronization</h2>
+          <p class="auth-subtitle">Real-time multi-device sync for student roster and live practice logs</p>
+        </div>
+        <button class="modal-close-btn" id="closeCloudSyncModalBtn" onclick="closeCloudSyncModal()">✕</button>
+      </div>
+
+      <div style="padding: 1.5rem;">
+        <div style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 10px; padding: 0.9rem 1rem; margin-bottom: 1.25rem; font-size: 0.85rem; line-height: 1.5;">
+          <div style="font-weight: 700; color: #4338ca; margin-bottom: 0.35rem;">⚡ مزامنة سحابية لحظية مع Google Cloud Firebase</div>
+          <div>أي طالب تضيفه أو تعدله أو يحل أسئلة سينتقل فوراً وبشكل لحظي بين هاتفك وجهاز الطالب وحساب المعلمة دون الحاجة لأي رفع يدوي أو تشغيل ملفات الـ bat نهائياً.</div>
+        </div>
+
+        <form id="cloudSyncForm" onsubmit="handleSaveCloudConfig(event)">
+          <div class="form-group">
+            <label for="firebaseApiKey">Firebase API Key</label>
+            <input type="text" id="firebaseApiKey" placeholder="AIzaSy..." required>
+          </div>
+          <div class="form-group">
+            <label for="firebaseProjectId">Firebase Project ID</label>
+            <input type="text" id="firebaseProjectId" placeholder="e.g. rania-classroom-123" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="firebaseAuthDomain">Auth Domain (Optional)</label>
+              <input type="text" id="firebaseAuthDomain" placeholder="project-id.firebaseapp.com">
+            </div>
+            <div class="form-group">
+              <label for="firebaseAppId">App ID (Optional)</label>
+              <input type="text" id="firebaseAppId" placeholder="1:123456789:web:abcdef">
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 0.75rem; margin-top: 1rem; flex-wrap: wrap;">
+            <button type="submit" class="primary-glow-btn flex-1" style="font-weight: 700; padding: 0.75rem;">
+              💾 حفظ وتفعيل المزامنة الفورية
+            </button>
+            <button type="button" class="secondary-glass-btn" onclick="handleSyncAllToCloud()" title="رفع جميع الطلاب المحفوظين محلياً إلى السحابة فوراً">
+              ☁️ رفع الطلاب للسحابة الآن
+            </button>
+          </div>
+        </form>
+
+        <div style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border-card); font-size: 0.8rem; color: var(--text-muted);">
+          <details>
+            <summary style="cursor: pointer; font-weight: 600; color: var(--text-main);">📖 كيف أحصل على بيانات Firebase مجاناً في دقيقة؟</summary>
+            <ol style="margin-top: 0.5rem; padding-left: 1.2rem; line-height: 1.6;">
+              <li>افتح موقع <a href="https://console.firebase.google.com/" target="_blank" style="color: var(--color-primary); font-weight: 600;">console.firebase.google.com</a> بحساب جوجل الخاص بك.</li>
+              <li>اضغط <strong>Add project</strong> وسمّه <code>rania-classroom</code>.</li>
+              <li>من القائمة الجانبية، اضغط <strong>Firestore Database</strong> ثم <strong>Create Database</strong> (اختر Start in test mode).</li>
+              <li>اضغط علامة الترس ⚙️ بجانب Project Overview ثم <strong>Project settings</strong>، وانسخ الـ <strong>API Key</strong> و <strong>Project ID</strong> وضعهما هنا.</li>
+            </ol>
+          </details>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================================
        CLASSROOM TOOL 1: SCHOOL CALCULATOR
        ==================================================================== -->
   <div class="classroom-tool-panel" id="calculatorWidget">
@@ -1788,7 +1855,10 @@
   <script src="js/question-engine.js"></script>
   <script src="js/classroom-tools.js"></script>
   <script src="js/certificate.js"></script>
-  <script src="app.js?v=2.6.3"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  <script src="js/cloud-db.js"></script>
+  <script src="app.js?v=2.7.0"></script>
 </body>
 </html>
 
