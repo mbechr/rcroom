@@ -26,6 +26,7 @@
     firestore: null,
     unsubscribeStudents: null,
     unsubscribeLogs: null,
+    unsubscribeAssignments: null,
 
     init() {
       const config = this.getConfig();
@@ -185,6 +186,47 @@
             console.warn('Practice logs realtime listener error:', err.message);
           });
       } catch (e) {}
+
+      // 3. Realtime Assignments Listener
+      try {
+        if (this.unsubscribeAssignments) this.unsubscribeAssignments();
+        this.unsubscribeAssignments = this.firestore.collection('assignments')
+          .orderBy('created_at', 'desc')
+          .limit(50)
+          .onSnapshot(snapshot => {
+            const cloudAssignments = [];
+            snapshot.forEach(doc => {
+              const data = doc.data();
+              cloudAssignments.push({
+                id: data.id || doc.id,
+                skill_code: data.skill_code || '',
+                skill_name: data.skill_name || '',
+                subject: data.subject || 'Maths',
+                grade: data.grade || 'Year 4',
+                due_date: data.due_date || 'Soon',
+                instructions: data.instructions || '',
+                target_student: data.target_student || 'all',
+                question_goal: Number(data.question_goal) || 10,
+                created_at: data.created_at || new Date().toISOString(),
+                created_by: data.created_by || 'Miss Rania',
+                completed_by: data.completed_by || {}
+              });
+            });
+
+            console.log('⚡ Realtime Cloud Update: Loaded', cloudAssignments.length, 'assignments from Firestore.');
+            localStorage.setItem('rc_custom_assignments', JSON.stringify(cloudAssignments));
+
+            // Refresh UI if visible
+            if (typeof window.renderDashboardAssignments === 'function') {
+              window.renderDashboardAssignments();
+            }
+            if (typeof window.renderTeacherAssignments === 'function') {
+              window.renderTeacherAssignments();
+            }
+          }, err => {
+            console.warn('Assignments realtime listener error:', err.message);
+          });
+      } catch (e) {}
     },
 
     // -------------------------------------------------------------------------
@@ -258,6 +300,70 @@
         }, { merge: true });
       } catch (err) {
         console.warn('Failed to log session to Firestore:', err);
+      }
+    },
+
+    /**
+     * Save assignment to Google Cloud Firestore
+     */
+    async saveAssignment(assignmentData) {
+      if (!this.isConfigured || !this.firestore) return;
+      try {
+        const docId = String(assignmentData.id);
+        const payload = {
+          id: assignmentData.id,
+          skill_code: assignmentData.skill_code || '',
+          skill_name: assignmentData.skill_name || '',
+          subject: assignmentData.subject || 'Maths',
+          grade: assignmentData.grade || 'Year 4',
+          due_date: assignmentData.due_date || 'Soon',
+          instructions: assignmentData.instructions || '',
+          target_student: assignmentData.target_student || 'all',
+          question_goal: Number(assignmentData.question_goal) || 10,
+          created_at: assignmentData.created_at || new Date().toISOString(),
+          created_by: 'Miss Rania',
+          completed_by: assignmentData.completed_by || {}
+        };
+        await this.firestore.collection('assignments').doc(docId).set(payload, { merge: true });
+        console.log('✅ Assignment saved to Google Cloud Firestore:', payload.skill_code);
+      } catch (err) {
+        console.warn('Failed to save assignment to Firestore:', err);
+      }
+    },
+
+    /**
+     * Delete assignment from Google Cloud Firestore
+     */
+    async deleteAssignment(assignmentId) {
+      if (!this.isConfigured || !this.firestore) return;
+      try {
+        const docId = String(assignmentId);
+        await this.firestore.collection('assignments').doc(docId).delete();
+        console.log('🗑️ Assignment deleted from Google Cloud Firestore:', docId);
+      } catch (err) {
+        console.warn('Failed to delete assignment from Firestore:', err);
+      }
+    },
+
+    /**
+     * Mark assignment completed by a student in Google Cloud Firestore
+     */
+    async markAssignmentCompleted(assignmentId, studentId, sessionStats) {
+      if (!this.isConfigured || !this.firestore) return;
+      try {
+        const docId = String(assignmentId);
+        const updateField = {};
+        updateField[`completed_by.${studentId}`] = {
+          student_id: Number(studentId),
+          completed_at: new Date().toISOString(),
+          smart_score: sessionStats.smart_score || 100,
+          questions_answered: sessionStats.questions_answered || 0,
+          questions_correct: sessionStats.questions_correct || 0
+        };
+        await this.firestore.collection('assignments').doc(docId).update(updateField);
+        console.log(`✅ Assignment ${docId} marked completed for student ${studentId} in Firestore`);
+      } catch (err) {
+        console.warn('Failed to mark assignment completed in Firestore:', err);
       }
     },
 

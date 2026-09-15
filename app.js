@@ -596,44 +596,172 @@ const DB = {
   },
 
   async getAssignments(studentId = null) {
+    let list = [];
     try {
       const url = studentId ? `/api/assignments/student/${studentId}` : '/api/assignments';
       const res = await fetch(this.apiUrl(url));
       if (res.ok) {
         const json = await res.json();
-        if (json.success && json.assignments) return json.assignments;
+        if (json.success && Array.isArray(json.assignments)) list = json.assignments;
       }
     } catch (e) {}
 
-    // Fallback sample assignments
-    return [
-      { id: 1, skill_code: 'A.1', skill_name: 'Place value models - up to thousands', subject: 'Maths', grade: 'Year 4', due_date: 'Tomorrow', instructions: 'Reach SmartScore 80 before tomorrow!', is_completed: 0, completions_count: 0, total_students: 4 },
-      { id: 2, skill_code: 'B.3', skill_name: 'Identify nouns – common and proper', subject: 'English', grade: 'Year 4', due_date: 'Tomorrow', instructions: 'Identify capital letters and proper names.', is_completed: 0, completions_count: 0, total_students: 4 },
-      { id: 3, skill_code: 'S.1', skill_name: 'Photosynthesis and plant energy flow', subject: 'Science', grade: 'Year 4', due_date: 'In 3 days', instructions: 'Weekly science inquiry assignment.', is_completed: 0, completions_count: 0, total_students: 4 }
-    ];
+    // Load custom persistent assignments from localStorage / CloudDB
+    let customAssignments = [];
+    try {
+      customAssignments = JSON.parse(localStorage.getItem('rc_custom_assignments') || '[]');
+    } catch (e) {
+      customAssignments = [];
+    }
+
+    // Default initial homework if nothing exists yet
+    if (!customAssignments.length && !list.length) {
+      customAssignments = [
+        {
+          id: 1001,
+          skill_code: 'A.1',
+          skill_name: 'Place value models - up to thousands',
+          subject: 'Maths',
+          grade: 'Year 4',
+          due_date: 'Tomorrow',
+          instructions: 'Solve 10 questions carefully to reach SmartScore 80+!',
+          target_student: 'all',
+          question_goal: 10,
+          created_by: 'Miss Rania',
+          completed_by: {}
+        }
+      ];
+      localStorage.setItem('rc_custom_assignments', JSON.stringify(customAssignments));
+    }
+
+    const combined = [...customAssignments, ...list];
+    const uniqueMap = new Map();
+    combined.forEach(a => {
+      uniqueMap.set(String(a.id), a);
+    });
+    const allAssignments = Array.from(uniqueMap.values());
+
+    if (studentId) {
+      const numId = Number(studentId);
+      const studentObj = this.findStudentById(numId) || AppState.currentUser || {};
+      const username = (studentObj.username || '').toLowerCase();
+
+      return allAssignments.filter(a => {
+        const target = (a.target_student || 'all').toString().toLowerCase();
+        return target === 'all' || target === String(numId) || target === username;
+      }).map(a => {
+        const completedInfo = (a.completed_by && (a.completed_by[numId] || a.completed_by[username])) || null;
+        return {
+          ...a,
+          is_completed: completedInfo ? 1 : 0,
+          student_score: completedInfo ? completedInfo.smart_score : 0,
+          completed_at: completedInfo ? completedInfo.completed_at : null
+        };
+      });
+    }
+
+    // Return all assignments for teacher with completion counts
+    const activeStudents = (await this.getDemoStudents()).filter(s => s.role !== 'teacher');
+    return allAssignments.map(a => {
+      const completedEntries = a.completed_by ? Object.values(a.completed_by) : [];
+      const totalTarget = a.target_student === 'all' ? Math.max(1, activeStudents.length) : 1;
+      return {
+        ...a,
+        completions_count: completedEntries.length,
+        total_students: totalTarget
+      };
+    });
   },
 
   async createAssignment(data) {
     try {
-      const res = await fetch(this.apiUrl('/api/assignments/create'), {
+      fetch(this.apiUrl('/api/assignments/create'), {
         method: 'POST',
         headers: this.getAuthHeaders(),
         body: JSON.stringify(data)
-      });
-      if (res.ok) return await res.json();
+      }).catch(() => {});
     } catch (e) {}
-    return { success: true, assignment_id: Date.now() };
+
+    const newAssignment = {
+      id: Date.now(),
+      skill_code: data.skill_code || 'A.1',
+      skill_name: data.skill_name || 'Class Homework Drill',
+      subject: data.subject || 'Maths',
+      grade: data.grade || 'Year 4',
+      due_date: data.due_date || 'Upcoming',
+      instructions: data.instructions || 'Complete the assigned questions carefully.',
+      target_student: data.target_student || 'all',
+      question_goal: Number(data.question_goal) || 10,
+      created_at: new Date().toISOString(),
+      created_by: 'Miss Rania',
+      completed_by: {}
+    };
+
+    let customAssignments = [];
+    try {
+      customAssignments = JSON.parse(localStorage.getItem('rc_custom_assignments') || '[]');
+    } catch (e) {
+      customAssignments = [];
+    }
+    customAssignments.unshift(newAssignment);
+    localStorage.setItem('rc_custom_assignments', JSON.stringify(customAssignments));
+
+    if (window.CloudDB) {
+      window.CloudDB.saveAssignment(newAssignment);
+    }
+
+    return { success: true, assignment: newAssignment, assignment_id: newAssignment.id };
   },
 
   async deleteAssignment(assignmentId) {
     try {
-      const res = await fetch(this.apiUrl('/api/assignments/delete'), {
+      fetch(this.apiUrl('/api/assignments/delete'), {
         method: 'POST',
         headers: this.getAuthHeaders(),
         body: JSON.stringify({ assignment_id: assignmentId })
-      });
-      if (res.ok) return await res.json();
+      }).catch(() => {});
     } catch (e) {}
+
+    let customAssignments = [];
+    try {
+      customAssignments = JSON.parse(localStorage.getItem('rc_custom_assignments') || '[]');
+    } catch (e) {
+      customAssignments = [];
+    }
+    customAssignments = customAssignments.filter(a => String(a.id) !== String(assignmentId));
+    localStorage.setItem('rc_custom_assignments', JSON.stringify(customAssignments));
+
+    if (window.CloudDB) {
+      window.CloudDB.deleteAssignment(assignmentId);
+    }
+
+    return { success: true };
+  },
+
+  async completeAssignment(assignmentId, studentId, sessionStats) {
+    let customAssignments = [];
+    try {
+      customAssignments = JSON.parse(localStorage.getItem('rc_custom_assignments') || '[]');
+    } catch (e) {
+      customAssignments = [];
+    }
+    const target = customAssignments.find(a => String(a.id) === String(assignmentId));
+    if (target) {
+      if (!target.completed_by) target.completed_by = {};
+      target.completed_by[studentId] = {
+        student_id: Number(studentId),
+        completed_at: new Date().toISOString(),
+        smart_score: sessionStats.smart_score || 100,
+        questions_answered: sessionStats.questions_answered || 0,
+        questions_correct: sessionStats.questions_correct || 0
+      };
+      localStorage.setItem('rc_custom_assignments', JSON.stringify(customAssignments));
+    }
+
+    if (window.CloudDB) {
+      window.CloudDB.markAssignmentCompleted(assignmentId, studentId, sessionStats);
+    }
+
     return { success: true };
   },
 
@@ -1144,9 +1272,12 @@ const el = {
   closeCreateAssignmentModalBtn: document.getElementById('closeCreateAssignmentModalBtn'),
   createAssignmentForm: document.getElementById('createAssignmentForm'),
   assignSubject: document.getElementById('assignSubject'),
+  assignGrade: document.getElementById('assignGrade'),
+  assignSkillSelect: document.getElementById('assignSkillSelect'),
   assignSkillSearch: document.getElementById('assignSkillSearch'),
   assignSkillTitle: document.getElementById('assignSkillTitle'),
-  assignGrade: document.getElementById('assignGrade'),
+  assignTargetStudent: document.getElementById('assignTargetStudent'),
+  assignQuestionTarget: document.getElementById('assignQuestionTarget'),
   assignDueDate: document.getElementById('assignDueDate'),
   assignInstructions: document.getElementById('assignInstructions'),
   openAddStudentModalBtn: document.getElementById('openAddStudentModalBtn'),
@@ -1357,6 +1488,15 @@ function buildFlatSkillsIndex() {
 // =============================================================================
 
 function switchView(viewId) {
+  const user = AppState.currentUser;
+  const isTeacher = user && (user.role === 'teacher' || user.username === 'admin' || user.username === 'rania');
+
+  // STRICT LOCKDOWN: Students cannot browse open skills bank or curriculum tracks
+  if (!isTeacher && (viewId === 'tracks' || viewId === 'skills')) {
+    showToast('Skills Bank is managed exclusively by Miss Rania 🔒', 'ℹ️');
+    viewId = 'dashboard';
+  }
+
   AppState.currentView = viewId;
 
   // Update tabs (both top bar & persistent left sidebar)
@@ -1495,6 +1635,13 @@ function updateStudentHeader() {
       sidebarTeacherTab.classList.add('bg-purple-600', 'text-white');
       sidebarTeacherTab.classList.remove('text-purple-700', 'hover:bg-purple-50');
     }
+    // Teacher sees curriculum tracks and skills bank
+    document.querySelectorAll('.nav-tab[data-view="tracks"], .nav-tab[data-view="skills"]').forEach(t => t.style.display = 'flex');
+    const topSearch = document.getElementById('topSearchIconBtn');
+    if (topSearch) topSearch.style.display = 'flex';
+    const dashTracks = document.getElementById('dashTracksPreviewContainer');
+    if (dashTracks && dashTracks.closest('section')) dashTracks.closest('section').style.display = 'block';
+
     if (el.navStudentAvatar) el.navStudentAvatar.textContent = user.avatar || '👩‍🏫';
     if (el.navStudentName) el.navStudentName.textContent = user.full_name || 'Miss Rania';
     if (el.navStudentGrade) el.navStudentGrade.innerHTML = `<span>Instructor &bull; Admin</span>`;
@@ -1507,6 +1654,23 @@ function updateStudentHeader() {
     if (sidebarTeacherTab) {
       sidebarTeacherTab.style.display = 'none'; // Strictly hidden for students
     }
+    // STRICT LOCKDOWN: Students cannot browse open curriculum tracks & skills bank
+    document.querySelectorAll('.nav-tab[data-view="tracks"], .nav-tab[data-view="skills"]').forEach(t => t.style.display = 'none');
+    const topSearch = document.getElementById('topSearchIconBtn');
+    if (topSearch) topSearch.style.display = 'none';
+    const dashTracks = document.getElementById('dashTracksPreviewContainer');
+    if (dashTracks && dashTracks.closest('section')) dashTracks.closest('section').style.display = 'none';
+
+    // Focus Hero Button directly on Homework
+    const heroBtn = document.getElementById('dashStartPracticeBtn');
+    if (heroBtn) {
+      heroBtn.innerHTML = '<span>🚀</span><span>Start Homework</span>';
+      heroBtn.onclick = () => {
+        const sec = document.getElementById('dashAssignmentsSection');
+        if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+      };
+    }
+
     if (el.navStudentAvatar) el.navStudentAvatar.textContent = user.avatar || '🦊';
     if (el.navStudentName) el.navStudentName.textContent = user.full_name;
     if (el.navStudentGrade) el.navStudentGrade.innerHTML = `(${user.grade_level || 'Student'})`;
@@ -2177,12 +2341,48 @@ window.printStudentLoginCards = async function() {
 };
 
 window.launchPracticeForSkill = function(skillCode) {
+  const user = AppState.currentUser;
+  const isTeacher = user && (user.role === 'teacher' || user.username === 'admin' || user.username === 'rania');
+  if (!isTeacher) {
+    showToast('Open practice is disabled. Please solve your assigned homework below 🔒', '⚠️');
+    return;
+  }
   const skill = AppState.flatSkills.find(s => s.code === skillCode || s.permacode === skillCode);
   if (skill) {
     openPracticeModal(skill);
   } else {
     showToast(`Skill ${skillCode} ready for practice`);
   }
+};
+
+window.launchPracticeForAssignment = async function(assignmentId) {
+  const user = AppState.currentUser;
+  const assignments = await DB.getAssignments(user ? user.id : null);
+  const a = assignments.find(item => String(item.id) === String(assignmentId));
+  if (!a) {
+    showToast('Assignment not found');
+    return;
+  }
+
+  let targetSkill = AppState.flatSkills.find(s => s.code === a.skill_code || s.permacode === a.skill_code);
+  if (!targetSkill) {
+    targetSkill = {
+      id: 'assign-' + a.id,
+      code: a.skill_code,
+      name: a.skill_name,
+      permacode: a.skill_code,
+      subject: a.subject,
+      grade: a.grade
+    };
+  }
+
+  targetSkill = {
+    ...targetSkill,
+    assignment_id: a.id,
+    question_goal: Number(a.question_goal) || 10
+  };
+
+  openPracticeModal(targetSkill);
 };
 
 function exportClassroomCsv() {
@@ -2241,6 +2441,12 @@ async function renderLeaderboardView() {
 // =============================================================================
 
 function startPracticeByPermacode(permacode, encodedTitle) {
+  const user = AppState.currentUser;
+  const isTeacher = user && (user.role === 'teacher' || user.username === 'admin' || user.username === 'rania');
+  if (!isTeacher) {
+    showToast('Open practice is disabled. Please solve your assigned homework below 🔒', '⚠️');
+    return;
+  }
   const title = decodeURIComponent(encodedTitle);
   let targetSkill = AppState.flatSkills.find(s => s.permacode === permacode);
   if (!targetSkill) {
@@ -2257,7 +2463,18 @@ function startPracticeByPermacode(permacode, encodedTitle) {
 }
 
 function openPracticeModal(skill) {
+  const user = AppState.currentUser;
+  const isTeacher = user && (user.role === 'teacher' || user.username === 'admin' || user.username === 'rania');
+
+  // STRICT LOCKDOWN: Students can ONLY open assigned homework!
+  if (!isTeacher && !skill.assignment_id) {
+    showToast('This topic has not been assigned by Miss Rania 🔒', '⚠️');
+    return;
+  }
+
   AppState.practice.activeSkill = skill;
+  AppState.practice.assignment_id = skill.assignment_id || null;
+  AppState.practice.question_goal = skill.question_goal || 10;
   AppState.practice.score = 0;
   AppState.practice.answeredCount = 0;
   AppState.practice.correctCount = 0;
@@ -2266,7 +2483,7 @@ function openPracticeModal(skill) {
 
   el.practiceModalSkillCode.textContent = skill.code && skill.code !== skill.permacode ? skill.code : '';
   el.practiceModalSkillSubject.textContent = skill.subject;
-  el.practiceModalSkillTitle.textContent = skill.name;
+  el.practiceModalSkillTitle.textContent = skill.name + (skill.question_goal ? ` (Goal: ${skill.question_goal} Questions)` : '');
   el.practiceScore.textContent = '0';
   el.practiceAnswered.textContent = '0';
   el.practiceTimer.textContent = '00:00';
@@ -2292,7 +2509,8 @@ function closePracticeModal() {
   // If student answered at least 1 question, submit practice session to SQL DB!
   if (AppState.practice.answeredCount > 0 && AppState.practice.activeSkill) {
     const s = AppState.practice.activeSkill;
-    DB.submitPracticeSession({
+    const assignmentId = AppState.practice.assignment_id;
+    const sessionData = {
       student_id: AppState.currentUser.id,
       skill_code: s.code || s.permacode,
       skill_name: s.name,
@@ -2301,11 +2519,21 @@ function closePracticeModal() {
       smart_score: AppState.practice.score,
       questions_answered: AppState.practice.answeredCount,
       questions_correct: AppState.practice.correctCount,
-      duration_seconds: AppState.practice.timerSeconds
-    }).then(res => {
-      showToast(`Practice logged! Earned +${res.xp_earned || 25} XP 🎉`);
+      duration_seconds: AppState.practice.timerSeconds,
+      assignment_id: assignmentId
+    };
+
+    DB.submitPracticeSession(sessionData).then(res => {
+      showToast(`Homework progress saved! Earned +${res.xp_earned || 25} XP 🎉`);
       updateStudentHeader();
     });
+
+    if (assignmentId) {
+      DB.completeAssignment(assignmentId, AppState.currentUser.id, sessionData).then(() => {
+        renderDashboardAssignments();
+        renderTeacherAssignments();
+      });
+    }
   }
 
   el.practiceModal.classList.remove('open');
@@ -2346,6 +2574,16 @@ function ensureUniqueChoices(correct, rawOptions, count = 4) {
 
 function loadNextQuestion() {
   if (window.SpeechAudio) window.SpeechAudio.stop();
+
+  // Check if Homework Question Goal has been reached
+  if (AppState.practice.question_goal && AppState.practice.answeredCount >= AppState.practice.question_goal) {
+    SoundFX.fanfare();
+    ConfettiFX.fire(4000);
+    showToast(`🎉 Homework Completed! You solved all ${AppState.practice.answeredCount} questions! 🌟`);
+    closePracticeModal();
+    return;
+  }
+
   AppState.practice.selectedOption = null;
 
   el.practiceFeedbackBox.style.display = 'none';
@@ -3096,25 +3334,31 @@ async function renderDashboardAssignments() {
     el.dashAssignmentsGrid.innerHTML = list.map(a => {
       const isDone = a.is_completed === 1;
       const statusClass = isDone ? 'completed' : 'pending';
-      const statusText = isDone ? 'Completed ✓' : `Due: ${a.due_date}`;
+      const statusText = isDone ? `Completed ✅ (${a.student_score || 100}%)` : `Due: ${a.due_date}`;
+      const goalText = a.question_goal ? `Goal: Complete ${a.question_goal} Questions` : 'Goal: Complete Drill';
 
       return `
-        <div class="assignment-card ${statusClass}">
-          <div class="assign-card-top">
-            <span class="assign-skill-code">${a.skill_code} &bull; ${a.subject}</span>
-            <span class="assign-due-badge ${statusClass}">${statusText}</span>
+        <div class="assignment-card ${statusClass}" style="border: 1px solid ${isDone ? 'rgba(16,185,129,0.3)' : 'rgba(99,102,241,0.2)'}; background: ${isDone ? 'rgba(16,185,129,0.03)' : 'var(--bg-surface-solid)'}; border-radius: 14px; padding: 1.25rem; display: flex; flex-col; justify-content: space-between; gap: 0.85rem; box-shadow: var(--shadow-sm);">
+          <div class="assign-card-top" style="display:flex; justify-content:space-between; align-items:center;">
+            <span class="assign-skill-code" style="font-weight:700; font-size:0.82rem; color:var(--color-primary);">${a.skill_code} &bull; ${a.subject}</span>
+            <span class="assign-due-badge ${statusClass}" style="font-size:0.75rem; font-weight:700; padding:0.25rem 0.65rem; border-radius:9999px; background:${isDone ? '#dcfce7; color:#15803d;' : '#fee2e2; color:#b91c1c;'}">${statusText}</span>
           </div>
-          <div class="assign-skill-title">${a.skill_name}</div>
-          <div class="assign-instructions">${a.instructions || 'Practice to reach SmartScore 80.'}</div>
-          <div class="assign-card-footer">
-            <span style="font-size:0.75rem; color:var(--text-muted);">${a.grade}</span>
-            <button type="button" class="${isDone ? 'secondary-glass-btn' : 'primary-glow-btn'}" onclick="launchPracticeForSkill('${a.skill_code}')" style="padding:0.4rem 0.9rem; font-size:0.8rem;">
-              ${isDone ? 'Review Again' : 'Start Task 🚀'}
+          <div>
+            <div class="assign-skill-title" style="font-size:1.05rem; font-weight:700; color:var(--text-primary); margin-bottom:0.35rem;">${a.skill_name}</div>
+            <div class="assign-instructions" style="font-size:0.85rem; color:var(--text-secondary); line-height:1.4;">${a.instructions || 'Practice and complete all required questions.'}</div>
+          </div>
+          <div style="font-size:0.78rem; font-weight:600; color:var(--color-tertiary); background:rgba(245,158,11,0.08); padding:0.35rem 0.65rem; border-radius:6px; align-self:flex-start;">
+            🎯 ${goalText}
+          </div>
+          <div class="assign-card-footer" style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border-subtle); padding-top:0.75rem; margin-top:0.25rem;">
+            <span style="font-size:0.78rem; font-weight:600; color:var(--text-muted);">${a.grade}</span>
+            <button type="button" class="${isDone ? 'secondary-glass-btn' : 'primary-glow-btn'}" onclick="launchPracticeForAssignment('${a.id}')" style="padding:0.45rem 1rem; font-size:0.85rem; font-weight:700;">
+              ${isDone ? 'Review / Practice Again 🔄' : 'Start Homework ➜'}
             </button>
           </div>
         </div>
       `;
-    }).join('') || '<div style="color:var(--text-muted); padding:1rem;">No assignments currently assigned by Miss Rania.</div>';
+    }).join('') || '<div style="color:var(--text-muted); padding:1.5rem; text-align:center; background:var(--bg-surface-solid); border-radius:12px; border:1px dashed var(--border-card);">🎉 All caught up! No pending homework assigned by Miss Rania right now.</div>';
   } catch (err) {
     console.error('Error loading student assignments:', err);
   }
@@ -3127,30 +3371,48 @@ async function renderTeacherAssignments() {
     const list = await DB.getAssignments();
     el.teacherAssignmentsGrid.innerHTML = list.map(a => {
       const completions = a.completions_count || 0;
-      const total = a.total_students || 4;
-      const pct = Math.round((completions / total) * 100);
+      const total = a.total_students || 1;
+      const pct = Math.min(100, Math.round((completions / total) * 100));
+      const targetLabel = a.target_student === 'all' ? 'All Students' : `Student ID: ${a.target_student}`;
+
+      // Build pill tags for students who completed it
+      let completedPills = '';
+      if (a.completed_by && Object.keys(a.completed_by).length > 0) {
+        completedPills = Object.values(a.completed_by).map(c => 
+          `<span style="display:inline-block; font-size:0.72rem; padding:0.15rem 0.45rem; background:#dcfce7; color:#15803d; border-radius:4px; margin-right:4px; font-weight:600;">Student ${c.student_id}: ${c.smart_score || 100}% ✅</span>`
+        ).join('');
+      } else {
+        completedPills = '<span style="font-size:0.75rem; color:var(--text-muted);">No student completions yet.</span>';
+      }
 
       return `
-        <div class="teacher-assign-card">
-          <div class="assign-card-top">
-            <span class="assign-skill-code">${a.skill_code} &bull; ${a.subject} (${a.grade})</span>
-            <button type="button" class="action-btn-sm" onclick="deleteClassAssignment(${a.id})" style="color:#ff453a;" title="Delete Assignment">🗑️</button>
+        <div class="teacher-assign-card" style="background:var(--bg-surface-solid); border:1px solid var(--border-card); border-radius:14px; padding:1.25rem; display:flex; flex-direction:column; gap:0.75rem; box-shadow:var(--shadow-sm);">
+          <div class="assign-card-top" style="display:flex; justify-content:space-between; align-items:center;">
+            <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
+              <span class="assign-skill-code" style="font-weight:700; color:var(--color-primary); font-size:0.85rem;">${a.skill_code} &bull; ${a.subject} (${a.grade})</span>
+              <span style="font-size:0.72rem; padding:0.15rem 0.5rem; background:rgba(99,102,241,0.1); color:#4f46e5; border-radius:9999px; font-weight:600;">${targetLabel}</span>
+            </div>
+            <button type="button" class="action-btn-sm" onclick="deleteClassAssignment('${a.id}')" style="color:#ef4444; background:rgba(239,68,68,0.1); border:none; padding:0.3rem 0.6rem; border-radius:6px; cursor:pointer;" title="Delete Assignment">🗑️</button>
           </div>
-          <div class="assign-skill-title">${a.skill_name}</div>
-          <div class="assign-instructions">${a.instructions || 'Class assignment'}</div>
+          <div class="assign-skill-title" style="font-weight:700; font-size:1.05rem; color:var(--text-primary);">${a.skill_name}</div>
+          <div class="assign-instructions" style="font-size:0.83rem; color:var(--text-secondary); line-height:1.4;">${a.instructions || 'Class assignment.'}</div>
           <div>
-            <div style="display:flex; justify-content:space-between; font-size:0.78rem; font-weight:600; color:var(--text-secondary);">
-              <span>Student Completion: ${completions} / ${total}</span>
+            <div style="display:flex; justify-content:space-between; font-size:0.78rem; font-weight:600; color:var(--text-secondary); margin-bottom:0.35rem;">
+              <span>Submissions: ${completions} / ${total}</span>
               <span>${pct}%</span>
             </div>
-            <div class="progress-track-bg">
-              <div class="progress-track-fill" style="width: ${pct}%;"></div>
+            <div class="progress-track-bg" style="width:100%; height:6px; background:var(--border-subtle); border-radius:9999px; overflow:hidden;">
+              <div class="progress-track-fill" style="width: ${pct}%; height:100%; background:var(--color-primary); border-radius:9999px; transition:width 0.3s ease;"></div>
             </div>
           </div>
-          <div style="font-size:0.75rem; color:var(--text-muted);">Due: <strong>${a.due_date}</strong></div>
+          <div style="padding-top:0.4rem; border-top:1px solid var(--border-subtle); display:flex; flex-direction:column; gap:0.35rem;">
+            <span style="font-size:0.72rem; font-weight:700; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.05em;">Student Status:</span>
+            <div>${completedPills}</div>
+          </div>
+          <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.25rem;">Due: <strong>${a.due_date}</strong> • Goal: <strong>${a.question_goal || 10} Questions</strong></div>
         </div>
       `;
-    }).join('') || '<div style="color:var(--text-muted); padding:1rem;">No active class assignments. Click Create New Assignment above!</div>';
+    }).join('') || '<div style="color:var(--text-muted); padding:1rem;">No active class assignments. Click "Assign Homework to Students" above to send one!</div>';
   } catch (err) {
     console.error('Error loading teacher assignments:', err);
   }
@@ -3505,12 +3767,106 @@ function setupEventListeners() {
     });
   }
 
+  // Helper to populate assignment skill dropdown based on subject and grade
+  function populateAssignmentSkillSelect(subject, grade) {
+    const skillSelect = document.getElementById('assignSkillSelect');
+    if (!skillSelect) return;
+    skillSelect.innerHTML = '';
+
+    let skills = [];
+    if (AppState.flatSkills && AppState.flatSkills.length) {
+      skills = AppState.flatSkills.filter(s => 
+        s.subject && s.subject.toLowerCase() === (subject || 'Maths').toLowerCase() && 
+        s.grade && (s.grade.toLowerCase() === (grade || 'Year 4').toLowerCase() || s.grade.toLowerCase().includes((grade || 'Year 4').toLowerCase()))
+      );
+    }
+
+    if (!skills.length && AppState.data && AppState.data[subject]) {
+      const grData = AppState.data[subject].grades.find(g => g.grade.toLowerCase() === (grade || 'Year 4').toLowerCase());
+      if (grData) {
+        grData.categories.forEach(c => {
+          c.skills.forEach(s => skills.push({ ...s, subject, grade }));
+        });
+      }
+    }
+
+    // Deduplicate by code/permacode
+    const seen = new Set();
+    skills.forEach(s => {
+      const code = s.code || s.permacode;
+      if (!seen.has(code)) {
+        seen.add(code);
+        const opt = document.createElement('option');
+        opt.value = code;
+        opt.textContent = `${s.code ? s.code + ' - ' : ''}${s.name}`;
+        opt.dataset.code = code;
+        opt.dataset.title = s.name;
+        skillSelect.appendChild(opt);
+      }
+    });
+
+    const customOpt = document.createElement('option');
+    customOpt.value = '__custom__';
+    customOpt.textContent = '➕ Custom Topic / Manual Skill Code...';
+    skillSelect.appendChild(customOpt);
+
+    const customFields = document.getElementById('customSkillFields');
+    if (customFields) customFields.style.display = 'none';
+  }
+
+  async function populateAssignmentStudentSelect() {
+    const stSelect = document.getElementById('assignTargetStudent');
+    if (!stSelect) return;
+    stSelect.innerHTML = '<option value="all">👥 All Students</option>';
+    try {
+      const students = (await DB.getDemoStudents()).filter(s => s.role !== 'teacher');
+      students.forEach(s => {
+        const opt = document.createElement('option');
+        opt.value = String(s.id);
+        opt.textContent = `👤 ${s.full_name} (${s.username} • ${s.grade_level})`;
+        stSelect.appendChild(opt);
+      });
+    } catch (e) {}
+  }
+
   // Teacher Assignment Modal
   if (el.openCreateAssignmentModalBtn) {
     el.openCreateAssignmentModalBtn.addEventListener('click', () => {
       if (el.createAssignmentModal) {
-        el.assignDueDate.value = new Date(Date.now() + 86400000 * 2).toISOString().slice(0, 10);
+        if (el.assignDueDate) {
+          el.assignDueDate.value = new Date(Date.now() + 86400000 * 2).toISOString().slice(0, 10);
+        }
+        const subj = el.assignSubject ? el.assignSubject.value : 'Maths';
+        const gr = el.assignGrade ? el.assignGrade.value : 'Year 4';
+        populateAssignmentSkillSelect(subj, gr);
+        populateAssignmentStudentSelect();
         el.createAssignmentModal.classList.add('open');
+      }
+    });
+  }
+
+  if (el.assignSubject) {
+    el.assignSubject.addEventListener('change', () => {
+      const subj = el.assignSubject.value;
+      const gr = el.assignGrade ? el.assignGrade.value : 'Year 4';
+      populateAssignmentSkillSelect(subj, gr);
+    });
+  }
+
+  if (el.assignGrade) {
+    el.assignGrade.addEventListener('change', () => {
+      const subj = el.assignSubject ? el.assignSubject.value : 'Maths';
+      const gr = el.assignGrade.value;
+      populateAssignmentSkillSelect(subj, gr);
+    });
+  }
+
+  const skillSelectEl = document.getElementById('assignSkillSelect');
+  if (skillSelectEl) {
+    skillSelectEl.addEventListener('change', () => {
+      const customFields = document.getElementById('customSkillFields');
+      if (customFields) {
+        customFields.style.display = (skillSelectEl.value === '__custom__') ? 'block' : 'none';
       }
     });
   }
@@ -3524,12 +3880,29 @@ function setupEventListeners() {
   if (el.createAssignmentForm) {
     el.createAssignmentForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const code = el.assignSkillSearch.value.trim().toUpperCase();
-      const title = el.assignSkillTitle.value.trim();
-      const subj = el.assignSubject.value;
-      const grade = el.assignGrade.value;
-      const due = el.assignDueDate.value;
-      const notes = el.assignInstructions.value.trim();
+      const skillSelect = document.getElementById('assignSkillSelect');
+      const isCustom = skillSelect && skillSelect.value === '__custom__';
+
+      let code = '';
+      let title = '';
+      if (isCustom) {
+        code = (el.assignSkillSearch?.value.trim().toUpperCase()) || 'CUSTOM';
+        title = (el.assignSkillTitle?.value.trim()) || 'Custom Drill';
+      } else if (skillSelect && skillSelect.selectedIndex >= 0) {
+        const selectedOpt = skillSelect.options[skillSelect.selectedIndex];
+        code = selectedOpt.dataset.code || selectedOpt.value;
+        title = selectedOpt.dataset.title || selectedOpt.textContent;
+      } else {
+        code = 'A.1';
+        title = 'General Maths Drill';
+      }
+
+      const subj = el.assignSubject ? el.assignSubject.value : 'Maths';
+      const grade = el.assignGrade ? el.assignGrade.value : 'Year 4';
+      const due = el.assignDueDate ? el.assignDueDate.value : 'Tomorrow';
+      const notes = el.assignInstructions ? el.assignInstructions.value.trim() : '';
+      const targetStudent = el.assignTargetStudent ? el.assignTargetStudent.value : 'all';
+      const questionGoal = el.assignQuestionTarget ? (Number(el.assignQuestionTarget.value) || 10) : 10;
 
       await DB.createAssignment({
         teacher_id: AppState.currentUser.id || 1,
@@ -3538,12 +3911,17 @@ function setupEventListeners() {
         subject: subj,
         grade: grade,
         due_date: due,
-        instructions: notes
+        instructions: notes,
+        target_student: targetStudent,
+        question_goal: questionGoal
       });
 
       el.createAssignmentModal.classList.remove('open');
-      showToast('Assignment published to classroom! 📌');
-      renderTeacherAssignments();
+      showToast('Assignment sent to students! 🚀');
+      await renderTeacherAssignments();
+      if (typeof renderDashboardAssignments === 'function') {
+        await renderDashboardAssignments();
+      }
     });
   }
 

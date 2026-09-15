@@ -1444,33 +1444,25 @@
        MODAL 1: CREATE CLASSROOM ASSIGNMENT MODAL
        ==================================================================== -->
   <div class="auth-modal-backdrop" id="createAssignmentModal">
-    <div class="auth-modal-window" style="max-width: 520px;">
+    <div class="auth-modal-window" style="max-width: 580px;">
       <div class="auth-modal-header">
         <div>
-          <h2 class="auth-title">Create Class Assignment 📌</h2>
-          <p class="auth-subtitle">Assign a specific curriculum skill as homework or required practice.</p>
+          <h2 class="auth-title">Assign Homework to Students 📌</h2>
+          <p class="auth-subtitle">Select a curriculum skill and send homework directly to your students in real-time.</p>
         </div>
         <button class="modal-close-btn" id="closeCreateAssignmentModalBtn">✕</button>
       </div>
       <form id="createAssignmentForm" class="auth-form" onsubmit="return false;" style="padding: 1.5rem;">
-        <div class="form-group">
-          <label for="assignSubject">Subject</label>
-          <select id="assignSubject">
-            <option value="Maths" selected>Maths</option>
-            <option value="English">English</option>
-            <option value="Science">Science</option>
-            <option value="Social Studies">Social Studies</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="assignSkillSearch">Skill Code or Search</label>
-          <input type="text" id="assignSkillSearch" placeholder="e.g. A.1 or place value" required>
-        </div>
-        <div class="form-group">
-          <label for="assignSkillTitle">Skill Title</label>
-          <input type="text" id="assignSkillTitle" placeholder="e.g. Place value models - up to thousands" required>
-        </div>
         <div class="form-row">
+          <div class="form-group">
+            <label for="assignSubject">Subject</label>
+            <select id="assignSubject">
+              <option value="Maths" selected>Maths</option>
+              <option value="English">English</option>
+              <option value="Science">Science</option>
+              <option value="Social Studies">Social Studies</option>
+            </select>
+          </div>
           <div class="form-group">
             <label for="assignGrade">Year Level</label>
             <select id="assignGrade">
@@ -1481,16 +1473,60 @@
               <option value="Year 7">Year 7</option>
             </select>
           </div>
-          <div class="form-group">
-            <label for="assignDueDate">Target Due Date</label>
-            <input type="date" id="assignDueDate" required>
+        </div>
+
+        <div class="form-group">
+          <label for="assignSkillSelect">Select Skill / Topic</label>
+          <select id="assignSkillSelect" style="width: 100%; font-weight: 600;">
+            <!-- Populated dynamically based on Subject + Grade -->
+          </select>
+        </div>
+
+        <div class="form-group" id="customSkillFields" style="display: none;">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="assignSkillSearch">Skill Code</label>
+              <input type="text" id="assignSkillSearch" placeholder="e.g. A.1">
+            </div>
+            <div class="form-group">
+              <label for="assignSkillTitle">Skill Title</label>
+              <input type="text" id="assignSkillTitle" placeholder="e.g. Place value models">
+            </div>
           </div>
         </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="assignTargetStudent">Assign To</label>
+            <select id="assignTargetStudent" style="font-weight: 600;">
+              <option value="all">👥 All Students</option>
+              <!-- Populated dynamically with students like 'beshr' -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="assignQuestionTarget">Question Goal</label>
+            <select id="assignQuestionTarget">
+              <option value="5">5 Quick Questions</option>
+              <option value="10" selected>10 Questions (Standard)</option>
+              <option value="15">15 Questions (Thorough)</option>
+              <option value="20">20 Questions (Mastery Drill)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="assignDueDate">Target Due Date</label>
+          <input type="date" id="assignDueDate" required>
+        </div>
+
         <div class="form-group">
           <label for="assignInstructions">Teacher Instructions (Optional)</label>
-          <textarea id="assignInstructions" rows="2" placeholder="e.g. Solve at least 10 questions and reach SmartScore 80!"></textarea>
+          <textarea id="assignInstructions" rows="2" placeholder="e.g. Focus on accuracy and aim for SmartScore 80+!"></textarea>
         </div>
-        <button type="submit" class="primary-glow-btn full-width" id="submitCreateAssignmentBtn">Publish Assignment to Class 🚀</button>
+
+        <button type="submit" class="primary-glow-btn full-width" id="submitCreateAssignmentBtn" style="font-weight: 700; font-size: 1rem; padding: 0.85rem;">
+          Send Homework to Students Now 🚀
+        </button>
       </form>
     </div>
   </div>
