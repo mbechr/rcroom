@@ -4837,6 +4837,14 @@ function setupEventListeners() {
     });
   }
 
+  if (el.addStudentModal) {
+    el.addStudentModal.addEventListener('click', (e) => {
+      if (e.target === el.addStudentModal) {
+        el.addStudentModal.classList.remove('open');
+      }
+    });
+  }
+
   if (el.addStudentForm) {
     el.addStudentForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -5059,6 +5067,23 @@ function setupEventListeners() {
       await renderTeacherConsoleView();
     });
   }
+
+  // Universal Modal Closer on Escape Key & Backdrop Click
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.auth-modal-backdrop.open, .practice-modal-backdrop.open').forEach(m => {
+        m.classList.remove('open');
+      });
+    }
+  });
+
+  document.querySelectorAll('.auth-modal-backdrop').forEach(backdrop => {
+    backdrop.addEventListener('click', (e) => {
+      if (e.target === backdrop) {
+        backdrop.classList.remove('open');
+      }
+    });
+  });
 
   // Cloud Sync Modal Backdrop Click
   const cloudModal = document.getElementById('cloudSyncModal');

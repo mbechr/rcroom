@@ -844,26 +844,6 @@
         </div>
       </div>
 
-      <!-- Quick How-To Guide Box for Teacher -->
-      <div class="report-section-card glass-panel" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(168, 85, 247, 0.08) 100%); border: 1px solid rgba(99, 102, 241, 0.25); margin-bottom: 1.5rem; padding: 1.25rem 1.5rem;">
-        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div class="space-y-1.5">
-            <div class="flex items-center gap-2">
-              <span class="text-xl">💡</span>
-              <h3 class="font-bold text-base text-primary">Teacher Guide: Student Accounts & Login Credentials</h3>
-            </div>
-            <p class="text-sm text-on-surface-variant max-w-4xl leading-relaxed" style="line-height: 1.7;">
-              1. <strong>Pre-Registered Students (Base Roster):</strong> Accounts (Alex, Sophia, Liam, Emma) use universal default password <code class="px-1.5 py-0.5 rounded bg-surface-container font-mono text-primary font-bold">password123</code>.<br>
-              2. <strong>Adding New Students:</strong> Click <strong>"Add New Student"</strong> above, enter their name, username, and password, and select their grade level (Reception through Year 13).<br>
-              3. <strong>Distributing Credentials:</strong> Click <strong>"Print Login Cards"</strong> to print student credential slips for students to take home.
-            </p>
-          </div>
-          <button class="primary-glow-btn shrink-0" onclick="document.getElementById('addStudentModal').classList.add('open')" style="padding: 0.65rem 1.2rem; font-size: 0.9rem;">
-            <span>➕</span> <span>Add Student Now</span>
-          </button>
-        </div>
-      </div>
-
       <!-- Teacher Navigation Sub-Tabs -->
       <div class="flex items-center gap-2 mb-6 border-b border-border-card pb-3 overflow-x-auto" id="teacherSubTabs">
         <button type="button" class="teacher-sub-tab px-4 py-2 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 font-bold text-xs flex items-center gap-2 cursor-pointer transition-all active" data-ttab="students" onclick="switchTeacherTab('students')">
@@ -1224,9 +1204,9 @@
           <h2 class="auth-title">Assign Homework to Students 📌</h2>
           <p class="auth-subtitle">Select a curriculum skill and send homework directly to your students in real-time.</p>
         </div>
-        <button class="modal-close-btn" id="closeCreateAssignmentModalBtn">✕</button>
+        <button class="modal-close-btn" id="closeCreateAssignmentModalBtn" onclick="document.getElementById('createAssignmentModal').classList.remove('open')">✕</button>
       </div>
-      <form id="createAssignmentForm" class="auth-form" onsubmit="return false;" style="padding: 1.5rem;">
+      <form id="createAssignmentForm" class="auth-form" onsubmit="return false;">
         <div class="form-row">
           <div class="form-group">
             <label for="assignSubject">Subject</label>
@@ -1309,15 +1289,15 @@
        MODAL 2: ADD NEW STUDENT MODAL (TEACHER CONSOLE)
        ==================================================================== -->
   <div class="auth-modal-backdrop" id="addStudentModal">
-    <div class="auth-modal-window" style="max-width: 500px;">
+    <div class="auth-modal-window" style="max-width: 620px;">
       <div class="auth-modal-header">
         <div>
           <h2 class="auth-title">Add New Student to Classroom 👤</h2>
           <p class="auth-subtitle">Create a student account with grade level and login credentials</p>
         </div>
-        <button class="modal-close-btn" id="closeAddStudentModalBtn">✕</button>
+        <button class="modal-close-btn" id="closeAddStudentModalBtn" onclick="document.getElementById('addStudentModal').classList.remove('open')">✕</button>
       </div>
-      <form id="addStudentForm" class="auth-form" onsubmit="return false;" style="padding: 1.5rem;">
+      <form id="addStudentForm" class="auth-form" onsubmit="return false;">
         <div class="form-row">
           <div class="form-group flex-1">
             <label for="tNewStudentName">Student Full Name</label>
@@ -1422,9 +1402,9 @@
           <h2 class="auth-title">Reset Password 🔑</h2>
           <p class="auth-subtitle" id="resetStudentSubtitle">Set a new password for student.</p>
         </div>
-        <button class="modal-close-btn" id="closeResetPasswordModalBtn">✕</button>
+        <button class="modal-close-btn" id="closeResetPasswordModalBtn" onclick="document.getElementById('resetPasswordModal').classList.remove('open')">✕</button>
       </div>
-      <form id="resetPasswordForm" class="auth-form" onsubmit="return false;" style="padding: 1.5rem;">
+      <form id="resetPasswordForm" class="auth-form" onsubmit="return false;">
         <input type="hidden" id="resetStudentId">
         <div class="form-group">
           <label for="newResetPassword">New Password</label>
@@ -1439,15 +1419,15 @@
        MODAL 4: EDIT STUDENT MODAL
        ==================================================================== -->
   <div class="auth-modal-backdrop" id="editStudentModal">
-    <div class="auth-modal-window" style="max-width: 540px;">
+    <div class="auth-modal-window" style="max-width: 620px;">
       <div class="auth-modal-header">
         <div>
           <h2 class="auth-title">Edit Student Profile ✏️</h2>
           <p class="auth-subtitle" id="editStudentSubtitle">Update student name, contacts, grade, or billing details</p>
         </div>
-        <button class="modal-close-btn" id="closeEditStudentModalBtn">✕</button>
+        <button class="modal-close-btn" id="closeEditStudentModalBtn" onclick="document.getElementById('editStudentModal').classList.remove('open')">✕</button>
       </div>
-      <form id="editStudentForm" class="auth-form" onsubmit="return false;" style="padding: 1.5rem;">
+      <form id="editStudentForm" class="auth-form" onsubmit="return false;">
         <input type="hidden" id="editStudentId">
         <div class="form-row">
           <div class="form-group flex-1">
@@ -1547,15 +1527,15 @@
        MODAL 5: SUBMIT PAYMENT PROOF / RECEIPT (For Student)
        ==================================================================== -->
   <div class="auth-modal-backdrop" id="submitPaymentModal">
-    <div class="auth-modal-window" style="max-width: 500px;">
+    <div class="auth-modal-window" style="max-width: 560px;">
       <div class="auth-modal-header">
         <div>
           <h2 class="auth-title">Submit Payment Receipt 💳</h2>
-          <p class="auth-subtitle">Record class lecture, covered syllabus, Zoom Pro link, and study sheet</p>
+          <p class="auth-subtitle">Submit payment screenshot or transaction reference for Miss Rania</p>
         </div>
         <button class="modal-close-btn" id="closeSubmitPaymentModalBtn" onclick="document.getElementById('submitPaymentModal').classList.remove('open')">✕</button>
       </div>
-      <form id="submitPaymentForm" class="auth-form" onsubmit="return false;" style="padding: 1.5rem;">
+      <form id="submitPaymentForm" class="auth-form" onsubmit="return false;">
         <div class="form-row">
           <div class="form-group flex-1">
             <label for="payDateInput">Payment Date</label>
@@ -1599,7 +1579,7 @@
        MODAL 6: LOG CLASS SESSION & ZOOM (For Teacher)
        ==================================================================== -->
   <div class="auth-modal-backdrop" id="addClassSessionModal">
-    <div class="auth-modal-window" style="max-width: 540px;">
+    <div class="auth-modal-window" style="max-width: 600px;">
       <div class="auth-modal-header">
         <div>
           <h2 class="auth-title">Log Class Session & Zoom 🎥</h2>
@@ -1607,7 +1587,7 @@
         </div>
         <button class="modal-close-btn" id="closeAddClassSessionModalBtn" onclick="document.getElementById('addClassSessionModal').classList.remove('open')">✕</button>
       </div>
-      <form id="addClassSessionForm" class="auth-form" onsubmit="return false;" style="padding: 1.5rem;">
+      <form id="addClassSessionForm" class="auth-form" onsubmit="return false;">
         <div class="form-row">
           <div class="form-group flex-1">
             <label for="sessDateInput">Session Date & Time</label>
