@@ -18,10 +18,10 @@ def run_integration_tests():
     res = conn.getresponse()
     html_data = res.read().decode('utf-8')
     assert res.status == 200, f'Expected 200, got {res.status}'
-    assert 'langToggleBtn' in html_data, 'HTML must contain language toggle button'
+    assert 'loginCosmosCanvas' in html_data, 'HTML must contain login cosmos canvas'
     assert 'calculatorWidget' in html_data, 'HTML must contain calculator widget'
     assert 'masteryCertModal' in html_data, 'HTML must contain certificate modal'
-    print('  [PASS] index.html served with new tools and bilingual switcher')
+    print('  [PASS] index.html served with new tools and clean English interface')
 
     print('=== 2. Testing Secure Login (Alex student) ===')
     login_payload = json.dumps({'username': 'alex', 'password': 'password123'})

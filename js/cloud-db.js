@@ -603,11 +603,11 @@
       if (isConnected) {
         badge.className = 'cloud-status-pill connected';
         badge.innerHTML = '<span class="status-dot green"></span> 🟢 Google Cloud Active';
-        badge.title = 'متصل سحابياً بـ Google Cloud Firebase (المزامنة اللحظية مفعلة)';
+        badge.title = '   Google Cloud Firebase (  )';
       } else {
         badge.className = 'cloud-status-pill local';
-        badge.innerHTML = '<span class="status-dot amber"></span> ☁️ إعداد السحابة (Google Cloud)';
-        badge.title = 'اضغط هنا لربط Google Cloud Firebase والتزامن التلقائي اللحظي';
+        badge.innerHTML = '<span class="status-dot amber"></span> ☁️   (Google Cloud)';
+        badge.title = '   Google Cloud Firebase   ';
       }
     }
   };

@@ -283,22 +283,6 @@
           <span class="material-symbols-outlined text-[19px]">search</span>
         </button>
 
-        <!-- Streak Badge -->
-        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-streak-glow shadow-[0_0_12px_rgba(245,158,11,0.25)] cursor-pointer" id="navStudentStreakWrap" title="Practice Streak">
-          <span class="material-symbols-outlined text-streak-amber text-[18px]">local_fire_department</span>
-          <span class="font-label-md text-label-md text-on-surface font-bold" id="navStudentStreak">0 Streak</span>
-        </div>
-
-        <!-- Language Switcher (EN / AR) -->
-        <button aria-label="Language toggle" class="w-9 h-9 rounded-lg flex items-center justify-center bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer font-bold text-xs" id="langToggleBtn" type="button" title="Switch Language (English / العربية)">
-          <span id="langToggleText">عربي</span>
-        </button>
-
-        <!-- Theme Toggle -->
-        <button aria-label="Theme toggle" class="w-9 h-9 rounded-lg flex items-center justify-center bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer" id="themeToggleBtn" type="button" title="Toggle Light / Dark Mode">
-          <span class="material-symbols-outlined text-[18px]" id="themeIcon">light_mode</span>
-        </button>
-
         <!-- Quick Teacher Dashboard Button (Only visible when logged in as teacher) -->
         <button type="button" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs transition-all shadow-sm cursor-pointer" id="topTeacherQuickBtn" onclick="switchView('teacher')" style="display: none;" title="All Students Management Dashboard">
           <span class="material-symbols-outlined text-[17px]">group</span>
@@ -333,10 +317,7 @@
        ==================================================================== -->
   <aside class="fixed left-0 top-20 bottom-0 w-64 bg-surface-container-lowest z-40 flex flex-col justify-between py-5 border-r border-border-subtle shadow-[0_1px_8px_rgba(0,0,0,0.04)] overflow-y-auto overflow-x-hidden" id="portalSidebar">
     <div class="flex flex-col gap-5 px-3">
-      <div class="px-3 flex items-center justify-between sidebar-header-box">
-        <span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold sidebar-text">Navigation Track</span>
-        <span class="px-2 py-0.5 rounded-full bg-mastery-emerald/15 text-mastery-emerald font-label-sm text-label-sm font-bold sidebar-badge">Active Cohort</span>
-      </div>
+      
       <nav class="flex flex-col gap-1.5" id="sidebarNavTabs">
         <!-- Student Views -->
         <button class="nav-tab student-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all bg-primary-container text-on-primary font-bold shadow-sm active text-left w-full cursor-pointer" data-view="dashboard" title="Dashboard & Homework">
@@ -367,23 +348,7 @@
       </nav>
     </div>
 
-    <!-- Sidebar Footer Widgets: Daily XP Goal & SQL Status -->
-    <div class="px-3 flex flex-col gap-3 sidebar-bottom-box">
-      <div class="p-3.5 rounded-xl bg-surface-container-low flex flex-col gap-2">
-        <div class="flex items-center justify-between">
-          <span class="font-label-sm text-label-sm text-on-surface-variant">Daily XP Goal</span>
-          <span class="font-label-sm text-label-sm text-primary font-bold" id="sidebarDailyXpText">350 / 500</span>
-        </div>
-        <div class="w-full h-2 rounded-full bg-surface-variant overflow-hidden">
-          <div class="h-full rounded-full bg-primary-container w-[70%]" id="sidebarDailyXpBar"></div>
-        </div>
-      </div>
-      <div class="px-2 flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm">
-        <span>SQL Sandbox v4.1</span>
-        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-mastery-emerald"></span>Online</span>
-      </div>
-    </div>
-  </aside>
+    </aside>
 
   <!-- Mobile Sidebar Backdrop Overlay -->
   <div id="sidebarBackdrop" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 opacity-0 pointer-events-none transition-opacity duration-300"></div>
@@ -409,10 +374,6 @@
               <!-- Left Column: Greeting & Actions -->
               <div class="lg:col-span-7 flex flex-col space-y-4">
                 <div class="flex items-center gap-2.5">
-                  <span class="px-3 py-1 rounded-full bg-streak-glow text-on-surface font-label-sm text-label-sm font-bold flex items-center gap-1.5 shadow-sm">
-                    <span class="material-symbols-outlined text-streak-amber text-[18px]">local_fire_department</span>
-                    <span id="dashStreakBadgeText">5-Day Practice Streak</span>
-                  </span>
                   <span class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm" id="dashCohortTag">
                     Year 4 Cohort Alpha
                   </span>
@@ -422,7 +383,7 @@
                     Welcome back, <span id="dashStudentName">Alex</span>! 👋
                   </h1>
                   <p class="font-body-md text-body-md text-on-surface-variant max-w-xl">
-                    You are currently on a <strong id="dashStreakText">5-day practice streak</strong>. Your next milestone is <strong id="dashNextMilestone">Level 6</strong>. Choose a track below or jump into the 8,264+ skills bank.
+                    Welcome to your learning portal. Access your assigned homework tasks, participate in live Zoom Pro classes, and monitor your curriculum mastery.
                   </p>
                 </div>
                 <div class="flex flex-wrap items-center gap-3 pt-2">
@@ -610,11 +571,11 @@
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2 text-cyan-400 font-label-sm text-label-sm font-bold">
                 <span class="material-symbols-outlined text-[18px]">receipt_long</span>
-                <span>// MONTHLY SUBSCRIPTION & PAYMENT PROOF • حالة الاشتراك وإشعار الدفع</span>
+                <span>// MONTHLY SUBSCRIPTION & TUITION STATUS</span>
               </div>
               <button class="px-3.5 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 font-label-sm text-xs font-bold border border-cyan-500/30 transition-all flex items-center gap-1.5 cursor-pointer" onclick="openSubmitPaymentModal()">
                 <span class="material-symbols-outlined text-[16px]">upload_file</span>
-                <span>Upload Payment Proof / إرسال إشعار الدفع</span>
+                <span>Upload Payment Proof</span>
               </button>
             </div>
             <div id="dashPaymentProofCard" class="bg-surface-card rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -628,7 +589,7 @@
               <div class="space-y-1">
                 <div class="flex items-center gap-2 text-primary font-label-sm text-label-sm font-bold">
                   <span class="material-symbols-outlined text-[18px]">videocam</span>
-                  <span>// ZOOM PRO SESSIONS & SYLLABUS • سجل الحصص والمذكرات</span>
+                  <span>// ZOOM PRO SESSIONS & SYLLABUS LOG</span>
                 </div>
                 <p class="font-body-sm text-body-sm text-on-surface-variant">
                   Access live Zoom Pro meetings, class syllabus topics, and download lesson PDF study sheets.
@@ -670,7 +631,7 @@
         <div class="view-actions-col">
           <button class="primary-glow-btn" onclick="openSubmitPaymentModal()">
             <span class="material-symbols-outlined text-[18px]">cloud_upload</span>
-            <span>Submit Payment Proof / رفع إشعار الدفع</span>
+            <span>Submit Payment Proof</span>
           </button>
         </div>
       </div>
@@ -840,12 +801,6 @@
           </div>
         </div>
 
-        <!-- Badges & Achievements -->
-        <div class="report-section-block">
-          <h3 class="report-block-title">Earned Achievement Badges</h3>
-          <div class="badges-showcase-grid" id="reportBadgesGrid">
-            <!-- Injected via JS -->
-          </div>
         </div>
 
         <!-- Practice Session History Table -->
@@ -1026,8 +981,8 @@
                 <button type="button" class="roster-filter-btn px-3 py-1 rounded-lg text-slate-400 hover:text-white font-bold" data-filter="pending" onclick="filterTeacherRoster('pending')">Pending 🟡</button>
                 <button type="button" class="roster-filter-btn px-3 py-1 rounded-lg text-slate-400 hover:text-white font-bold" data-filter="overdue" onclick="filterTeacherRoster('overdue')">Overdue 🔴</button>
               </div>
-              <button type="button" class="cloud-status-pill" id="cloudSyncStatusBadge" onclick="openCloudSyncModal()" title="إعداد المزامنة السحابية الفورية مع Google Cloud">
-                <span class="status-dot amber"></span> ☁️ Google Cloud
+              <button type="button" class="cloud-status-pill" id="cloudSyncStatusBadge" onclick="openCloudSyncModal()" title="Configure Google Cloud Live Synchronization">
+                <span class="status-dot amber"></span> ☁️ Google Cloud Sync
               </button>
               <button class="secondary-glass-btn" onclick="printStudentLoginCards()" style="font-size:0.85rem; padding: 0.45rem 0.9rem;">
                 <span>🖨️</span> <span>Print Cards</span>
@@ -1068,7 +1023,7 @@
           <div class="section-card-header flex items-center justify-between">
             <div>
               <h3 class="card-title">Incoming Payment Proofs &amp; Transfers 💳</h3>
-              <p class="card-subtitle">إشعارات التحويل (انستاباي / فودافون كاش) المرسلة من الطلاب لاعتمادها</p>
+              <p class="card-subtitle">Incoming student transfer receipts (InstaPay, Vodafone Cash, Bank Transfer) pending verification</p>
             </div>
           </div>
           <div id="teacherPaymentsListContainer" class="p-4 space-y-4">
@@ -1085,7 +1040,7 @@
           <div class="section-card-header flex items-center justify-between">
             <div>
               <h3 class="card-title">Class Sessions &amp; Zoom Hub 🎥</h3>
-              <p class="card-subtitle">سجل الحصص المنعقدة والمنهج المشروح وروابط زووم وملفات الـ PDF</p>
+              <p class="card-subtitle">Scheduled lectures, covered curriculum units, Zoom Pro links, and study materials</p>
             </div>
             <button class="primary-glow-btn" onclick="document.getElementById('addClassSessionModal').classList.add('open')">
               <span>➕</span> <span>Log New Class Session</span>
@@ -1308,13 +1263,13 @@
       <div class="auth-tab-content active" id="authTabLogin" style="padding: 1.75rem 2rem;">
         <form id="loginForm" class="auth-form" onsubmit="return false;">
           <div class="form-group mb-4">
-            <label for="loginUsername" class="text-xs font-bold uppercase tracking-wider text-slate-300">Username / اسم المستخدم</label>
+            <label for="loginUsername" class="text-xs font-bold uppercase tracking-wider text-slate-300">Username</label>
             <div class="relative mt-1">
               <input type="text" id="loginUsername" placeholder="e.g. beshr, alex, or admin" required autocomplete="username" class="w-full px-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700/80 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all text-sm font-medium">
             </div>
           </div>
           <div class="form-group mb-5">
-            <label for="loginPassword" class="text-xs font-bold uppercase tracking-wider text-slate-300">Password / كلمة المرور</label>
+            <label for="loginPassword" class="text-xs font-bold uppercase tracking-wider text-slate-300">Password</label>
             <div class="relative mt-1">
               <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password" class="w-full px-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700/80 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all text-sm font-medium">
             </div>
@@ -1437,37 +1392,37 @@
       <form id="addStudentForm" class="auth-form" onsubmit="return false;" style="padding: 1.5rem;">
         <div class="form-row">
           <div class="form-group flex-1">
-            <label for="tNewStudentName">Student Full Name / اسم الطالب</label>
+            <label for="tNewStudentName">Student Full Name</label>
             <input type="text" id="tNewStudentName" placeholder="e.g. Beshr Mohamed" required>
           </div>
           <div class="form-group flex-1">
-            <label for="tNewStudentParentName">Parent / Father Name (اسم ولي الأمر)</label>
+            <label for="tNewStudentParentName">Parent / Father Name</label>
             <input type="text" id="tNewStudentParentName" placeholder="e.g. Mohamed Beshr">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group flex-1">
-            <label for="tNewStudentPhone">Student Phone / هاتف الطالب</label>
+            <label for="tNewStudentPhone">Student Phone</label>
             <input type="tel" id="tNewStudentPhone" placeholder="01xxxxxxxxx">
           </div>
           <div class="form-group flex-1">
-            <label for="tNewStudentParentPhone">Parent WhatsApp / هاتف ولي الأمر (واتساب)</label>
+            <label for="tNewStudentParentPhone">Parent WhatsApp Phone</label>
             <input type="tel" id="tNewStudentParentPhone" placeholder="01xxxxxxxxx">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group flex-1">
-            <label for="tNewStudentUser">Login Username / اسم المستخدم</label>
+            <label for="tNewStudentUser">Login Username</label>
             <input type="text" id="tNewStudentUser" placeholder="e.g. beshr" required>
           </div>
           <div class="form-group flex-1">
-            <label for="tNewStudentPass">Password / كلمة المرور</label>
+            <label for="tNewStudentPass">Password</label>
             <input type="password" id="tNewStudentPass" value="password123" required>
           </div>
         </div>
         <div class="form-row">
           <div class="form-group flex-1">
-            <label for="tNewStudentGrade">Grade Level / الصف الدراسي</label>
+            <label for="tNewStudentGrade">Grade Level</label>
             <select id="tNewStudentGrade">
               <option value="Reception">Early Years (Reception)</option>
               <option value="Year 1">Year 1 (Key Stage 1)</option>
@@ -1486,7 +1441,7 @@
             </select>
           </div>
           <div class="form-group flex-1">
-            <label for="tNewStudentAvatar">Avatar / الصورة الرمزية</label>
+            <label for="tNewStudentAvatar">Avatar Character</label>
             <select id="tNewStudentAvatar">
               <option value="🦊" selected>🦊 Fox</option>
               <option value="🦄">🦄 Unicorn</option>
@@ -1501,24 +1456,24 @@
         </div>
         <div class="form-row">
           <div class="form-group flex-1">
-            <label for="tNewStudentPaymentMethod">Payment Method / طريقة الدفع</label>
+            <label for="tNewStudentPaymentMethod">Payment Method</label>
             <select id="tNewStudentPaymentMethod">
-              <option value="InstaPay" selected>InstaPay (انستاباي)</option>
-              <option value="Vodafone Cash">Vodafone Cash (فودافون كاش)</option>
-              <option value="Cash">Cash (كاش باليد)</option>
-              <option value="Bank Transfer">Bank Transfer (تحويل بنكي)</option>
+              <option value="InstaPay" selected>InstaPay</option>
+              <option value="Vodafone Cash">Vodafone Cash</option>
+              <option value="Cash">Cash</option>
+              <option value="Bank Transfer">Bank Transfer</option>
             </select>
           </div>
           <div class="form-group flex-1">
-            <label for="tNewStudentAmount">Monthly Fee / مبلغ الاشتراك (ج.م)</label>
+            <label for="tNewStudentAmount">Monthly Tuition Fee (EGP)</label>
             <input type="number" id="tNewStudentAmount" placeholder="e.g. 500" value="500">
           </div>
           <div class="form-group flex-1">
-            <label for="tNewStudentPaymentStatus">Status / حالة السداد</label>
+            <label for="tNewStudentPaymentStatus">Subscription Status</label>
             <select id="tNewStudentPaymentStatus">
-              <option value="paid">Paid ✅ (تم السداد)</option>
-              <option value="pending">Pending ⏳ (قيد التأكيد)</option>
-              <option value="overdue" selected>Overdue 🔴 (مستحق/متأخر)</option>
+              <option value="paid">Paid 🟢 (Active)</option>
+              <option value="pending">Pending 🟡 (Under Review)</option>
+              <option value="overdue" selected>Overdue 🔴 (Payment Due)</option>
             </select>
           </div>
         </div>
@@ -1568,27 +1523,27 @@
         <input type="hidden" id="editStudentId">
         <div class="form-row">
           <div class="form-group flex-1">
-            <label for="editStudentName">Student Full Name / اسم الطالب</label>
+            <label for="editStudentName">Student Full Name</label>
             <input type="text" id="editStudentName" placeholder="e.g. Beshr Mohamed" required>
           </div>
           <div class="form-group flex-1">
-            <label for="editStudentParentName">Parent Name / اسم ولي الأمر</label>
+            <label for="editStudentParentName">Parent / Father Name</label>
             <input type="text" id="editStudentParentName" placeholder="e.g. Mohamed Beshr">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group flex-1">
-            <label for="editStudentPhone">Student Phone / هاتف الطالب</label>
+            <label for="editStudentPhone">Student Phone</label>
             <input type="tel" id="editStudentPhone" placeholder="01xxxxxxxxx">
           </div>
           <div class="form-group flex-1">
-            <label for="editStudentParentPhone">Parent WhatsApp / هاتف ولي الأمر</label>
+            <label for="editStudentParentPhone">Parent WhatsApp Phone</label>
             <input type="tel" id="editStudentParentPhone" placeholder="01xxxxxxxxx">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group flex-1">
-            <label for="editStudentUser">Login Username / اسم الدخول</label>
+            <label for="editStudentUser">Login Username</label>
             <input type="text" id="editStudentUser" placeholder="e.g. beshr" required>
           </div>
           <div class="form-group flex-1">
@@ -1634,14 +1589,14 @@
           <div class="form-group flex-1">
             <label for="editStudentPaymentMethod">Payment Method</label>
             <select id="editStudentPaymentMethod">
-              <option value="InstaPay">InstaPay (انستاباي)</option>
-              <option value="Vodafone Cash">Vodafone Cash (فودافون كاش)</option>
-              <option value="Cash">Cash (كاش)</option>
-              <option value="Bank Transfer">Bank Transfer (تحويل)</option>
+              <option value="InstaPay">InstaPay</option>
+              <option value="Vodafone Cash">Vodafone Cash</option>
+              <option value="Cash">Cash</option>
+              <option value="Bank Transfer">Bank Transfer</option>
             </select>
           </div>
           <div class="form-group flex-1">
-            <label for="editStudentAmount">Fee (ج.م)</label>
+            <label for="editStudentAmount">Monthly Fee (EGP)</label>
             <input type="number" id="editStudentAmount" placeholder="500">
           </div>
           <div class="form-group flex-1">
@@ -1668,38 +1623,38 @@
       <div class="auth-modal-header">
         <div>
           <h2 class="auth-title">Submit Payment Receipt 💳</h2>
-          <p class="auth-subtitle">رفع إشعار تحويل الاشتراك (انستاباي / فودافون كاش)</p>
+          <p class="auth-subtitle">Record class lecture, covered syllabus, Zoom Pro link, and study sheet</p>
         </div>
         <button class="modal-close-btn" id="closeSubmitPaymentModalBtn" onclick="document.getElementById('submitPaymentModal').classList.remove('open')">✕</button>
       </div>
       <form id="submitPaymentForm" class="auth-form" onsubmit="return false;" style="padding: 1.5rem;">
         <div class="form-row">
           <div class="form-group flex-1">
-            <label for="payDateInput">Payment Date / تاريخ التحويل</label>
+            <label for="payDateInput">Payment Date</label>
             <input type="date" id="payDateInput" required>
           </div>
           <div class="form-group flex-1">
-            <label for="payMethodInput">Payment Method / طريقة التحويل</label>
+            <label for="payMethodInput">Payment Method</label>
             <select id="payMethodInput" required>
-              <option value="InstaPay" selected>InstaPay (انستاباي)</option>
-              <option value="Vodafone Cash">Vodafone Cash (فودافون كاش)</option>
-              <option value="Cash">Cash (كاش باليد)</option>
-              <option value="Bank Transfer">Bank Transfer (تحويل بنكي)</option>
+              <option value="InstaPay" selected>InstaPay</option>
+              <option value="Vodafone Cash">Vodafone Cash</option>
+              <option value="Cash">Cash</option>
+              <option value="Bank Transfer">Bank Transfer</option>
             </select>
           </div>
         </div>
         <div class="form-row">
           <div class="form-group flex-1">
-            <label for="payAmountInput">Amount Paid / المبلغ المدفوع (ج.م)</label>
+            <label for="payAmountInput">Amount Paid (EGP)</label>
             <input type="number" id="payAmountInput" placeholder="500" required>
           </div>
           <div class="form-group flex-1">
-            <label for="payNotesInput">Account / Wallet No. (رقم المحفظة/الحساب)</label>
-            <input type="text" id="payNotesInput" placeholder="e.g. 010xxxxxxxx أو رقم العملية">
+            <label for="payNotesInput">Account / Wallet Reference Number</label>
+            <input type="text" id="payNotesInput" placeholder="e.g. 010xxxxxxxx or transaction reference ID">
           </div>
         </div>
         <div class="form-group">
-          <label for="payReceiptFileInput">Upload Screenshot / صورة الإيصال أو التحويل</label>
+            <label for="payReceiptFileInput">Upload Receipt Screenshot</label>
           <input type="file" id="payReceiptFileInput" accept="image/*" class="w-full text-xs text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30 cursor-pointer">
           <div id="payReceiptPreviewWrap" style="display:none; margin-top: 0.75rem; text-align: center;">
             <img id="payReceiptPreview" src="" alt="Receipt Preview" style="max-height: 140px; margin: 0 auto; border-radius: 12px; border: 1px solid rgba(0, 229, 255, 0.3);">
@@ -1720,36 +1675,36 @@
       <div class="auth-modal-header">
         <div>
           <h2 class="auth-title">Log Class Session & Zoom 🎥</h2>
-          <p class="auth-subtitle">توثيق الحصة والمنهج المشروح وروابط زووم وملف الـ PDF</p>
+          <p class="auth-subtitle">Record class lecture, covered syllabus, Zoom Pro link, and study sheet</p>
         </div>
         <button class="modal-close-btn" id="closeAddClassSessionModalBtn" onclick="document.getElementById('addClassSessionModal').classList.remove('open')">✕</button>
       </div>
       <form id="addClassSessionForm" class="auth-form" onsubmit="return false;" style="padding: 1.5rem;">
         <div class="form-row">
           <div class="form-group flex-1">
-            <label for="sessDateInput">Session Date / تاريخ الحصة</label>
+            <label for="sessDateInput">Session Date & Time</label>
             <input type="date" id="sessDateInput" required>
           </div>
           <div class="form-group flex-1">
-            <label for="sessTitleInput">Session Title / عنوان الحصة</label>
+            <label for="sessTitleInput">Session Title</label>
             <input type="text" id="sessTitleInput" placeholder="e.g. Unit 2: Lesson 1 - Fractions" required>
           </div>
         </div>
         <div class="form-group">
-          <label for="sessTopicInput">Topics &amp; Syllabus Covered (المنهج المشروح بالتفصيل)</label>
-          <textarea id="sessTopicInput" rows="3" placeholder="اكتب ما تم شرحه للطلاب في هذه الحصة، النقاط الأساسية، والصفحات..." required style="width: 100%; border-radius: 12px; padding: 0.75rem; background: var(--bg-hover); border: 1px solid var(--border-card); color: var(--text-primary); font-size: 0.85rem; resize: vertical;"></textarea>
+            <label for="sessTopicInput">Topics & Syllabus Covered (Detailed Summary)</label>
+          <textarea id="sessTopicInput" rows="3" placeholder="Enter curriculum units, topics covered, and key takeaways..." required style="background: rgba(14, 18, 30, 0.8); border: 1px solid rgba(255,255,255,0.15); color: #fff; width: 100%; border-radius: 8px; padding: 0.75rem; font-size: 0.9rem; resize: vertical;"></textarea>
         </div>
         <div class="form-group">
-          <label for="sessZoomLinkInput">Zoom Meeting / Recording Link (رابط زووم أو التسجيل)</label>
+          <label for="sessZoomLinkInput">Zoom Pro Meeting / Recording Link</label>
           <input type="url" id="sessZoomLinkInput" placeholder="https://zoom.us/j/... or Cloud Recording URL">
         </div>
         <div class="form-row">
           <div class="form-group flex-1">
-            <label for="sessPdfLinkInput">PDF Sheet URL (رابط ملف الشرح PDF)</label>
+            <label for="sessPdfLinkInput">Study Sheet PDF URL (Optional)</label>
             <input type="url" id="sessPdfLinkInput" placeholder="https://... / Google Drive / Dropbox link">
           </div>
           <div class="form-group flex-1">
-            <label for="sessPdfTitleInput">PDF Pages (الصفحات المقررة)</label>
+            <label for="sessPdfTitleInput">Assigned Pages / Chapters (Optional)</label>
             <input type="text" id="sessPdfTitleInput" placeholder="e.g. Pages 12 - 16">
           </div>
         </div>
@@ -1768,7 +1723,7 @@
       <div class="auth-modal-header">
         <div>
           <h2 class="auth-title">Student Progress Report 📊</h2>
-          <p class="auth-subtitle" id="reportStudentSubtitle">تقرير متابعة وأداء الطالب للفترة الماضية</p>
+          <p class="auth-subtitle" id="reportStudentSubtitle">Student Academic Progress & Performance Summary</p>
         </div>
         <button class="modal-close-btn" id="closeStudentReportModalBtn" onclick="document.getElementById('studentReportModal').classList.remove('open')">✕</button>
       </div>
@@ -1786,7 +1741,7 @@
       <div class="auth-modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
         <div>
           <h2 class="auth-title" id="receiptPreviewTitle">Payment Receipt Proof 🧾</h2>
-          <p class="auth-subtitle" id="receiptPreviewSubtitle">معاينة إشعار التحويل</p>
+          <p class="auth-subtitle" id="receiptPreviewSubtitle">Payment Receipt Verification Preview</p>
         </div>
         <button class="modal-close-btn" onclick="document.getElementById('receiptPreviewModal').classList.remove('open')">✕</button>
       </div>
@@ -1803,7 +1758,7 @@
     <div class="auth-modal-window" style="max-width: 560px;">
       <div class="auth-modal-header">
         <div>
-          <h2 class="auth-title">☁️ Google Cloud Live Synchronization</h2>
+          <h2 class="auth-title">☁️ Google Cloud Sync Live Synchronization</h2>
           <p class="auth-subtitle">Real-time multi-device sync for student roster and live practice logs</p>
         </div>
         <button class="modal-close-btn" id="closeCloudSyncModalBtn" onclick="closeCloudSyncModal()">✕</button>
@@ -1811,8 +1766,8 @@
 
       <div style="padding: 1.5rem;">
         <div style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 10px; padding: 0.9rem 1rem; margin-bottom: 1.25rem; font-size: 0.85rem; line-height: 1.5;">
-          <div style="font-weight: 700; color: #4338ca; margin-bottom: 0.35rem;">⚡ مزامنة سحابية لحظية مع Google Cloud Firebase</div>
-          <div>أي طالب تضيفه أو تعدله أو يحل أسئلة سينتقل فوراً وبشكل لحظي بين هاتفك وجهاز الطالب وحساب المعلمة دون الحاجة لأي رفع يدوي أو تشغيل ملفات الـ bat نهائياً.</div>
+          <div style="font-weight: 700; color: #4338ca; margin-bottom: 0.35rem;">⚡ Real-Time Google Cloud Firebase Synchronization</div>
+          <div>Any student added, modified, or practicing will synchronize instantaneously between devices, student portals, and teacher consoles without manual upload.</div>
         </div>
 
         <form id="cloudSyncForm" onsubmit="handleSaveCloudConfig(event)">
@@ -1837,22 +1792,22 @@
 
           <div style="display: flex; gap: 0.75rem; margin-top: 1rem; flex-wrap: wrap;">
             <button type="submit" class="primary-glow-btn flex-1" style="font-weight: 700; padding: 0.75rem;">
-              💾 حفظ وتفعيل المزامنة الفورية
+              💾 Save & Activate Cloud Sync
             </button>
-            <button type="button" class="secondary-glass-btn" onclick="handleSyncAllToCloud()" title="رفع جميع الطلاب المحفوظين محلياً إلى السحابة فوراً">
-              ☁️ رفع الطلاب للسحابة الآن
+            <button type="button" class="secondary-glass-btn" onclick="handleSyncAllToCloud()" title="Sync all local students to Google Cloud Firebase">
+              ☁️ Sync All Students to Cloud Now
             </button>
           </div>
         </form>
 
         <div style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border-card); font-size: 0.8rem; color: var(--text-muted);">
           <details>
-            <summary style="cursor: pointer; font-weight: 600; color: var(--text-main);">📖 كيف أحصل على بيانات Firebase مجاناً في دقيقة؟</summary>
+            <summary style="cursor: pointer; font-weight: 600; color: var(--text-main);">📖 How to get free Firebase credentials in 1 minute?</summary>
             <ol style="margin-top: 0.5rem; padding-left: 1.2rem; line-height: 1.6;">
-              <li>افتح موقع <a href="https://console.firebase.google.com/" target="_blank" style="color: var(--color-primary); font-weight: 600;">console.firebase.google.com</a> بحساب جوجل الخاص بك.</li>
-              <li>اضغط <strong>Add project</strong> وسمّه <code>rania-classroom</code>.</li>
-              <li>من القائمة الجانبية، اضغط <strong>Firestore Database</strong> ثم <strong>Create Database</strong> (اختر Start in test mode).</li>
-              <li>اضغط علامة الترس ⚙️ بجانب Project Overview ثم <strong>Project settings</strong>، وانسخ الـ <strong>API Key</strong> و <strong>Project ID</strong> وضعهما هنا.</li>
+            <li>Open <a href="https://console.firebase.google.com/" target="_blank" style="color: #2563eb; text-decoration: underline;">Google Firebase Console</a> and sign in with your Google account.</li>
+            <li>Click <strong>Add project</strong> and name it e.g. <code>rania-classroom</code>.</li>
+            <li>From the left navigation, select <strong>Firestore Database</strong> and click <strong>Create Database</strong>.</li>
+            <li>Under <strong>Project settings</strong>, copy your <strong>API Key</strong> and <strong>Project ID</strong> and paste them above.</li>
             </ol>
           </details>
         </div>

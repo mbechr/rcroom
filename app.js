@@ -2511,7 +2511,7 @@ async function renderTeacherConsoleView() {
       const badgeText = pStatus === 'paid' ? 'Paid 🟢' : (pStatus === 'pending' ? 'Pending 🟡' : 'Overdue 🔴');
 
       const waClean = cleanWhatsAppNumber(s.parent_phone);
-      const waLink = waClean ? `https://wa.me/${waClean}?text=${encodeURIComponent('مرحباً بحضرتك يا فندم بخصوص متابعة الطالب ' + s.full_name + ' مع مس رانيا 🌸')}` : null;
+      const waLink = waClean ? `https://wa.me/${waClean}?text=${encodeURIComponent('Hello! Regarding student progress for ' + s.full_name + ' with Miss Rania 🌸')}` : null;
 
       return `
         <tr>
@@ -2536,7 +2536,7 @@ async function renderTeacherConsoleView() {
           </td>
           <td>
             ${waLink ? `
-              <a href="${waLink}" target="_blank" class="whatsapp-btn" title="فتح محادثة واتساب مع ولي الأمر">
+              <a href="${waLink}" target="_blank" class="whatsapp-btn" title="Open WhatsApp Chat with Parent">
                 <span>💬</span>
                 <span>${s.parent_phone}</span>
               </a>
@@ -2554,19 +2554,19 @@ async function renderTeacherConsoleView() {
           </td>
           <td>
             <div class="actions-cell">
-              <button class="action-btn-sm" onclick="openStudentReportModal(${s.id})" title="عرض تقرير أداء الطالب وواتساب">
+              <button class="action-btn-sm" onclick="openStudentReportModal(${s.id})" title="View Student Academic Report">
                 <span class="btn-icon">📊</span> Report
               </button>
-              <button class="action-btn-sm" onclick="sendPaymentReminderWhatsApp(${s.id})" title="إرسال تذكير المصروفات عبر واتساب" style="background:rgba(37,211,102,0.15); color:#25d366; border:1px solid rgba(37,211,102,0.3);">
+              <button class="action-btn-sm" onclick="sendPaymentReminderWhatsApp(${s.id})" title="Send Tuition Reminder via WhatsApp" style="background:rgba(37,211,102,0.15); color:#25d366; border:1px solid rgba(37,211,102,0.3);">
                 <span class="btn-icon">💬</span> Reminder
               </button>
-              <button class="action-btn-sm edit" onclick="openEditStudentModal(${s.id})" title="تعديل بيانات الطالب والمصروفات">
+              <button class="action-btn-sm edit" onclick="openEditStudentModal(${s.id})" title="Edit Student Profile & Tuition">
                 <span class="btn-icon">✏️</span> Edit
               </button>
-              <button class="action-btn-sm key" onclick="openResetPasswordModal(${s.id}, '${safeName}')" title="تغيير كلمة المرور">
+              <button class="action-btn-sm key" onclick="openResetPasswordModal(${s.id}, '${safeName}')" title="Reset Password">
                 <span class="btn-icon">🔑</span>
               </button>
-              <button class="action-btn-sm delete" onclick="confirmDeleteStudent(${s.id}, '${safeName}')" title="حذف الطالب">
+              <button class="action-btn-sm delete" onclick="confirmDeleteStudent(${s.id}, '${safeName}')" title="Delete Student">
                 <span class="btn-icon">🗑️</span>
               </button>
             </div>
@@ -2687,26 +2687,25 @@ window.sendPaymentReminderWhatsApp = function(studentId) {
   }
   const parentPhone = student.parent_phone || student.student_phone;
   if (!parentPhone) {
-    showToast('يرجى أولاً إدخال رقم ولي الأمر أو الهاتف للطالب عبر زر التعديل (Edit) ✏️', '⚠️');
+    showToast('Please enter parent phone number first via Edit ✏️', '⚠️');
     return;
   }
   const cleanPhone = cleanWhatsAppNumber(parentPhone);
   const studentName = student.full_name || student.username;
-  const parentName = student.parent_name ? ` (أ/ ${student.parent_name})` : '';
+  const parentName = student.parent_name ? ` (Parent: ${student.parent_name})` : '';
   const amount = student.payment_amount !== undefined ? student.payment_amount : 500;
   const method = student.payment_method || 'InstaPay / Vodafone Cash';
   const monthName = new Date().toLocaleString('ar-EG', { month: 'long' });
 
-  const msg = `أهلاً بحضرتك يا فندم${parentName}، ولي أمر الطالب/ة: ${studentName} 🌸
-تحياتي، مس رانيا.
-نود تذكير سيادتكم بمصروفات الاشتراك الشهري (${amount} ج.م) لشهر ${monthName}.
-طريقة الدفع المقررة: ${method}.
-يمكنكم التحويل ورفع صورة إشعار التحويل مباشرة من خلال حساب الطالب على المنصة.
-شكراً جزيلاً لتعاونكم ودعمكم المستمر لرحلة تفوق الطالب ✨`;
+  const msg = `Hello! Greetings from Miss Rania 🌸${parentName ? ' (Parent of ' + studentName + ')' : ''}.
+This is a friendly reminder regarding the monthly tuition fee for ${studentName} (${amount} EGP) for ${monthName}.
+Selected payment method: ${method}.
+You can transfer the amount and upload the payment receipt directly through the student portal.
+Thank you very much for your continuous cooperation and support! ✨`;
 
   const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
   window.open(url, '_blank');
-  showToast(`جاري فتح واتساب لإرسال تذكير المصروفات 💬`);
+  showToast('Opening WhatsApp to send tuition reminder 💬');
 };
 
 window.sendWhatsAppReport = function(studentId) {
@@ -2718,7 +2717,7 @@ window.sendWhatsAppReport = function(studentId) {
   }
   const parentPhone = student.parent_phone || student.student_phone;
   if (!parentPhone) {
-    showToast('يرجى حفظ رقم هاتف ولي الأمر أولاً لإرسال التقرير 📱', '⚠️');
+    showToast('Please enter parent phone number first to send report 📱', '⚠️');
     return;
   }
   const cleanPhone = cleanWhatsAppNumber(parentPhone);
@@ -2727,22 +2726,23 @@ window.sendWhatsAppReport = function(studentId) {
   const acc = stats.accuracy_rate || student.accuracy_rate || 0;
   const xp = Math.max(stats.xp, student.xp || 0);
   const smart = stats.avg_smart_score || student.avg_smart_score || 0;
-  const statusStr = student.payment_status === 'paid' ? 'ساري ومسدد 🟢' : (student.payment_status === 'pending' ? 'قيد المراجعة 🟡' : 'مطلوب التجديد 🔴');
+  const statusStr = student.payment_status === 'paid' ? 'Active & Paid 🟢' : (student.payment_status === 'pending' ? 'Under Review 🟡' : 'Payment Due 🔴');
 
-  const msg = `🌟 تقرير متابعة وأداء الطالب/ة: ${student.full_name} 🌟
-📚 الصف الدراسي: ${student.grade_level || 'General'}
+  const englishStatus = student.payment_status === 'paid' ? 'Active & Paid 🟢' : (student.payment_status === 'pending' ? 'Under Review 🟡' : 'Payment Due 🔴');
+  const msg = `🌟 Academic Progress Report: ${student.full_name} 🌟
+📚 Grade Level: ${student.grade_level || 'General'}
 ━━━━━━━━━━━━━━━━━━━━
-✅ إجمالي الأسئلة المنجزة: ${q.toLocaleString()} سؤال
-🎯 نسبة الدقة والإتقان: ${acc}%
-🏅 متوسط SmartScore: ${smart}/100
-🏆 نقاط الخبرة المكتسبة (XP): ${xp.toLocaleString()} XP
-💳 حالة الاشتراك الشهري: ${statusStr}
+✅ Questions Completed: ${q.toLocaleString()}
+🎯 Accuracy Rate: ${acc}%
+🏅 Average SmartScore: ${smart}/100
+🏆 Mastery Points: ${xp.toLocaleString()} XP
+💳 Tuition Status: ${englishStatus}
 ━━━━━━━━━━━━━━━━━━━━
-مع تحيات مس رانيا 🌸 منصة التفوق الرقمي التعليمية`;
+Best regards, Miss Rania 🌸 RC Classroom Portal`;
 
   const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
   window.open(url, '_blank');
-  showToast(`جاري إرسال التقرير لولي الأمر عبر واتساب 📤`);
+  showToast('Opening WhatsApp to send progress report 📤');
 };
 
 window.openStudentReportModal = function(studentId) {
@@ -2756,7 +2756,7 @@ window.openStudentReportModal = function(studentId) {
   if (!modal || !content) return;
 
   if (sub) {
-    sub.textContent = `${student.full_name} • ${student.grade_level} • ولي الأمر: ${student.parent_name || 'غير مسجل'}`;
+    sub.textContent = `${student.full_name} • ${student.grade_level} • Parent: ${student.parent_name || 'Not provided'}`;
   }
 
   const stats = DB.getStudentStats(student.id);
@@ -2818,7 +2818,7 @@ window.openStudentReportModal = function(studentId) {
       <div style="display: flex; flex-direction: column; gap: 0.6rem; padding-top: 0.5rem;">
         <button type="button" class="whatsapp-btn full-width" onclick="sendWhatsAppReport(${student.id})" style="padding: 0.85rem; font-size: 0.95rem; justify-content: center; cursor: pointer;">
           <span style="font-size: 1.2rem;">💬</span>
-          <span>إرسال التقرير لولي الأمر عبر واتساب (1-Click WhatsApp)</span>
+          <span>Send Progress Report via WhatsApp</span>
         </button>
         <button type="button" class="secondary-glass-btn full-width" onclick="printStudentReportCard(${student.id})" style="padding: 0.7rem; justify-content: center; cursor: pointer;">
           <span>🖨️</span>
@@ -2882,10 +2882,10 @@ async function renderTeacherPayments() {
           <div style="display: flex; align-items: center; gap: 0.5rem; shrink-0; align-self: flex-end;">
             ${isPending ? `
               <button type="button" class="action-btn-sm" onclick="reviewPaymentReceipt(${p.id}, 'approved')" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4); font-weight: 700; padding: 6px 14px; border-radius: 8px; cursor: pointer;">
-                ✅ Approve / اعتماد
+                ✅ Approve
               </button>
               <button type="button" class="action-btn-sm delete" onclick="reviewPaymentReceipt(${p.id}, 'rejected')" style="padding: 6px 12px; border-radius: 8px; cursor: pointer;">
-                ❌ Reject / رفض
+                ❌ Reject
               </button>
             ` : `
               <span style="font-size: 0.8rem; color: #64748b;">Reviewed</span>
@@ -2949,7 +2949,7 @@ async function renderTeacherSessions() {
             <strong style="color: #fff; font-size: 1.1rem;">${s.title}</strong>
           </div>
           <div style="color: #94a3b8; font-size: 0.9rem; line-height: 1.5; margin-top: 6px;">
-            <strong>المنهج المشروح:</strong> ${s.topic || 'General curriculum coverage'}
+            <strong>Topics Covered:</strong> ${s.topic || 'General curriculum coverage'}
           </div>
           <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 8px;">
             ${s.zoom_link ? `
@@ -3010,7 +3010,7 @@ async function renderStudentSessions() {
           <div>
             <h3 class="font-title-md text-title-md text-on-surface font-bold leading-snug">${s.title}</h3>
             <p class="font-body-sm text-body-sm text-on-surface-variant mt-1.5" style="line-height: 1.6;">
-              <strong class="text-primary font-bold">المنهج المشروح:</strong> ${s.topic || 'Curriculum unit review'}
+              <strong class="text-primary font-bold">Curriculum Covered:</strong> ${s.topic || 'Curriculum unit review'}
             </p>
           </div>
         </div>
@@ -3018,13 +3018,13 @@ async function renderStudentSessions() {
           ${s.zoom_link ? `
             <a href="${s.zoom_link}" target="_blank" class="w-full py-2.5 px-4 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold flex items-center justify-center gap-2 shadow-sm transition-all text-sm no-underline">
               <span>🎥</span>
-              <span>Join Zoom Pro Meeting / دخول الحصة</span>
+              <span>Join Zoom Pro Meeting</span>
             </a>
           ` : ''}
           ${s.pdf_link ? `
             <a href="${s.pdf_link}" target="_blank" class="w-full py-2 px-4 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface font-semibold flex items-center justify-center gap-2 transition-all text-xs no-underline">
               <span>📄</span>
-              <span>${s.pdf_title || 'Download Study Sheet (PDF) / مذكرة الشرح'}</span>
+              <span>${s.pdf_title || 'Download Study Sheet (PDF)'}</span>
             </a>
           ` : ''}
         </div>
@@ -3055,20 +3055,20 @@ function renderStudentPaymentStatus() {
   let badgeBg = 'rgba(16, 185, 129, 0.15)';
   let badgeBorder = 'rgba(16, 185, 129, 0.3)';
   let statusText = 'Subscription Active & Paid 🟢';
-  let statusAr = 'الاشتراك ساري ومسدد بالكامل';
+  let statusAr = 'Tuition is active and up to date';
 
   if (status === 'pending') {
     badgeColor = '#fbbf24';
     badgeBg = 'rgba(251, 191, 36, 0.15)';
     badgeBorder = 'rgba(251, 191, 36, 0.3)';
     statusText = 'Receipt Under Review 🟡';
-    statusAr = 'إشعار التحويل قيد المراجعة والاعتماد من مس رانيا';
+    statusAr = 'Payment receipt is under review by Miss Rania';
   } else if (status === 'overdue') {
     badgeColor = '#f43f5e';
     badgeBg = 'rgba(244, 63, 94, 0.15)';
     badgeBorder = 'rgba(244, 63, 94, 0.3)';
     statusText = 'Subscription Overdue 🔴';
-    statusAr = 'متأخر ومطلوب سداد الاشتراك الشهري';
+    statusAr = 'Monthly tuition payment is due';
   }
 
   const html = `
@@ -3095,7 +3095,7 @@ function renderStudentPaymentStatus() {
     <div class="shrink-0 flex items-center gap-3">
       <button type="button" class="primary-glow-btn" onclick="openSubmitPaymentModal()" style="font-size: 0.85rem; padding: 0.6rem 1.2rem; cursor: pointer;">
         <span class="material-symbols-outlined text-[18px]">upload_file</span>
-        <span>Upload Proof / إرسال إشعار الدفع</span>
+        <span>Upload Payment Proof</span>
       </button>
     </div>
   `;
@@ -5353,7 +5353,7 @@ async function handleSaveCloudConfig(e) {
   const appId = document.getElementById('firebaseAppId')?.value.trim() || '';
 
   if (!apiKey || !projectId) {
-    showToast('⚠️ يرجى إدخال Firebase API Key و Project ID');
+    showToast('⚠️ Please enter Firebase API Key and Project ID');
     return;
   }
 
@@ -5361,31 +5361,31 @@ async function handleSaveCloudConfig(e) {
     try {
       const ok = window.CloudDB.saveConfig({ apiKey, projectId, authDomain, appId });
       if (ok) {
-        showToast('⚡ تم ربط Google Cloud Firebase بنجاح! المزامنة الفورية نشطة الآن.');
+        showToast('⚡ Google Cloud Firebase connected successfully! Real-time sync active.');
         closeCloudSyncModal();
         setTimeout(() => {
           handleSyncAllToCloud(true);
         }, 500);
       } else {
-        showToast('⚠️ تعذر الاتصال بـ Firebase. يرجى التحقق من المفاتيح.');
+        showToast('⚠️ Unable to connect to Firebase. Please verify credentials.');
       }
     } catch (err) {
-      showToast('❌ خطأ: ' + err.message);
+      showToast('❌ Error: ' + err.message);
     }
   }
 }
 
 async function handleSyncAllToCloud(isSilent = false) {
   if (!window.CloudDB || !window.CloudDB.isConfigured) {
-    if (!isSilent) showToast('⚠️ يرجى أولاً إدخال بيانات Firebase وحفظها.');
+    if (!isSilent) showToast('⚠️ Please configure and save Firebase credentials first.');
     return;
   }
   try {
     const count = await window.CloudDB.syncAllLocalStudentsToCloud();
-    showToast(`☁️ تم رفع ${count} طالب إلى السحابة بنجاح!`);
+    showToast(`☁️ Successfully synced ${count} students to cloud!`);
     if (!isSilent) closeCloudSyncModal();
   } catch (err) {
-    showToast('❌ فشل الرفع للسحابة: ' + err.message);
+    showToast('❌ Cloud sync failed: ' + err.message);
   }
 }
 
