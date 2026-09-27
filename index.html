@@ -110,7 +110,7 @@
   <meta http-equiv="Expires" content="0">
 
   <!-- Core Project Styles -->
-  <link rel="stylesheet" href="style.css?v=2.6.1">
+  <link rel="stylesheet" href="style.css?v=2.9.5">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><rect width='48' height='48' rx='12' fill='%230062e3'/><path d='M14 15h9a6 6 0 0 1 0 12h-9V15zm6 7h3a1 1 0 0 0 0-2h-3v2z' fill='%23ffffff'/><path d='M22 27l5 9h-6l-4.5-8h4.5z' fill='%23ffffff'/><path d='M34 16l1.2 3.8 3.8 1.2-3.8 1.2-1.2 3.8-1.2-3.8-3.8-1.2 3.8-1.2z' fill='%23f59e0b'/></svg>">
 
   <style>
@@ -397,14 +397,22 @@
                   </p>
                 </div>
 
-                <div class="flex flex-wrap items-center gap-3.5 pt-2">
+                <div class="flex flex-wrap items-center gap-3 pt-2">
                   <button type="button" class="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-primary-container text-on-primary font-bold text-sm shadow-md hover:bg-primary transition-all active:translate-y-0.5 cursor-pointer" id="dashStartPracticeBtn">
                     <span>🚀</span>
                     <span>Start Daily Practice</span>
                   </button>
-                  <button type="button" class="flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-container-high text-on-surface font-semibold text-sm hover:bg-surface-container hover:text-primary transition-all cursor-pointer" id="dashViewReportBtn">
+                  <button type="button" class="flex items-center gap-2 px-4 py-3 rounded-xl bg-surface-container-high text-on-surface font-semibold text-sm hover:bg-surface-container hover:text-primary transition-all cursor-pointer" onclick="switchView('curriculum-books')">
+                    <span>📚</span>
+                    <span>Curriculum Books</span>
+                  </button>
+                  <button type="button" class="flex items-center gap-2 px-4 py-3 rounded-xl bg-surface-container-high text-on-surface font-semibold text-sm hover:bg-surface-container hover:text-primary transition-all cursor-pointer" onclick="switchView('sessions')">
+                    <span>🎥</span>
+                    <span>Zoom Classes</span>
+                  </button>
+                  <button type="button" class="flex items-center gap-2 px-4 py-3 rounded-xl bg-surface-container-high text-on-surface font-semibold text-sm hover:bg-surface-container hover:text-primary transition-all cursor-pointer" id="dashViewReportBtn">
                     <span>📊</span>
-                    <span>View Performance Report</span>
+                    <span>My Report</span>
                   </button>
                 </div>
               </div>
@@ -2143,7 +2151,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="js/cloud-db.js"></script>
-  <script src="app.js?v=2.7.0"></script>
+  <script src="app.js?v=2.9.5"></script>
 </body>
 </html>
 
