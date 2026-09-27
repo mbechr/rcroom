@@ -164,6 +164,164 @@ const ConfettiFX = {
 // State & Constants
 // =============================================================================
 
+
+// =============================================================================
+// Velvet Obsidian Cosmos Canvas (Interactive Animated Login Screen Background)
+// =============================================================================
+
+const LoginCosmos = {
+  canvas: null,
+  ctx: null,
+  particles: [],
+  animId: null,
+  mouse: { x: null, y: null, radius: 140 },
+  isRunning: false,
+
+  init() {
+    this.canvas = document.getElementById('loginCosmosCanvas');
+    if (!this.canvas) return;
+    this.ctx = this.canvas.getContext('2d');
+    this.resize();
+
+    window.addEventListener('resize', () => this.resize());
+    window.addEventListener('mousemove', (e) => {
+      this.mouse.x = e.clientX;
+      this.mouse.y = e.clientY;
+    });
+    window.addEventListener('mouseout', () => {
+      this.mouse.x = null;
+      this.mouse.y = null;
+    });
+
+    this.createParticles();
+    this.start();
+  },
+
+  resize() {
+    if (!this.canvas) return;
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = window.innerHeight;
+  },
+
+  createParticles() {
+    this.particles = [];
+    const count = Math.min(80, Math.max(35, Math.floor((window.innerWidth * window.innerHeight) / 14000)));
+    const colors = [
+      'rgba(0, 229, 255, 0.85)',   // Celestial Cyan
+      'rgba(168, 85, 247, 0.85)',  // Royal Violet
+      'rgba(251, 191, 36, 0.75)',  // Amber Gold
+      'rgba(16, 185, 129, 0.75)',  // Mastery Emerald
+      'rgba(255, 255, 255, 0.9)'   // Starlight
+    ];
+
+    for (let i = 0; i < count; i++) {
+      this.particles.push({
+        x: Math.random() * (this.canvas.width || window.innerWidth),
+        y: Math.random() * (this.canvas.height || window.innerHeight),
+        vx: (Math.random() - 0.5) * 0.7,
+        vy: (Math.random() - 0.5) * 0.7,
+        radius: Math.random() * 2 + 1.2,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        pulseSpeed: Math.random() * 0.02 + 0.01,
+        pulseVal: Math.random() * Math.PI
+      });
+    }
+  },
+
+  start() {
+    if (this.isRunning) return;
+    this.isRunning = true;
+
+    const animate = () => {
+      if (!this.isRunning || !this.ctx || !this.canvas) return;
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+      const w = this.canvas.width;
+      const h = this.canvas.height;
+
+      // Subtle luminous ambient nebula gradients
+      const grad1 = this.ctx.createRadialGradient(w * 0.25, h * 0.3, 50, w * 0.25, h * 0.3, w * 0.45);
+      grad1.addColorStop(0, 'rgba(0, 229, 255, 0.04)');
+      grad1.addColorStop(1, 'rgba(0, 229, 255, 0)');
+      this.ctx.fillStyle = grad1;
+      this.ctx.fillRect(0, 0, w, h);
+
+      const grad2 = this.ctx.createRadialGradient(w * 0.75, h * 0.7, 50, w * 0.75, h * 0.7, w * 0.45);
+      grad2.addColorStop(0, 'rgba(139, 92, 246, 0.045)');
+      grad2.addColorStop(1, 'rgba(139, 92, 246, 0)');
+      this.ctx.fillStyle = grad2;
+      this.ctx.fillRect(0, 0, w, h);
+
+      for (let i = 0; i < this.particles.length; i++) {
+        const p = this.particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+
+        if (p.x < 0) p.x = this.canvas.width;
+        else if (p.x > this.canvas.width) p.x = 0;
+        if (p.y < 0) p.y = this.canvas.height;
+        else if (p.y > this.canvas.height) p.y = 0;
+
+        if (this.mouse.x !== null) {
+          const dx = this.mouse.x - p.x;
+          const dy = this.mouse.y - p.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < this.mouse.radius) {
+            const force = (this.mouse.radius - dist) / this.mouse.radius;
+            p.x -= (dx / dist) * force * 1.5;
+            p.y -= (dy / dist) * force * 1.5;
+          }
+        }
+
+        p.pulseVal += p.pulseSpeed;
+        const currentRadius = p.radius + Math.sin(p.pulseVal) * 0.5;
+
+        this.ctx.beginPath();
+        this.ctx.arc(p.x, p.y, Math.max(0.5, currentRadius), 0, Math.PI * 2);
+        this.ctx.fillStyle = p.color;
+        this.ctx.shadowBlur = 8;
+        this.ctx.shadowColor = p.color;
+        this.ctx.fill();
+        this.ctx.shadowBlur = 0;
+
+        for (let j = i + 1; j < this.particles.length; j++) {
+          const p2 = this.particles[j];
+          const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+          if (dist < 115) {
+            const alpha = (1 - dist / 115) * 0.28;
+            this.ctx.beginPath();
+            this.ctx.strokeStyle = `rgba(0, 229, 255, ${alpha})`;
+            this.ctx.lineWidth = 0.8;
+            this.ctx.moveTo(p.x, p.y);
+            this.ctx.lineTo(p2.x, p2.y);
+            this.ctx.stroke();
+          }
+        }
+      }
+
+      this.animId = requestAnimationFrame(animate);
+    };
+
+    this.animId = requestAnimationFrame(animate);
+  },
+
+  pause() {
+    this.isRunning = false;
+    if (this.animId) {
+      cancelAnimationFrame(this.animId);
+      this.animId = null;
+    }
+    if (this.ctx && this.canvas) {
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+  },
+
+  resume() {
+    if (!this.canvas) this.init();
+    else if (!this.isRunning) this.start();
+  }
+};
+
 const AppState = {
   data: null,
   summary: null,
@@ -202,7 +360,7 @@ window.AppState = AppState;
 const DB = {
   // Preloaded Demo Students & Teacher for instant client-side offline fallback
   demoStudents: [
-    { id: 101, username: 'beshr', full_name: 'beshr', grade_level: 'Year 4', avatar: '🦊', password: '123456', xp: 0, streak_days: 0, role: 'student' },
+    { id: 101, username: 'beshr', full_name: 'Beshr Mohamed', parent_name: 'Mohamed Beshr', student_phone: '01012345678', parent_phone: '01098765432', payment_method: 'InstaPay', payment_date: '2026-09-20', payment_amount: 500, payment_status: 'paid', grade_level: 'Year 4', avatar: '🦊', password: '123456', xp: 450, streak_days: 3, role: 'student' },
     { id: 5, username: 'admin', full_name: 'Miss Rania', grade_level: 'Instructor', avatar: '👩‍🏫', xp: 0, streak_days: 0, role: 'teacher' },
     { id: 6, username: 'rania', full_name: 'Miss Rania', grade_level: 'Instructor', avatar: '👩‍🏫', xp: 0, streak_days: 0, role: 'teacher' }
   ],
@@ -812,6 +970,13 @@ const DB = {
       username: cleanUser,
       password: cleanPw,
       full_name: fullName,
+      parent_name: data.parent_name || '',
+      student_phone: data.student_phone || '',
+      parent_phone: data.parent_phone || '',
+      payment_method: data.payment_method || 'InstaPay',
+      payment_date: data.payment_date || new Date().toISOString().split('T')[0],
+      payment_amount: data.payment_amount !== undefined ? Number(data.payment_amount) : 500,
+      payment_status: data.payment_status || 'paid',
       grade_level: data.grade_level || 'Year 4',
       avatar: data.avatar || '🦊',
       xp: 0,
@@ -876,6 +1041,13 @@ const DB = {
       if (grade) existing.grade_level = grade;
       if (avatar) existing.avatar = avatar;
       if (cleanPw) existing.password = cleanPw;
+      if (data.parent_name !== undefined) existing.parent_name = data.parent_name;
+      if (data.student_phone !== undefined) existing.student_phone = data.student_phone;
+      if (data.parent_phone !== undefined) existing.parent_phone = data.parent_phone;
+      if (data.payment_method !== undefined) existing.payment_method = data.payment_method;
+      if (data.payment_date !== undefined) existing.payment_date = data.payment_date;
+      if (data.payment_amount !== undefined) existing.payment_amount = Number(data.payment_amount);
+      if (data.payment_status !== undefined) existing.payment_status = data.payment_status;
       localStorage.setItem('rc_custom_students', JSON.stringify(localStudents));
     }
 
@@ -1084,6 +1256,13 @@ const DB = {
         username: s.username,
         password: s.password || '123456',
         full_name: s.full_name,
+        parent_name: s.parent_name || '',
+        student_phone: s.student_phone || '',
+        parent_phone: s.parent_phone || '',
+        payment_method: s.payment_method || 'InstaPay',
+        payment_date: s.payment_date || '',
+        payment_amount: s.payment_amount !== undefined ? s.payment_amount : 500,
+        payment_status: s.payment_status || 'paid',
         grade_level: s.grade_level,
         avatar: s.avatar || '🦊',
         xp: xp,
@@ -1152,7 +1331,167 @@ const DB = {
       };
     });
     return withLiveXp.sort((a, b) => b.xp - a.xp);
-  }
+  },
+
+  async submitPayment(data) {
+    if (window.CloudDB && window.CloudDB.isConfigured) {
+      try {
+        const res = await window.CloudDB.submitPayment(data);
+        if (res && res.success) return res;
+      } catch (e) {}
+    }
+    try {
+      const res = await fetch(this.apiUrl('/api/payments/submit'), {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(data)
+      });
+      if (res.ok) return await res.json();
+    } catch (e) {}
+
+    const local = JSON.parse(localStorage.getItem('rc_custom_payments') || '[]');
+    const newP = {
+      id: Date.now(),
+      student_id: data.student_id || (AppState.currentUser ? AppState.currentUser.id : 0),
+      student_name: data.student_name || (AppState.currentUser ? AppState.currentUser.full_name : ''),
+      amount: data.amount || 0,
+      payment_date: data.payment_date || new Date().toISOString().split('T')[0],
+      payment_method: data.payment_method || 'InstaPay',
+      receipt_image: data.receipt_image || '',
+      notes: data.notes || '',
+      status: 'pending',
+      created_at: new Date().toISOString()
+    };
+    local.unshift(newP);
+    localStorage.setItem('rc_custom_payments', JSON.stringify(local));
+
+    if (AppState.currentUser) {
+      AppState.currentUser.payment_status = 'pending';
+      localStorage.setItem('current_student', JSON.stringify(AppState.currentUser));
+      this.syncLocalStudentUpdate({ student_id: AppState.currentUser.id, payment_status: 'pending' });
+    }
+    return { success: true, payment: newP };
+  },
+
+  async reviewPayment(paymentId, status) {
+    if (window.CloudDB && window.CloudDB.isConfigured) {
+      try {
+        await window.CloudDB.reviewPayment(paymentId, status);
+      } catch (e) {}
+    }
+    try {
+      const res = await fetch(this.apiUrl('/api/payments/review'), {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ payment_id: paymentId, status: status })
+      });
+      if (res.ok) return await res.json();
+    } catch (e) {}
+
+    let local = JSON.parse(localStorage.getItem('rc_custom_payments') || '[]');
+    const p = local.find(x => x.id === paymentId || String(x.id) === String(paymentId));
+    if (p) {
+      p.status = status;
+      localStorage.setItem('rc_custom_payments', JSON.stringify(local));
+      if (p.student_id) {
+        const studentStatus = status === 'approved' ? 'paid' : 'overdue';
+        this.syncLocalStudentUpdate({ student_id: p.student_id, payment_status: studentStatus });
+        if (AppState.currentUser && AppState.currentUser.id === p.student_id) {
+          AppState.currentUser.payment_status = studentStatus;
+          localStorage.setItem('current_student', JSON.stringify(AppState.currentUser));
+        }
+      }
+    }
+    return { success: true };
+  },
+
+  async getPayments() {
+    if (window.CloudDB && window.CloudDB.isConfigured) {
+      try {
+        const cloudPayments = await window.CloudDB.getPayments();
+        if (cloudPayments && cloudPayments.length) return cloudPayments;
+      } catch (e) {}
+    }
+    try {
+      const res = await fetch(this.apiUrl('/api/payments/list'), { headers: this.getAuthHeaders() });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.payments) return json.payments;
+      }
+    } catch (e) {}
+    return JSON.parse(localStorage.getItem('rc_custom_payments') || '[]');
+  },
+
+  async saveClassSession(data) {
+    if (window.CloudDB && window.CloudDB.isConfigured) {
+      try {
+        const res = await window.CloudDB.saveClassSession(data);
+        if (res && res.success) return res;
+      } catch (e) {}
+    }
+    try {
+      const res = await fetch(this.apiUrl('/api/sessions/create'), {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(data)
+      });
+      if (res.ok) return await res.json();
+    } catch (e) {}
+
+    const local = JSON.parse(localStorage.getItem('rc_class_sessions') || '[]');
+    const sess = {
+      id: Date.now(),
+      title: data.title || 'Live Class Session',
+      topic: data.topic || '',
+      session_date: data.session_date || new Date().toISOString(),
+      zoom_link: data.zoom_link || '',
+      pdf_link: data.pdf_link || '',
+      pdf_title: data.pdf_title || 'Class Material PDF',
+      created_at: new Date().toISOString()
+    };
+    local.unshift(sess);
+    localStorage.setItem('rc_class_sessions', JSON.stringify(local));
+    return { success: true, session: sess };
+  },
+
+  async deleteClassSession(sessionId) {
+    if (window.CloudDB && window.CloudDB.isConfigured) {
+      try {
+        await window.CloudDB.deleteClassSession(sessionId);
+      } catch (e) {}
+    }
+    try {
+      const res = await fetch(this.apiUrl('/api/sessions/delete'), {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({ session_id: sessionId })
+      });
+      if (res.ok) return await res.json();
+    } catch (e) {}
+
+    let local = JSON.parse(localStorage.getItem('rc_class_sessions') || '[]');
+    local = local.filter(s => s.id !== sessionId && String(s.id) !== String(sessionId));
+    localStorage.setItem('rc_class_sessions', JSON.stringify(local));
+    return { success: true };
+  },
+
+  async getClassSessions() {
+    if (window.CloudDB && window.CloudDB.isConfigured) {
+      try {
+        const cloudSessions = await window.CloudDB.getClassSessions();
+        if (cloudSessions && cloudSessions.length) return cloudSessions;
+      } catch (e) {}
+    }
+    try {
+      const res = await fetch(this.apiUrl('/api/sessions/list'), { headers: this.getAuthHeaders() });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && json.sessions) return json.sessions;
+      }
+    } catch (e) {}
+    return JSON.parse(localStorage.getItem('rc_class_sessions') || '[]');
+  },
+
 };
 
 // =============================================================================
@@ -1359,6 +1698,9 @@ async function initPortal() {
   applyTheme(AppState.currentTheme);
   setupEventListeners();
 
+  // Initialize Animated Velvet Obsidian Cosmos Background
+  LoginCosmos.init();
+
   // Initialize Real-time Google Cloud Database Sync (Firebase)
   if (window.CloudDB) {
     window.CloudDB.init();
@@ -1367,8 +1709,11 @@ async function initPortal() {
   // Strict Authentication Gate Check
   if (!AppState.currentUser) {
     document.body.classList.add('auth-locked');
+    LoginCosmos.resume();
     openAuthModal(true);
     return; // STOP: Never render curriculum or student views until authenticated!
+  } else {
+    LoginCosmos.pause();
   }
 
   // Synchronize current user XP with real accumulated practice stats
@@ -1533,6 +1878,12 @@ function switchView(viewId) {
   // On-demand rendering
   if (viewId === 'dashboard') {
     renderDashboard();
+    renderStudentPaymentStatus();
+    renderStudentSessions();
+  } else if (viewId === 'sessions') {
+    renderStudentSessions();
+  } else if (viewId === 'payments') {
+    renderStudentPaymentStatus();
   } else if (viewId === 'tracks') {
     renderTracksView();
   } else if (viewId === 'skills') {
@@ -1715,6 +2066,8 @@ async function renderDashboard() {
   if (!user) return;
   renderDashboardAssignments();
 
+  renderStudentPaymentStatus();
+  renderStudentSessions();
   el.dashStudentName.textContent = user.full_name.split(' ')[0];
   el.dashStreakText.textContent = `${user.streak_days}-day practice streak`;
 
@@ -2142,13 +2495,23 @@ async function renderTeacherConsoleView() {
     if (el.tClassAccuracy) el.tClassAccuracy.textContent = `${overview.class_stats ? overview.class_stats.accuracy_rate : 0}%`;
     if (el.tTotalHours) el.tTotalHours.textContent = `${overview.class_stats ? overview.class_stats.total_hours : 0}h`;
 
-    // Student Roster Table
-    const roster = overview.roster || [];
+    // Student Roster Table (8-Column CRM matching table header)
+    let roster = overview.roster || [];
     AppState.currentTeacherRoster = roster;
+
+    const filter = AppState.teacherRosterFilter || 'all';
+    if (filter !== 'all') {
+      roster = roster.filter(s => (s.payment_status || 'paid') === filter);
+    }
+
     el.teacherRosterTableBody.innerHTML = roster.map(s => {
-      const acc = s.accuracy_rate || 0;
-      const accClass = acc >= 90 ? 'green' : (acc >= 75 ? 'amber' : 'orange');
       const safeName = (s.full_name || '').replace(/'/g, "\\'");
+      const pStatus = s.payment_status || 'paid';
+      const badgeClass = pStatus === 'paid' ? 'paid' : (pStatus === 'pending' ? 'pending' : 'overdue');
+      const badgeText = pStatus === 'paid' ? 'Paid 🟢' : (pStatus === 'pending' ? 'Pending 🟡' : 'Overdue 🔴');
+
+      const waClean = cleanWhatsAppNumber(s.parent_phone);
+      const waLink = waClean ? `https://wa.me/${waClean}?text=${encodeURIComponent('مرحباً بحضرتك يا فندم بخصوص متابعة الطالب ' + s.full_name + ' مع مس رانيا 🌸')}` : null;
 
       return `
         <tr>
@@ -2157,48 +2520,60 @@ async function renderTeacherConsoleView() {
               <div class="leader-avatar">${s.avatar || '🦊'}</div>
               <div>
                 <div class="leader-name" style="font-weight:700;">${s.full_name}</div>
-                <div style="font-size:0.75rem; color:var(--text-muted);">${s.is_custom ? 'Custom Student' : 'Classroom Member'}</div>
+                <div style="font-size:0.75rem; color:var(--text-muted); display:flex; gap:6px; align-items:center;">
+                  <code style="color:var(--color-primary); font-size:0.75rem;">@${s.username}</code>
+                  <span>&bull;</span>
+                  <span style="color:#00e5ff; font-weight:700;">${s.grade_level || 'Year 4'}</span>
+                </div>
               </div>
             </div>
           </td>
           <td>
-            <code style="background:rgba(99,102,241,0.12); color:#4338ca; padding:3px 7px; border-radius:6px; font-weight:700; font-size:0.85rem;">@${s.username}</code>
+            <strong style="color:var(--text-main); font-size:0.85rem;">${s.parent_name || '—'}</strong>
           </td>
           <td>
-            <code style="background:rgba(16,185,129,0.12); color:#047857; padding:3px 7px; border-radius:6px; font-weight:700; font-size:0.85rem;">${s.password || 'password123'}</code>
+            ${s.student_phone ? `<a href="tel:${s.student_phone}" style="color:var(--text-muted); text-decoration:none; font-size:0.85rem;">📞 ${s.student_phone}</a>` : '<span style="color:var(--text-muted);">—</span>'}
           </td>
-          <td><strong style="color:var(--text-main); font-size:0.85rem;">${s.grade_level}</strong></td>
           <td>
-            ${s.is_custom
-              ? '<span style="background:rgba(59,130,246,0.12); color:#2563eb; padding:3px 8px; border-radius:12px; font-size:0.72rem; font-weight:700;">Custom ✨</span>'
-              : '<span style="background:rgba(100,116,139,0.12); color:#475569; padding:3px 8px; border-radius:12px; font-size:0.72rem; font-weight:700;">Enrolled 📌</span>'}
+            ${waLink ? `
+              <a href="${waLink}" target="_blank" class="whatsapp-btn" title="فتح محادثة واتساب مع ولي الأمر">
+                <span>💬</span>
+                <span>${s.parent_phone}</span>
+              </a>
+            ` : (s.parent_phone ? `<span style="font-size:0.85rem;">${s.parent_phone}</span>` : '<span style="color:var(--text-muted);">—</span>')}
           </td>
-          <td><strong>${s.questions_answered ? s.questions_answered.toLocaleString() : 0}</strong></td>
-          <td><span class="accuracy-pill ${accClass}">${acc}%</span></td>
-          <td><strong style="color:${s.avg_smart_score >= 90 ? 'var(--color-success)' : 'inherit'}">${s.avg_smart_score || 0}</strong></td>
-          <td><strong style="color:var(--color-primary); font-family:var(--font-mono);">${(s.xp || 0).toLocaleString()} XP</strong></td>
+          <td>
+            <span class="payment-badge ${badgeClass}">${badgeText}</span>
+          </td>
+          <td>
+            <strong style="color:var(--text-main); font-size:0.85rem;">${s.payment_amount !== undefined ? s.payment_amount : 500} EGP</strong>
+            <div style="font-size:0.72rem; color:var(--text-muted);">${s.payment_method || 'InstaPay'}</div>
+          </td>
+          <td>
+            <span style="font-size:0.8rem; color:var(--text-muted);">${s.payment_date || '—'}</span>
+          </td>
           <td>
             <div class="actions-cell">
-              <button class="action-btn-sm" onclick="inspectStudentReport(${s.id})" title="Student Performance Report">
+              <button class="action-btn-sm" onclick="openStudentReportModal(${s.id})" title="عرض تقرير أداء الطالب وواتساب">
                 <span class="btn-icon">📊</span> Report
               </button>
-              <button class="action-btn-sm print" onclick="printStudentReportCard(${s.id})" title="Print Student Report Card">
-                <span class="btn-icon">🖨️</span>
+              <button class="action-btn-sm" onclick="sendPaymentReminderWhatsApp(${s.id})" title="إرسال تذكير المصروفات عبر واتساب" style="background:rgba(37,211,102,0.15); color:#25d366; border:1px solid rgba(37,211,102,0.3);">
+                <span class="btn-icon">💬</span> Reminder
               </button>
-              <button class="action-btn-sm edit" onclick="openEditStudentModal(${s.id})" title="Edit Student Profile & Password">
+              <button class="action-btn-sm edit" onclick="openEditStudentModal(${s.id})" title="تعديل بيانات الطالب والمصروفات">
                 <span class="btn-icon">✏️</span> Edit
               </button>
-              <button class="action-btn-sm key" onclick="openResetPasswordModal(${s.id}, '${safeName}')" title="Reset Student Password">
-                <span class="btn-icon">🔑</span> Pass
+              <button class="action-btn-sm key" onclick="openResetPasswordModal(${s.id}, '${safeName}')" title="تغيير كلمة المرور">
+                <span class="btn-icon">🔑</span>
               </button>
-              <button class="action-btn-sm delete" onclick="confirmDeleteStudent(${s.id}, '${safeName}')" title="Remove Student from Classroom">
-                <span class="btn-icon">🗑️</span> Delete
+              <button class="action-btn-sm delete" onclick="confirmDeleteStudent(${s.id}, '${safeName}')" title="حذف الطالب">
+                <span class="btn-icon">🗑️</span>
               </button>
             </div>
           </td>
         </tr>
       `;
-    }).join('') || '<tr><td colspan="10" style="text-align:center; padding:1.5rem;">No registered students found.</td></tr>';
+    }).join('') || '<tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--text-muted);">No students found matching current filter.</td></tr>';
 
     // Attention Needed Skills
     const attention = overview.attention_skills || [];
@@ -2238,6 +2613,516 @@ async function renderTeacherConsoleView() {
     el.teacherRosterTableBody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Failed to load classroom data.</td></tr>';
   }
 }
+
+
+// =============================================================================
+// Student & Parent CRM, WhatsApp Dispatcher, and Payment Proof Controllers
+// =============================================================================
+
+function cleanWhatsAppNumber(phone) {
+  if (!phone) return '';
+  let cleaned = String(phone).replace(/[^\d+]/g, '');
+  if (cleaned.startsWith('+')) cleaned = cleaned.slice(1);
+  if (cleaned.startsWith('01')) cleaned = '2' + cleaned;
+  else if (cleaned.startsWith('1') && cleaned.length === 10) cleaned = '20' + cleaned;
+  return cleaned;
+}
+
+window.cleanWhatsAppNumber = cleanWhatsAppNumber;
+
+window.switchTeacherTab = function(tabName) {
+  const tabs = document.querySelectorAll('#teacherSubTabs button');
+  tabs.forEach(t => {
+    const isActive = t.dataset.ttab === tabName;
+    t.classList.toggle('active', isActive);
+    if (isActive) {
+      t.className = 'teacher-sub-tab px-4 py-2 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 font-bold text-xs flex items-center gap-2 cursor-pointer transition-all active';
+    } else {
+      t.className = 'teacher-sub-tab px-4 py-2 rounded-xl bg-transparent border border-transparent text-slate-400 hover:text-white font-bold text-xs flex items-center gap-2 cursor-pointer transition-all';
+    }
+  });
+
+  const panels = {
+    students: document.getElementById('teacherPanelStudents'),
+    payments: document.getElementById('teacherPanelPayments'),
+    sessions: document.getElementById('teacherPanelSessions'),
+    homework: document.getElementById('teacherPanelHomework')
+  };
+
+  Object.keys(panels).forEach(k => {
+    if (panels[k]) panels[k].style.display = (k === tabName ? 'block' : 'none');
+  });
+
+  if (tabName === 'students') {
+    renderTeacherConsoleView();
+  } else if (tabName === 'payments') {
+    renderTeacherPayments();
+  } else if (tabName === 'sessions') {
+    renderTeacherSessions();
+  } else if (tabName === 'homework') {
+    renderTeacherAssignments();
+  }
+};
+
+window.filterTeacherRoster = function(filter) {
+  AppState.teacherRosterFilter = filter;
+  document.querySelectorAll('.roster-filter-btn').forEach(btn => {
+    const isAct = btn.dataset.filter === filter;
+    btn.classList.toggle('active', isAct);
+    if (isAct) {
+      btn.className = 'roster-filter-btn px-3 py-1 rounded-lg bg-cyan-500/20 text-cyan-400 font-bold active';
+    } else {
+      btn.className = 'roster-filter-btn px-3 py-1 rounded-lg text-slate-400 hover:text-white font-bold';
+    }
+  });
+  renderTeacherConsoleView();
+};
+
+window.sendPaymentReminderWhatsApp = function(studentId) {
+  const student = (AppState.currentTeacherRoster || []).find(s => s.id === studentId || String(s.id) === String(studentId)) ||
+                  DB.findStudentById(studentId);
+  if (!student) {
+    showToast('Student not found in active roster', '⚠️');
+    return;
+  }
+  const parentPhone = student.parent_phone || student.student_phone;
+  if (!parentPhone) {
+    showToast('يرجى أولاً إدخال رقم ولي الأمر أو الهاتف للطالب عبر زر التعديل (Edit) ✏️', '⚠️');
+    return;
+  }
+  const cleanPhone = cleanWhatsAppNumber(parentPhone);
+  const studentName = student.full_name || student.username;
+  const parentName = student.parent_name ? ` (أ/ ${student.parent_name})` : '';
+  const amount = student.payment_amount !== undefined ? student.payment_amount : 500;
+  const method = student.payment_method || 'InstaPay / Vodafone Cash';
+  const monthName = new Date().toLocaleString('ar-EG', { month: 'long' });
+
+  const msg = `أهلاً بحضرتك يا فندم${parentName}، ولي أمر الطالب/ة: ${studentName} 🌸
+تحياتي، مس رانيا.
+نود تذكير سيادتكم بمصروفات الاشتراك الشهري (${amount} ج.م) لشهر ${monthName}.
+طريقة الدفع المقررة: ${method}.
+يمكنكم التحويل ورفع صورة إشعار التحويل مباشرة من خلال حساب الطالب على المنصة.
+شكراً جزيلاً لتعاونكم ودعمكم المستمر لرحلة تفوق الطالب ✨`;
+
+  const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+  showToast(`جاري فتح واتساب لإرسال تذكير المصروفات 💬`);
+};
+
+window.sendWhatsAppReport = function(studentId) {
+  const student = (AppState.currentTeacherRoster || []).find(s => s.id === studentId || String(s.id) === String(studentId)) ||
+                  DB.findStudentById(studentId);
+  if (!student) {
+    showToast('Student record not found', '⚠️');
+    return;
+  }
+  const parentPhone = student.parent_phone || student.student_phone;
+  if (!parentPhone) {
+    showToast('يرجى حفظ رقم هاتف ولي الأمر أولاً لإرسال التقرير 📱', '⚠️');
+    return;
+  }
+  const cleanPhone = cleanWhatsAppNumber(parentPhone);
+  const stats = DB.getStudentStats(student.id);
+  const q = stats.questions_answered || student.questions_answered || 0;
+  const acc = stats.accuracy_rate || student.accuracy_rate || 0;
+  const xp = Math.max(stats.xp, student.xp || 0);
+  const smart = stats.avg_smart_score || student.avg_smart_score || 0;
+  const statusStr = student.payment_status === 'paid' ? 'ساري ومسدد 🟢' : (student.payment_status === 'pending' ? 'قيد المراجعة 🟡' : 'مطلوب التجديد 🔴');
+
+  const msg = `🌟 تقرير متابعة وأداء الطالب/ة: ${student.full_name} 🌟
+📚 الصف الدراسي: ${student.grade_level || 'General'}
+━━━━━━━━━━━━━━━━━━━━
+✅ إجمالي الأسئلة المنجزة: ${q.toLocaleString()} سؤال
+🎯 نسبة الدقة والإتقان: ${acc}%
+🏅 متوسط SmartScore: ${smart}/100
+🏆 نقاط الخبرة المكتسبة (XP): ${xp.toLocaleString()} XP
+💳 حالة الاشتراك الشهري: ${statusStr}
+━━━━━━━━━━━━━━━━━━━━
+مع تحيات مس رانيا 🌸 منصة التفوق الرقمي التعليمية`;
+
+  const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+  showToast(`جاري إرسال التقرير لولي الأمر عبر واتساب 📤`);
+};
+
+window.openStudentReportModal = function(studentId) {
+  const student = (AppState.currentTeacherRoster || []).find(s => s.id === studentId || String(s.id) === String(studentId)) ||
+                  DB.findStudentById(studentId);
+  if (!student) return;
+
+  const modal = document.getElementById('studentReportModal');
+  const sub = document.getElementById('reportStudentSubtitle');
+  const content = document.getElementById('studentReportContent');
+  if (!modal || !content) return;
+
+  if (sub) {
+    sub.textContent = `${student.full_name} • ${student.grade_level} • ولي الأمر: ${student.parent_name || 'غير مسجل'}`;
+  }
+
+  const stats = DB.getStudentStats(student.id);
+  const q = stats.questions_answered || student.questions_answered || 0;
+  const acc = stats.accuracy_rate || student.accuracy_rate || 0;
+  const xp = Math.max(stats.xp, student.xp || 0);
+  const smart = stats.avg_smart_score || student.avg_smart_score || 0;
+
+  content.innerHTML = `
+    <div style="display:flex; flex-direction:column; gap:1.25rem;">
+      <div style="background: rgba(0, 229, 255, 0.05); border: 1px solid rgba(0, 229, 255, 0.2); border-radius: 14px; padding: 1.2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+        <div style="display: flex; align-items: center; gap: 0.9rem;">
+          <div style="font-size: 2.2rem; background: rgba(255,255,255,0.08); width: 52px; height: 52px; border-radius: 12px; display: flex; align-items: center; justify-content: center;">${student.avatar || '🦊'}</div>
+          <div>
+            <div style="font-weight: 800; font-size: 1.15rem; color: #fff;">${student.full_name}</div>
+            <div style="font-size: 0.85rem; color: #94a3b8;">@${student.username} &bull; ${student.grade_level}</div>
+          </div>
+        </div>
+        <div style="text-align: right;">
+          <span class="payment-badge ${student.payment_status || 'paid'}">${(student.payment_status || 'paid').toUpperCase()}</span>
+          <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 4px;">Fee: ${student.payment_amount !== undefined ? student.payment_amount : 500} EGP (${student.payment_method || 'InstaPay'})</div>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
+        <div style="background: rgba(14, 18, 30, 0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1rem; text-align: center;">
+          <div style="font-size: 0.75rem; color: #94a3b8; font-weight: 700;">QUESTIONS SOLVED</div>
+          <div style="font-size: 1.6rem; font-weight: 800; color: #00e5ff; margin-top: 4px;">${q.toLocaleString()}</div>
+        </div>
+        <div style="background: rgba(14, 18, 30, 0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1rem; text-align: center;">
+          <div style="font-size: 0.75rem; color: #94a3b8; font-weight: 700;">ACCURACY RATE</div>
+          <div style="font-size: 1.6rem; font-weight: 800; color: #10b981; margin-top: 4px;">${acc}%</div>
+        </div>
+        <div style="background: rgba(14, 18, 30, 0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1rem; text-align: center;">
+          <div style="font-size: 0.75rem; color: #94a3b8; font-weight: 700;">AVG SMARTSCORE</div>
+          <div style="font-size: 1.6rem; font-weight: 800; color: #fbbf24; margin-top: 4px;">${smart}/100</div>
+        </div>
+        <div style="background: rgba(14, 18, 30, 0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1rem; text-align: center;">
+          <div style="font-size: 0.75rem; color: #94a3b8; font-weight: 700;">MASTERY XP</div>
+          <div style="font-size: 1.6rem; font-weight: 800; color: #8b5cf6; margin-top: 4px;">${xp.toLocaleString()}</div>
+        </div>
+      </div>
+
+      <div style="background: rgba(14, 18, 30, 0.6); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 1rem; font-size: 0.85rem; line-height: 1.6;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.35rem;">
+          <span style="color: #94a3b8;">Father / Parent:</span>
+          <strong style="color: #fff;">${student.parent_name || 'Not provided'}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.35rem;">
+          <span style="color: #94a3b8;">Student Phone:</span>
+          <strong style="color: #fff;">${student.student_phone || 'Not provided'}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: #94a3b8;">Parent WhatsApp:</span>
+          <strong style="color: #00e5ff;">${student.parent_phone || 'Not provided'}</strong>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 0.6rem; padding-top: 0.5rem;">
+        <button type="button" class="whatsapp-btn full-width" onclick="sendWhatsAppReport(${student.id})" style="padding: 0.85rem; font-size: 0.95rem; justify-content: center; cursor: pointer;">
+          <span style="font-size: 1.2rem;">💬</span>
+          <span>إرسال التقرير لولي الأمر عبر واتساب (1-Click WhatsApp)</span>
+        </button>
+        <button type="button" class="secondary-glass-btn full-width" onclick="printStudentReportCard(${student.id})" style="padding: 0.7rem; justify-content: center; cursor: pointer;">
+          <span>🖨️</span>
+          <span>Print Formal Progress Report Card</span>
+        </button>
+      </div>
+    </div>
+  `;
+
+  modal.classList.add('open');
+};
+
+async function renderTeacherPayments() {
+  const container = document.getElementById('teacherPaymentsListContainer');
+  if (!container) return;
+  container.innerHTML = '<div style="text-align:center; padding: 2rem; color: var(--text-muted);">Loading incoming payment proofs...</div>';
+
+  try {
+    const list = await DB.getPayments();
+    if (!list || !list.length) {
+      container.innerHTML = `
+        <div style="text-align: center; padding: 3rem; background: rgba(14, 18, 30, 0.5); border-radius: 14px; border: 1px dashed rgba(255,255,255,0.1);">
+          <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">💳</div>
+          <div style="font-weight: 700; color: #fff; font-size: 1rem;">No incoming payment receipts</div>
+          <div style="color: #94a3b8; font-size: 0.85rem; margin-top: 4px;">When students upload payment receipts (InstaPay / Vodafone Cash), they will appear here for one-click approval.</div>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = list.map(p => {
+      const isPending = p.status === 'pending';
+      const badgeClass = isPending ? 'pending' : (p.status === 'approved' ? 'paid' : 'overdue');
+      const safeImg = p.receipt_image ? p.receipt_image.replace(/"/g, '&quot;') : '';
+
+      return `
+        <div style="background: rgba(14, 18, 30, 0.7); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 1.25rem; display: flex; flex-direction: column; md:flex-row; gap: 1.25rem; justify-content: space-between; align-items: start; transition: all 0.2s;">
+          <div style="display: flex; gap: 1rem; min-width: 0; flex: 1;">
+            ${p.receipt_image ? `
+              <div onclick="viewReceiptImage('${safeImg}', '${(p.student_name || 'Receipt').replace(/'/g, "\\'")}')" class="receipt-thumb shrink-0 cursor-pointer" title="Click to enlarge screenshot">
+                <img src="${p.receipt_image}" alt="Receipt" style="width: 72px; height: 72px; object-fit: cover; border-radius: 10px; border: 1px solid rgba(0, 229, 255, 0.3);">
+              </div>
+            ` : `
+              <div style="width: 72px; height: 72px; border-radius: 10px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; shrink-0;">
+                🧾
+              </div>
+            `}
+            <div style="min-width: 0;">
+              <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+                <strong style="color: #fff; font-size: 1.05rem;">${p.student_name || 'Student'}</strong>
+                <span class="payment-badge ${badgeClass}">${(p.status || 'pending').toUpperCase()}</span>
+                <span style="font-size: 0.8rem; color: #00e5ff; font-weight: 700; background: rgba(0, 229, 255, 0.1); padding: 2px 8px; border-radius: 6px;">${p.amount || 0} EGP</span>
+              </div>
+              <div style="font-size: 0.85rem; color: #94a3b8; margin-top: 4px;">
+                <span>📅 ${p.payment_date || 'Recent'}</span> &bull; 
+                <span>💳 ${p.payment_method || 'InstaPay'}</span>
+              </div>
+              ${p.notes ? `<div style="font-size: 0.8rem; color: #cbd5e1; margin-top: 6px; background: rgba(255,255,255,0.04); padding: 4px 8px; border-radius: 6px;">📝 ${p.notes}</div>` : ''}
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.5rem; shrink-0; align-self: flex-end;">
+            ${isPending ? `
+              <button type="button" class="action-btn-sm" onclick="reviewPaymentReceipt(${p.id}, 'approved')" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4); font-weight: 700; padding: 6px 14px; border-radius: 8px; cursor: pointer;">
+                ✅ Approve / اعتماد
+              </button>
+              <button type="button" class="action-btn-sm delete" onclick="reviewPaymentReceipt(${p.id}, 'rejected')" style="padding: 6px 12px; border-radius: 8px; cursor: pointer;">
+                ❌ Reject / رفض
+              </button>
+            ` : `
+              <span style="font-size: 0.8rem; color: #64748b;">Reviewed</span>
+            `}
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch (err) {
+    console.error('Failed to render teacher payments:', err);
+    container.innerHTML = '<div style="color: #ef4444; padding: 1rem;">Failed to load payments.</div>';
+  }
+}
+
+window.reviewPaymentReceipt = async function(paymentId, status) {
+  try {
+    await DB.reviewPayment(paymentId, status);
+    showToast(status === 'approved' ? 'Payment approved successfully! Student marked as Paid 🟢' : 'Payment rejected. Student marked as Overdue 🔴');
+    await renderTeacherPayments();
+    await renderTeacherConsoleView();
+  } catch (e) {
+    showToast('Failed to update receipt status: ' + e.message, '⚠️');
+  }
+};
+
+window.viewReceiptImage = function(imgSrc, studentName) {
+  const modal = document.getElementById('receiptPreviewModal');
+  const img = document.getElementById('receiptPreviewImg');
+  const title = document.getElementById('receiptPreviewTitle');
+  if (!modal || !img) return;
+  img.src = imgSrc;
+  if (title) title.textContent = `Receipt Proof: ${studentName}`;
+  modal.classList.add('open');
+};
+
+async function renderTeacherSessions() {
+  const container = document.getElementById('teacherSessionsListContainer');
+  if (!container) return;
+  container.innerHTML = '<div style="text-align:center; padding: 2rem; color: var(--text-muted);">Loading class sessions...</div>';
+
+  try {
+    const sessions = await DB.getClassSessions();
+    if (!sessions || !sessions.length) {
+      container.innerHTML = `
+        <div style="text-align: center; padding: 3rem; background: rgba(14, 18, 30, 0.5); border-radius: 14px; border: 1px dashed rgba(255,255,255,0.1);">
+          <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🎥</div>
+          <div style="font-weight: 700; color: #fff; font-size: 1rem;">No class sessions logged yet</div>
+          <div style="color: #94a3b8; font-size: 0.85rem; margin-top: 4px;">Click "Log New Class Session" above to add Zoom meetings, syllabus topics, and lesson PDF sheets.</div>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = sessions.map(s => `
+      <div style="background: rgba(14, 18, 30, 0.7); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 1.25rem; display: flex; justify-content: space-between; align-items: start; gap: 1rem; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 260px;">
+          <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+            <span style="background: rgba(139, 92, 246, 0.2); color: #c084fc; border: 1px solid rgba(139, 92, 246, 0.4); padding: 2px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;">
+              📅 ${s.session_date ? new Date(s.session_date).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) : 'Session'}
+            </span>
+            <strong style="color: #fff; font-size: 1.1rem;">${s.title}</strong>
+          </div>
+          <div style="color: #94a3b8; font-size: 0.9rem; line-height: 1.5; margin-top: 6px;">
+            <strong>المنهج المشروح:</strong> ${s.topic || 'General curriculum coverage'}
+          </div>
+          <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 8px;">
+            ${s.zoom_link ? `
+              <a href="${s.zoom_link}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; text-decoration: none;">
+                🎥 Zoom Meeting
+              </a>
+            ` : ''}
+            ${s.pdf_link ? `
+              <a href="${s.pdf_link}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; text-decoration: none;">
+                📄 ${s.pdf_title || 'PDF Sheet'}
+              </a>
+            ` : ''}
+          </div>
+        </div>
+        <button type="button" class="action-btn-sm delete" onclick="deleteClassSessionItem(${s.id})" title="Delete session" style="padding: 6px 12px; border-radius: 8px; cursor: pointer;">
+          🗑️ Delete
+        </button>
+      </div>
+    `).join('');
+  } catch (err) {
+    console.error('Failed to render teacher sessions:', err);
+    container.innerHTML = '<div style="color: #ef4444; padding: 1rem;">Failed to load sessions.</div>';
+  }
+}
+
+window.deleteClassSessionItem = async function(id) {
+  if (!confirm('Are you sure you want to remove this class session?')) return;
+  await DB.deleteClassSession(id);
+  showToast('Session removed successfully 🗑️');
+  await renderTeacherSessions();
+  await renderStudentSessions();
+};
+
+async function renderStudentSessions() {
+  const dashGrid = document.getElementById('dashSessionsGrid');
+  const fullGrid = document.getElementById('fullSessionsGrid');
+  if (!dashGrid && !fullGrid) return;
+
+  try {
+    const sessions = await DB.getClassSessions();
+    const html = (!sessions || !sessions.length) ? `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; background: rgba(14, 18, 30, 0.5); border-radius: 14px; border: 1px dashed rgba(255,255,255,0.1);">
+        <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🎥</div>
+        <div style="font-weight: 700; color: #fff; font-size: 1rem;">No Live Classes Scheduled Yet</div>
+        <div style="color: #94a3b8; font-size: 0.85rem; margin-top: 4px;">Miss Rania will post upcoming Zoom Pro links and study sheet PDFs here.</div>
+      </div>
+    ` : sessions.map(s => `
+      <div class="bg-surface-card rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between space-y-4 hover:shadow-md transition-all">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between gap-2">
+            <span class="px-3 py-1 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 font-label-sm text-xs font-bold">
+              ${s.session_date ? new Date(s.session_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Live Class'}
+            </span>
+            <span class="text-xs text-on-surface-variant font-bold">
+              ${s.session_date ? new Date(s.session_date).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : ''}
+            </span>
+          </div>
+          <div>
+            <h3 class="font-title-md text-title-md text-on-surface font-bold leading-snug">${s.title}</h3>
+            <p class="font-body-sm text-body-sm text-on-surface-variant mt-1.5" style="line-height: 1.6;">
+              <strong class="text-primary font-bold">المنهج المشروح:</strong> ${s.topic || 'Curriculum unit review'}
+            </p>
+          </div>
+        </div>
+        <div class="space-y-2 pt-2 border-t border-border-subtle">
+          ${s.zoom_link ? `
+            <a href="${s.zoom_link}" target="_blank" class="w-full py-2.5 px-4 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold flex items-center justify-center gap-2 shadow-sm transition-all text-sm no-underline">
+              <span>🎥</span>
+              <span>Join Zoom Pro Meeting / دخول الحصة</span>
+            </a>
+          ` : ''}
+          ${s.pdf_link ? `
+            <a href="${s.pdf_link}" target="_blank" class="w-full py-2 px-4 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface font-semibold flex items-center justify-center gap-2 transition-all text-xs no-underline">
+              <span>📄</span>
+              <span>${s.pdf_title || 'Download Study Sheet (PDF) / مذكرة الشرح'}</span>
+            </a>
+          ` : ''}
+        </div>
+      </div>
+    `).join('');
+
+    if (dashGrid) dashGrid.innerHTML = html;
+    if (fullGrid) fullGrid.innerHTML = html;
+  } catch (err) {
+    console.error('Failed to render student sessions:', err);
+  }
+}
+
+function renderStudentPaymentStatus() {
+  const card = document.getElementById('dashPaymentProofCard');
+  const fullCard = document.getElementById('studentFullPaymentCard');
+  if (!card && !fullCard) return;
+
+  const user = AppState.currentUser;
+  if (!user || user.role === 'teacher') return;
+
+  const status = user.payment_status || 'paid';
+  const amount = user.payment_amount !== undefined ? user.payment_amount : 500;
+  const method = user.payment_method || 'InstaPay / Vodafone Cash';
+  const payDate = user.payment_date || 'Active';
+
+  let badgeColor = '#10b981';
+  let badgeBg = 'rgba(16, 185, 129, 0.15)';
+  let badgeBorder = 'rgba(16, 185, 129, 0.3)';
+  let statusText = 'Subscription Active & Paid 🟢';
+  let statusAr = 'الاشتراك ساري ومسدد بالكامل';
+
+  if (status === 'pending') {
+    badgeColor = '#fbbf24';
+    badgeBg = 'rgba(251, 191, 36, 0.15)';
+    badgeBorder = 'rgba(251, 191, 36, 0.3)';
+    statusText = 'Receipt Under Review 🟡';
+    statusAr = 'إشعار التحويل قيد المراجعة والاعتماد من مس رانيا';
+  } else if (status === 'overdue') {
+    badgeColor = '#f43f5e';
+    badgeBg = 'rgba(244, 63, 94, 0.15)';
+    badgeBorder = 'rgba(244, 63, 94, 0.3)';
+    statusText = 'Subscription Overdue 🔴';
+    statusAr = 'متأخر ومطلوب سداد الاشتراك الشهري';
+  }
+
+  const html = `
+    <div class="flex items-center gap-4 min-w-0">
+      <div style="width: 52px; height: 52px; border-radius: 14px; background: ${badgeBg}; border: 1px solid ${badgeBorder}; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; shrink-0;">
+        ${status === 'paid' ? '✅' : (status === 'pending' ? '⏳' : '⚠️')}
+      </div>
+      <div class="min-w-0 space-y-1">
+        <div class="flex items-center gap-2.5 flex-wrap">
+          <span style="background: ${badgeBg}; color: ${badgeColor}; border: 1px solid ${badgeBorder}; font-weight: 800; font-size: 0.8rem; padding: 2px 10px; border-radius: 20px;">
+            ${statusText}
+          </span>
+          <span class="text-xs text-on-surface-variant font-bold">${statusAr}</span>
+        </div>
+        <div class="text-xs text-on-surface-variant flex items-center gap-3 flex-wrap pt-0.5">
+          <span>💰 Monthly Tuition: <strong class="text-on-surface">${amount} EGP</strong></span>
+          <span>&bull;</span>
+          <span>💳 Method: <strong class="text-on-surface">${method}</strong></span>
+          <span>&bull;</span>
+          <span>📅 Date: <strong class="text-on-surface">${payDate}</strong></span>
+        </div>
+      </div>
+    </div>
+    <div class="shrink-0 flex items-center gap-3">
+      <button type="button" class="primary-glow-btn" onclick="openSubmitPaymentModal()" style="font-size: 0.85rem; padding: 0.6rem 1.2rem; cursor: pointer;">
+        <span class="material-symbols-outlined text-[18px]">upload_file</span>
+        <span>Upload Proof / إرسال إشعار الدفع</span>
+      </button>
+    </div>
+  `;
+
+  if (card) card.innerHTML = html;
+  if (fullCard) fullCard.innerHTML = `<div class="bg-surface-card rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6">${html}</div>`;
+}
+
+window.renderStudentPaymentStatus = renderStudentPaymentStatus;
+window.renderStudentSessions = renderStudentSessions;
+window.renderTeacherPayments = renderTeacherPayments;
+window.renderTeacherSessions = renderTeacherSessions;
+
+window.openSubmitPaymentModal = function() {
+  const modal = document.getElementById('submitPaymentModal');
+  if (!modal) return;
+  const user = AppState.currentUser;
+  if (user) {
+    const amountInput = document.getElementById('payAmountInput');
+    const methodInput = document.getElementById('payMethodInput');
+    const dateInput = document.getElementById('payDateInput');
+    if (amountInput && user.payment_amount) amountInput.value = user.payment_amount;
+    if (methodInput && user.payment_method) methodInput.value = user.payment_method;
+    if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+  }
+  modal.classList.add('open');
+};
 
 window.inspectStudentReport = function(studentId) {
   AppState.viewingReportStudentId = studentId;
@@ -3276,6 +4161,7 @@ window.logoutUser = function() {
 };
 
 async function openAuthModal(isMandatory = false) {
+  LoginCosmos.resume();
   if (!el.authModal) return;
   el.authModal.classList.add('open');
   if (el.loginErrorMsg) el.loginErrorMsg.style.display = 'none';
@@ -3297,6 +4183,7 @@ async function openAuthModal(isMandatory = false) {
 }
 
 function setCurrentStudent(student) {
+  LoginCosmos.pause();
   AppState.currentUser = student;
   AppState.viewingReportStudentId = null;
   localStorage.setItem('current_student', JSON.stringify(student));
@@ -3462,12 +4349,24 @@ window.openEditStudentModal = function(studentId) {
 
   if (el.editStudentId) el.editStudentId.value = s.id;
   if (el.editStudentName) el.editStudentName.value = s.full_name || '';
+  const pName = document.getElementById('editStudentParentName');
+  if (pName) pName.value = s.parent_name || '';
+  const sPhone = document.getElementById('editStudentPhone');
+  if (sPhone) sPhone.value = s.student_phone || '';
+  const pPhone = document.getElementById('editStudentParentPhone');
+  if (pPhone) pPhone.value = s.parent_phone || '';
   if (el.editStudentUser) el.editStudentUser.value = s.username || '';
   if (el.editStudentGrade) el.editStudentGrade.value = s.grade_level || 'Year 4';
   if (el.editStudentAvatar) el.editStudentAvatar.value = s.avatar || '🦊';
-  if (el.editStudentPass) el.editStudentPass.value = '';
+  const pMethod = document.getElementById('editStudentPaymentMethod');
+  if (pMethod) pMethod.value = s.payment_method || 'InstaPay';
+  const pAmt = document.getElementById('editStudentAmount');
+  if (pAmt) pAmt.value = s.payment_amount !== undefined ? s.payment_amount : 500;
+  const pStatus = document.getElementById('editStudentPaymentStatus');
+  if (pStatus) pStatus.value = s.payment_status || 'paid';
+  if (el.editStudentPass) el.editStudentPass.value = s.password || '';
   if (el.editStudentSubtitle) {
-    el.editStudentSubtitle.textContent = `Update name, username, grade or password for ${s.full_name} (@${s.username})`;
+    el.editStudentSubtitle.textContent = `Update full details for ${s.full_name} (@${s.username})`;
   }
   el.editStudentModal.classList.add('open');
 };
@@ -3942,17 +4841,29 @@ function setupEventListeners() {
     el.addStudentForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       const name = el.tNewStudentName.value.trim();
+      const parentName = document.getElementById('tNewStudentParentName')?.value.trim() || '';
+      const studentPhone = document.getElementById('tNewStudentPhone')?.value.trim() || '';
+      const parentPhone = document.getElementById('tNewStudentParentPhone')?.value.trim() || '';
       const user = el.tNewStudentUser.value.trim();
       const pass = el.tNewStudentPass.value;
       const grade = el.tNewStudentGrade.value;
       const avatar = el.tNewStudentAvatar.value;
+      const payMethod = document.getElementById('tNewStudentPaymentMethod')?.value || 'InstaPay';
+      const payAmt = Number(document.getElementById('tNewStudentAmount')?.value) || 500;
+      const payStatus = document.getElementById('tNewStudentPaymentStatus')?.value || 'paid';
 
       const res = await DB.teacherCreateStudent({
         full_name: name,
+        parent_name: parentName,
+        student_phone: studentPhone,
+        parent_phone: parentPhone,
         username: user,
         password: pass,
         grade_level: grade,
-        avatar: avatar
+        avatar: avatar,
+        payment_method: payMethod,
+        payment_amount: payAmt,
+        payment_status: payStatus
       });
 
       if (res.success) {
@@ -3987,10 +4898,16 @@ function setupEventListeners() {
       e.preventDefault();
       const sid = el.editStudentId.value;
       const name = el.editStudentName.value.trim();
+      const parentName = document.getElementById('editStudentParentName')?.value.trim() || '';
+      const studentPhone = document.getElementById('editStudentPhone')?.value.trim() || '';
+      const parentPhone = document.getElementById('editStudentParentPhone')?.value.trim() || '';
       const user = el.editStudentUser.value.trim();
       const grade = el.editStudentGrade.value;
       const avatar = el.editStudentAvatar.value;
       const pass = el.editStudentPass.value.trim();
+      const payMethod = document.getElementById('editStudentPaymentMethod')?.value || 'InstaPay';
+      const payAmt = Number(document.getElementById('editStudentAmount')?.value) || 0;
+      const payStatus = document.getElementById('editStudentPaymentStatus')?.value || 'paid';
 
       if (!name || !user) {
         showToast('Please enter both name and username');
@@ -4000,10 +4917,16 @@ function setupEventListeners() {
       const res = await DB.teacherUpdateStudent({
         student_id: sid,
         full_name: name,
+        parent_name: parentName,
+        student_phone: studentPhone,
+        parent_phone: parentPhone,
         username: user,
         grade_level: grade,
         avatar: avatar,
-        password: pass
+        password: pass,
+        payment_method: payMethod,
+        payment_amount: payAmt,
+        payment_status: payStatus
       });
 
       if (res && res.success) {
@@ -4012,6 +4935,99 @@ function setupEventListeners() {
         await renderTeacherConsoleView();
       } else {
         showToast((res && res.error) || 'Failed to update student profile');
+      }
+    });
+  }
+
+
+  // Student Submit Payment Receipt Form
+  const submitPayForm = document.getElementById('submitPaymentForm');
+  const payFileInput = document.getElementById('payReceiptFileInput');
+  const payPreviewWrap = document.getElementById('payReceiptPreviewWrap');
+  const payPreview = document.getElementById('payReceiptPreview');
+  let currentReceiptBase64 = '';
+
+  if (payFileInput) {
+    payFileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (re) => {
+          currentReceiptBase64 = re.target.result;
+          if (payPreview) payPreview.src = currentReceiptBase64;
+          if (payPreviewWrap) payPreviewWrap.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+
+  if (submitPayForm) {
+    submitPayForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const dateVal = document.getElementById('payDateInput')?.value;
+      const methodVal = document.getElementById('payMethodInput')?.value;
+      const amountVal = document.getElementById('payAmountInput')?.value;
+      const notesVal = document.getElementById('payNotesInput')?.value;
+
+      const user = AppState.currentUser;
+      if (!user) {
+        showToast('Please sign in first', '⚠️');
+        return;
+      }
+
+      const res = await DB.submitPayment({
+        student_id: user.id,
+        student_name: user.full_name,
+        amount: Number(amountVal) || 500,
+        payment_date: dateVal,
+        payment_method: methodVal,
+        receipt_image: currentReceiptBase64,
+        notes: notesVal
+      });
+
+      if (res && res.success) {
+        showToast('Payment proof submitted successfully! Miss Rania will review and approve it. 🧾');
+        document.getElementById('submitPaymentModal')?.classList.remove('open');
+        submitPayForm.reset();
+        currentReceiptBase64 = '';
+        if (payPreviewWrap) payPreviewWrap.style.display = 'none';
+        renderStudentPaymentStatus();
+      } else {
+        showToast('Failed to submit receipt: ' + ((res && res.error) || 'Please try again'), '⚠️');
+      }
+    });
+  }
+
+  // Teacher Log Class Session Form
+  const addSessionForm = document.getElementById('addClassSessionForm');
+  if (addSessionForm) {
+    addSessionForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const dateVal = document.getElementById('sessDateInput')?.value;
+      const titleVal = document.getElementById('sessTitleInput')?.value;
+      const topicVal = document.getElementById('sessTopicInput')?.value;
+      const zoomVal = document.getElementById('sessZoomLinkInput')?.value;
+      const pdfVal = document.getElementById('sessPdfLinkInput')?.value;
+      const pdfTitleVal = document.getElementById('sessPdfTitleInput')?.value;
+
+      const res = await DB.saveClassSession({
+        session_date: dateVal,
+        title: titleVal,
+        topic: topicVal,
+        zoom_link: zoomVal,
+        pdf_link: pdfVal,
+        pdf_title: pdfTitleVal
+      });
+
+      if (res && res.success) {
+        showToast('Class session published to students! 🎥');
+        document.getElementById('addClassSessionModal')?.classList.remove('open');
+        addSessionForm.reset();
+        await renderTeacherSessions();
+        await renderStudentSessions();
+      } else {
+        showToast('Failed to save session', '⚠️');
       }
     });
   }

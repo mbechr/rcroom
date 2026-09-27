@@ -338,36 +338,31 @@
         <span class="px-2 py-0.5 rounded-full bg-mastery-emerald/15 text-mastery-emerald font-label-sm text-label-sm font-bold sidebar-badge">Active Cohort</span>
       </div>
       <nav class="flex flex-col gap-1.5" id="sidebarNavTabs">
-        <button class="nav-tab flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all bg-primary-container text-on-primary font-bold shadow-sm active text-left w-full cursor-pointer" data-view="dashboard" title="Dashboard">
+        <!-- Student Views -->
+        <button class="nav-tab student-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all bg-primary-container text-on-primary font-bold shadow-sm active text-left w-full cursor-pointer" data-view="dashboard" title="Dashboard & Homework">
           <span class="material-symbols-outlined text-[20px] shrink-0">space_dashboard</span>
-          <span class="sidebar-text truncate" data-i18n="navDashboard">Dashboard</span>
+          <span class="sidebar-text truncate">Portal &amp; Tasks 📝</span>
         </button>
-        <button class="nav-tab flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="tracks" title="Curriculum Tracks">
-          <span class="material-symbols-outlined text-[20px] shrink-0">route</span>
-          <span class="sidebar-text truncate" data-i18n="navCurriculum">Curriculum Tracks</span>
+        <button class="nav-tab student-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="sessions" title="Zoom & Class Logs">
+          <span class="material-symbols-outlined text-[20px] shrink-0">videocam</span>
+          <span class="sidebar-text truncate">Zoom &amp; Lessons 🎥</span>
         </button>
-        <button class="nav-tab flex items-center justify-between px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="skills" title="Skills Bank (8,264+)">
-          <div class="flex items-center gap-3 min-w-0">
-            <span class="material-symbols-outlined text-[20px] shrink-0">menu_book</span>
-            <span class="sidebar-text truncate" data-i18n="navSkills">Skills Bank</span>
-          </div>
-          <span class="font-label-sm text-label-sm font-bold text-primary sidebar-badge shrink-0">8.2k</span>
+        <button class="nav-tab student-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="payments" title="Subscription & Payment">
+          <span class="material-symbols-outlined text-[20px] shrink-0">credit_card</span>
+          <span class="sidebar-text truncate">Payment &amp; Proof 💳</span>
         </button>
-        <button class="nav-tab flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="reports" title="Student Reports">
+        <button class="nav-tab student-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="reports" title="My Progress">
           <span class="material-symbols-outlined text-[20px] shrink-0">analytics</span>
-          <span class="sidebar-text truncate" data-i18n="navReports">Student Reports</span>
+          <span class="sidebar-text truncate">My Progress 📊</span>
         </button>
-        <button class="nav-tab flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="leaderboard" title="Leaderboard">
-          <span class="material-symbols-outlined text-[20px] shrink-0">emoji_events</span>
-          <span class="sidebar-text truncate" data-i18n="navLeaderboard">Leaderboard</span>
-        </button>
-        <!-- Teacher Console & Students Dashboard Access (Only visible when logged in as Teacher) -->
-        <button class="nav-tab teacher-nav-tab flex items-center justify-between px-3 py-2.5 rounded-xl font-label-md text-label-md text-purple-700 hover:bg-purple-50 transition-all text-left w-full cursor-pointer border border-purple-200/60" data-view="teacher" id="sidebarTeacherTabBtn" style="display: none;" title="All Students Management Dashboard">
+
+        <!-- Teacher Console Access (Only visible when logged in as Teacher) -->
+        <button class="nav-tab teacher-nav-tab flex items-center justify-between px-3 py-2.5 rounded-xl font-label-md text-label-md text-cyan-400 hover:bg-cyan-500/10 transition-all text-left w-full cursor-pointer border border-cyan-500/30" data-view="teacher" id="sidebarTeacherTabBtn" style="display: none;" title="Teacher Command Center">
           <div class="flex items-center gap-3 min-w-0">
-            <span class="material-symbols-outlined text-[20px] shrink-0 text-purple-600">group</span>
-            <span class="sidebar-text truncate font-bold">Students Dashboard 👥</span>
+            <span class="material-symbols-outlined text-[20px] shrink-0 text-cyan-400">admin_panel_settings</span>
+            <span class="sidebar-text truncate font-bold">Teacher Center 👥</span>
           </div>
-          <span class="font-label-sm text-xs font-bold text-white bg-purple-600 px-2 py-0.5 rounded-full sidebar-badge shrink-0" id="sidebarTeacherBadge">Admin</span>
+          <span class="font-label-sm text-xs font-bold text-black bg-cyan-400 px-2 py-0.5 rounded-full sidebar-badge shrink-0" id="sidebarTeacherBadge">Admin</span>
         </button>
       </nav>
     </div>
@@ -610,268 +605,80 @@
             </div>
           </section>
 
-          <!-- Section 3: Structured Learning Pathways (Teacher Rania's Curated Tracks) -->
-          <section class="space-y-5">
-            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
-              <div class="space-y-1">
-                <div class="flex items-center gap-2 text-primary font-label-sm text-label-sm font-bold">
-                  <span class="material-symbols-outlined text-[18px]">alt_route</span>
-                  <span>// TEACHER RANIA'S CURATED TRACKS • Structured Learning Pathways</span>
-                </div>
-                <p class="font-body-sm text-body-sm text-on-surface-variant max-w-2xl">
-                  Complete units with pedagogical lecture notes, teacher tips, and direct drills connected to the 8,264+ skills engine.
-                </p>
+          <!-- Section 3: Student Subscription & Payment Proof Status -->
+          <section id="dashPaymentSection" class="space-y-4">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2 text-cyan-400 font-label-sm text-label-sm font-bold">
+                <span class="material-symbols-outlined text-[18px]">receipt_long</span>
+                <span>// MONTHLY SUBSCRIPTION & PAYMENT PROOF • حالة الاشتراك وإشعار الدفع</span>
               </div>
-              <!-- Filter Pills -->
-              <div class="flex items-center gap-1.5 bg-surface-card p-1 rounded-xl shadow-sm self-start border border-slate-100">
-                <button class="px-4 py-1.5 rounded-lg bg-primary-container text-on-primary font-label-sm text-label-sm font-bold shadow-sm cursor-pointer" onclick="switchView('tracks')">All</button>
-                <button class="px-4 py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low font-label-sm text-label-sm transition-colors cursor-pointer" onclick="switchView('tracks')">Maths</button>
-                <button class="px-4 py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low font-label-sm text-label-sm transition-colors cursor-pointer" onclick="switchView('tracks')">English</button>
-                <button class="px-4 py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low font-label-sm text-label-sm transition-colors cursor-pointer" onclick="switchView('tracks')">Science</button>
-              </div>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="dashTracksPreviewContainer">
-              <!-- Track Card 1 -->
-              <div class="bg-surface-card rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between space-y-6 hover:shadow-md transition-all">
-                <div class="space-y-4">
-                  <div class="flex items-center justify-between">
-                    <span class="px-3 py-1 rounded-full bg-surface-tint text-primary font-label-sm text-label-sm font-bold">Maths Mastery Track</span>
-                    <div class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-mastery-emerald/10 text-mastery-emerald font-label-sm text-label-sm font-bold">
-                      <span class="material-symbols-outlined text-[16px]">school</span>
-                      <span>Teacher Pick</span>
-                    </div>
-                  </div>
-                  <div>
-                    <h3 class="font-title-md text-title-md text-on-surface font-bold">Numbers, Decimals &amp; Place Value</h3>
-                    <p class="font-body-sm text-body-sm text-on-surface-variant mt-1.5">Foundational Year 4 unit covering 4-digit comparison, rounding, and decimal fractions.</p>
-                  </div>
-                  <div class="flex items-center gap-4 text-on-surface-variant font-label-sm text-label-sm">
-                    <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">menu_book</span> 18 Lessons</span>
-                    <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">quiz</span> 240+ Questions</span>
-                  </div>
-                </div>
-                <div class="space-y-3 pt-2">
-                  <div class="flex items-center justify-between font-label-sm text-label-sm">
-                    <span class="text-on-surface-variant">Unit Completion</span>
-                    <span class="text-primary font-bold">14 / 18 (78%)</span>
-                  </div>
-                  <div class="w-full h-2.5 rounded-full bg-surface-container-high overflow-hidden">
-                    <div class="h-full rounded-full bg-primary-container" style="width: 78%;"></div>
-                  </div>
-                  <button class="w-full py-2.5 rounded-xl bg-surface-container-low text-primary font-label-md text-label-md font-bold hover:bg-surface-container transition-all flex items-center justify-center gap-2 cursor-pointer" onclick="switchView('tracks')">
-                    <span>Resume Module 15</span>
-                    <span class="material-symbols-outlined text-[18px]">play_arrow</span>
-                  </button>
-                </div>
-              </div>
-              <!-- Track Card 2 -->
-              <div class="bg-surface-card rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between space-y-6 hover:shadow-md transition-all">
-                <div class="space-y-4">
-                  <div class="flex items-center justify-between">
-                    <span class="px-3 py-1 rounded-full bg-secondary-fixed text-secondary font-label-sm text-label-sm font-bold">English Track</span>
-                    <div class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-streak-glow text-on-surface font-label-sm text-label-sm font-bold">
-                      <span class="material-symbols-outlined text-streak-amber text-[16px]">star</span>
-                      <span>Essential</span>
-                    </div>
-                  </div>
-                  <div>
-                    <h3 class="font-title-md text-title-md text-on-surface font-bold">Grammar Mechanics &amp; Creative Synthesis</h3>
-                    <p class="font-body-sm text-body-sm text-on-surface-variant mt-1.5">Sentence structure, fronted adverbials, expanded noun phrases, and punctuation mastery.</p>
-                  </div>
-                  <div class="flex items-center gap-4 text-on-surface-variant font-label-sm text-label-sm">
-                    <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">menu_book</span> 14 Lessons</span>
-                    <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">quiz</span> 190+ Questions</span>
-                  </div>
-                </div>
-                <div class="space-y-3 pt-2">
-                  <div class="flex items-center justify-between font-label-sm text-label-sm">
-                    <span class="text-on-surface-variant">Unit Completion</span>
-                    <span class="text-secondary font-bold">6 / 14 (42%)</span>
-                  </div>
-                  <div class="w-full h-2.5 rounded-full bg-surface-container-high overflow-hidden">
-                    <div class="h-full rounded-full bg-secondary-container" style="width: 42%;"></div>
-                  </div>
-                  <button class="w-full py-2.5 rounded-xl bg-surface-container-low text-secondary font-label-md text-label-md font-bold hover:bg-surface-container transition-all flex items-center justify-center gap-2 cursor-pointer" onclick="switchView('tracks')">
-                    <span>Resume Module 7</span>
-                    <span class="material-symbols-outlined text-[18px]">play_arrow</span>
-                  </button>
-                </div>
-              </div>
-              <!-- Track Card 3 -->
-              <div class="bg-surface-card rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col justify-between space-y-6 hover:shadow-md transition-all">
-                <div class="space-y-4">
-                  <div class="flex items-center justify-between">
-                    <span class="px-3 py-1 rounded-full bg-tertiary-fixed text-tertiary font-label-sm text-label-sm font-bold">Science Inquiry Track</span>
-                    <div class="flex items-center gap-1 px-2.5 py-1 rounded-full bg-mastery-emerald/10 text-mastery-emerald font-label-sm text-label-sm font-bold">
-                      <span class="material-symbols-outlined text-[16px]">biotech</span>
-                      <span>Lab Ready</span>
-                    </div>
-                  </div>
-                  <div>
-                    <h3 class="font-title-md text-title-md text-on-surface font-bold">Living Things, States of Matter &amp; Sound</h3>
-                    <p class="font-body-sm text-body-sm text-on-surface-variant mt-1.5">Interactive experiments, classification keys, solids/liquids/gases, and acoustic vibrations.</p>
-                  </div>
-                  <div class="flex items-center gap-4 text-on-surface-variant font-label-sm text-label-sm">
-                    <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">menu_book</span> 16 Lessons</span>
-                    <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[16px]">quiz</span> 210+ Questions</span>
-                  </div>
-                </div>
-                <div class="space-y-3 pt-2">
-                  <div class="flex items-center justify-between font-label-sm text-label-sm">
-                    <span class="text-on-surface-variant">Unit Completion</span>
-                    <span class="text-tertiary font-bold">12 / 16 (75%)</span>
-                  </div>
-                  <div class="w-full h-2.5 rounded-full bg-surface-container-high overflow-hidden">
-                    <div class="h-full rounded-full bg-tertiary-container" style="width: 75%;"></div>
-                  </div>
-                  <button class="w-full py-2.5 rounded-xl bg-surface-container-low text-tertiary font-label-md text-label-md font-bold hover:bg-surface-container transition-all flex items-center justify-center gap-2 cursor-pointer" onclick="switchView('tracks')">
-                    <span>Resume Module 13</span>
-                    <span class="material-symbols-outlined text-[18px]">play_arrow</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <!-- Section 4: 8,264+ Interactive Skills Bank Explorer Preview -->
-          <section class="bg-surface-card rounded-2xl p-6 lg:p-8 shadow-sm border border-slate-100 space-y-6">
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-              <div>
-                <div class="flex items-center gap-2">
-                  <span class="px-2.5 py-0.5 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm font-bold">Engine v4.2</span>
-                  <h2 class="font-headline-sm text-headline-sm text-on-surface font-bold">8,264+ Interactive Skills Bank Explorer</h2>
-                </div>
-                <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Instant query drill-down across curricula, competency codes, and diagnostic smart indicators.</p>
-              </div>
-              <!-- Grade Selector Dropdown -->
-              <div class="flex items-center gap-3">
-                <label class="font-label-sm text-label-sm text-on-surface-variant font-medium">Curriculum Tier:</label>
-                <div class="relative">
-                  <select class="appearance-none bg-surface-container-low text-on-surface font-label-md text-label-md font-bold py-2.5 pl-4 pr-10 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 cursor-pointer" onchange="switchView('skills')">
-                    <option>Reception</option>
-                    <option>Year 1</option>
-                    <option>Year 2</option>
-                    <option>Year 3</option>
-                    <option selected="">Year 4 (Active Student Cohort)</option>
-                    <option>Year 5</option>
-                    <option>Year 6</option>
-                    <option>Year 7</option>
-                    <option>Year 8</option>
-                    <option>Year 9</option>
-                    <option>Year 10</option>
-                    <option>Year 11</option>
-                    <option>Year 12</option>
-                    <option>Year 13</option>
-                  </select>
-                  <span class="material-symbols-outlined pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">expand_more</span>
-                </div>
-              </div>
-            </div>
-            <!-- Search & Filter Controls -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 items-center">
-              <!-- Search Input -->
-              <div class="lg:col-span-6 relative">
-                <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
-                <input class="w-full h-11 pl-10 pr-4 rounded-xl bg-surface-container-low text-on-surface placeholder:text-on-surface-variant font-body-sm text-body-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all" id="dashSpotlightInput" placeholder="Search 8,264+ skills or skill codes (e.g. A.1)..." type="text"/>
-              </div>
-              <!-- Subject Chips -->
-              <div class="lg:col-span-3 flex items-center gap-1.5 overflow-x-auto py-1">
-                <button class="px-3 py-2 rounded-xl bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold whitespace-nowrap hover:bg-surface-container transition-colors cursor-pointer" onclick="switchView('skills')">🌐 All</button>
-                <button class="px-3 py-2 rounded-xl bg-primary-container text-on-primary font-label-sm text-label-sm font-bold whitespace-nowrap cursor-pointer" onclick="switchView('skills')">📐 Maths</button>
-                <button class="px-3 py-2 rounded-xl bg-surface-container-low text-on-surface font-label-sm text-label-sm font-semibold whitespace-nowrap hover:bg-surface-container transition-colors cursor-pointer" onclick="switchView('skills')">📚 English</button>
-                <button class="px-3 py-2 rounded-xl bg-surface-container-low text-on-surface font-label-sm text-label-sm font-semibold whitespace-nowrap hover:bg-surface-container transition-colors cursor-pointer" onclick="switchView('skills')">🔬 Science</button>
-              </div>
-              <!-- Filter Toggles -->
-              <div class="lg:col-span-3 flex items-center justify-end gap-1.5">
-                <button class="px-3 py-2 rounded-xl bg-surface-container-high text-on-surface font-label-sm text-label-sm font-bold cursor-pointer" onclick="switchView('skills')">All Skills</button>
-                <button class="px-3 py-2 rounded-xl bg-surface-container-low text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm font-semibold flex items-center gap-1 cursor-pointer" onclick="switchView('skills')">
-                  <span class="text-streak-amber">★</span> Starred
-                </button>
-                <button class="px-3 py-2 rounded-xl bg-surface-container-low text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm font-semibold flex items-center gap-1 cursor-pointer" onclick="switchView('skills')">
-                  <span class="text-mastery-emerald">✓</span> Mastered
-                </button>
-              </div>
-            </div>
-            <!-- Skills Bank Interactive Rows (Preview) -->
-            <div class="space-y-2.5">
-              <!-- Skill Row 1 -->
-              <div class="flex items-center justify-between p-4 rounded-xl bg-surface-container-low hover:bg-surface-container transition-all group cursor-pointer" onclick="openPracticeModal({code:'A.1', name:'Place value models - up to thousands', category_name:'Place Value', grade:'Year 4', subject:'Maths'})">
-                <div class="flex items-center gap-4 min-w-0">
-                  <span class="w-10 h-10 rounded-lg bg-surface-card flex items-center justify-center font-label-md text-label-md font-bold text-primary shadow-sm shrink-0">A.1</span>
-                  <div class="flex flex-col truncate">
-                    <div class="flex items-center gap-2">
-                      <span class="font-label-md text-label-md font-bold text-on-surface truncate">Place value models - up to thousands</span>
-                      <span class="px-2 py-0.5 rounded bg-tertiary-container text-on-tertiary-container font-label-sm text-label-sm font-bold shrink-0">SmartScore 89</span>
-                    </div>
-                    <span class="font-body-sm text-body-sm text-on-surface-variant truncate">Convert multi-base blocks into standard positional numerals and expanded sums</span>
-                  </div>
-                </div>
-                <div class="flex items-center gap-4 shrink-0 pl-3">
-                  <div class="hidden sm:flex flex-col text-right">
-                    <span class="font-label-sm text-label-sm font-bold text-on-surface">32 Answered</span>
-                    <span class="font-label-sm text-label-sm text-mastery-emerald">88.5% Accuracy</span>
-                  </div>
-                  <button class="px-3.5 py-1.5 rounded-lg bg-primary-container text-on-primary font-label-sm text-label-sm font-bold group-hover:bg-primary transition-all cursor-pointer">Practice</button>
-                </div>
-              </div>
-              <!-- Skill Row 2 -->
-              <div class="flex items-center justify-between p-4 rounded-xl bg-surface-container-low hover:bg-surface-container transition-all group cursor-pointer" onclick="openPracticeModal({code:'A.2', name:'Identify value of underlined digit', category_name:'Place Value', grade:'Year 4', subject:'Maths'})">
-                <div class="flex items-center gap-4 min-w-0">
-                  <span class="w-10 h-10 rounded-lg bg-surface-card flex items-center justify-center font-label-md text-label-md font-bold text-primary shadow-sm shrink-0">A.2</span>
-                  <div class="flex flex-col truncate">
-                    <div class="flex items-center gap-2">
-                      <span class="font-label-md text-label-md font-bold text-on-surface truncate">Identify value of underlined digit</span>
-                      <span class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm font-bold shrink-0">SmartScore 64</span>
-                    </div>
-                    <span class="font-body-sm text-body-sm text-on-surface-variant truncate">Determine value based on placement (ones, tens, hundreds, thousands, ten-thousands)</span>
-                  </div>
-                </div>
-                <div class="flex items-center gap-4 shrink-0 pl-3">
-                  <div class="hidden sm:flex flex-col text-right">
-                    <span class="font-label-sm text-label-sm font-bold text-on-surface">18 Answered</span>
-                    <span class="font-label-sm text-label-sm text-primary">72.0% Accuracy</span>
-                  </div>
-                  <button class="px-3.5 py-1.5 rounded-lg bg-surface-container-high text-primary font-label-sm text-label-sm font-bold group-hover:bg-primary-container group-hover:text-on-primary transition-all cursor-pointer">Practice</button>
-                </div>
-              </div>
-              <!-- Skill Row 3 -->
-              <div class="flex items-center justify-between p-4 rounded-xl bg-surface-container-low hover:bg-surface-container transition-all group cursor-pointer" onclick="openPracticeModal({code:'B.4', name:'Multiplication facts up to 12 x 12 with speed drill', category_name:'Multiplication', grade:'Year 4', subject:'Maths'})">
-                <div class="flex items-center gap-4 min-w-0">
-                  <span class="w-10 h-10 rounded-lg bg-surface-card flex items-center justify-center font-label-md text-label-md font-bold text-secondary shadow-sm shrink-0">B.4</span>
-                  <div class="flex flex-col truncate">
-                    <div class="flex items-center gap-2">
-                      <span class="font-label-md text-label-md font-bold text-on-surface truncate">Multiplication facts up to 12 x 12 with speed drill</span>
-                      <span class="px-2 py-0.5 rounded bg-tertiary-container text-on-tertiary-container font-label-sm text-label-sm font-bold shrink-0">Mastered 100</span>
-                    </div>
-                    <span class="font-body-sm text-body-sm text-on-surface-variant truncate">Times tables mastery matrix with rapid 60-second challenge sprint</span>
-                  </div>
-                </div>
-                <div class="flex items-center gap-4 shrink-0 pl-3">
-                  <div class="hidden sm:flex flex-col text-right">
-                    <span class="font-label-sm text-label-sm font-bold text-on-surface">94 Answered</span>
-                    <span class="font-label-sm text-label-sm text-mastery-emerald">98.2% Accuracy</span>
-                  </div>
-                  <button class="px-3.5 py-1.5 rounded-lg bg-surface-card text-mastery-emerald font-label-sm text-label-sm font-bold flex items-center gap-1 group-hover:bg-tertiary-container group-hover:text-on-tertiary-container transition-all cursor-pointer">
-                    <span>Review</span>
-                    <span class="material-symbols-outlined text-[14px]">refresh</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-            <!-- Bank Footer Status -->
-            <div class="flex flex-wrap items-center justify-between gap-4 pt-2 text-on-surface-variant font-label-sm text-label-sm">
-              <span class="flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-mastery-emerald"></span>
-                Displaying 3 of 8,264 curriculum skills mapped to UK National &amp; Cambridge frameworks.
-              </span>
-              <button class="text-primary font-bold hover:underline flex items-center gap-1 cursor-pointer" onclick="switchView('skills')">
-                Browse Full 8,264+ Skills Matrix
-                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+              <button class="px-3.5 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 font-label-sm text-xs font-bold border border-cyan-500/30 transition-all flex items-center gap-1.5 cursor-pointer" onclick="openSubmitPaymentModal()">
+                <span class="material-symbols-outlined text-[16px]">upload_file</span>
+                <span>Upload Payment Proof / إرسال إشعار الدفع</span>
               </button>
             </div>
+            <div id="dashPaymentProofCard" class="bg-surface-card rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <!-- Dynamically populated by renderStudentPaymentStatus() -->
+            </div>
           </section>
 
+          <!-- Section 4: Zoom Pro Live Classes & Lesson Syllabus Log -->
+          <section id="dashSessionsSection" class="space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div class="space-y-1">
+                <div class="flex items-center gap-2 text-primary font-label-sm text-label-sm font-bold">
+                  <span class="material-symbols-outlined text-[18px]">videocam</span>
+                  <span>// ZOOM PRO SESSIONS & SYLLABUS • سجل الحصص والمذكرات</span>
+                </div>
+                <p class="font-body-sm text-body-sm text-on-surface-variant">
+                  Access live Zoom Pro meetings, class syllabus topics, and download lesson PDF study sheets.
+                </p>
+              </div>
+            </div>
+            <div id="dashSessionsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              <!-- Dynamically populated by renderStudentSessions() -->
+            </div>
+          </section>
         </section>
+
+    <!-- ====================================================================
+         VIEW: ZOOM PRO SESSIONS & CLASS LOG (STUDENT & TEACHER)
+         ==================================================================== -->
+    <section id="view-sessions" class="portal-view">
+      <div class="view-header-row">
+        <div>
+          <div class="view-kicker">// CLASSROOM LECTURES &amp; SYLLABUS</div>
+          <h1 class="view-main-title">Zoom Pro Live Classes &amp; Materials 🎥</h1>
+          <p class="view-lead-text">View all scheduled and past class sessions, syllabus covered by Miss Rania, Zoom links, and downloadable PDF study guides.</p>
+        </div>
+      </div>
+      <div id="fullSessionsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
+        <!-- Injected via JS -->
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         VIEW: STUDENT SUBSCRIPTION & PAYMENT PROOF
+         ==================================================================== -->
+    <section id="view-payments" class="portal-view">
+      <div class="view-header-row">
+        <div>
+          <div class="view-kicker">// TUITION &amp; SUBSCRIPTION STATUS</div>
+          <h1 class="view-main-title">Monthly Tuition &amp; Payment Receipts 💳</h1>
+          <p class="view-lead-text">Review your subscription standing, payment details, and upload receipts (Vodafone Cash, InstaPay, etc.) directly to Miss Rania.</p>
+        </div>
+        <div class="view-actions-col">
+          <button class="primary-glow-btn" onclick="openSubmitPaymentModal()">
+            <span class="material-symbols-outlined text-[18px]">cloud_upload</span>
+            <span>Submit Payment Proof / رفع إشعار الدفع</span>
+          </button>
+        </div>
+      </div>
+      <div id="studentFullPaymentCard" class="space-y-6 pt-4">
+        <!-- Injected via JS -->
+      </div>
+    </section>
+
 
 <!-- ====================================================================
          VIEW 2: CURRICULUM TRACKS (MISS RANIA'S COURSES)
@@ -1147,94 +954,166 @@
         </div>
       </div>
 
-      <!-- Class Overview KPI Banner -->
-      <div class="teacher-kpi-grid">
-        <div class="kpi-card glass-panel">
-          <div class="kpi-icon-wrap blue">👥</div>
-          <div class="kpi-data-col">
-            <span class="kpi-value" id="tTotalStudents">0</span>
-            <span class="kpi-label">Enrolled Students</span>
+      <!-- Teacher Navigation Sub-Tabs -->
+      <div class="flex items-center gap-2 mb-6 border-b border-border-card pb-3 overflow-x-auto" id="teacherSubTabs">
+        <button type="button" class="teacher-sub-tab px-4 py-2 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 font-bold text-xs flex items-center gap-2 cursor-pointer transition-all active" data-ttab="students" onclick="switchTeacherTab('students')">
+          <span class="material-symbols-outlined text-[18px]">group</span>
+          <span>Students &amp; Subscriptions 👥</span>
+        </button>
+        <button type="button" class="teacher-sub-tab px-4 py-2 rounded-xl bg-surface-card hover:bg-surface-hover border border-border-card text-slate-400 font-bold text-xs flex items-center gap-2 cursor-pointer transition-all" data-ttab="payments" onclick="switchTeacherTab('payments')">
+          <span class="material-symbols-outlined text-[18px]">receipt_long</span>
+          <span>Payment Receipts 💳</span>
+          <span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-[10px] font-bold" id="tPendingReceiptsBadge" style="display:none;">0</span>
+        </button>
+        <button type="button" class="teacher-sub-tab px-4 py-2 rounded-xl bg-surface-card hover:bg-surface-hover border border-border-card text-slate-400 font-bold text-xs flex items-center gap-2 cursor-pointer transition-all" data-ttab="sessions" onclick="switchTeacherTab('sessions')">
+          <span class="material-symbols-outlined text-[18px]">videocam</span>
+          <span>Zoom &amp; Syllabus Log 🎥</span>
+        </button>
+        <button type="button" class="teacher-sub-tab px-4 py-2 rounded-xl bg-surface-card hover:bg-surface-hover border border-border-card text-slate-400 font-bold text-xs flex items-center gap-2 cursor-pointer transition-all" data-ttab="homework" onclick="switchTeacherTab('homework')">
+          <span class="material-symbols-outlined text-[18px]">assignment</span>
+          <span>Homework Assignments 📝</span>
+        </button>
+      </div>
+
+      <!-- ==============================================================
+           PANEL 1: STUDENTS & BILLING CRM
+           ============================================================== -->
+      <div id="teacherPanelStudents" class="teacher-tab-panel">
+        <!-- Class Overview KPI Banner -->
+        <div class="teacher-kpi-grid">
+          <div class="kpi-card glass-panel">
+            <div class="kpi-icon-wrap blue">👥</div>
+            <div class="kpi-data-col">
+              <span class="kpi-value" id="tTotalStudents">0</span>
+              <span class="kpi-label">Enrolled Students</span>
+            </div>
+          </div>
+          <div class="kpi-card glass-panel">
+            <div class="kpi-icon-wrap green">✅</div>
+            <div class="kpi-data-col">
+              <span class="kpi-value" id="tPaidCount">0</span>
+              <span class="kpi-label">Paid Subscriptions</span>
+            </div>
+          </div>
+          <div class="kpi-card glass-panel">
+            <div class="kpi-icon-wrap amber">⏳</div>
+            <div class="kpi-data-col">
+              <span class="kpi-value" id="tPendingCount">0</span>
+              <span class="kpi-label">Pending Verification</span>
+            </div>
+          </div>
+          <div class="kpi-card glass-panel">
+            <div class="kpi-icon-wrap red" style="color:#ef4444;">⚠️</div>
+            <div class="kpi-data-col">
+              <span class="kpi-value" id="tOverdueCount">0</span>
+              <span class="kpi-label">Overdue / Unpaid</span>
+            </div>
           </div>
         </div>
-        <div class="kpi-card glass-panel">
-          <div class="kpi-icon-wrap purple">📝</div>
-          <div class="kpi-data-col">
-            <span class="kpi-value" id="tTotalQuestions">0</span>
-            <span class="kpi-label">Questions Solved</span>
+
+        <!-- Student Roster & Live Analytics -->
+        <div class="report-section-card glass-panel" style="margin-bottom: 2rem;">
+          <div class="section-card-header flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 class="card-title">Enrolled Students &amp; Parent CRM 📋</h3>
+              <p class="card-subtitle">Full student directory, parent contacts, WhatsApp dispatch, and payment tracking.</p>
+            </div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <!-- Filter Pills -->
+              <div class="flex items-center gap-1 bg-surface-card p-1 rounded-xl border border-border-card text-xs">
+                <button type="button" class="roster-filter-btn px-3 py-1 rounded-lg bg-cyan-500/20 text-cyan-400 font-bold active" data-filter="all" onclick="filterTeacherRoster('all')">All</button>
+                <button type="button" class="roster-filter-btn px-3 py-1 rounded-lg text-slate-400 hover:text-white font-bold" data-filter="paid" onclick="filterTeacherRoster('paid')">Paid 🟢</button>
+                <button type="button" class="roster-filter-btn px-3 py-1 rounded-lg text-slate-400 hover:text-white font-bold" data-filter="pending" onclick="filterTeacherRoster('pending')">Pending 🟡</button>
+                <button type="button" class="roster-filter-btn px-3 py-1 rounded-lg text-slate-400 hover:text-white font-bold" data-filter="overdue" onclick="filterTeacherRoster('overdue')">Overdue 🔴</button>
+              </div>
+              <button type="button" class="cloud-status-pill" id="cloudSyncStatusBadge" onclick="openCloudSyncModal()" title="إعداد المزامنة السحابية الفورية مع Google Cloud">
+                <span class="status-dot amber"></span> ☁️ Google Cloud
+              </button>
+              <button class="secondary-glass-btn" onclick="printStudentLoginCards()" style="font-size:0.85rem; padding: 0.45rem 0.9rem;">
+                <span>🖨️</span> <span>Print Cards</span>
+              </button>
+              <button class="primary-glow-btn" id="openAddStudentModalBtn" onclick="document.getElementById('addStudentModal').classList.add('open')" style="font-size:0.85rem; padding: 0.45rem 0.9rem;">
+                <span>👤+</span> <span>Add Student</span>
+              </button>
+            </div>
           </div>
-        </div>
-        <div class="kpi-card glass-panel">
-          <div class="kpi-icon-wrap green">🎯</div>
-          <div class="kpi-data-col">
-            <span class="kpi-value" id="tClassAccuracy">0%</span>
-            <span class="kpi-label">Class Accuracy</span>
-          </div>
-        </div>
-        <div class="kpi-card glass-panel">
-          <div class="kpi-icon-wrap amber">⏱️</div>
-          <div class="kpi-data-col">
-            <span class="kpi-value" id="tTotalHours">0h</span>
-            <span class="kpi-label">Practice Hours</span>
+
+          <div class="table-responsive-wrap">
+            <table class="report-history-table">
+              <thead>
+                <tr>
+                  <th>Student &amp; Grade</th>
+                  <th>Parent / Father</th>
+                  <th>Student Phone</th>
+                  <th>Parent WhatsApp</th>
+                  <th>Subscription Status</th>
+                  <th>Fee &amp; Method</th>
+                  <th>Last Payment</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="teacherRosterTableBody">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
 
-      <!-- Student Roster & Live Analytics -->
-      <div class="report-section-card glass-panel" style="margin-bottom: 2rem;">
-        <div class="section-card-header flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h3 class="card-title">Enrolled Students Roster & Login Credentials 📋</h3>
-            <p class="card-subtitle">Complete credentials directory (usernames, passwords, grade assignments, and live progress stats).</p>
+      <!-- ==============================================================
+           PANEL 2: PAYMENT RECEIPTS REVIEW
+           ============================================================== -->
+      <div id="teacherPanelPayments" class="teacher-tab-panel" style="display: none;">
+        <div class="report-section-card glass-panel mb-6">
+          <div class="section-card-header flex items-center justify-between">
+            <div>
+              <h3 class="card-title">Incoming Payment Proofs &amp; Transfers 💳</h3>
+              <p class="card-subtitle">إشعارات التحويل (انستاباي / فودافون كاش) المرسلة من الطلاب لاعتمادها</p>
+            </div>
           </div>
-          <div class="flex items-center gap-2">
-            <button type="button" class="cloud-status-pill" id="cloudSyncStatusBadge" onclick="openCloudSyncModal()" title="إعداد المزامنة السحابية الفورية مع Google Cloud">
-              <span class="status-dot amber"></span> ☁️ Google Cloud
-            </button>
-            <button class="secondary-glass-btn" onclick="printStudentLoginCards()" style="font-size:0.85rem; padding: 0.45rem 0.9rem;">
-              <span>🖨️</span> <span>Print Login Cards</span>
-            </button>
-            <button class="primary-glow-btn" id="openAddStudentModalBtn" style="font-size:0.85rem; padding: 0.45rem 0.9rem;">
-              <span>👤+</span> <span>Add New Student</span>
-            </button>
+          <div id="teacherPaymentsListContainer" class="p-4 space-y-4">
+            <!-- Injected via JS -->
           </div>
-        </div>
-
-        <div class="table-responsive-wrap">
-          <table class="report-history-table">
-            <thead>
-              <tr>
-                <th>Student</th>
-                <th>Username</th>
-                <th>Password</th>
-                <th>Grade</th>
-                <th>Account Type</th>
-                <th>Questions Done</th>
-                <th>Accuracy</th>
-                <th>SmartScore</th>
-                <th>Total XP</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="teacherRosterTableBody">
-              <!-- Injected via JS -->
-            </tbody>
-          </table>
         </div>
       </div>
 
-      <!-- Classroom Assignments & Homework Manager -->
-      <div class="report-section-card glass-panel" style="margin-bottom: 2rem;">
-        <div class="section-card-header">
-          <div>
-            <h3 class="card-title">📌 Classroom Assignments & Homework</h3>
-            <p class="card-subtitle">Active assigned skills, target due dates, and student completion tracking.</p>
+      <!-- ==============================================================
+           PANEL 3: ZOOM & SYLLABUS LOG
+           ============================================================== -->
+      <div id="teacherPanelSessions" class="teacher-tab-panel" style="display: none;">
+        <div class="report-section-card glass-panel mb-6">
+          <div class="section-card-header flex items-center justify-between">
+            <div>
+              <h3 class="card-title">Class Sessions &amp; Zoom Hub 🎥</h3>
+              <p class="card-subtitle">سجل الحصص المنعقدة والمنهج المشروح وروابط زووم وملفات الـ PDF</p>
+            </div>
+            <button class="primary-glow-btn" onclick="document.getElementById('addClassSessionModal').classList.add('open')">
+              <span>➕</span> <span>Log New Class Session</span>
+            </button>
           </div>
-          <button class="primary-glow-btn" id="openCreateAssignmentModalBtn">
-            <span>+</span> <span>Create New Assignment</span>
-          </button>
+          <div id="teacherSessionsListContainer" class="p-4 space-y-4">
+            <!-- Injected via JS -->
+          </div>
         </div>
-        <div class="assignments-teacher-grid" id="teacherAssignmentsGrid">
-          <!-- Injected via JS -->
+      </div>
+
+      <!-- ==============================================================
+           PANEL 4: HOMEWORK ASSIGNMENTS
+           ============================================================== -->
+      <div id="teacherPanelHomework" class="teacher-tab-panel" style="display: none;">
+        <div class="report-section-card glass-panel" style="margin-bottom: 2rem;">
+          <div class="section-card-header">
+            <div>
+              <h3 class="card-title">📌 Classroom Assignments &amp; Homework</h3>
+              <p class="card-subtitle">Active assigned skills, target due dates, and student completion tracking.</p>
+            </div>
+            <button class="primary-glow-btn" id="openCreateAssignmentModalBtn" onclick="document.getElementById('createAssignmentModal').classList.add('open')">
+              <span>+</span> <span>Create New Assignment</span>
+            </button>
+          </div>
+          <div class="assignments-teacher-grid" id="teacherAssignmentsGrid">
+            <!-- Injected via JS -->
+          </div>
         </div>
       </div>
 
@@ -1402,38 +1281,50 @@
   </div>
 
   <!-- ====================================================================
-       STUDENT AUTHENTICATION & SWITCHER MODAL
+  <!-- ====================================================================
+       ANIMATED LOGIN CANVAS (Interactive Cosmos & Constellations)
+       ==================================================================== -->
+  <canvas id="loginCosmosCanvas"></canvas>
+
+  <!-- ====================================================================
+       STUDENT AUTHENTICATION & LOGIN MODAL
        ==================================================================== -->
   <div class="auth-modal-backdrop" id="authModal">
-    <div class="auth-modal-window" style="max-width: 440px;">
-      <div class="auth-modal-header">
-        <div>
-          <div class="flex items-center gap-2 mb-1">
-            <span class="text-xl">🔐</span>
-            <h2 class="auth-title">RC Classroom — Sign In</h2>
+    <div class="auth-modal-window" style="max-width: 450px;">
+      <div class="auth-modal-header" style="flex-direction: column; align-items: center; text-align: center; padding: 2.25rem 2rem 1.25rem; border-bottom: 1px solid rgba(255,255,255,0.08); background: radial-gradient(circle at 50% 0%, rgba(0, 229, 255, 0.12) 0%, transparent 70%);">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-cyan-500 via-indigo-500 to-amber-400 p-[2px] shadow-[0_0_25px_rgba(0,229,255,0.35)] mb-3">
+          <div class="w-full h-full bg-[#0b0e18] rounded-2xl flex items-center justify-center">
+            <span class="text-2xl">🎓</span>
           </div>
-          <p class="auth-subtitle">Unified login portal for students and teacher (admin)</p>
         </div>
-        <button class="modal-close-btn" id="closeAuthModalBtn">✕</button>
+        <div class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-[11px] font-bold tracking-wider uppercase mb-1.5">
+          <span>✨ Private Academy Portal</span>
+        </div>
+        <h2 class="auth-title text-2xl font-extrabold text-white tracking-tight" style="margin: 0;">RC CLASSROOM</h2>
+        <p class="auth-subtitle text-slate-400 text-xs mt-1">Miss Rania's Tutoring &amp; Learning Management System</p>
       </div>
 
       <!-- UNIFIED SIGN IN (Students & Teacher) -->
-      <div class="auth-tab-content active" id="authTabLogin" style="padding-top: 0.5rem;">
+      <div class="auth-tab-content active" id="authTabLogin" style="padding: 1.75rem 2rem;">
         <form id="loginForm" class="auth-form" onsubmit="return false;">
-          <div class="form-group">
-            <label for="loginUsername">Username</label>
-            <input type="text" id="loginUsername" placeholder="e.g. alex, sophia, or teacher admin" required autocomplete="username">
+          <div class="form-group mb-4">
+            <label for="loginUsername" class="text-xs font-bold uppercase tracking-wider text-slate-300">Username / اسم المستخدم</label>
+            <div class="relative mt-1">
+              <input type="text" id="loginUsername" placeholder="e.g. beshr, alex, or admin" required autocomplete="username" class="w-full px-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700/80 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all text-sm font-medium">
+            </div>
           </div>
-          <div class="form-group">
-            <label for="loginPassword">Password</label>
-            <input type="password" id="loginPassword" placeholder="Enter your account password" required autocomplete="current-password">
+          <div class="form-group mb-5">
+            <label for="loginPassword" class="text-xs font-bold uppercase tracking-wider text-slate-300">Password / كلمة المرور</label>
+            <div class="relative mt-1">
+              <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password" class="w-full px-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700/80 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all text-sm font-medium">
+            </div>
           </div>
-          <div class="form-error-msg" id="loginErrorMsg" style="display: none;"></div>
-          <button type="submit" class="primary-glow-btn full-width" id="submitLoginBtn" style="font-weight: 700; font-size: 1rem; padding: 0.85rem;">
-            Sign In to Classroom &rarr;
+          <div class="form-error-msg mb-4 text-xs font-bold text-rose-400 bg-rose-500/10 p-2.5 rounded-lg border border-rose-500/20" id="loginErrorMsg" style="display: none;"></div>
+          <button type="submit" class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-cyan-400 via-sky-500 to-indigo-500 text-slate-950 font-extrabold text-sm shadow-[0_0_20px_rgba(0,229,255,0.4)] hover:shadow-[0_0_30px_rgba(0,229,255,0.6)] hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer" id="submitLoginBtn">
+            Sign In to Academy &rarr;
           </button>
-          <div style="margin-top: 1.25rem; padding: 0.85rem 1rem; background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2); border-radius: 8px; font-size: 0.82rem; color: var(--text-muted); line-height: 1.5; text-align: center;">
-            🔒 <strong>Note:</strong> Student enrollment is managed exclusively by the Teacher (Admin) inside the Teacher Dashboard.
+          <div class="mt-4 p-3 rounded-xl bg-slate-900/50 border border-slate-800 text-[11px] text-slate-400 text-center leading-relaxed">
+            🔐 <strong>Miss Rania's Private Cohort:</strong> Students and parents receive credentials directly from Miss Rania.
           </div>
         </form>
       </div>
@@ -1544,22 +1435,39 @@
         <button class="modal-close-btn" id="closeAddStudentModalBtn">✕</button>
       </div>
       <form id="addStudentForm" class="auth-form" onsubmit="return false;" style="padding: 1.5rem;">
-        <div class="form-group">
-          <label for="tNewStudentName">Student Full Name</label>
-          <input type="text" id="tNewStudentName" placeholder="e.g. Oliver Smith" required>
-        </div>
-        <div class="form-group">
-          <label for="tNewStudentUser">Login Username</label>
-          <input type="text" id="tNewStudentUser" placeholder="e.g. oliver (letters and numbers only)" required>
-        </div>
-        <div class="form-group">
-          <label for="tNewStudentPass">Password</label>
-          <input type="password" id="tNewStudentPass" value="password123" required>
-          <small style="color:var(--text-muted); font-size:0.75rem; margin-top:0.25rem; display:block;">Default password: password123 (can be changed)</small>
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="tNewStudentName">Student Full Name / اسم الطالب</label>
+            <input type="text" id="tNewStudentName" placeholder="e.g. Beshr Mohamed" required>
+          </div>
+          <div class="form-group flex-1">
+            <label for="tNewStudentParentName">Parent / Father Name (اسم ولي الأمر)</label>
+            <input type="text" id="tNewStudentParentName" placeholder="e.g. Mohamed Beshr">
+          </div>
         </div>
         <div class="form-row">
-          <div class="form-group">
-            <label for="tNewStudentGrade">Grade Level</label>
+          <div class="form-group flex-1">
+            <label for="tNewStudentPhone">Student Phone / هاتف الطالب</label>
+            <input type="tel" id="tNewStudentPhone" placeholder="01xxxxxxxxx">
+          </div>
+          <div class="form-group flex-1">
+            <label for="tNewStudentParentPhone">Parent WhatsApp / هاتف ولي الأمر (واتساب)</label>
+            <input type="tel" id="tNewStudentParentPhone" placeholder="01xxxxxxxxx">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="tNewStudentUser">Login Username / اسم المستخدم</label>
+            <input type="text" id="tNewStudentUser" placeholder="e.g. beshr" required>
+          </div>
+          <div class="form-group flex-1">
+            <label for="tNewStudentPass">Password / كلمة المرور</label>
+            <input type="password" id="tNewStudentPass" value="password123" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="tNewStudentGrade">Grade Level / الصف الدراسي</label>
             <select id="tNewStudentGrade">
               <option value="Reception">Early Years (Reception)</option>
               <option value="Year 1">Year 1 (Key Stage 1)</option>
@@ -1577,8 +1485,8 @@
               <option value="Year 13">Year 13 (A-Level)</option>
             </select>
           </div>
-          <div class="form-group">
-            <label for="tNewStudentAvatar">Avatar</label>
+          <div class="form-group flex-1">
+            <label for="tNewStudentAvatar">Avatar / الصورة الرمزية</label>
             <select id="tNewStudentAvatar">
               <option value="🦊" selected>🦊 Fox</option>
               <option value="🦄">🦄 Unicorn</option>
@@ -1591,7 +1499,30 @@
             </select>
           </div>
         </div>
-        <button type="submit" class="primary-glow-btn full-width" id="submitAddStudentBtn" style="font-weight: 700; padding: 0.85rem;">
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="tNewStudentPaymentMethod">Payment Method / طريقة الدفع</label>
+            <select id="tNewStudentPaymentMethod">
+              <option value="InstaPay" selected>InstaPay (انستاباي)</option>
+              <option value="Vodafone Cash">Vodafone Cash (فودافون كاش)</option>
+              <option value="Cash">Cash (كاش باليد)</option>
+              <option value="Bank Transfer">Bank Transfer (تحويل بنكي)</option>
+            </select>
+          </div>
+          <div class="form-group flex-1">
+            <label for="tNewStudentAmount">Monthly Fee / مبلغ الاشتراك (ج.م)</label>
+            <input type="number" id="tNewStudentAmount" placeholder="e.g. 500" value="500">
+          </div>
+          <div class="form-group flex-1">
+            <label for="tNewStudentPaymentStatus">Status / حالة السداد</label>
+            <select id="tNewStudentPaymentStatus">
+              <option value="paid">Paid ✅ (تم السداد)</option>
+              <option value="pending">Pending ⏳ (قيد التأكيد)</option>
+              <option value="overdue" selected>Overdue 🔴 (مستحق/متأخر)</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="primary-glow-btn full-width" id="submitAddStudentBtn" style="font-weight: 700; padding: 0.85rem; margin-top: 0.5rem;">
           Add Student & Create Account 👤
         </button>
       </form>
@@ -1625,38 +1556,55 @@
        MODAL 4: EDIT STUDENT MODAL
        ==================================================================== -->
   <div class="auth-modal-backdrop" id="editStudentModal">
-    <div class="auth-modal-window" style="max-width: 500px;">
+    <div class="auth-modal-window" style="max-width: 540px;">
       <div class="auth-modal-header">
         <div>
           <h2 class="auth-title">Edit Student Profile ✏️</h2>
-          <p class="auth-subtitle" id="editStudentSubtitle">Update student name, username, grade level, or password</p>
+          <p class="auth-subtitle" id="editStudentSubtitle">Update student name, contacts, grade, or billing details</p>
         </div>
         <button class="modal-close-btn" id="closeEditStudentModalBtn">✕</button>
       </div>
       <form id="editStudentForm" class="auth-form" onsubmit="return false;" style="padding: 1.5rem;">
         <input type="hidden" id="editStudentId">
-        <div class="form-group">
-          <label for="editStudentName">Student Full Name</label>
-          <input type="text" id="editStudentName" placeholder="e.g. Oliver Smith" required>
-        </div>
-        <div class="form-group">
-          <label for="editStudentUser">Login Username</label>
-          <input type="text" id="editStudentUser" placeholder="e.g. oliver (letters and numbers)" required>
-        </div>
-        <div class="form-group">
-          <label for="editStudentPass">New Password (optional)</label>
-          <input type="text" id="editStudentPass" placeholder="Leave empty to keep current password">
-          <small style="color:var(--text-muted); font-size:0.75rem; margin-top:0.25rem; display:block;">Leave empty to keep existing password</small>
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="editStudentName">Student Full Name / اسم الطالب</label>
+            <input type="text" id="editStudentName" placeholder="e.g. Beshr Mohamed" required>
+          </div>
+          <div class="form-group flex-1">
+            <label for="editStudentParentName">Parent Name / اسم ولي الأمر</label>
+            <input type="text" id="editStudentParentName" placeholder="e.g. Mohamed Beshr">
+          </div>
         </div>
         <div class="form-row">
-          <div class="form-group">
+          <div class="form-group flex-1">
+            <label for="editStudentPhone">Student Phone / هاتف الطالب</label>
+            <input type="tel" id="editStudentPhone" placeholder="01xxxxxxxxx">
+          </div>
+          <div class="form-group flex-1">
+            <label for="editStudentParentPhone">Parent WhatsApp / هاتف ولي الأمر</label>
+            <input type="tel" id="editStudentParentPhone" placeholder="01xxxxxxxxx">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="editStudentUser">Login Username / اسم الدخول</label>
+            <input type="text" id="editStudentUser" placeholder="e.g. beshr" required>
+          </div>
+          <div class="form-group flex-1">
+            <label for="editStudentPass">New Password (optional)</label>
+            <input type="text" id="editStudentPass" placeholder="Leave blank to keep current">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group flex-1">
             <label for="editStudentGrade">Grade Level</label>
             <select id="editStudentGrade">
               <option value="Reception">Early Years (Reception)</option>
               <option value="Year 1">Year 1 (Key Stage 1)</option>
               <option value="Year 2">Year 2 (Key Stage 1)</option>
               <option value="Year 3">Year 3 (Lower KS2)</option>
-              <option value="Year 4" selected>Year 4 (Lower KS2)</option>
+              <option value="Year 4">Year 4 (Lower KS2)</option>
               <option value="Year 5">Year 5 (Upper KS2)</option>
               <option value="Year 6">Year 6 (Upper KS2)</option>
               <option value="Year 7">Year 7 (Key Stage 3)</option>
@@ -1668,10 +1616,10 @@
               <option value="Year 13">Year 13 (A-Level)</option>
             </select>
           </div>
-          <div class="form-group">
+          <div class="form-group flex-1">
             <label for="editStudentAvatar">Avatar</label>
             <select id="editStudentAvatar">
-              <option value="🦊" selected>🦊 Fox</option>
+              <option value="🦊">🦊 Fox</option>
               <option value="🦄">🦄 Unicorn</option>
               <option value="🚀">🚀 Rocket</option>
               <option value="🦁">🦁 Lion</option>
@@ -1682,10 +1630,169 @@
             </select>
           </div>
         </div>
-        <button type="submit" class="primary-glow-btn full-width" id="submitEditStudentBtn" style="font-weight: 700; padding: 0.85rem;">
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="editStudentPaymentMethod">Payment Method</label>
+            <select id="editStudentPaymentMethod">
+              <option value="InstaPay">InstaPay (انستاباي)</option>
+              <option value="Vodafone Cash">Vodafone Cash (فودافون كاش)</option>
+              <option value="Cash">Cash (كاش)</option>
+              <option value="Bank Transfer">Bank Transfer (تحويل)</option>
+            </select>
+          </div>
+          <div class="form-group flex-1">
+            <label for="editStudentAmount">Fee (ج.م)</label>
+            <input type="number" id="editStudentAmount" placeholder="500">
+          </div>
+          <div class="form-group flex-1">
+            <label for="editStudentPaymentStatus">Status</label>
+            <select id="editStudentPaymentStatus">
+              <option value="paid">Paid ✅</option>
+              <option value="pending">Pending ⏳</option>
+              <option value="overdue">Overdue 🔴</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="primary-glow-btn full-width" id="submitEditStudentBtn" style="font-weight: 700; padding: 0.85rem; margin-top: 0.5rem;">
           Save Changes 💾
         </button>
       </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MODAL 5: SUBMIT PAYMENT PROOF / RECEIPT (For Student)
+       ==================================================================== -->
+  <div class="auth-modal-backdrop" id="submitPaymentModal">
+    <div class="auth-modal-window" style="max-width: 500px;">
+      <div class="auth-modal-header">
+        <div>
+          <h2 class="auth-title">Submit Payment Receipt 💳</h2>
+          <p class="auth-subtitle">رفع إشعار تحويل الاشتراك (انستاباي / فودافون كاش)</p>
+        </div>
+        <button class="modal-close-btn" id="closeSubmitPaymentModalBtn" onclick="document.getElementById('submitPaymentModal').classList.remove('open')">✕</button>
+      </div>
+      <form id="submitPaymentForm" class="auth-form" onsubmit="return false;" style="padding: 1.5rem;">
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="payDateInput">Payment Date / تاريخ التحويل</label>
+            <input type="date" id="payDateInput" required>
+          </div>
+          <div class="form-group flex-1">
+            <label for="payMethodInput">Payment Method / طريقة التحويل</label>
+            <select id="payMethodInput" required>
+              <option value="InstaPay" selected>InstaPay (انستاباي)</option>
+              <option value="Vodafone Cash">Vodafone Cash (فودافون كاش)</option>
+              <option value="Cash">Cash (كاش باليد)</option>
+              <option value="Bank Transfer">Bank Transfer (تحويل بنكي)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="payAmountInput">Amount Paid / المبلغ المدفوع (ج.م)</label>
+            <input type="number" id="payAmountInput" placeholder="500" required>
+          </div>
+          <div class="form-group flex-1">
+            <label for="payNotesInput">Account / Wallet No. (رقم المحفظة/الحساب)</label>
+            <input type="text" id="payNotesInput" placeholder="e.g. 010xxxxxxxx أو رقم العملية">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="payReceiptFileInput">Upload Screenshot / صورة الإيصال أو التحويل</label>
+          <input type="file" id="payReceiptFileInput" accept="image/*" class="w-full text-xs text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30 cursor-pointer">
+          <div id="payReceiptPreviewWrap" style="display:none; margin-top: 0.75rem; text-align: center;">
+            <img id="payReceiptPreview" src="" alt="Receipt Preview" style="max-height: 140px; margin: 0 auto; border-radius: 12px; border: 1px solid rgba(0, 229, 255, 0.3);">
+          </div>
+        </div>
+        <button type="submit" class="primary-glow-btn full-width" id="submitPaymentReceiptBtn" style="font-weight: 700; padding: 0.85rem; margin-top: 0.5rem;">
+          Send Receipt to Miss Rania 🚀
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MODAL 6: LOG CLASS SESSION & ZOOM (For Teacher)
+       ==================================================================== -->
+  <div class="auth-modal-backdrop" id="addClassSessionModal">
+    <div class="auth-modal-window" style="max-width: 540px;">
+      <div class="auth-modal-header">
+        <div>
+          <h2 class="auth-title">Log Class Session & Zoom 🎥</h2>
+          <p class="auth-subtitle">توثيق الحصة والمنهج المشروح وروابط زووم وملف الـ PDF</p>
+        </div>
+        <button class="modal-close-btn" id="closeAddClassSessionModalBtn" onclick="document.getElementById('addClassSessionModal').classList.remove('open')">✕</button>
+      </div>
+      <form id="addClassSessionForm" class="auth-form" onsubmit="return false;" style="padding: 1.5rem;">
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="sessDateInput">Session Date / تاريخ الحصة</label>
+            <input type="date" id="sessDateInput" required>
+          </div>
+          <div class="form-group flex-1">
+            <label for="sessTitleInput">Session Title / عنوان الحصة</label>
+            <input type="text" id="sessTitleInput" placeholder="e.g. Unit 2: Lesson 1 - Fractions" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="sessTopicInput">Topics &amp; Syllabus Covered (المنهج المشروح بالتفصيل)</label>
+          <textarea id="sessTopicInput" rows="3" placeholder="اكتب ما تم شرحه للطلاب في هذه الحصة، النقاط الأساسية، والصفحات..." required style="width: 100%; border-radius: 12px; padding: 0.75rem; background: var(--bg-hover); border: 1px solid var(--border-card); color: var(--text-primary); font-size: 0.85rem; resize: vertical;"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="sessZoomLinkInput">Zoom Meeting / Recording Link (رابط زووم أو التسجيل)</label>
+          <input type="url" id="sessZoomLinkInput" placeholder="https://zoom.us/j/... or Cloud Recording URL">
+        </div>
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="sessPdfLinkInput">PDF Sheet URL (رابط ملف الشرح PDF)</label>
+            <input type="url" id="sessPdfLinkInput" placeholder="https://... / Google Drive / Dropbox link">
+          </div>
+          <div class="form-group flex-1">
+            <label for="sessPdfTitleInput">PDF Pages (الصفحات المقررة)</label>
+            <input type="text" id="sessPdfTitleInput" placeholder="e.g. Pages 12 - 16">
+          </div>
+        </div>
+        <button type="submit" class="primary-glow-btn full-width" id="submitClassSessionBtn" style="font-weight: 700; padding: 0.85rem; margin-top: 0.5rem;">
+          Save & Publish Session to Students 🎥
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MODAL 7: STUDENT PERFORMANCE REPORT & WHATSAPP DISPATCHER
+       ==================================================================== -->
+  <div class="auth-modal-backdrop" id="studentReportModal">
+    <div class="auth-modal-window" style="max-width: 580px;">
+      <div class="auth-modal-header">
+        <div>
+          <h2 class="auth-title">Student Progress Report 📊</h2>
+          <p class="auth-subtitle" id="reportStudentSubtitle">تقرير متابعة وأداء الطالب للفترة الماضية</p>
+        </div>
+        <button class="modal-close-btn" id="closeStudentReportModalBtn" onclick="document.getElementById('studentReportModal').classList.remove('open')">✕</button>
+      </div>
+      <div style="padding: 1.5rem;" id="studentReportContent">
+        <!-- Injected via JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MODAL 8: RECEIPT IMAGE PREVIEW MODAL
+       ==================================================================== -->
+  <div class="auth-modal-backdrop" id="receiptPreviewModal">
+    <div class="auth-modal-window" style="max-width: 650px; text-align: center; background: rgba(10, 12, 20, 0.95);">
+      <div class="auth-modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+        <div>
+          <h2 class="auth-title" id="receiptPreviewTitle">Payment Receipt Proof 🧾</h2>
+          <p class="auth-subtitle" id="receiptPreviewSubtitle">معاينة إشعار التحويل</p>
+        </div>
+        <button class="modal-close-btn" onclick="document.getElementById('receiptPreviewModal').classList.remove('open')">✕</button>
+      </div>
+      <div style="padding: 1.5rem;">
+        <img id="receiptPreviewImg" src="" alt="Proof Screenshot" style="max-height: 70vh; max-width: 100%; border-radius: 14px; margin: 0 auto; box-shadow: 0 10px 40px rgba(0,0,0,0.6);">
+      </div>
     </div>
   </div>
 

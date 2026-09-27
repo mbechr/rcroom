@@ -128,6 +128,13 @@
               accuracy_rate: data.accuracy_rate || 0,
               avg_smart_score: data.avg_smart_score || 0,
               last_active: data.last_active || 'Not started',
+              parent_name: data.parent_name || '',
+              student_phone: data.student_phone || '',
+              parent_phone: data.parent_phone || '',
+              payment_method: data.payment_method || 'InstaPay',
+              payment_date: data.payment_date || '',
+              payment_amount: Number(data.payment_amount) || 0,
+              payment_status: data.payment_status || 'overdue',
               is_custom: true
             });
           });
@@ -227,6 +234,76 @@
             console.warn('Assignments realtime listener error:', err.message);
           });
       } catch (e) {}
+
+      // 4. Realtime Payment Proofs / Receipts Listener
+      try {
+        this.firestore.collection('payments')
+          .orderBy('submitted_at', 'desc')
+          .limit(50)
+          .onSnapshot(snapshot => {
+            const payments = [];
+            snapshot.forEach(doc => {
+              const data = doc.data();
+              payments.push({
+                id: doc.id,
+                student_id: Number(data.student_id),
+                student_name: data.student_name || '',
+                amount: Number(data.amount) || 0,
+                payment_method: data.payment_method || 'InstaPay',
+                payment_date: data.payment_date || '',
+                receipt_image: data.receipt_image || '',
+                notes: data.notes || '',
+                status: data.status || 'pending_review',
+                submitted_at: data.submitted_at || '',
+                reviewed_at: data.reviewed_at || ''
+              });
+            });
+            console.log('⚡ Realtime Cloud Update: Loaded', payments.length, 'payments from Firestore.');
+            localStorage.setItem('rc_custom_payments', JSON.stringify(payments));
+
+            if (typeof window.renderTeacherPayments === 'function') {
+              window.renderTeacherPayments();
+            }
+            if (typeof window.renderStudentPaymentStatus === 'function') {
+              window.renderStudentPaymentStatus();
+            }
+          }, err => {
+            console.warn('Payments realtime listener error:', err.message);
+          });
+      } catch (e) {}
+
+      // 5. Realtime Class Sessions (Zoom & Curriculum Log) Listener
+      try {
+        this.firestore.collection('class_sessions')
+          .orderBy('date', 'desc')
+          .limit(50)
+          .onSnapshot(snapshot => {
+            const sessions = [];
+            snapshot.forEach(doc => {
+              const data = doc.data();
+              sessions.push({
+                id: doc.id,
+                date: data.date || '',
+                title: data.title || 'Class Session',
+                topic_covered: data.topic_covered || '',
+                zoom_link: data.zoom_link || '',
+                recording_link: data.recording_link || '',
+                pdf_url: data.pdf_url || '',
+                pdf_title: data.pdf_title || '',
+                notes: data.notes || '',
+                created_at: data.created_at || ''
+              });
+            });
+            console.log('⚡ Realtime Cloud Update: Loaded', sessions.length, 'class sessions from Firestore.');
+            localStorage.setItem('rc_class_sessions', JSON.stringify(sessions));
+
+            if (typeof window.renderClassSessionsView === 'function') {
+              window.renderClassSessionsView();
+            }
+          }, err => {
+            console.warn('Class sessions realtime listener error:', err.message);
+          });
+      } catch (e) {}
     },
 
     // -------------------------------------------------------------------------
@@ -250,6 +327,13 @@
           avatar: studentData.avatar || '🦊',
           xp: studentData.xp || 0,
           role: 'student',
+          parent_name: (studentData.parent_name || '').trim(),
+          student_phone: (studentData.student_phone || '').trim(),
+          parent_phone: (studentData.parent_phone || '').trim(),
+          payment_method: studentData.payment_method || 'InstaPay',
+          payment_date: studentData.payment_date || '',
+          payment_amount: Number(studentData.payment_amount) || 0,
+          payment_status: studentData.payment_status || 'overdue',
           updated_at: new Date().toISOString()
         };
 
@@ -257,6 +341,115 @@
         console.log('✅ Student synced to Google Cloud Firestore:', payload.username);
       } catch (err) {
         console.warn('Failed to save student to Firestore:', err);
+      }
+    },
+
+    /**
+     * Submit payment proof to Firestore
+     */
+    async submitPayment(paymentData) {
+      if (!this.isConfigured || !this.firestore) return;
+      try {
+        const id = paymentData.id || ('pay_' + Date.now());
+        const payload = {
+          id: id,
+          student_id: Number(paymentData.student_id),
+          student_name: paymentData.student_name || '',
+          amount: Number(paymentData.amount) || 0,
+          payment_method: paymentData.payment_method || 'InstaPay',
+          payment_date: paymentData.payment_date || new Date().toISOString().slice(0, 10),
+          receipt_image: paymentData.receipt_image || '',
+          notes: paymentData.notes || '',
+          status: 'pending_review',
+          submitted_at: new Date().toISOString()
+        };
+        await this.firestore.collection('payments').doc(id).set(payload);
+
+        // Update student document in Firestore
+        const studentRef = this.firestore.collection('students').doc(String(paymentData.student_id));
+        await studentRef.set({
+          payment_status: 'pending',
+          payment_amount: payload.amount,
+          payment_date: payload.payment_date,
+          payment_method: payload.payment_method
+        }, { merge: true });
+
+        console.log('✅ Payment submitted to Google Cloud Firestore:', id);
+        return id;
+      } catch (err) {
+        console.warn('Failed to submit payment to Firestore:', err);
+      }
+    },
+
+    /**
+     * Review payment (Approve / Reject) in Firestore
+     */
+    async reviewPayment(paymentId, action, studentId, paymentData) {
+      if (!this.isConfigured || !this.firestore) return;
+      try {
+        const newStatus = action === 'approved' ? 'approved' : 'rejected';
+        await this.firestore.collection('payments').doc(String(paymentId)).update({
+          status: newStatus,
+          reviewed_at: new Date().toISOString()
+        });
+
+        if (studentId) {
+          const studentRef = this.firestore.collection('students').doc(String(studentId));
+          if (action === 'approved') {
+            await studentRef.set({
+              payment_status: 'paid',
+              payment_date: paymentData && paymentData.payment_date ? paymentData.payment_date : new Date().toISOString().slice(0, 10),
+              payment_amount: paymentData && paymentData.amount ? paymentData.amount : 0
+            }, { merge: true });
+          } else {
+            await studentRef.set({
+              payment_status: 'overdue'
+            }, { merge: true });
+          }
+        }
+        console.log(`✅ Payment ${paymentId} reviewed as ${newStatus} in Firestore`);
+      } catch (err) {
+        console.warn('Failed to review payment in Firestore:', err);
+      }
+    },
+
+    /**
+     * Save class session to Firestore
+     */
+    async saveClassSession(sessionData) {
+      if (!this.isConfigured || !this.firestore) return;
+      try {
+        const id = sessionData.id || ('sess_' + Date.now());
+        const payload = {
+          id: id,
+          date: sessionData.date || new Date().toISOString().slice(0, 10),
+          title: sessionData.title || 'Class Session',
+          topic_covered: sessionData.topic_covered || '',
+          zoom_link: sessionData.zoom_link || '',
+          recording_link: sessionData.recording_link || '',
+          pdf_url: sessionData.pdf_url || '',
+          pdf_title: sessionData.pdf_title || '',
+          notes: sessionData.notes || '',
+          created_at: sessionData.created_at || new Date().toISOString()
+        };
+        await this.firestore.collection('class_sessions').doc(id).set(payload, { merge: true });
+        console.log('✅ Class session saved to Google Cloud Firestore:', id);
+        return id;
+      } catch (err) {
+        console.warn('Failed to save class session to Firestore:', err);
+      }
+    },
+
+    /**
+     * Delete class session from Firestore
+     */
+    async deleteClassSession(sessionId) {
+      if (!this.isConfigured || !this.firestore) return;
+      try {
+        await this.firestore.collection('class_sessions').doc(String(sessionId)).delete();
+        console.log('🗑️ Class session deleted from Firestore:', sessionId);
+      } catch (err) {
+        console.warn('Failed to delete class session from Firestore:', err);
       }
     },
 

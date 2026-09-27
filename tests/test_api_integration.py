@@ -167,6 +167,88 @@ def run_integration_tests():
     assert not any(s['id'] == new_student_id for s in roster), 'Student must be removed from roster'
     print('  [PASS] Student deleted and removed from classroom roster')
 
+    print('=== 9. Testing Student Payment Proof Submission & Teacher Review ===')
+    # 9a: Student submits payment proof
+    pay_payload = json.dumps({
+        'student_id': 1,
+        'student_name': 'Alex Johnson',
+        'amount': 550,
+        'payment_date': '2026-09-25',
+        'payment_method': 'InstaPay',
+        'receipt_image': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
+        'notes': 'Paid via InstaPay transaction #987654'
+    })
+    conn.request('POST', '/api/payments/submit', body=pay_payload, headers={
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {student_token}'
+    })
+    res = conn.getresponse()
+    body = json.loads(res.read().decode('utf-8'))
+    assert res.status == 200 and body['success'], 'Student payment submission should succeed'
+    payment_id = body['payment_id']
+    print('  [PASS] Payment proof screenshot submitted successfully')
+
+    # 9b: Teacher lists payments
+    conn.request('GET', '/api/payments/list', headers={'Authorization': f'Bearer {teacher_token}'})
+    res = conn.getresponse()
+    body = json.loads(res.read().decode('utf-8'))
+    assert res.status == 200 and body['success'], 'Teacher listing payments should succeed'
+    assert any(p['id'] == payment_id for p in body['payments']), 'Submitted payment must be in payments list'
+    print('  [PASS] Teacher retrieved incoming payment receipts list')
+
+    # 9c: Teacher approves payment
+    review_payload = json.dumps({
+        'payment_id': payment_id,
+        'status': 'approved'
+    })
+    conn.request('POST', '/api/payments/review', body=review_payload, headers={
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {teacher_token}'
+    })
+    res = conn.getresponse()
+    body = json.loads(res.read().decode('utf-8'))
+    assert res.status == 200 and body['success'], 'Teacher review payment should succeed'
+    print('  [PASS] Teacher approved payment proof and updated subscription status')
+
+    print('=== 10. Testing Zoom Class Sessions & Syllabus Hub ===')
+    # 10a: Teacher creates class session
+    sess_payload = json.dumps({
+        'title': 'Year 4 Live Masterclass: Fractions & Decimals',
+        'topic': 'Unit 3: Comparing decimals and fraction equivalence',
+        'session_date': '2026-09-28 17:00:00',
+        'zoom_link': 'https://zoom.us/j/98765432100',
+        'pdf_link': 'https://example.com/materials/fractions_wk3.pdf',
+        'pdf_title': 'Fractions Unit Notes & Exercises (PDF)'
+    })
+    conn.request('POST', '/api/sessions/create', body=sess_payload, headers={
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {teacher_token}'
+    })
+    res = conn.getresponse()
+    body = json.loads(res.read().decode('utf-8'))
+    assert res.status == 200 and body['success'], 'Teacher session creation should succeed'
+    session_id = body['session_id']
+    print('  [PASS] Teacher created and logged Zoom class session with PDF study link')
+
+    # 10b: Student/teacher lists sessions
+    conn.request('GET', '/api/sessions/list', headers={'Authorization': f'Bearer {student_token}'})
+    res = conn.getresponse()
+    body = json.loads(res.read().decode('utf-8'))
+    assert res.status == 200 and body['success'], 'Session list retrieval should succeed'
+    assert any(s['id'] == session_id for s in body['sessions']), 'Created session must be in sessions list'
+    print('  [PASS] Students and teachers can retrieve live class sessions feed')
+
+    # 10c: Teacher deletes session
+    del_sess_payload = json.dumps({'session_id': session_id})
+    conn.request('POST', '/api/sessions/delete', body=del_sess_payload, headers={
+        'Content-Type': 'application/json',
+        'Authorization': f'Bearer {teacher_token}'
+    })
+    res = conn.getresponse()
+    body = json.loads(res.read().decode('utf-8'))
+    assert res.status == 200 and body['success'], 'Session deletion should succeed'
+    print('  [PASS] Teacher removed class session successfully')
+
     conn.close()
     httpd.shutdown()
     print('\n=== ALL API INTEGRATION TESTS PASSED PERFECTLY ===')

@@ -34,7 +34,7 @@ def init_auth_db():
         FOREIGN KEY(user_id) REFERENCES users(id)
     )
     ''')
-    # Ensure plain_password column exists for teacher dashboard management
+    # Ensure plain_password and CRM / billing columns exist for teacher dashboard management
     cursor = conn.cursor()
     cursor.execute("PRAGMA table_info(users)")
     cols = [r['name'] for r in cursor.fetchall()]
@@ -45,6 +45,53 @@ def init_auth_db():
             conn.execute("UPDATE users SET plain_password = 'admin123' WHERE role = 'teacher' AND plain_password IS NULL")
         except Exception:
             pass
+
+    crm_columns = {
+        'parent_name': 'TEXT DEFAULT ""',
+        'student_phone': 'TEXT DEFAULT ""',
+        'parent_phone': 'TEXT DEFAULT ""',
+        'payment_method': 'TEXT DEFAULT "InstaPay"',
+        'payment_date': 'TEXT DEFAULT ""',
+        'payment_amount': 'REAL DEFAULT 0',
+        'payment_status': 'TEXT DEFAULT "overdue"'
+    }
+    for col_name, col_def in crm_columns.items():
+        if col_name not in cols:
+            try:
+                conn.execute(f"ALTER TABLE users ADD COLUMN {col_name} {col_def}")
+            except Exception:
+                pass
+
+    conn.execute('''
+    CREATE TABLE IF NOT EXISTS payment_receipts (
+        id TEXT PRIMARY KEY,
+        student_id INTEGER NOT NULL,
+        student_name TEXT,
+        amount REAL DEFAULT 0,
+        payment_method TEXT DEFAULT 'InstaPay',
+        payment_date TEXT,
+        receipt_image TEXT,
+        notes TEXT,
+        status TEXT DEFAULT 'pending_review',
+        submitted_at TEXT,
+        reviewed_at TEXT
+    )
+    ''')
+
+    conn.execute('''
+    CREATE TABLE IF NOT EXISTS class_sessions (
+        id TEXT PRIMARY KEY,
+        date TEXT,
+        title TEXT,
+        topic_covered TEXT,
+        zoom_link TEXT,
+        recording_link TEXT,
+        pdf_url TEXT,
+        pdf_title TEXT,
+        notes TEXT,
+        created_at TEXT
+    )
+    ''')
     conn.commit()
     conn.close()
 
@@ -425,6 +472,14 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
             grade = data.get('grade_level', 'Year 4')
             avatar = data.get('avatar', '🦊')
 
+            parent_name = data.get('parent_name', '').strip()
+            student_phone = data.get('student_phone', '').strip()
+            parent_phone = data.get('parent_phone', '').strip()
+            payment_method = data.get('payment_method', 'InstaPay').strip()
+            payment_date = data.get('payment_date', '').strip()
+            payment_amount = float(data.get('payment_amount', 0) or 0)
+            payment_status = data.get('payment_status', 'overdue').strip()
+
             if not full_name or not username:
                 return self.send_json({'success': False, 'error': 'Name and username are required.'}, status=400)
 
@@ -433,9 +488,15 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
             try:
                 salted_hash = hash_pw(password)
                 cursor.execute('''
-                INSERT INTO users (username, password_hash, full_name, grade_level, avatar, xp, streak_days, role, plain_password)
-                VALUES (?, ?, ?, ?, ?, 100, 1, 'student', ?)
-                ''', (username, salted_hash, full_name, grade, avatar, password))
+                INSERT INTO users (
+                    username, password_hash, full_name, grade_level, avatar, xp, streak_days, role, plain_password,
+                    parent_name, student_phone, parent_phone, payment_method, payment_date, payment_amount, payment_status
+                )
+                VALUES (?, ?, ?, ?, ?, 100, 1, 'student', ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    username, salted_hash, full_name, grade, avatar, password,
+                    parent_name, student_phone, parent_phone, payment_method, payment_date, payment_amount, payment_status
+                ))
                 student_id = cursor.lastrowid
                 cursor.execute('''
                 INSERT INTO student_badges (student_id, badge_id, badge_name, badge_icon, badge_desc)
@@ -460,6 +521,13 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
             grade = data.get('grade_level', '').strip()
             avatar = data.get('avatar', '').strip()
             password = data.get('password', '').strip()
+            parent_name = data.get('parent_name', '').strip()
+            student_phone = data.get('student_phone', '').strip()
+            parent_phone = data.get('parent_phone', '').strip()
+            payment_method = data.get('payment_method', '').strip()
+            payment_date = data.get('payment_date', '').strip()
+            payment_amount = data.get('payment_amount', None)
+            payment_status = data.get('payment_status', '').strip()
 
             if not student_id or not full_name or not username:
                 return self.send_json({'success': False, 'error': 'student_id, full_name, and username are required'}, status=400)
@@ -473,24 +541,38 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
                 conn.close()
                 return self.send_json({'success': False, 'error': 'Username is already taken by another student.'}, status=409)
 
+            updates = [
+                'full_name = ?',
+                'username = ?',
+                'grade_level = CASE WHEN ? != "" THEN ? ELSE grade_level END',
+                'avatar = CASE WHEN ? != "" THEN ? ELSE avatar END',
+                'parent_name = CASE WHEN ? != "" THEN ? ELSE parent_name END',
+                'student_phone = CASE WHEN ? != "" THEN ? ELSE student_phone END',
+                'parent_phone = CASE WHEN ? != "" THEN ? ELSE parent_phone END',
+                'payment_method = CASE WHEN ? != "" THEN ? ELSE payment_method END',
+                'payment_date = CASE WHEN ? != "" THEN ? ELSE payment_date END',
+                'payment_status = CASE WHEN ? != "" THEN ? ELSE payment_status END'
+            ]
+            params = [
+                full_name, username, grade, grade, avatar, avatar,
+                parent_name, parent_name, student_phone, student_phone, parent_phone, parent_phone,
+                payment_method, payment_method, payment_date, payment_date, payment_status, payment_status
+            ]
+
+            if payment_amount is not None:
+                updates.append('payment_amount = ?')
+                params.append(float(payment_amount or 0))
+
             if password:
                 salted_hash = hash_pw(password)
-                cursor.execute('''
-                UPDATE users 
-                SET full_name = ?, username = ?, 
-                    grade_level = CASE WHEN ? != '' THEN ? ELSE grade_level END,
-                    avatar = CASE WHEN ? != '' THEN ? ELSE avatar END,
-                    password_hash = ?, plain_password = ?
-                WHERE id = ? AND role != 'teacher'
-                ''', (full_name, username, grade, grade, avatar, avatar, salted_hash, password, student_id))
-            else:
-                cursor.execute('''
-                UPDATE users 
-                SET full_name = ?, username = ?, 
-                    grade_level = CASE WHEN ? != '' THEN ? ELSE grade_level END,
-                    avatar = CASE WHEN ? != '' THEN ? ELSE avatar END
-                WHERE id = ? AND role != 'teacher'
-                ''', (full_name, username, grade, grade, avatar, avatar, student_id))
+                updates.append('password_hash = ?')
+                params.append(salted_hash)
+                updates.append('plain_password = ?')
+                params.append(password)
+
+            params.append(student_id)
+            sql = f"UPDATE users SET {', '.join(updates)} WHERE id = ? AND role != 'teacher'"
+            cursor.execute(sql, tuple(params))
 
             conn.commit()
             conn.close()
@@ -533,6 +615,122 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
             cursor.execute('DELETE FROM assignment_completions WHERE student_id = ?', (student_id,))
             cursor.execute('DELETE FROM user_sessions WHERE user_id = ?', (student_id,))
             cursor.execute("DELETE FROM users WHERE id = ? AND role != 'teacher'", (student_id,))
+            conn.commit()
+            conn.close()
+            return self.send_json({'success': True})
+
+        # ---------------------------------------------------------------------
+        # Payments Management
+        # ---------------------------------------------------------------------
+        elif path == '/api/payments/submit':
+            data = self.parse_body()
+            student_id = data.get('student_id')
+            student_name = data.get('student_name', '')
+            amount = float(data.get('amount', 0) or 0)
+            payment_method = data.get('payment_method', 'InstaPay')
+            payment_date = data.get('payment_date', datetime.utcnow().strftime('%Y-%m-%d'))
+            receipt_image = data.get('receipt_image', '')
+            notes = data.get('notes', '')
+            receipt_id = data.get('id') or secrets.token_hex(8)
+
+            if not student_id:
+                return self.send_json({'success': False, 'error': 'student_id required'}, status=400)
+
+            conn = get_db()
+            cursor = conn.cursor()
+            cursor.execute('''
+            INSERT INTO payment_receipts (id, student_id, student_name, amount, payment_method, payment_date, receipt_image, notes, status, submitted_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending_review', datetime('now'))
+            ''', (receipt_id, student_id, student_name, amount, payment_method, payment_date, receipt_image, notes))
+
+            # Update student status to pending
+            cursor.execute('''
+            UPDATE users SET payment_status = 'pending', payment_amount = ?, payment_date = ?, payment_method = ?
+            WHERE id = ?
+            ''', (amount, payment_date, payment_method, student_id))
+
+            conn.commit()
+            conn.close()
+            return self.send_json({'success': True, 'receipt_id': receipt_id, 'payment_id': receipt_id})
+
+        elif path == '/api/payments/review':
+            auth_user = get_authenticated_user(self.headers)
+            if not auth_user or auth_user.get('role') != 'teacher':
+                return self.send_json({'success': False, 'error': 'Teacher authorization required.'}, status=403)
+
+            data = self.parse_body()
+            receipt_id = data.get('receipt_id') or data.get('payment_id')
+            action = data.get('action') or data.get('status') or 'approved' # 'approved' or 'rejected'
+
+            if not receipt_id:
+                return self.send_json({'success': False, 'error': 'receipt_id or payment_id required'}, status=400)
+
+            conn = get_db()
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM payment_receipts WHERE id = ?', (receipt_id,))
+            receipt = cursor.fetchone()
+            if not receipt:
+                conn.close()
+                return self.send_json({'success': False, 'error': 'Receipt not found'}, status=404)
+
+            new_status = 'approved' if action == 'approved' else 'rejected'
+            cursor.execute('UPDATE payment_receipts SET status = ?, reviewed_at = datetime("now") WHERE id = ?', (new_status, receipt_id))
+
+            # If approved, update student user record to paid
+            if action == 'approved':
+                cursor.execute('''
+                UPDATE users SET payment_status = 'paid', payment_date = ?, payment_amount = ?, payment_method = ?
+                WHERE id = ?
+                ''', (receipt['payment_date'], receipt['amount'], receipt['payment_method'], receipt['student_id']))
+            else:
+                cursor.execute('UPDATE users SET payment_status = "overdue" WHERE id = ?', (receipt['student_id'],))
+
+            conn.commit()
+            conn.close()
+            return self.send_json({'success': True, 'status': new_status})
+
+        # ---------------------------------------------------------------------
+        # Class Sessions (Zoom & Syllabus Log)
+        # ---------------------------------------------------------------------
+        elif path == '/api/sessions/create':
+            auth_user = get_authenticated_user(self.headers)
+            if not auth_user or auth_user.get('role') != 'teacher':
+                return self.send_json({'success': False, 'error': 'Teacher authorization required.'}, status=403)
+
+            data = self.parse_body()
+            session_id = data.get('id') or secrets.token_hex(8)
+            date_str = data.get('session_date') or data.get('date', datetime.utcnow().strftime('%Y-%m-%d'))
+            title = data.get('title', 'Class Session')
+            topic = data.get('topic') or data.get('topic_covered', '')
+            zoom_link = data.get('zoom_link', '')
+            recording_link = data.get('recording_link', '')
+            pdf_url = data.get('pdf_link') or data.get('pdf_url', '')
+            pdf_title = data.get('pdf_title', '')
+            notes = data.get('notes', '')
+
+            conn = get_db()
+            cursor = conn.cursor()
+            cursor.execute('''
+            INSERT INTO class_sessions (id, date, title, topic_covered, zoom_link, recording_link, pdf_url, pdf_title, notes, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+            ''', (session_id, date_str, title, topic, zoom_link, recording_link, pdf_url, pdf_title, notes))
+            conn.commit()
+            conn.close()
+            return self.send_json({'success': True, 'session_id': session_id})
+
+        elif path == '/api/sessions/delete':
+            auth_user = get_authenticated_user(self.headers)
+            if not auth_user or auth_user.get('role') != 'teacher':
+                return self.send_json({'success': False, 'error': 'Teacher authorization required.'}, status=403)
+
+            data = self.parse_body()
+            session_id = data.get('session_id')
+            if not session_id:
+                return self.send_json({'success': False, 'error': 'session_id required'}, status=400)
+
+            conn = get_db()
+            cursor = conn.cursor()
+            cursor.execute('DELETE FROM class_sessions WHERE id = ?', (session_id,))
             conn.commit()
             conn.close()
             return self.send_json({'success': True})
@@ -691,6 +889,13 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
             SELECT 
                 u.id, u.username, u.full_name, u.grade_level, u.avatar, u.xp, u.streak_days,
                 COALESCE(u.plain_password, 'password123') as password,
+                COALESCE(u.parent_name, '') as parent_name,
+                COALESCE(u.student_phone, '') as student_phone,
+                COALESCE(u.parent_phone, '') as parent_phone,
+                COALESCE(u.payment_method, 'InstaPay') as payment_method,
+                COALESCE(u.payment_date, '') as payment_date,
+                COALESCE(u.payment_amount, 0) as payment_amount,
+                COALESCE(u.payment_status, 'overdue') as payment_status,
                 COUNT(p.id) as sessions_count,
                 COALESCE(SUM(p.questions_answered), 0) as questions_answered,
                 COALESCE(SUM(p.questions_correct), 0) as questions_correct,
@@ -844,6 +1049,34 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
             assignments = [dict(r) for r in cursor.fetchall()]
             conn.close()
             return self.send_json({'success': True, 'assignments': assignments})
+
+        # ---------------------------------------------------------------------
+        # Payments Query
+        # ---------------------------------------------------------------------
+        elif path == '/api/payments/list':
+            conn = get_db()
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM payment_receipts ORDER BY submitted_at DESC LIMIT 100')
+            receipts = [dict(r) for r in cursor.fetchall()]
+            conn.close()
+            return self.send_json({'success': True, 'receipts': receipts, 'payments': receipts})
+
+        # ---------------------------------------------------------------------
+        # Class Sessions Query
+        # ---------------------------------------------------------------------
+        elif path == '/api/sessions/list':
+            conn = get_db()
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM class_sessions ORDER BY date DESC, created_at DESC LIMIT 100')
+            sessions = []
+            for s in cursor.fetchall():
+                d = dict(s)
+                d['session_date'] = d.get('date')
+                d['topic'] = d.get('topic_covered')
+                d['pdf_link'] = d.get('pdf_url')
+                sessions.append(d)
+            conn.close()
+            return self.send_json({'success': True, 'sessions': sessions})
 
         # Static files
         super().do_GET()
