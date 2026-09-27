@@ -366,238 +366,193 @@
         <section id="view-dashboard" class="portal-view active space-y-8">
           
 
-          <!-- Welcome & Milestone Hero Panel -->
-          <section class="relative overflow-hidden rounded-2xl bg-surface-card shadow-sm p-6 lg:p-8 border border-slate-100">
-            <div class="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-surface-tint pointer-events-none blur-3xl opacity-70"></div>
-            <div class="absolute right-1/4 -bottom-20 w-64 h-64 rounded-full bg-streak-glow pointer-events-none blur-2xl opacity-60"></div>
-            <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-              <!-- Left Column: Greeting & Actions -->
-              <div class="lg:col-span-7 flex flex-col space-y-4">
-                <div class="flex items-center gap-2.5">
-                  <span class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm" id="dashCohortTag">
-                    Year 4 Cohort Alpha
+          <!-- Welcome Banner & Quick Profile Card -->
+          <div class="relative overflow-hidden rounded-3xl bg-surface-card shadow-sm p-6 sm:p-8 lg:p-10 border border-slate-100/80">
+            <div class="absolute -right-20 -top-20 w-96 h-96 rounded-full bg-primary/5 pointer-events-none blur-3xl"></div>
+            <div class="absolute right-1/3 -bottom-24 w-80 h-80 rounded-full bg-streak-amber/5 pointer-events-none blur-3xl"></div>
+
+            <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
+              <!-- Left Column: Greeting, Grade Badge & Quick Actions -->
+              <div class="flex-1 space-y-4 max-w-2xl">
+                <div class="flex items-center gap-3">
+                  <span class="px-3.5 py-1 rounded-full bg-primary/10 text-primary font-bold text-xs tracking-wide uppercase border border-primary/20" id="dashCohortTag">
+                    Year 4 • Miss Rania's Class
+                  </span>
+                  <span class="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 font-bold text-xs flex items-center gap-1.5 border border-emerald-500/20">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Active Student
                   </span>
                 </div>
+                
                 <div class="space-y-2">
-                  <h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight">
-                    Welcome back, <span id="dashStudentName">Alex</span>! 👋
+                  <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-on-surface tracking-tight">
+                    Welcome back, <span id="dashStudentName" class="text-primary">Alex</span>! 👋
                   </h1>
-                  <p class="font-body-md text-body-md text-on-surface-variant max-w-xl">
-                    Welcome to your learning portal. Access your assigned homework tasks, participate in live Zoom Pro classes, and monitor your curriculum mastery.
+                  <p class="text-sm sm:text-base text-on-surface-variant leading-relaxed">
+                    Here is your study agenda for this week. Complete your assigned homework, attend live Zoom Pro classes, and verify your tuition status.
                   </p>
                 </div>
-                <div class="flex flex-wrap items-center gap-3 pt-2">
-                  <button class="flex items-center gap-2 px-6 py-3 rounded-xl bg-primary-container text-on-primary font-label-lg text-label-lg shadow-md hover:bg-primary transition-all active:translate-y-0.5 cursor-pointer" id="dashStartPracticeBtn">
+
+                <div class="flex flex-wrap items-center gap-3.5 pt-2">
+                  <button type="button" class="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-primary-container text-on-primary font-bold text-sm shadow-md hover:bg-primary transition-all active:translate-y-0.5 cursor-pointer" id="dashStartPracticeBtn">
                     <span>🚀</span>
-                    <span>Resume Practice</span>
+                    <span>Start Daily Practice</span>
                   </button>
-                  <button class="flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-container-low text-primary font-label-lg text-label-lg hover:bg-surface-container transition-all cursor-pointer" id="dashViewReportBtn">
+                  <button type="button" class="flex items-center gap-2 px-5 py-3 rounded-xl bg-surface-container-high text-on-surface font-semibold text-sm hover:bg-surface-container hover:text-primary transition-all cursor-pointer" id="dashViewReportBtn">
                     <span>📊</span>
-                    <span>View My Performance Report</span>
+                    <span>View Performance Report</span>
                   </button>
                 </div>
               </div>
-              <!-- Right Column: Level Progress Widget -->
-              <div class="lg:col-span-5 bg-surface-container-low rounded-xl p-5 sm:p-6 flex flex-col justify-between space-y-5 shadow-sm">
-                <div class="flex items-start justify-between">
+
+              <!-- Right Column: Sleek Student Level & Progress Pill -->
+              <div class="w-full lg:w-80 shrink-0 bg-surface-container-low/70 rounded-2xl p-5 sm:p-6 border border-slate-100 flex flex-col gap-4">
+                <div class="flex items-center justify-between">
                   <div>
-                    <span class="font-label-sm text-label-sm text-primary uppercase font-bold tracking-wider">Level Target</span>
-                    <h3 class="font-headline-sm text-headline-sm text-on-surface mt-0.5 flex items-center gap-2">
+                    <span class="text-xs uppercase font-extrabold text-primary tracking-wider">Academic Rank</span>
+                    <h3 class="text-base font-bold text-on-surface mt-0.5 flex items-center gap-1.5">
                       <span id="dashRankTitle">Lv. 5 Maths Explorer</span>
-                      <span class="text-base">🧭</span>
+                      <span>🧭</span>
                     </h3>
                   </div>
-                  <div class="w-12 h-12 rounded-xl bg-primary-container text-on-primary flex items-center justify-center font-headline-sm text-headline-sm font-extrabold shadow-sm" id="dashLevelBadge">
+                  <div class="w-11 h-11 rounded-xl bg-primary text-white flex items-center justify-center font-bold text-lg shadow-sm" id="dashLevelBadge">
                     5
                   </div>
                 </div>
+
                 <div class="space-y-2">
-                  <div class="flex items-center justify-between font-label-md text-label-md">
+                  <div class="flex items-center justify-between text-xs font-semibold">
                     <span class="text-on-surface-variant">XP Progress</span>
                     <span class="text-on-surface font-bold"><span id="dashCurrentXP">1,420</span> / <span id="dashTargetXP">2,000</span> XP</span>
                   </div>
-                  <div class="w-full h-3 rounded-full bg-surface-variant overflow-hidden p-0.5">
-                    <div class="h-full rounded-full bg-gradient-to-r from-primary-container via-secondary to-mastery-emerald transition-all duration-700 ease-out" id="dashXpFill" style="width: 71%;"></div>
+                  <div class="w-full h-2.5 rounded-full bg-surface-container-high overflow-hidden">
+                    <div class="h-full rounded-full bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500 transition-all duration-700" id="dashXpFill" style="width: 71%;"></div>
                   </div>
-                  <div class="flex items-center justify-between text-on-surface-variant font-label-sm text-label-sm pt-1">
-                    <span id="dashXpPercentText">71% to Level 6</span>
-                    <span id="dashXpRemainingText">580 XP Remaining</span>
+                  <div class="flex items-center justify-between text-[11px] text-on-surface-variant font-medium">
+                    <span id="dashXpPercentText">71% to Next Level</span>
+                    <span id="dashXpRemainingText" class="font-semibold text-primary">580 XP Remaining</span>
                   </div>
                 </div>
-                <div class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg bg-surface-card text-on-surface shadow-sm">
-                  <span class="material-symbols-outlined text-streak-amber text-[20px] shrink-0">military_tech</span>
-                  <span class="font-label-sm text-label-sm font-semibold" id="dashMilestonePrompt">Solve 4 more questions to reach Level 6!</span>
+
+                <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-surface-card border border-border-subtle text-xs text-on-surface-variant">
+                  <span class="material-symbols-outlined text-streak-amber text-[18px] shrink-0">military_tech</span>
+                  <span class="font-medium truncate" id="dashMilestonePrompt">Keep practicing to achieve mastery!</span>
                 </div>
               </div>
             </div>
+          </div>
 
-            <!-- Fast Daily Stats Strip -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-8 pt-6 bg-surface-container-lowest/70 rounded-xl p-4 border border-slate-100">
-              <div class="flex items-center gap-3 p-2">
-                <div class="w-10 h-10 rounded-xl bg-surface-tint flex items-center justify-center text-xl shrink-0">📚</div>
-                <div class="flex flex-col">
-                  <span class="font-headline-sm text-headline-sm text-on-surface leading-tight font-bold" id="kpiQuestionsAnswered">142</span>
-                  <span class="font-label-sm text-label-sm text-on-surface-variant">Questions Solved</span>
-                </div>
+          <!-- Quick Metrics: 4 Dedicated KPI Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div class="bg-surface-card rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-all">
+              <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center text-2xl shrink-0">
+                📚
               </div>
-              <div class="flex items-center gap-3 p-2">
-                <div class="w-10 h-10 rounded-xl bg-surface-tint flex items-center justify-center text-xl shrink-0">🎯</div>
-                <div class="flex flex-col">
-                  <span class="font-headline-sm text-headline-sm text-on-surface leading-tight font-bold" id="kpiAccuracyRate">88.5%</span>
-                  <span class="font-label-sm text-label-sm text-on-surface-variant">Accuracy Rate</span>
-                </div>
-              </div>
-              <div class="flex items-center gap-3 p-2">
-                <div class="w-10 h-10 rounded-xl bg-surface-tint flex items-center justify-center text-xl shrink-0">⏱️</div>
-                <div class="flex flex-col">
-                  <span class="font-headline-sm text-headline-sm text-on-surface leading-tight font-bold" id="kpiTimeSpent">1h 45m</span>
-                  <span class="font-label-sm text-label-sm text-on-surface-variant">Practice Time</span>
-                </div>
-              </div>
-              <div class="flex items-center gap-3 p-2">
-                <div class="w-10 h-10 rounded-xl bg-surface-tint flex items-center justify-center text-xl shrink-0">🏆</div>
-                <div class="flex flex-col">
-                  <span class="font-headline-sm text-headline-sm text-on-surface leading-tight font-bold" id="kpiMasteredCount">8</span>
-                  <span class="font-label-sm text-label-sm text-on-surface-variant">Skills Mastered</span>
-                </div>
+              <div class="flex flex-col">
+                <span class="text-2xl font-extrabold text-on-surface tracking-tight" id="kpiQuestionsAnswered">142</span>
+                <span class="text-xs text-on-surface-variant font-semibold">Questions Solved</span>
               </div>
             </div>
-          </section>
 
-          <!-- Section 2: Assigned by Miss Rania -->
-          <section class="space-y-4" id="dashAssignmentsSection">
-            <div class="flex items-center justify-between">
+            <div class="bg-surface-card rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-all">
+              <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center text-2xl shrink-0">
+                🎯
+              </div>
+              <div class="flex flex-col">
+                <span class="text-2xl font-extrabold text-on-surface tracking-tight" id="kpiAccuracyRate">88.5%</span>
+                <span class="text-xs text-on-surface-variant font-semibold">Accuracy Rate</span>
+              </div>
+            </div>
+
+            <div class="bg-surface-card rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-all">
+              <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center text-2xl shrink-0">
+                ⏱️
+              </div>
+              <div class="flex flex-col">
+                <span class="text-2xl font-extrabold text-on-surface tracking-tight" id="kpiTimeSpent">1h 45m</span>
+                <span class="text-xs text-on-surface-variant font-semibold">Practice Time</span>
+              </div>
+            </div>
+
+            <div class="bg-surface-card rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-all">
+              <div class="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-600 flex items-center justify-center text-2xl shrink-0">
+                🏆
+              </div>
+              <div class="flex flex-col">
+                <span class="text-2xl font-extrabold text-on-surface tracking-tight" id="kpiMasteredCount">8</span>
+                <span class="text-xs text-on-surface-variant font-semibold">Skills Mastered</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 1: Teacher Assigned Homework & Tasks -->
+          <section class="space-y-5" id="dashAssignmentsSection">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
               <div class="flex items-center gap-3">
-                <div class="p-2 rounded-lg bg-surface-container text-primary">
-                  <span class="material-symbols-outlined text-[22px]">assignment</span>
+                <div class="w-11 h-11 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-[24px]">assignment</span>
                 </div>
                 <div>
-                  <span class="font-label-sm text-label-sm text-primary font-bold uppercase tracking-wider">📌 TEACHER ASSIGNMENTS • Assigned by Miss Rania</span>
-                  <h2 class="font-title-md text-title-md text-on-surface font-bold">Active Tasks (3)</h2>
+                  <div class="flex items-center gap-2.5">
+                    <h2 class="text-xl font-bold text-on-surface">Homework &amp; Assignments</h2>
+                    <span class="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold text-xs" id="dashAssignmentBadge">Active Tasks</span>
+                  </div>
+                  <p class="text-xs sm:text-sm text-on-surface-variant mt-0.5">Problem sets and curriculum exercises assigned by Miss Rania.</p>
                 </div>
               </div>
-              <button class="font-label-sm text-label-sm text-primary hover:underline font-bold flex items-center gap-1 cursor-pointer" onclick="switchView('tracks')">
-                View All Homework 
+              <button type="button" class="text-xs sm:text-sm text-primary hover:underline font-bold flex items-center gap-1.5 cursor-pointer self-start sm:self-auto" onclick="switchView('tracks')">
+                <span>View Full Curriculum</span>
                 <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
               </button>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-5" id="dashAssignmentsGrid">
-              <!-- Task Card 1 -->
-              <div class="bg-surface-card rounded-xl p-5 shadow-sm border border-slate-100 flex flex-col justify-between space-y-4 hover:shadow-md transition-shadow">
-                <div class="space-y-3">
-                  <div class="flex items-center justify-between">
-                    <span class="px-2.5 py-1 rounded-md bg-surface-container font-label-sm text-label-sm font-bold text-primary">Year 4 • Maths</span>
-                    <span class="px-2 py-0.5 rounded bg-error-container text-on-error-container font-label-sm text-label-sm font-semibold">Due Tomorrow</span>
-                  </div>
-                  <div>
-                    <h3 class="font-title-md text-title-md text-on-surface font-bold leading-snug">A.1 Maths: Place value models - up to thousands</h3>
-                    <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Focus on standard form conversion &amp; expanded notation.</p>
-                  </div>
-                </div>
-                <div class="space-y-3 pt-2">
-                  <div class="space-y-1.5">
-                    <div class="flex items-center justify-between font-label-sm text-label-sm">
-                      <span class="text-on-surface-variant">SmartScore Progress</span>
-                      <span class="text-on-surface font-bold">89 / 100</span>
-                    </div>
-                    <div class="w-full h-2 rounded-full bg-surface-container-high overflow-hidden">
-                      <div class="h-full rounded-full bg-primary-container" style="width: 85%;"></div>
-                    </div>
-                    <div class="text-right font-label-sm text-label-sm text-on-surface-variant">85% Complete</div>
-                  </div>
-                  <button class="w-full py-2.5 px-4 rounded-xl bg-primary-container text-on-primary font-label-md text-label-md font-bold flex items-center justify-center gap-2 hover:bg-primary transition-all cursor-pointer" onclick="openPracticeModal({code:'A.1', name:'Place value models - up to thousands', category_name:'Place Value', grade:'Year 4', subject:'Maths'})">
-                    <span>Continue Drill</span>
-                    <span>➜</span>
-                  </button>
-                </div>
-              </div>
-              <!-- Task Card 2 -->
-              <div class="bg-surface-card rounded-xl p-5 shadow-sm border border-slate-100 flex flex-col justify-between space-y-4 hover:shadow-md transition-shadow">
-                <div class="space-y-3">
-                  <div class="flex items-center justify-between">
-                    <span class="px-2.5 py-1 rounded-md bg-surface-container font-label-sm text-label-sm font-bold text-tertiary">Year 4 • Science</span>
-                    <span class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface font-label-sm text-label-sm font-semibold">Due: Friday</span>
-                  </div>
-                  <div>
-                    <h3 class="font-title-md text-title-md text-on-surface font-bold leading-snug">Science Inquiry: Ecosystems &amp; Food Chains</h3>
-                    <div class="flex items-center gap-1.5 mt-2 text-on-surface-variant font-label-sm text-label-sm">
-                      <span class="w-5 h-5 rounded-full bg-secondary-fixed flex items-center justify-center font-bold text-[10px] text-secondary">MR</span>
-                      <span>Assigned by Miss Rania</span>
-                    </div>
-                  </div>
-                </div>
-                <div class="space-y-3 pt-2">
-                  <div class="p-3 rounded-lg bg-surface-container-low flex items-center justify-between">
-                    <span class="font-label-sm text-label-sm text-on-surface-variant">Task Status</span>
-                    <span class="px-2 py-0.5 rounded-full bg-surface-variant text-on-surface-variant font-label-sm text-label-sm font-bold">Pending</span>
-                  </div>
-                  <button class="w-full py-2.5 px-4 rounded-xl bg-surface-container-high text-primary font-label-md text-label-md font-bold flex items-center justify-center gap-2 hover:bg-surface-container transition-all cursor-pointer" onclick="openPracticeModal({code:'S.1', name:'Ecosystems & Food Chains', category_name:'Biology', grade:'Year 4', subject:'Science'})">
-                    <span>Start Practice</span>
-                    <span>➜</span>
-                  </button>
-                </div>
-              </div>
-              <!-- Task Card 3 -->
-              <div class="bg-surface-card rounded-xl p-5 shadow-sm border border-slate-100 flex flex-col justify-between space-y-4 hover:shadow-md transition-shadow">
-                <div class="space-y-3">
-                  <div class="flex items-center justify-between">
-                    <span class="px-2.5 py-1 rounded-md bg-surface-container font-label-sm text-label-sm font-bold text-secondary">Year 4 • English</span>
-                    <span class="px-2 py-0.5 rounded bg-surface-container-high text-on-surface-variant font-label-sm text-label-sm font-semibold">Due: Next Monday</span>
-                  </div>
-                  <div>
-                    <h3 class="font-title-md text-title-md text-on-surface font-bold leading-snug">English Reading: Inference &amp; Context Clues</h3>
-                    <p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Passage analysis with text-dependent comprehension queries.</p>
-                  </div>
-                </div>
-                <div class="space-y-3 pt-2">
-                  <div class="p-3 rounded-lg bg-tertiary-container/10 flex items-center justify-between text-tertiary">
-                    <div class="flex items-center gap-1.5 font-label-sm text-label-sm font-bold">
-                      <span class="material-symbols-outlined text-[18px]">verified</span>
-                      <span>SmartScore: 92/100</span>
-                    </div>
-                    <span class="px-2 py-0.5 rounded bg-tertiary-container text-on-tertiary-container font-label-sm text-label-sm font-bold">Mastered</span>
-                  </div>
-                  <button class="w-full py-2.5 px-4 rounded-xl bg-surface-container-low text-on-surface font-label-md text-label-md font-bold flex items-center justify-center gap-2 hover:bg-surface-container transition-all cursor-pointer" onclick="openPracticeModal({code:'E.1', name:'Inference & Context Clues', category_name:'Reading Comprehension', grade:'Year 4', subject:'English'})">
-                    <span>Review</span>
-                    <span>➜</span>
-                  </button>
-                </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="dashAssignmentsGrid">
+              <!-- Dynamically populated by renderDashboardAssignments() -->
+              <div class="col-span-full py-10 px-6 rounded-2xl bg-surface-card border border-slate-100 text-center text-on-surface-variant font-medium">
+                Loading assigned homework...
               </div>
             </div>
           </section>
 
-          <!-- Section 3: Student Subscription & Payment Proof Status -->
-          <section id="dashPaymentSection" class="space-y-4">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2 text-cyan-400 font-label-sm text-label-sm font-bold">
-                <span class="material-symbols-outlined text-[18px]">receipt_long</span>
-                <span>// MONTHLY SUBSCRIPTION & TUITION STATUS</span>
+          <!-- Section 2: Live Zoom Pro Classes & Materials -->
+          <section class="space-y-5" id="dashSessionsSection">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
+              <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl bg-cyan-500/10 text-cyan-600 flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-[24px]">videocam</span>
+                </div>
+                <div>
+                  <h2 class="text-xl font-bold text-on-surface">Live Zoom Pro Classes &amp; Materials</h2>
+                  <p class="text-xs sm:text-sm text-on-surface-variant mt-0.5">Scheduled live lectures, syllabus review, and downloadable PDF study guides.</p>
+                </div>
               </div>
-              <button class="px-3.5 py-1.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-400 font-label-sm text-xs font-bold border border-cyan-500/30 transition-all flex items-center gap-1.5 cursor-pointer" onclick="openSubmitPaymentModal()">
-                <span class="material-symbols-outlined text-[16px]">upload_file</span>
-                <span>Upload Payment Proof</span>
+              <button type="button" class="text-xs sm:text-sm text-cyan-600 hover:underline font-bold flex items-center gap-1.5 cursor-pointer self-start sm:self-auto" onclick="switchView('sessions')">
+                <span>View All Sessions</span>
+                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
               </button>
             </div>
-            <div id="dashPaymentProofCard" class="bg-surface-card rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <!-- Dynamically populated by renderStudentPaymentStatus() -->
+
+            <div id="dashSessionsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <!-- Dynamically populated by renderStudentSessions() -->
             </div>
           </section>
 
-          <!-- Section 4: Zoom Pro Live Classes & Lesson Syllabus Log -->
-          <section id="dashSessionsSection" class="space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div class="space-y-1">
-                <div class="flex items-center gap-2 text-primary font-label-sm text-label-sm font-bold">
-                  <span class="material-symbols-outlined text-[18px]">videocam</span>
-                  <span>// ZOOM PRO SESSIONS & SYLLABUS LOG</span>
+          <!-- Section 3: Student Monthly Tuition & Payment Standing -->
+          <section id="dashPaymentSection" class="space-y-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
+              <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-[24px]">receipt_long</span>
                 </div>
-                <p class="font-body-sm text-body-sm text-on-surface-variant">
-                  Access live Zoom Pro meetings, class syllabus topics, and download lesson PDF study sheets.
-                </p>
+                <div>
+                  <h2 class="text-xl font-bold text-on-surface">Monthly Tuition &amp; Payment Standing</h2>
+                  <p class="text-xs sm:text-sm text-on-surface-variant mt-0.5">Review your monthly subscription status and upload payment proof receipts.</p>
+                </div>
               </div>
             </div>
-            <div id="dashSessionsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              <!-- Dynamically populated by renderStudentSessions() -->
+
+            <div id="dashPaymentProofCard" class="bg-surface-card rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <!-- Dynamically populated by renderStudentPaymentStatus() -->
             </div>
           </section>
         </section>
@@ -1067,33 +1022,6 @@
             </button>
           </div>
           <div class="assignments-teacher-grid" id="teacherAssignmentsGrid">
-            <!-- Injected via JS -->
-          </div>
-        </div>
-      </div>
-
-      <!-- Two Column Grid: Attention Needed & Mastered Topics -->
-      <div class="teacher-columns-grid">
-        <div class="report-section-card glass-panel">
-          <div class="section-card-header">
-            <div>
-              <h3 class="card-title">⚠️ Topics Requiring Teacher Attention</h3>
-              <p class="card-subtitle">Skills where student accuracy dropped below 85%. Ideal for class revision.</p>
-            </div>
-          </div>
-          <div class="teacher-skills-list" id="teacherAttentionSkillsList">
-            <!-- Injected via JS -->
-          </div>
-        </div>
-
-        <div class="report-section-card glass-panel">
-          <div class="section-card-header">
-            <div>
-              <h3 class="card-title">🌟 Top Mastered Competencies</h3>
-              <p class="card-subtitle">Skills where students consistently achieved SmartScore 90+.</p>
-            </div>
-          </div>
-          <div class="teacher-skills-list" id="teacherMasteredSkillsList">
             <!-- Injected via JS -->
           </div>
         </div>

@@ -2109,9 +2109,9 @@ async function renderDashboard() {
     }
   } catch (e) {}
 
-  // Render Tracks Preview on Dashboard
+  // Render Tracks Preview on Dashboard if container exists
   const teacherData = window.TEACHER_CURRICULUM;
-  if (teacherData && teacherData.tracks) {
+  if (teacherData && teacherData.tracks && el.dashTracksPreviewContainer) {
     el.dashTracksPreviewContainer.innerHTML = teacherData.tracks.slice(0, 3).map(track => `
       <div class="unit-card">
         <div>
@@ -4225,27 +4225,27 @@ async function renderDashboardAssignments() {
       const goalText = a.question_goal ? `Goal: Complete ${a.question_goal} Questions` : 'Goal: Complete Drill';
 
       return `
-        <div class="assignment-card ${statusClass}" style="border: 1px solid ${isDone ? 'rgba(16,185,129,0.3)' : 'rgba(99,102,241,0.2)'}; background: ${isDone ? 'rgba(16,185,129,0.03)' : 'var(--bg-surface-solid)'}; border-radius: 14px; padding: 1.25rem; display: flex; flex-col; justify-content: space-between; gap: 0.85rem; box-shadow: var(--shadow-sm);">
+        <div class="assignment-card ${statusClass}" style="border: 1px solid ${isDone ? 'rgba(16,185,129,0.3)' : 'rgba(99,102,241,0.2)'}; background: ${isDone ? 'rgba(16,185,129,0.03)' : 'var(--bg-surface-solid)'}; border-radius: 16px; padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between; gap: 1rem; box-shadow: var(--shadow-sm);">
           <div class="assign-card-top" style="display:flex; justify-content:space-between; align-items:center;">
-            <span class="assign-skill-code" style="font-weight:700; font-size:0.82rem; color:var(--color-primary);">${a.skill_code} &bull; ${a.subject}</span>
-            <span class="assign-due-badge ${statusClass}" style="font-size:0.75rem; font-weight:700; padding:0.25rem 0.65rem; border-radius:9999px; background:${isDone ? '#dcfce7; color:#15803d;' : '#fee2e2; color:#b91c1c;'}">${statusText}</span>
+            <span class="assign-skill-code" style="font-weight:700; font-size:0.85rem; color:var(--color-primary);">${a.skill_code} &bull; ${a.subject}</span>
+            <span class="assign-due-badge ${statusClass}" style="font-size:0.75rem; font-weight:700; padding:0.3rem 0.75rem; border-radius:9999px; background:${isDone ? '#dcfce7; color:#15803d;' : '#fee2e2; color:#b91c1c;'}">${statusText}</span>
           </div>
           <div>
-            <div class="assign-skill-title" style="font-size:1.05rem; font-weight:700; color:var(--text-primary); margin-bottom:0.35rem;">${a.skill_name}</div>
-            <div class="assign-instructions" style="font-size:0.85rem; color:var(--text-secondary); line-height:1.4;">${a.instructions || 'Practice and complete all required questions.'}</div>
+            <div class="assign-skill-title" style="font-size:1.1rem; font-weight:700; color:var(--text-primary); margin-bottom:0.4rem; line-height:1.4;">${a.skill_name}</div>
+            <div class="assign-instructions" style="font-size:0.875rem; color:var(--text-secondary); line-height:1.5;">${a.instructions || 'Practice and complete all required questions.'}</div>
           </div>
-          <div style="font-size:0.78rem; font-weight:600; color:var(--color-tertiary); background:rgba(245,158,11,0.08); padding:0.35rem 0.65rem; border-radius:6px; align-self:flex-start;">
+          <div style="font-size:0.8rem; font-weight:600; color:var(--color-tertiary); background:rgba(245,158,11,0.08); padding:0.4rem 0.75rem; border-radius:8px; align-self:flex-start;">
             🎯 ${goalText}
           </div>
-          <div class="assign-card-footer" style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border-subtle); padding-top:0.75rem; margin-top:0.25rem;">
-            <span style="font-size:0.78rem; font-weight:600; color:var(--text-muted);">${a.grade}</span>
-            <button type="button" class="${isDone ? 'secondary-glass-btn' : 'primary-glow-btn'}" onclick="launchPracticeForAssignment('${a.id}')" style="padding:0.45rem 1rem; font-size:0.85rem; font-weight:700;">
+          <div class="assign-card-footer" style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border-subtle); padding-top:1rem; margin-top:0.35rem;">
+            <span style="font-size:0.8rem; font-weight:600; color:var(--text-muted);">${a.grade}</span>
+            <button type="button" class="${isDone ? 'secondary-glass-btn' : 'primary-glow-btn'}" onclick="launchPracticeForAssignment('${a.id}')" style="padding:0.55rem 1.25rem; font-size:0.875rem; font-weight:700; border-radius:10px;">
               ${isDone ? 'Review / Practice Again 🔄' : 'Start Homework ➜'}
             </button>
           </div>
         </div>
       `;
-    }).join('') || '<div style="color:var(--text-muted); padding:1.5rem; text-align:center; background:var(--bg-surface-solid); border-radius:12px; border:1px dashed var(--border-card);">🎉 All caught up! No pending homework assigned by Miss Rania right now.</div>';
+    }).join('') || '<div style="grid-column: 1 / -1; color:var(--text-muted); padding:2.5rem; text-align:center; background:var(--bg-surface-solid); border-radius:16px; border:1px dashed var(--border-card); font-size:0.95rem;">🎉 All caught up! No pending homework assigned by Miss Rania right now.</div>';
   } catch (err) {
     console.error('Error loading student assignments:', err);
   }
