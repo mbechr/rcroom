@@ -2776,7 +2776,7 @@ async function renderTeacherConsoleView() {
                 <div style="font-size:0.75rem; color:var(--text-muted); display:flex; gap:6px; align-items:center;">
                   <code style="color:var(--color-primary); font-size:0.75rem;">@${s.username}</code>
                   <span>&bull;</span>
-                  <span style="color:#00e5ff; font-weight:700;">${s.grade_level || 'Year 4'}</span>
+                  <span style="color:var(--color-primary); font-weight:700;">${s.grade_level || 'Year 4'}</span>
                 </div>
               </div>
             </div>
@@ -2884,15 +2884,10 @@ function cleanWhatsAppNumber(phone) {
 window.cleanWhatsAppNumber = cleanWhatsAppNumber;
 
 window.switchTeacherTab = function(tabName) {
-  const tabs = document.querySelectorAll('#teacherSubTabs button');
+  const tabs = document.querySelectorAll('#teacherSubTabs .teacher-sub-tab');
   tabs.forEach(t => {
     const isActive = t.dataset.ttab === tabName;
     t.classList.toggle('active', isActive);
-    if (isActive) {
-      t.className = 'teacher-sub-tab px-4 py-2 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 font-bold text-xs flex items-center gap-2 cursor-pointer transition-all active';
-    } else {
-      t.className = 'teacher-sub-tab px-4 py-2 rounded-xl bg-transparent border border-transparent text-slate-400 hover:text-white font-bold text-xs flex items-center gap-2 cursor-pointer transition-all';
-    }
   });
 
   const panels = {
@@ -2926,13 +2921,7 @@ window.switchTeacherTab = function(tabName) {
 window.filterTeacherRoster = function(filter) {
   AppState.teacherRosterFilter = filter;
   document.querySelectorAll('.roster-filter-btn').forEach(btn => {
-    const isAct = btn.dataset.filter === filter;
-    btn.classList.toggle('active', isAct);
-    if (isAct) {
-      btn.className = 'roster-filter-btn px-3 py-1 rounded-lg bg-cyan-500/20 text-cyan-400 font-bold active';
-    } else {
-      btn.className = 'roster-filter-btn px-3 py-1 rounded-lg text-slate-400 hover:text-white font-bold';
-    }
+    btn.classList.toggle('active', btn.dataset.filter === filter);
   });
   renderTeacherConsoleView();
 };
@@ -3099,10 +3088,10 @@ async function renderTeacherPayments() {
     const list = await DB.getPayments();
     if (!list || !list.length) {
       container.innerHTML = `
-        <div style="text-align: center; padding: 3rem; background: rgba(14, 18, 30, 0.5); border-radius: 14px; border: 1px dashed rgba(255,255,255,0.1);">
-          <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">💳</div>
-          <div style="font-weight: 700; color: #fff; font-size: 1rem;">No incoming payment receipts</div>
-          <div style="color: #94a3b8; font-size: 0.85rem; margin-top: 4px;">When students upload payment receipts (InstaPay / Vodafone Cash), they will appear here for one-click approval.</div>
+        <div class="teacher-empty-box">
+          <div class="empty-icon">💳</div>
+          <div class="empty-title">No incoming payment receipts</div>
+          <div class="empty-desc">When students upload payment receipts (InstaPay / Vodafone Cash), they will appear here for one-click approval.</div>
         </div>
       `;
       return;
@@ -3114,40 +3103,40 @@ async function renderTeacherPayments() {
       const safeImg = p.receipt_image ? p.receipt_image.replace(/"/g, '&quot;') : '';
 
       return `
-        <div style="background: rgba(14, 18, 30, 0.7); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 1.25rem; display: flex; flex-direction: column; md:flex-row; gap: 1.25rem; justify-content: space-between; align-items: start; transition: all 0.2s;">
+        <div class="teacher-item-card">
           <div style="display: flex; gap: 1rem; min-width: 0; flex: 1;">
             ${p.receipt_image ? `
               <div onclick="viewReceiptImage('${safeImg}', '${(p.student_name || 'Receipt').replace(/'/g, "\\'")}')" class="receipt-thumb shrink-0 cursor-pointer" title="Click to enlarge screenshot">
-                <img src="${p.receipt_image}" alt="Receipt" style="width: 72px; height: 72px; object-fit: cover; border-radius: 10px; border: 1px solid rgba(0, 229, 255, 0.3);">
+                <img src="${p.receipt_image}" alt="Receipt" style="width: 72px; height: 72px; object-fit: cover; border-radius: 10px; border: 1px solid var(--border-card);">
               </div>
             ` : `
-              <div style="width: 72px; height: 72px; border-radius: 10px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; shrink-0;">
+              <div style="width: 72px; height: 72px; border-radius: 10px; background: var(--bg-hover); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; border: 1px solid var(--border-subtle);">
                 🧾
               </div>
             `}
             <div style="min-width: 0;">
               <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
-                <strong style="color: #fff; font-size: 1.05rem;">${p.student_name || 'Student'}</strong>
+                <strong class="teacher-item-title">${p.student_name || 'Student'}</strong>
                 <span class="payment-badge ${badgeClass}">${(p.status || 'pending').toUpperCase()}</span>
-                <span style="font-size: 0.8rem; color: #00e5ff; font-weight: 700; background: rgba(0, 229, 255, 0.1); padding: 2px 8px; border-radius: 6px;">${p.amount || 0} EGP</span>
+                <span style="font-size: 0.8rem; color: var(--color-primary); font-weight: 700; background: var(--bg-hover); border: 1px solid var(--border-subtle); padding: 2px 8px; border-radius: 6px;">${p.amount || 0} EGP</span>
               </div>
-              <div style="font-size: 0.85rem; color: #94a3b8; margin-top: 4px;">
+              <div class="teacher-item-meta">
                 <span>📅 ${p.payment_date || 'Recent'}</span> &bull; 
                 <span>💳 ${p.payment_method || 'InstaPay'}</span>
               </div>
-              ${p.notes ? `<div style="font-size: 0.8rem; color: #cbd5e1; margin-top: 6px; background: rgba(255,255,255,0.04); padding: 4px 8px; border-radius: 6px;">📝 ${p.notes}</div>` : ''}
+              ${p.notes ? `<div class="teacher-item-notes">📝 ${p.notes}</div>` : ''}
             </div>
           </div>
           <div style="display: flex; align-items: center; gap: 0.5rem; shrink-0; align-self: flex-end;">
             ${isPending ? `
-              <button type="button" class="action-btn-sm" onclick="reviewPaymentReceipt(${p.id}, 'approved')" style="background: rgba(16, 185, 129, 0.2); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4); font-weight: 700; padding: 6px 14px; border-radius: 8px; cursor: pointer;">
-                ✅ Approve
+              <button type="button" class="action-btn-sm" onclick="reviewPaymentReceipt(${p.id}, 'approved')" style="background: rgba(16, 185, 129, 0.12); color: #059669; border-color: rgba(16, 185, 129, 0.25); font-weight: 700; padding: 6px 14px; border-radius: 8px; cursor: pointer;">
+                ✓ Approve
               </button>
               <button type="button" class="action-btn-sm delete" onclick="reviewPaymentReceipt(${p.id}, 'rejected')" style="padding: 6px 12px; border-radius: 8px; cursor: pointer;">
-                ❌ Reject
+                ✕ Reject
               </button>
             ` : `
-              <span style="font-size: 0.8rem; color: #64748b;">Reviewed</span>
+              <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Reviewed</span>
             `}
           </div>
         </div>
@@ -3190,35 +3179,36 @@ async function renderTeacherSessions() {
     const sessions = await DB.getClassSessions();
     if (!sessions || !sessions.length) {
       container.innerHTML = `
-        <div style="text-align: center; padding: 3rem; background: rgba(14, 18, 30, 0.5); border-radius: 14px; border: 1px dashed rgba(255,255,255,0.1);">
-          <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🎥</div>
-          <div style="font-weight: 700; color: #fff; font-size: 1rem;">No class sessions logged yet</div>
-          <div style="color: #94a3b8; font-size: 0.85rem; margin-top: 4px;">Click "Log New Class Session" above to add Zoom meetings, syllabus topics, and lesson PDF sheets.</div>
+        <div class="teacher-empty-box">
+          <div class="empty-icon">🎥</div>
+          <div class="empty-title">No class sessions logged yet</div>
+          <div class="empty-desc">Click "Log Class Session" above to add Zoom meetings, syllabus topics, and lesson PDF sheets.</div>
         </div>
       `;
       return;
     }
 
     container.innerHTML = sessions.map(s => `
-      <div style="background: rgba(14, 18, 30, 0.7); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 1.25rem; display: flex; justify-content: space-between; align-items: start; gap: 1rem; flex-wrap: wrap;">
+      <div class="teacher-item-card">
         <div style="flex: 1; min-width: 260px;">
           <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
-            <span style="background: rgba(139, 92, 246, 0.2); color: #c084fc; border: 1px solid rgba(139, 92, 246, 0.4); padding: 2px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;">
-              📅 ${s.session_date ? new Date(s.session_date).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) : 'Session'}
+            <span class="planner-meta-pill time">
+              <span class="material-symbols-outlined text-[14px]">calendar_today</span>
+              ${s.session_date ? new Date(s.session_date).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) : 'Session'}
             </span>
-            <strong style="color: #fff; font-size: 1.1rem;">${s.title}</strong>
+            <strong class="teacher-item-title">${s.title}</strong>
           </div>
-          <div style="color: #94a3b8; font-size: 0.9rem; line-height: 1.5; margin-top: 6px;">
-            <strong>Topics Covered:</strong> ${s.topic || 'General curriculum coverage'}
+          <div class="teacher-item-meta" style="margin-top: 6px;">
+            <strong style="color: var(--text-primary);">Topics Covered:</strong> ${s.topic || 'General curriculum coverage'}
           </div>
           <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 8px;">
             ${s.zoom_link ? `
-              <a href="${s.zoom_link}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; text-decoration: none;">
+              <a href="${s.zoom_link}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(0, 113, 227, 0.1); color: var(--color-primary); border: 1px solid rgba(0, 113, 227, 0.25); padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; text-decoration: none;">
                 🎥 Zoom Meeting
               </a>
             ` : ''}
             ${s.pdf_link ? `
-              <a href="${s.pdf_link}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; text-decoration: none;">
+              <a href="${s.pdf_link}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(239, 68, 68, 0.1); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.25); padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; text-decoration: none;">
                 📄 ${s.pdf_title || 'PDF Sheet'}
               </a>
             ` : ''}
@@ -3461,14 +3451,8 @@ window.filterPlannerTasks = function(filter) {
   const dateInput = document.getElementById('plannerDateFilterInput');
   if (dateInput) dateInput.value = '';
 
-  document.querySelectorAll('.planner-filter-btn').forEach(btn => {
-    const isAct = btn.dataset.filter === filter;
-    btn.classList.toggle('active', isAct);
-    if (isAct) {
-      btn.className = 'planner-filter-btn px-3 py-1.5 rounded-xl font-bold text-xs bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 transition-all cursor-pointer active';
-    } else {
-      btn.className = 'planner-filter-btn px-3 py-1.5 rounded-xl font-bold text-xs bg-surface-container-high text-slate-300 hover:text-white transition-all cursor-pointer';
-    }
+  document.querySelectorAll('.planner-filter-tab, .planner-filter-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.filter === filter);
   });
 
   const label = document.getElementById('plannerCurrentViewDateLabel');
@@ -3488,9 +3472,8 @@ window.handlePlannerDateChange = function(dateStr) {
   AppState.plannerFilter = 'specific';
   AppState.plannerSpecificDate = dateStr;
 
-  document.querySelectorAll('.planner-filter-btn').forEach(btn => {
+  document.querySelectorAll('.planner-filter-tab, .planner-filter-btn').forEach(btn => {
     btn.classList.remove('active');
-    btn.className = 'planner-filter-btn px-3 py-1.5 rounded-xl font-bold text-xs bg-surface-container-high text-slate-300 hover:text-white transition-all cursor-pointer';
   });
 
   const label = document.getElementById('plannerCurrentViewDateLabel');
@@ -3571,10 +3554,10 @@ window.renderPlannerView = async function() {
 
     if (!filtered.length) {
       container.innerHTML = `
-        <div class="text-center py-12 px-4 bg-slate-900/40 rounded-2xl border border-dashed border-white/10">
-          <div class="text-4xl mb-3">📅</div>
-          <h3 class="text-white font-bold text-base">No lessons scheduled for this view</h3>
-          <p class="text-slate-400 text-xs mt-1">Click "Add Lesson Plan" above to schedule who will take lessons and what topics to cover.</p>
+        <div class="planner-empty-state">
+          <div class="planner-empty-icon">📅</div>
+          <h3 class="planner-empty-title">No lessons scheduled for this view</h3>
+          <p class="planner-empty-desc">Click "Add Lesson Plan" above to schedule who will take lessons and what topics to cover.</p>
         </div>
       `;
       return;
@@ -3585,29 +3568,29 @@ window.renderPlannerView = async function() {
       const formattedDate = new Date(t.date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
       return `
         <div class="planner-task-card ${isDone ? 'completed' : ''}" id="planCard_${t.id}">
-          <div class="flex flex-col md:flex-row md:items-start justify-between gap-3">
-            <div class="space-y-1.5 flex-1">
+          <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+            <div class="space-y-2 flex-1">
               <div class="flex items-center gap-2 flex-wrap">
-                <span class="px-2.5 py-0.5 rounded-lg bg-cyan-500/20 text-cyan-300 font-bold text-xs border border-cyan-500/30">
-                  🕒 ${t.time}
+                <span class="planner-meta-pill time">
+                  <span class="material-symbols-outlined text-[14px]">schedule</span> ${t.time}
                 </span>
-                <span class="px-2.5 py-0.5 rounded-lg bg-white/10 text-slate-300 text-xs font-semibold">
-                  📅 ${formattedDate}
+                <span class="planner-meta-pill date">
+                  <span class="material-symbols-outlined text-[14px]">calendar_today</span> ${formattedDate}
                 </span>
-                <span class="px-2.5 py-0.5 rounded-full ${isDone ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-300'} text-xs font-bold">
-                  ${isDone ? '✅ Completed' : '⏳ Pending'}
+                <span class="planner-meta-pill ${isDone ? 'status-completed' : 'status-pending'}">
+                  ${isDone ? '✓ Completed' : '⏳ Pending'}
                 </span>
-                <span class="px-2.5 py-0.5 rounded-lg bg-indigo-500/20 text-indigo-300 font-bold text-xs border border-indigo-500/30">
-                  👤 ${t.student_name}
+                <span class="planner-meta-pill student">
+                  <span class="material-symbols-outlined text-[14px]">person</span> ${t.student_name}
                 </span>
               </div>
-              <h3 class="planner-lesson-title text-base font-bold text-white mt-1">${t.lesson_title}</h3>
-              <div class="text-xs text-slate-300 mt-1 leading-relaxed bg-slate-900/60 p-3 rounded-xl border border-white/5">
-                <span class="text-cyan-400 font-bold uppercase tracking-wider block text-[10px] mb-1">What They Will Take (Topics &amp; Objectives):</span>
-                ${t.topics_to_take || 'General curriculum instruction and exercises.'}
+              <h3 class="planner-lesson-title">${t.lesson_title}</h3>
+              <div class="planner-topics-box">
+                <span class="planner-topics-label">What They Will Take (Topics &amp; Objectives):</span>
+                <div class="planner-topics-content">${t.topics_to_take || 'General curriculum instruction and exercises.'}</div>
               </div>
               ${(t.materials_needed || t.homework_assigned) ? `
-                <div class="flex flex-wrap gap-3 text-xs text-slate-400 pt-1">
+                <div class="planner-sub-meta">
                   ${t.materials_needed ? `<span>🎒 <strong>Materials:</strong> ${t.materials_needed}</span>` : ''}
                   ${t.homework_assigned ? `<span>📝 <strong>Homework:</strong> ${t.homework_assigned}</span>` : ''}
                 </div>
@@ -3615,15 +3598,15 @@ window.renderPlannerView = async function() {
             </div>
 
             <!-- Action Controls -->
-            <div class="flex items-center gap-2 shrink-0 pt-2 md:pt-0">
-              <button type="button" class="action-btn-sm" onclick="togglePlannerTaskItem('${t.id}')" style="background:${isDone ? 'rgba(255,255,255,0.1)' : 'rgba(16,185,129,0.2)'}; color:${isDone ? '#cbd5e1' : '#34d399'}; border:1px solid ${isDone ? 'rgba(255,255,255,0.2)' : 'rgba(16,185,129,0.4)'}; padding:0.4rem 0.75rem; border-radius:8px; font-weight:700; font-size:0.75rem; cursor:pointer;">
-                ${isDone ? '↩️ Reopen' : '✅ Mark Done'}
+            <div class="planner-actions-group">
+              <button type="button" class="planner-action-btn ${isDone ? 'toggle-reopen' : 'toggle-done'}" onclick="togglePlannerTaskItem('${t.id}')">
+                <span>${isDone ? '↩️ Reopen' : '✓ Mark Done'}</span>
               </button>
-              <button type="button" class="action-btn-sm" onclick="sharePlannerTaskWhatsApp('${t.id}')" style="background:rgba(34,197,94,0.15); color:#22c55e; border:1px solid rgba(34,197,94,0.3); padding:0.4rem 0.65rem; border-radius:8px; font-weight:700; font-size:0.75rem; cursor:pointer;" title="Send WhatsApp Lesson Reminder">
-                💬
+              <button type="button" class="planner-action-btn whatsapp" onclick="sharePlannerTaskWhatsApp('${t.id}')" title="Send WhatsApp Lesson Reminder">
+                <span>💬 WhatsApp</span>
               </button>
-              <button type="button" class="action-btn-sm delete" onclick="deletePlannerTaskItem('${t.id}')" style="background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.3); padding:0.4rem 0.65rem; border-radius:8px; cursor:pointer;" title="Delete Lesson">
-                🗑️
+              <button type="button" class="planner-action-btn delete" onclick="deletePlannerTaskItem('${t.id}')" title="Delete Lesson">
+                <span>🗑️</span>
               </button>
             </div>
           </div>

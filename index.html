@@ -110,7 +110,7 @@
   <meta http-equiv="Expires" content="0">
 
   <!-- Core Project Styles -->
-  <link rel="stylesheet" href="style.css?v=2.9.5">
+  <link rel="stylesheet" href="style.css?v=3.0.0">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><rect width='48' height='48' rx='12' fill='%230062e3'/><path d='M14 15h9a6 6 0 0 1 0 12h-9V15zm6 7h3a1 1 0 0 0 0-2h-3v2z' fill='%23ffffff'/><path d='M22 27l5 9h-6l-4.5-8h4.5z' fill='%23ffffff'/><path d='M34 16l1.2 3.8 3.8 1.2-3.8 1.2-1.2 3.8-1.2-3.8-3.8-1.2 3.8-1.2z' fill='%23f59e0b'/></svg>">
 
   <style>
@@ -883,50 +883,53 @@
     <section id="view-teacher" class="portal-view">
       <div class="view-header-row">
         <div>
-          <div class="view-kicker">// INSTRUCTOR CONTROL CENTER</div>
-          <h1 class="view-main-title">All Students Management Dashboard 👥</h1>
-          <p class="view-lead-text">Monitor enrolled students, inspect progress reports, print student login cards, and assign curriculum skills.</p>
+          <div class="view-kicker">// INSTRUCTOR OPERATIONS &amp; LESSON HUB</div>
+          <h1 class="view-main-title">Teacher Command Center</h1>
+          <p class="view-lead-text">Manage enrolled students, monitor tuition subscriptions, schedule daily lesson agendas, log Zoom sessions, and distribute homework.</p>
         </div>
         <div class="view-actions-col flex flex-wrap gap-2">
           <button class="primary-glow-btn" id="openAddStudentModalTopBtn" onclick="document.getElementById('addStudentModal').classList.add('open')">
-            <span>👤+</span> <span>Add New Student</span>
+            <span class="material-symbols-outlined text-[18px]">person_add</span>
+            <span>Add Student</span>
           </button>
           <button class="secondary-glass-btn" onclick="printStudentLoginCards()">
-            <span>🖨️</span> <span>Print Login Cards</span>
+            <span class="material-symbols-outlined text-[18px]">print</span>
+            <span>Print Login Cards</span>
           </button>
           <button class="secondary-glass-btn" id="exportClassroomCsvBtn">
-            <span>📥</span> <span>Export CSV</span>
+            <span class="material-symbols-outlined text-[18px]">download</span>
+            <span>Export CSV</span>
           </button>
         </div>
       </div>
 
       <!-- Teacher Navigation Sub-Tabs -->
-      <div class="flex items-center gap-2 mb-6 border-b border-border-card pb-3 overflow-x-auto" id="teacherSubTabs">
-        <button type="button" class="teacher-sub-tab px-4 py-2 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 font-bold text-xs flex items-center gap-2 cursor-pointer transition-all active" data-ttab="students" onclick="switchTeacherTab('students')">
-          <span class="material-symbols-outlined text-[18px]">group</span>
-          <span>Students &amp; Subscriptions 👥</span>
+      <div class="teacher-sub-nav" id="teacherSubTabs">
+        <button type="button" class="teacher-sub-tab active" data-ttab="students" onclick="switchTeacherTab('students')">
+          <span class="material-symbols-outlined">group</span>
+          <span>Students &amp; Subscriptions</span>
         </button>
-        <button type="button" class="teacher-sub-tab px-4 py-2 rounded-xl bg-surface-card hover:bg-surface-hover border border-border-card text-slate-400 font-bold text-xs flex items-center gap-2 cursor-pointer transition-all" data-ttab="payments" onclick="switchTeacherTab('payments')">
-          <span class="material-symbols-outlined text-[18px]">receipt_long</span>
-          <span>Payment Receipts 💳</span>
-          <span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 text-[10px] font-bold" id="tPendingReceiptsBadge" style="display:none;">0</span>
+        <button type="button" class="teacher-sub-tab" data-ttab="payments" onclick="switchTeacherTab('payments')">
+          <span class="material-symbols-outlined">receipt_long</span>
+          <span>Payment Receipts</span>
+          <span class="teacher-tab-badge amber" id="tPendingReceiptsBadge" style="display:none;">0</span>
         </button>
-        <button type="button" class="teacher-sub-tab px-4 py-2 rounded-xl bg-surface-card hover:bg-surface-hover border border-border-card text-slate-400 font-bold text-xs flex items-center gap-2 cursor-pointer transition-all" data-ttab="sessions" onclick="switchTeacherTab('sessions')">
-          <span class="material-symbols-outlined text-[18px]">videocam</span>
-          <span>Zoom &amp; Syllabus Log 🎥</span>
+        <button type="button" class="teacher-sub-tab" data-ttab="sessions" onclick="switchTeacherTab('sessions')">
+          <span class="material-symbols-outlined">videocam</span>
+          <span>Zoom &amp; Syllabus Log</span>
         </button>
-        <button type="button" class="teacher-sub-tab px-4 py-2 rounded-xl bg-surface-card hover:bg-surface-hover border border-border-card text-slate-400 font-bold text-xs flex items-center gap-2 cursor-pointer transition-all" data-ttab="homework" onclick="switchTeacherTab('homework')">
-          <span class="material-symbols-outlined text-[18px]">assignment</span>
-          <span>Homework Assignments 📝</span>
+        <button type="button" class="teacher-sub-tab" data-ttab="homework" onclick="switchTeacherTab('homework')">
+          <span class="material-symbols-outlined">assignment</span>
+          <span>Homework Assignments</span>
         </button>
-        <button type="button" class="teacher-sub-tab px-4 py-2 rounded-xl bg-surface-card hover:bg-surface-hover border border-border-card text-slate-400 font-bold text-xs flex items-center gap-2 cursor-pointer transition-all" data-ttab="books" onclick="switchTeacherTab('books')">
-          <span class="material-symbols-outlined text-[18px]">menu_book</span>
-          <span>Curriculum PDFs 📚</span>
+        <button type="button" class="teacher-sub-tab" data-ttab="books" onclick="switchTeacherTab('books')">
+          <span class="material-symbols-outlined">menu_book</span>
+          <span>Curriculum PDFs</span>
         </button>
-        <button type="button" class="teacher-sub-tab px-4 py-2 rounded-xl bg-surface-card hover:bg-surface-hover border border-border-card text-slate-400 font-bold text-xs flex items-center gap-2 cursor-pointer transition-all" data-ttab="planner" onclick="switchTeacherTab('planner')">
-          <span class="material-symbols-outlined text-[18px]">event_note</span>
-          <span>Daily Planner &amp; To-Do 📅</span>
-          <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold" id="tTodayPlannerBadge" style="display:none;">0</span>
+        <button type="button" class="teacher-sub-tab" data-ttab="planner" onclick="switchTeacherTab('planner')">
+          <span class="material-symbols-outlined">event_note</span>
+          <span>Daily Planner &amp; To-Do</span>
+          <span class="teacher-tab-badge emerald" id="tTodayPlannerBadge" style="display:none;">0</span>
         </button>
       </div>
 
@@ -970,25 +973,27 @@
         <div class="report-section-card glass-panel" style="margin-bottom: 2rem;">
           <div class="section-card-header flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h3 class="card-title">Enrolled Students &amp; Parent CRM 📋</h3>
+              <h3 class="card-title">Enrolled Students &amp; Parent CRM</h3>
               <p class="card-subtitle">Full student directory, parent contacts, WhatsApp dispatch, and payment tracking.</p>
             </div>
             <div class="flex items-center gap-2 flex-wrap">
               <!-- Filter Pills -->
-              <div class="flex items-center gap-1 bg-surface-card p-1 rounded-xl border border-border-card text-xs">
-                <button type="button" class="roster-filter-btn px-3 py-1 rounded-lg bg-cyan-500/20 text-cyan-400 font-bold active" data-filter="all" onclick="filterTeacherRoster('all')">All</button>
-                <button type="button" class="roster-filter-btn px-3 py-1 rounded-lg text-slate-400 hover:text-white font-bold" data-filter="paid" onclick="filterTeacherRoster('paid')">Paid 🟢</button>
-                <button type="button" class="roster-filter-btn px-3 py-1 rounded-lg text-slate-400 hover:text-white font-bold" data-filter="pending" onclick="filterTeacherRoster('pending')">Pending 🟡</button>
-                <button type="button" class="roster-filter-btn px-3 py-1 rounded-lg text-slate-400 hover:text-white font-bold" data-filter="overdue" onclick="filterTeacherRoster('overdue')">Overdue 🔴</button>
+              <div class="roster-filter-group">
+                <button type="button" class="roster-filter-btn active" data-filter="all" onclick="filterTeacherRoster('all')">All</button>
+                <button type="button" class="roster-filter-btn" data-filter="paid" onclick="filterTeacherRoster('paid')">Paid</button>
+                <button type="button" class="roster-filter-btn" data-filter="pending" onclick="filterTeacherRoster('pending')">Pending</button>
+                <button type="button" class="roster-filter-btn" data-filter="overdue" onclick="filterTeacherRoster('overdue')">Overdue</button>
               </div>
               <button type="button" class="cloud-status-pill" id="cloudSyncStatusBadge" onclick="openCloudSyncModal()" title="Configure Google Cloud Live Synchronization">
-                <span class="status-dot amber"></span> ☁️ Google Cloud Sync
+                <span class="status-dot amber"></span> ☁️ Cloud Sync
               </button>
               <button class="secondary-glass-btn" onclick="printStudentLoginCards()" style="font-size:0.85rem; padding: 0.45rem 0.9rem;">
-                <span>🖨️</span> <span>Print Cards</span>
+                <span class="material-symbols-outlined text-[16px]">print</span>
+                <span>Print Cards</span>
               </button>
               <button class="primary-glow-btn" id="openAddStudentModalBtn" onclick="document.getElementById('addStudentModal').classList.add('open')" style="font-size:0.85rem; padding: 0.45rem 0.9rem;">
-                <span>👤+</span> <span>Add Student</span>
+                <span class="material-symbols-outlined text-[16px]">person_add</span>
+                <span>Add Student</span>
               </button>
             </div>
           </div>
@@ -1043,22 +1048,26 @@
               <p class="card-subtitle">Scheduled lectures, covered curriculum units, Zoom Pro links, and study materials</p>
             </div>
             <button class="primary-glow-btn" onclick="document.getElementById('addClassSessionModal').classList.add('open')">
-              <span>➕</span> <span>Log New Class Session</span>
+              <span class="material-symbols-outlined text-[18px]">add_circle</span>
+              <span>Log Class Session</span>
             </button>
           </div>
 
           <!-- Zoom Pro Default Quick Banner -->
-          <div class="mx-4 mt-4 p-4 rounded-xl border border-cyan-500/30 bg-cyan-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="teacher-quick-banner">
             <div class="flex items-center gap-3">
-              <span class="text-2xl">⚡</span>
+              <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                <span class="material-symbols-outlined text-[22px]">videocam</span>
+              </div>
               <div>
-                <div class="text-xs font-bold uppercase tracking-wider text-cyan-400">Default Zoom Pro Room</div>
-                <div id="teacherDefaultZoomDisplay" class="text-xs text-slate-300 font-mono break-all mt-0.5">Not set (Click 'Set Default Zoom' to configure)</div>
+                <div class="teacher-quick-banner-title">Default Zoom Pro Room</div>
+                <div id="teacherDefaultZoomDisplay" class="teacher-quick-banner-desc">Not set (Click 'Set Default Zoom' to configure)</div>
               </div>
             </div>
             <div class="flex items-center gap-2">
-              <button type="button" class="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-bold transition-all cursor-pointer" onclick="promptSetDefaultZoomLink()">
-                ⚙️ Set Default Zoom
+              <button type="button" class="secondary-glass-btn text-xs py-1.5 px-3" onclick="promptSetDefaultZoomLink()">
+                <span class="material-symbols-outlined text-[16px]">settings</span>
+                <span>Set Default Zoom</span>
               </button>
             </div>
           </div>
@@ -1121,51 +1130,53 @@
         <div class="report-section-card glass-panel mb-6">
           <div class="section-card-header flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <div class="flex items-center gap-2">
-                <h3 class="card-title">📅 Daily Teaching Planner &amp; Lesson Agenda</h3>
-                <span class="px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 text-xs font-bold" id="plannerCurrentViewDateLabel">Today</span>
+              <div class="flex items-center gap-2.5">
+                <h3 class="card-title">Daily Teaching Planner &amp; Agenda</h3>
+                <span class="planner-meta-pill time" id="plannerCurrentViewDateLabel">Today</span>
               </div>
               <p class="card-subtitle">Organize your daily lesson schedule: who will take lessons, what topics they will cover, and homework assigned.</p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
               <button type="button" class="primary-glow-btn" onclick="openAddPlannerTaskModal()">
-                <span>➕</span> <span>Add Lesson Plan</span>
+                <span class="material-symbols-outlined text-[18px]">add_circle</span>
+                <span>Add Lesson Plan</span>
               </button>
               <button type="button" class="secondary-glass-btn" onclick="copyTodayAgendaWhatsApp()" title="Copy today's schedule for WhatsApp">
-                <span>💬</span> <span>Share Agenda</span>
+                <span class="material-symbols-outlined text-[18px]">share</span>
+                <span>Share Agenda</span>
               </button>
             </div>
           </div>
 
           <!-- Planner Date & Scope Filter Bar -->
-          <div class="p-4 border-b border-white/5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 bg-slate-900/40">
-            <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0" id="plannerScopeFilters">
-              <button type="button" class="planner-filter-btn px-3 py-1.5 rounded-xl font-bold text-xs bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 transition-all cursor-pointer active" data-filter="today" onclick="filterPlannerTasks('today')">Today</button>
-              <button type="button" class="planner-filter-btn px-3 py-1.5 rounded-xl font-bold text-xs bg-surface-container-high text-slate-300 hover:text-white transition-all cursor-pointer" data-filter="tomorrow" onclick="filterPlannerTasks('tomorrow')">Tomorrow</button>
-              <button type="button" class="planner-filter-btn px-3 py-1.5 rounded-xl font-bold text-xs bg-surface-container-high text-slate-300 hover:text-white transition-all cursor-pointer" data-filter="upcoming" onclick="filterPlannerTasks('upcoming')">Next 7 Days</button>
-              <button type="button" class="planner-filter-btn px-3 py-1.5 rounded-xl font-bold text-xs bg-surface-container-high text-slate-300 hover:text-white transition-all cursor-pointer" data-filter="all" onclick="filterPlannerTasks('all')">All Plans</button>
-              <button type="button" class="planner-filter-btn px-3 py-1.5 rounded-xl font-bold text-xs bg-surface-container-high text-slate-300 hover:text-white transition-all cursor-pointer" data-filter="completed" onclick="filterPlannerTasks('completed')">Done ✅</button>
+          <div class="planner-toolbar">
+            <div class="planner-segmented-group" id="plannerScopeFilters">
+              <button type="button" class="planner-filter-tab active" data-filter="today" onclick="filterPlannerTasks('today')">Today</button>
+              <button type="button" class="planner-filter-tab" data-filter="tomorrow" onclick="filterPlannerTasks('tomorrow')">Tomorrow</button>
+              <button type="button" class="planner-filter-tab" data-filter="upcoming" onclick="filterPlannerTasks('upcoming')">Next 7 Days</button>
+              <button type="button" class="planner-filter-tab" data-filter="all" onclick="filterPlannerTasks('all')">All Plans</button>
+              <button type="button" class="planner-filter-tab" data-filter="completed" onclick="filterPlannerTasks('completed')">Done ✓</button>
             </div>
 
-            <div class="flex items-center gap-2">
-              <span class="text-xs text-slate-400 font-semibold">Specific Date:</span>
-              <input type="date" id="plannerDateFilterInput" onchange="handlePlannerDateChange(this.value)" class="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:border-cyan-500">
+            <div class="planner-date-picker-wrap">
+              <span class="text-xs text-secondary font-semibold">Specific Date:</span>
+              <input type="date" id="plannerDateFilterInput" onchange="handlePlannerDateChange(this.value)" class="planner-date-input">
             </div>
           </div>
 
           <!-- Planner Mini KPI Strip -->
-          <div class="grid grid-cols-3 gap-3 p-4 border-b border-white/5 bg-slate-950/20 text-center">
-            <div class="p-3 rounded-xl bg-surface-card border border-border-card">
-              <span class="text-xs text-slate-400 font-semibold block">Total Lessons</span>
-              <span class="text-xl font-bold text-white mt-0.5 block" id="plannerTotalCount">0</span>
+          <div class="planner-kpi-strip">
+            <div class="planner-kpi-item">
+              <span class="planner-kpi-label">Total Lessons</span>
+              <span class="planner-kpi-val" id="plannerTotalCount">0</span>
             </div>
-            <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
-              <span class="text-xs text-amber-400 font-semibold block">Pending Lessons ⏳</span>
-              <span class="text-xl font-bold text-amber-300 mt-0.5 block" id="plannerPendingCount">0</span>
+            <div class="planner-kpi-item pending">
+              <span class="planner-kpi-label">Pending Lessons</span>
+              <span class="planner-kpi-val" id="plannerPendingCount">0</span>
             </div>
-            <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-              <span class="text-xs text-emerald-400 font-semibold block">Completed Lessons ✅</span>
-              <span class="text-xl font-bold text-emerald-300 mt-0.5 block" id="plannerCompletedCount">0</span>
+            <div class="planner-kpi-item completed">
+              <span class="planner-kpi-label">Completed Lessons</span>
+              <span class="planner-kpi-val" id="plannerCompletedCount">0</span>
             </div>
           </div>
 
@@ -2151,7 +2162,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="js/cloud-db.js"></script>
-  <script src="app.js?v=2.9.5"></script>
+  <script src="app.js?v=3.0.0"></script>
 </body>
 </html>
 
