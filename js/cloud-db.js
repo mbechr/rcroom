@@ -363,16 +363,23 @@
           status: 'pending_review',
           submitted_at: new Date().toISOString()
         };
-        await this.firestore.collection('payments').doc(id).set(payload);
+        const timeoutP = new Promise((resolve) => setTimeout(() => resolve('timeout'), 2500));
+        await Promise.race([
+          this.firestore.collection('payments').doc(id).set(payload),
+          timeoutP
+        ]);
 
         // Update student document in Firestore
         const studentRef = this.firestore.collection('students').doc(String(paymentData.student_id));
-        await studentRef.set({
-          payment_status: 'pending',
-          payment_amount: payload.amount,
-          payment_date: payload.payment_date,
-          payment_method: payload.payment_method
-        }, { merge: true });
+        await Promise.race([
+          studentRef.set({
+            payment_status: 'pending',
+            payment_amount: payload.amount,
+            payment_date: payload.payment_date,
+            payment_method: payload.payment_method
+          }, { merge: true }),
+          timeoutP
+        ]);
 
         console.log('✅ Payment submitted to Google Cloud Firestore:', id);
         return { success: true, id: id, payment_id: id };

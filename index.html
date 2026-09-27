@@ -110,7 +110,7 @@
   <meta http-equiv="Expires" content="0">
 
   <!-- Core Project Styles -->
-  <link rel="stylesheet" href="style.css?v=3.0.1">
+  <link rel="stylesheet" href="style.css?v=3.0.2">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><rect width='48' height='48' rx='12' fill='%230062e3'/><path d='M14 15h9a6 6 0 0 1 0 12h-9V15zm6 7h3a1 1 0 0 0 0-2h-3v2z' fill='%23ffffff'/><path d='M22 27l5 9h-6l-4.5-8h4.5z' fill='%23ffffff'/><path d='M34 16l1.2 3.8 3.8 1.2-3.8 1.2-1.2 3.8-1.2-3.8-3.8-1.2 3.8-1.2z' fill='%23f59e0b'/></svg>">
 
   <style>
@@ -1742,10 +1742,12 @@
           </div>
         </div>
         <div class="form-group">
-            <label for="payReceiptFileInput">Upload Receipt Screenshot</label>
-          <input type="file" id="payReceiptFileInput" accept="image/*" class="w-full text-xs text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30 cursor-pointer">
+          <label for="payReceiptFileInput">Upload Receipt Screenshot or PDF Document</label>
+          <input type="file" id="payReceiptFileInput" accept="image/*,application/pdf" class="w-full text-xs text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30 cursor-pointer">
           <div id="payReceiptPreviewWrap" style="display:none; margin-top: 0.75rem; text-align: center;">
-            <img id="payReceiptPreview" src="" alt="Receipt Preview" style="max-height: 140px; margin: 0 auto; border-radius: 12px; border: 1px solid rgba(0, 229, 255, 0.3);">
+            <div id="payReceiptStatusBadge" class="text-xs text-cyan-400 mb-2 font-mono"></div>
+            <img id="payReceiptPreview" src="" alt="Receipt Preview" style="max-height: 140px; margin: 0 auto; border-radius: 12px; border: 1px solid rgba(0, 229, 255, 0.3); display: none;">
+            <div id="payReceiptPdfPreview" style="display:none;" class="p-3 bg-cyan-950/40 border border-cyan-500/30 rounded-xl text-cyan-300 text-xs"></div>
           </div>
         </div>
         <button type="submit" class="primary-glow-btn full-width" id="submitPaymentReceiptBtn" onclick="handlePaymentReceiptSubmit(event)" style="font-weight: 700; padding: 0.85rem; margin-top: 0.5rem;">
@@ -1821,7 +1823,7 @@
         </div>
         <button class="modal-close-btn" id="closeAddCurriculumBookModalBtn" onclick="document.getElementById('addCurriculumBookModal').classList.remove('open')">✕</button>
       </div>
-      <form id="addCurriculumBookForm" class="auth-form" onsubmit="return false;">
+      <form id="addCurriculumBookForm" class="auth-form" onsubmit="handlePublishCurriculumBook(event)">
         <div class="form-group">
           <label for="bookTitleInput">Curriculum Book Title</label>
           <input type="text" id="bookTitleInput" placeholder="e.g. Cambridge Primary Mathematics Learner Book 4" required>
@@ -1847,15 +1849,19 @@
             <input type="text" id="bookPagesInput" placeholder="e.g. 184 Pages - 2nd Edition">
           </div>
           <div class="form-group flex-1">
-            <label for="bookPdfUrlInput">Full PDF URL / Cloud Drive Link</label>
-            <input type="url" id="bookPdfUrlInput" placeholder="https://... / Google Drive / Dropbox link" required>
+            <label for="bookPdfFileInput">Upload PDF from Device</label>
+            <input type="file" id="bookPdfFileInput" accept=".pdf" class="w-full text-xs text-slate-300 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/20 file:text-cyan-400 hover:file:bg-cyan-500/30 cursor-pointer">
           </div>
+        </div>
+        <div class="form-group">
+          <label for="bookPdfUrlInput">Full PDF URL / Cloud Drive Link</label>
+          <input type="text" id="bookPdfUrlInput" placeholder="https://... (or auto-filled when selecting PDF file above)" required>
         </div>
         <div class="form-group">
           <label for="bookDescInput">Description &amp; Units Covered</label>
           <textarea id="bookDescInput" rows="3" placeholder="Summary of units, chapters, and topics in this textbook..." style="background: rgba(14, 18, 30, 0.8); border: 1px solid rgba(255,255,255,0.15); color: #fff; width: 100%; border-radius: 8px; padding: 0.75rem; font-size: 0.9rem; resize: vertical;"></textarea>
         </div>
-        <button type="submit" class="primary-glow-btn full-width" id="submitCurriculumBookBtn" style="font-weight: 700; padding: 0.85rem; margin-top: 0.5rem;">
+        <button type="submit" class="primary-glow-btn full-width" id="submitCurriculumBookBtn" onclick="handlePublishCurriculumBook(event)" style="font-weight: 700; padding: 0.85rem; margin-top: 0.5rem;">
           Publish Curriculum Book 📚
         </button>
       </form>
@@ -2161,8 +2167,8 @@
   <script src="js/certificate.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-  <script src="js/cloud-db.js"></script>
-  <script src="app.js?v=3.0.1"></script>
+  <script src="js/cloud-db.js?v=3.0.2"></script>
+  <script src="app.js?v=3.0.2"></script>
 </body>
 </html>
 

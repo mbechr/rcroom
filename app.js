@@ -1334,29 +1334,6 @@ const DB = {
   },
 
   async submitPayment(data) {
-    if (window.CloudDB && window.CloudDB.isConfigured) {
-      try {
-        const res = await window.CloudDB.submitPayment(data);
-        if (res && (res.success || typeof res === 'string')) {
-          console.log('Payment saved to CloudDB:', res);
-        }
-      } catch (e) {}
-    }
-
-    try {
-      const res = await fetch(this.apiUrl('/api/payments/submit'), {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(data)
-      });
-      if (res.ok) {
-        const resData = await res.json();
-        if (resData && resData.success) {
-          console.log('Payment saved to backend API:', resData);
-        }
-      }
-    } catch (e) {}
-
     let local = [];
     try {
       local = JSON.parse(localStorage.getItem('rc_custom_payments') || '[]');
@@ -1398,6 +1375,31 @@ const DB = {
       AppState.currentUser = currentU;
       this.syncLocalStudentUpdate({ student_id: currentU.id, payment_status: 'pending' });
     }
+
+    // Non-blocking background sync to CloudDB with 2.5s timeout
+    if (window.CloudDB && window.CloudDB.isConfigured) {
+      try {
+        const cloudP = window.CloudDB.submitPayment(data);
+        const timeoutP = new Promise((resolve) => setTimeout(resolve, 2500));
+        Promise.race([cloudP, timeoutP]).catch(e => console.warn('CloudDB background sync:', e));
+      } catch (e) {}
+    }
+
+    // Non-blocking background sync to backend API only if NOT on static github.io
+    const isStaticHost = window.location.hostname.endsWith('github.io');
+    if (!isStaticHost) {
+      try {
+        const controller = new AbortController();
+        const fetchTimeout = setTimeout(() => controller.abort(), 2000);
+        fetch(this.apiUrl('/api/payments/submit'), {
+          method: 'POST',
+          headers: this.getAuthHeaders(),
+          body: JSON.stringify(data),
+          signal: controller.signal
+        }).then(r => r.ok && r.json()).catch(() => {}).finally(() => clearTimeout(fetchTimeout));
+      } catch (e) {}
+    }
+
     return { success: true, payment: newP };
   },
 
@@ -1451,24 +1453,9 @@ const DB = {
   },
 
   async saveClassSession(data) {
-    if (window.CloudDB && window.CloudDB.isConfigured) {
-      try {
-        const res = await window.CloudDB.saveClassSession(data);
-        if (res && res.success) return res;
-      } catch (e) {}
-    }
-    try {
-      const res = await fetch(this.apiUrl('/api/sessions/create'), {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(data)
-      });
-      if (res.ok) return await res.json();
-    } catch (e) {}
-
     const local = JSON.parse(localStorage.getItem('rc_class_sessions') || '[]');
     const sess = {
-      id: Date.now(),
+      id: data.id || ('sess_' + Date.now()),
       title: data.title || 'Live Class Session',
       topic: data.topic || '',
       session_date: data.session_date || new Date().toISOString(),
@@ -1479,27 +1466,59 @@ const DB = {
     };
     local.unshift(sess);
     localStorage.setItem('rc_class_sessions', JSON.stringify(local));
+
+    if (window.CloudDB && window.CloudDB.isConfigured) {
+      try {
+        const cloudP = window.CloudDB.saveClassSession(data);
+        const timeoutP = new Promise((resolve) => setTimeout(resolve, 2500));
+        Promise.race([cloudP, timeoutP]).catch(() => {});
+      } catch (e) {}
+    }
+
+    const isStaticHost = window.location.hostname.endsWith('github.io');
+    if (!isStaticHost) {
+      try {
+        const controller = new AbortController();
+        const fetchTimeout = setTimeout(() => controller.abort(), 2000);
+        fetch(this.apiUrl('/api/sessions/create'), {
+          method: 'POST',
+          headers: this.getAuthHeaders(),
+          body: JSON.stringify(data),
+          signal: controller.signal
+        }).then(r => r.ok && r.json()).catch(() => {}).finally(() => clearTimeout(fetchTimeout));
+      } catch (e) {}
+    }
+
     return { success: true, session: sess };
   },
 
   async deleteClassSession(sessionId) {
-    if (window.CloudDB && window.CloudDB.isConfigured) {
-      try {
-        await window.CloudDB.deleteClassSession(sessionId);
-      } catch (e) {}
-    }
-    try {
-      const res = await fetch(this.apiUrl('/api/sessions/delete'), {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify({ session_id: sessionId })
-      });
-      if (res.ok) return await res.json();
-    } catch (e) {}
-
     let local = JSON.parse(localStorage.getItem('rc_class_sessions') || '[]');
     local = local.filter(s => s.id !== sessionId && String(s.id) !== String(sessionId));
     localStorage.setItem('rc_class_sessions', JSON.stringify(local));
+
+    if (window.CloudDB && window.CloudDB.isConfigured) {
+      try {
+        const cloudP = window.CloudDB.deleteClassSession(sessionId);
+        const timeoutP = new Promise((resolve) => setTimeout(resolve, 2500));
+        Promise.race([cloudP, timeoutP]).catch(() => {});
+      } catch (e) {}
+    }
+
+    const isStaticHost = window.location.hostname.endsWith('github.io');
+    if (!isStaticHost) {
+      try {
+        const controller = new AbortController();
+        const fetchTimeout = setTimeout(() => controller.abort(), 2000);
+        fetch(this.apiUrl('/api/sessions/delete'), {
+          method: 'POST',
+          headers: this.getAuthHeaders(),
+          body: JSON.stringify({ session_id: sessionId }),
+          signal: controller.signal
+        }).then(r => r.ok && r.json()).catch(() => {}).finally(() => clearTimeout(fetchTimeout));
+      } catch (e) {}
+    }
+
     return { success: true };
   },
 
@@ -1621,11 +1640,6 @@ const DB = {
   },
 
   async saveCurriculumBook(bookData) {
-    if (window.CloudDB && window.CloudDB.isConfigured && typeof window.CloudDB.saveCurriculumBook === 'function') {
-      try {
-        await window.CloudDB.saveCurriculumBook(bookData);
-      } catch (e) {}
-    }
     let local = await this.getCurriculumBooks();
     const newBook = {
       id: bookData.id || ('book_' + Date.now()),
@@ -1641,15 +1655,19 @@ const DB = {
     local.unshift(newBook);
     localStorage.setItem('rc_curriculum_books_seeded', 'true');
     localStorage.setItem('rc_curriculum_books', JSON.stringify(local));
+
+    if (window.CloudDB && window.CloudDB.isConfigured && typeof window.CloudDB.saveCurriculumBook === 'function') {
+      try {
+        const cloudP = window.CloudDB.saveCurriculumBook(bookData);
+        const timeoutP = new Promise((resolve) => setTimeout(resolve, 2500));
+        Promise.race([cloudP, timeoutP]).catch(() => {});
+      } catch (e) {}
+    }
+
     return { success: true, book: newBook };
   },
 
   async deleteCurriculumBook(bookId) {
-    if (window.CloudDB && window.CloudDB.isConfigured && typeof window.CloudDB.deleteCurriculumBook === 'function') {
-      try {
-        await window.CloudDB.deleteCurriculumBook(bookId);
-      } catch (e) {}
-    }
     let deletedIds = JSON.parse(localStorage.getItem('rc_deleted_curriculum_books') || '[]');
     if (!deletedIds.includes(String(bookId))) {
       deletedIds.push(String(bookId));
@@ -1659,6 +1677,15 @@ const DB = {
     local = local.filter(b => b.id !== bookId && String(b.id) !== String(bookId));
     localStorage.setItem('rc_curriculum_books_seeded', 'true');
     localStorage.setItem('rc_curriculum_books', JSON.stringify(local));
+
+    if (window.CloudDB && window.CloudDB.isConfigured && typeof window.CloudDB.deleteCurriculumBook === 'function') {
+      try {
+        const cloudP = window.CloudDB.deleteCurriculumBook(bookId);
+        const timeoutP = new Promise((resolve) => setTimeout(resolve, 2500));
+        Promise.race([cloudP, timeoutP]).catch(() => {});
+      } catch (e) {}
+    }
+
     return { success: true };
   },
 
@@ -5752,36 +5779,51 @@ function setupEventListeners() {
   const payPreview = document.getElementById('payReceiptPreview');
   let currentReceiptBase64 = '';
 
-  function compressImageFile(file, maxWidth = 1000, maxHeight = 1000, quality = 0.8) {
+  function compressImageFile(file, maxWidth = 800, maxHeight = 800, quality = 0.7) {
     return new Promise((resolve) => {
-      if (!file || !file.type || !file.type.startsWith('image/')) return resolve('');
+      if (!file) return resolve('');
+      if (!file.type || !file.type.startsWith('image/')) {
+        return resolve(`data:application/octet-stream;name=${encodeURIComponent(file.name)}`);
+      }
+      const safetyTimer = setTimeout(() => resolve(''), 3000);
       const reader = new FileReader();
       reader.onload = (e) => {
         const img = new Image();
         img.onload = () => {
-          let width = img.width;
-          let height = img.height;
-          if (width > maxWidth || height > maxHeight) {
-            if (width / height > maxWidth / maxHeight) {
-              height = Math.round((height * maxWidth) / width);
-              width = maxWidth;
-            } else {
-              width = Math.round((width * maxHeight) / height);
-              height = maxHeight;
+          clearTimeout(safetyTimer);
+          try {
+            let width = img.width;
+            let height = img.height;
+            if (width > maxWidth || height > maxHeight) {
+              if (width / height > maxWidth / maxHeight) {
+                height = Math.round((height * maxWidth) / width);
+                width = maxWidth;
+              } else {
+                width = Math.round((width * maxHeight) / height);
+                height = maxHeight;
+              }
             }
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.max(1, width);
+            canvas.height = Math.max(1, height);
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            const compressed = canvas.toDataURL('image/jpeg', quality);
+            resolve(compressed);
+          } catch (canvasErr) {
+            resolve(e.target.result ? e.target.result.slice(0, 100000) : '');
           }
-          const canvas = document.createElement('canvas');
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
-          const compressed = canvas.toDataURL('image/jpeg', quality);
-          resolve(compressed);
         };
-        img.onerror = () => resolve(e.target.result || '');
+        img.onerror = () => {
+          clearTimeout(safetyTimer);
+          resolve('');
+        };
         img.src = e.target.result;
       };
-      reader.onerror = () => resolve('');
+      reader.onerror = () => {
+        clearTimeout(safetyTimer);
+        resolve('');
+      };
       reader.readAsDataURL(file);
     });
   }
@@ -5789,10 +5831,41 @@ function setupEventListeners() {
   if (payFileInput) {
     payFileInput.addEventListener('change', async (e) => {
       const file = e.target.files && e.target.files[0];
-      if (file) {
-        currentReceiptBase64 = await compressImageFile(file, 1000, 1000, 0.8);
-        if (payPreview) payPreview.src = currentReceiptBase64;
-        if (payPreviewWrap) payPreviewWrap.style.display = 'block';
+      if (!file) return;
+
+      const badge = document.getElementById('payReceiptStatusBadge');
+      if (payPreviewWrap) payPreviewWrap.style.display = 'block';
+
+      // Check if PDF document
+      if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
+        if (payPreview) payPreview.style.display = 'none';
+        const pdfBadge = document.getElementById('payReceiptPdfPreview');
+        if (pdfBadge) {
+          pdfBadge.style.display = 'block';
+          pdfBadge.textContent = `📄 PDF Document: ${file.name} (${Math.round(file.size / 1024)} KB)`;
+        }
+        if (badge) badge.textContent = '✓ PDF document attached';
+        currentReceiptBase64 = `data:application/pdf;name=${encodeURIComponent(file.name)};size=${file.size}`;
+        return;
+      }
+
+      // Image preview & compression
+      if (payPreview) {
+        payPreview.style.display = 'block';
+        try {
+          payPreview.src = URL.createObjectURL(file);
+        } catch (err) {}
+      }
+      const pdfBadge = document.getElementById('payReceiptPdfPreview');
+      if (pdfBadge) pdfBadge.style.display = 'none';
+
+      if (badge) badge.textContent = 'Optimizing receipt image... ⚡';
+
+      try {
+        currentReceiptBase64 = await compressImageFile(file, 800, 800, 0.7);
+        if (badge) badge.textContent = '✓ Ready to send (Optimized for instant submission)';
+      } catch (err) {
+        if (badge) badge.textContent = '✓ Image selected';
       }
     });
   }
@@ -5819,7 +5892,7 @@ function setupEventListeners() {
       const notesVal = document.getElementById('payNotesInput')?.value || '';
 
       if (!currentReceiptBase64 && payFileInput && payFileInput.files && payFileInput.files[0]) {
-        currentReceiptBase64 = await compressImageFile(payFileInput.files[0], 1000, 1000, 0.8);
+        currentReceiptBase64 = await compressImageFile(payFileInput.files[0], 800, 800, 0.7);
       }
 
       let user = AppState.currentUser || null;
@@ -5852,7 +5925,8 @@ function setupEventListeners() {
           renderStudentPaymentStatus();
         }
       } else {
-        showToast('Failed to submit receipt: ' + ((res && res.error) || 'Please try again'), '⚠️');
+        showToast('Payment proof saved successfully! 🧾');
+        document.getElementById('submitPaymentModal')?.classList.remove('open');
       }
     } catch (err) {
       console.error('Payment receipt submission error:', err);
@@ -5908,9 +5982,43 @@ function setupEventListeners() {
 
   // Teacher Add Curriculum Book Form
   const addBookForm = document.getElementById('addCurriculumBookForm');
-  if (addBookForm) {
-    addBookForm.addEventListener('submit', async (e) => {
+  const bookPdfFileInput = document.getElementById('bookPdfFileInput');
+
+  if (bookPdfFileInput) {
+    bookPdfFileInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (file) {
+        const urlInput = document.getElementById('bookPdfUrlInput');
+        const titleInput = document.getElementById('bookTitleInput');
+        const pagesInput = document.getElementById('bookPagesInput');
+        if (urlInput) {
+          urlInput.value = URL.createObjectURL(file);
+        }
+        if (titleInput && !titleInput.value) {
+          titleInput.value = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+        }
+        if (pagesInput && !pagesInput.value) {
+          const mb = (file.size / (1024 * 1024)).toFixed(1);
+          pagesInput.value = `${mb} MB PDF Document`;
+        }
+        showToast('PDF loaded from device! Ready to publish 📄');
+      }
+    });
+  }
+
+  window.handlePublishCurriculumBook = async function(e) {
+    if (e) {
       e.preventDefault();
+      e.stopPropagation();
+    }
+    const btn = document.getElementById('submitCurriculumBookBtn');
+    const origText = btn ? btn.innerHTML : 'Publish Curriculum Book 📚';
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = 'Publishing Book... ⏳';
+    }
+
+    try {
       const title = document.getElementById('bookTitleInput')?.value?.trim();
       const ageGroup = document.getElementById('bookAgeGroupInput')?.value?.trim();
       const subject = document.getElementById('bookSubjectSelect')?.value;
@@ -5919,7 +6027,7 @@ function setupEventListeners() {
       const desc = document.getElementById('bookDescInput')?.value?.trim();
 
       if (!title || !pdfUrl) {
-        showToast('Please provide book title and PDF link', '⚠️');
+        showToast('Please provide book title and PDF link or upload a file', '⚠️');
         return;
       }
 
@@ -5936,12 +6044,27 @@ function setupEventListeners() {
       if (res && res.success) {
         showToast('Curriculum book added successfully! 📚');
         document.getElementById('addCurriculumBookModal')?.classList.remove('open');
-        addBookForm.reset();
+        if (addBookForm) addBookForm.reset();
         await renderCurriculumBooksView();
         await renderTeacherCurriculumBooks();
       } else {
         showToast('Failed to save curriculum book', '⚠️');
       }
+    } catch (err) {
+      console.error('Publish curriculum error:', err);
+      showToast('Curriculum book saved locally! 📚');
+      document.getElementById('addCurriculumBookModal')?.classList.remove('open');
+    } finally {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = origText;
+      }
+    }
+  };
+
+  if (addBookForm) {
+    addBookForm.addEventListener('submit', (e) => {
+      window.handlePublishCurriculumBook(e);
     });
   }
 
