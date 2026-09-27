@@ -587,10 +587,13 @@
           <h1 class="view-main-title">Full Curriculum Textbooks &amp; PDFs 📚</h1>
           <p class="view-lead-text">Browse, read online, or download complete curriculum textbooks organized by curriculum title, subject, and age group / grade level.</p>
         </div>
-        <div class="view-actions-col teacher-only-action" id="teacherAddBookBtnCol" style="display: none;">
+        <div class="view-actions-col teacher-only-action flex flex-wrap gap-2" id="teacherAddBookBtnCol" style="display: none;">
           <button class="primary-glow-btn" onclick="openAddCurriculumBookModal()">
             <span class="material-symbols-outlined text-[18px]">add_circle</span>
             <span>Add Curriculum PDF</span>
+          </button>
+          <button type="button" class="secondary-glass-btn text-rose-400 hover:text-rose-300 border-rose-500/30" onclick="clearAllCurriculumBooksBtn()" title="Remove all default sample books">
+            <span>🗑️</span> <span>Clear Sample Books</span>
           </button>
         </div>
       </div>
@@ -912,6 +915,11 @@
           <span class="material-symbols-outlined text-[18px]">menu_book</span>
           <span>Curriculum PDFs 📚</span>
         </button>
+        <button type="button" class="teacher-sub-tab px-4 py-2 rounded-xl bg-surface-card hover:bg-surface-hover border border-border-card text-slate-400 font-bold text-xs flex items-center gap-2 cursor-pointer transition-all" data-ttab="planner" onclick="switchTeacherTab('planner')">
+          <span class="material-symbols-outlined text-[18px]">event_note</span>
+          <span>Daily Planner &amp; To-Do 📅</span>
+          <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold" id="tTodayPlannerBadge" style="display:none;">0</span>
+        </button>
       </div>
 
       <!-- ==============================================================
@@ -1083,11 +1091,78 @@
               <h3 class="card-title">📚 Official Curriculum Books &amp; PDF Library</h3>
               <p class="card-subtitle">Upload, organize, and manage full curriculum textbooks with age groups and subjects for your students.</p>
             </div>
-            <button class="primary-glow-btn" onclick="openAddCurriculumBookModal()">
-              <span>+</span> <span>Add Curriculum PDF</span>
-            </button>
+            <div class="flex items-center gap-2 flex-wrap">
+              <button class="primary-glow-btn" onclick="openAddCurriculumBookModal()">
+                <span>+</span> <span>Add Curriculum PDF</span>
+              </button>
+              <button type="button" class="secondary-glass-btn text-rose-400 hover:text-rose-300 border-rose-500/30" onclick="clearAllCurriculumBooksBtn()" title="Remove all default sample books">
+                <span>🗑️</span> <span>Clear Sample Books</span>
+              </button>
+            </div>
           </div>
           <div id="teacherBooksGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ==============================================================
+           PANEL 6: DAILY TEACHING PLANNER & TO-DO AGENDA
+           ============================================================== -->
+      <div id="teacherPanelPlanner" class="teacher-tab-panel" style="display: none;">
+        <div class="report-section-card glass-panel mb-6">
+          <div class="section-card-header flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="card-title">📅 Daily Teaching Planner &amp; Lesson Agenda</h3>
+                <span class="px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-400 text-xs font-bold" id="plannerCurrentViewDateLabel">Today</span>
+              </div>
+              <p class="card-subtitle">Organize your daily lesson schedule: who will take lessons, what topics they will cover, and homework assigned.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button type="button" class="primary-glow-btn" onclick="openAddPlannerTaskModal()">
+                <span>➕</span> <span>Add Lesson Plan</span>
+              </button>
+              <button type="button" class="secondary-glass-btn" onclick="copyTodayAgendaWhatsApp()" title="Copy today's schedule for WhatsApp">
+                <span>💬</span> <span>Share Agenda</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Planner Date & Scope Filter Bar -->
+          <div class="p-4 border-b border-white/5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 bg-slate-900/40">
+            <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0" id="plannerScopeFilters">
+              <button type="button" class="planner-filter-btn px-3 py-1.5 rounded-xl font-bold text-xs bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 transition-all cursor-pointer active" data-filter="today" onclick="filterPlannerTasks('today')">Today</button>
+              <button type="button" class="planner-filter-btn px-3 py-1.5 rounded-xl font-bold text-xs bg-surface-container-high text-slate-300 hover:text-white transition-all cursor-pointer" data-filter="tomorrow" onclick="filterPlannerTasks('tomorrow')">Tomorrow</button>
+              <button type="button" class="planner-filter-btn px-3 py-1.5 rounded-xl font-bold text-xs bg-surface-container-high text-slate-300 hover:text-white transition-all cursor-pointer" data-filter="upcoming" onclick="filterPlannerTasks('upcoming')">Next 7 Days</button>
+              <button type="button" class="planner-filter-btn px-3 py-1.5 rounded-xl font-bold text-xs bg-surface-container-high text-slate-300 hover:text-white transition-all cursor-pointer" data-filter="all" onclick="filterPlannerTasks('all')">All Plans</button>
+              <button type="button" class="planner-filter-btn px-3 py-1.5 rounded-xl font-bold text-xs bg-surface-container-high text-slate-300 hover:text-white transition-all cursor-pointer" data-filter="completed" onclick="filterPlannerTasks('completed')">Done ✅</button>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-slate-400 font-semibold">Specific Date:</span>
+              <input type="date" id="plannerDateFilterInput" onchange="handlePlannerDateChange(this.value)" class="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:border-cyan-500">
+            </div>
+          </div>
+
+          <!-- Planner Mini KPI Strip -->
+          <div class="grid grid-cols-3 gap-3 p-4 border-b border-white/5 bg-slate-950/20 text-center">
+            <div class="p-3 rounded-xl bg-surface-card border border-border-card">
+              <span class="text-xs text-slate-400 font-semibold block">Total Lessons</span>
+              <span class="text-xl font-bold text-white mt-0.5 block" id="plannerTotalCount">0</span>
+            </div>
+            <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
+              <span class="text-xs text-amber-400 font-semibold block">Pending Lessons ⏳</span>
+              <span class="text-xl font-bold text-amber-300 mt-0.5 block" id="plannerPendingCount">0</span>
+            </div>
+            <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+              <span class="text-xs text-emerald-400 font-semibold block">Completed Lessons ✅</span>
+              <span class="text-xl font-bold text-emerald-300 mt-0.5 block" id="plannerCompletedCount">0</span>
+            </div>
+          </div>
+
+          <!-- List Container -->
+          <div id="plannerTasksListContainer" class="p-4 space-y-4">
             <!-- Injected via JS -->
           </div>
         </div>
@@ -1763,6 +1838,65 @@
         </div>
         <button type="submit" class="primary-glow-btn full-width" id="submitCurriculumBookBtn" style="font-weight: 700; padding: 0.85rem; margin-top: 0.5rem;">
           Publish Curriculum Book 📚
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MODAL: ADD LESSON PLAN / TO-DO (For Teacher)
+       ==================================================================== -->
+  <div class="auth-modal-backdrop" id="addPlannerTaskModal">
+    <div class="auth-modal-window" style="max-width: 600px;">
+      <div class="auth-modal-header">
+        <div>
+          <h2 class="auth-title">Add Daily Lesson Plan &amp; To-Do 📅</h2>
+          <p class="auth-subtitle">Organize your lesson: who will take it, what topics they will cover, and date/time</p>
+        </div>
+        <button class="modal-close-btn" id="closeAddPlannerTaskModalBtn" onclick="document.getElementById('addPlannerTaskModal').classList.remove('open')">✕</button>
+      </div>
+      <form id="addPlannerTaskForm" class="auth-form" onsubmit="return false;">
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="planDateInput">Lesson Date</label>
+            <input type="date" id="planDateInput" required>
+          </div>
+          <div class="form-group flex-1">
+            <label for="planTimeInput">Scheduled Time</label>
+            <input type="text" id="planTimeInput" placeholder="e.g. 04:30 PM or 16:30" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="planStudentSelect">Who is Taking the Lesson? (Student or Group)</label>
+          <select id="planStudentSelect" required style="width: 100%; font-weight: 600;">
+            <!-- Populated via JS -->
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="planTitleInput">Lesson Title / Subject</label>
+          <input type="text" id="planTitleInput" placeholder="e.g. Cambridge Maths: Fractions & Decimals" required>
+        </div>
+
+        <div class="form-group">
+          <label for="planTopicsInput">What Will They Take? (Topics &amp; Syllabus Covered)</label>
+          <textarea id="planTopicsInput" rows="3" placeholder="Explain what concepts will be explained, which book pages, and exercises to solve..." required style="background: rgba(14, 18, 30, 0.8); border: 1px solid rgba(255,255,255,0.15); color: #fff; width: 100%; border-radius: 8px; padding: 0.75rem; font-size: 0.9rem; resize: vertical;"></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="planMaterialsInput">Materials / Book Pages (Optional)</label>
+            <input type="text" id="planMaterialsInput" placeholder="e.g. Learner Book 4 (Pages 34-38)">
+          </div>
+          <div class="form-group flex-1">
+            <label for="planHomeworkInput">Assigned Homework / Tasks (Optional)</label>
+            <input type="text" id="planHomeworkInput" placeholder="e.g. Solve worksheet 2, practice skill A.1">
+          </div>
+        </div>
+
+        <button type="submit" class="primary-glow-btn full-width" id="submitPlannerTaskBtn" style="font-weight: 700; padding: 0.85rem; margin-top: 0.5rem;">
+          Save to Daily Agenda 📅
         </button>
       </form>
     </div>

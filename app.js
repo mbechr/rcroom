@@ -1500,13 +1500,23 @@ const DB = {
         if (cloudBooks && cloudBooks.length) return cloudBooks;
       } catch (e) {}
     }
-    const local = localStorage.getItem('rc_curriculum_books');
-    if (local) {
+    const deletedIds = JSON.parse(localStorage.getItem('rc_deleted_curriculum_books') || '[]');
+    const isSeeded = localStorage.getItem('rc_curriculum_books_seeded') === 'true';
+
+    const localStr = localStorage.getItem('rc_curriculum_books');
+    if (localStr !== null) {
       try {
-        const parsed = JSON.parse(local);
-        if (Array.isArray(parsed) && parsed.length) return parsed;
+        const parsed = JSON.parse(localStr);
+        if (Array.isArray(parsed)) {
+          return parsed.filter(b => !deletedIds.includes(String(b.id)));
+        }
       } catch (e) {}
     }
+
+    if (isSeeded) {
+      return [];
+    }
+
     const defaultBooks = [
       {
         id: 'book_math_y4',
@@ -1575,8 +1585,11 @@ const DB = {
         created_at: new Date().toISOString()
       }
     ];
-    localStorage.setItem('rc_curriculum_books', JSON.stringify(defaultBooks));
-    return defaultBooks;
+
+    const filtered = defaultBooks.filter(b => !deletedIds.includes(String(b.id)));
+    localStorage.setItem('rc_curriculum_books_seeded', 'true');
+    localStorage.setItem('rc_curriculum_books', JSON.stringify(filtered));
+    return filtered;
   },
 
   async saveCurriculumBook(bookData) {
@@ -1598,6 +1611,7 @@ const DB = {
       created_at: new Date().toISOString()
     };
     local.unshift(newBook);
+    localStorage.setItem('rc_curriculum_books_seeded', 'true');
     localStorage.setItem('rc_curriculum_books', JSON.stringify(local));
     return { success: true, book: newBook };
   },
@@ -1608,9 +1622,123 @@ const DB = {
         await window.CloudDB.deleteCurriculumBook(bookId);
       } catch (e) {}
     }
+    let deletedIds = JSON.parse(localStorage.getItem('rc_deleted_curriculum_books') || '[]');
+    if (!deletedIds.includes(String(bookId))) {
+      deletedIds.push(String(bookId));
+      localStorage.setItem('rc_deleted_curriculum_books', JSON.stringify(deletedIds));
+    }
     let local = await this.getCurriculumBooks();
     local = local.filter(b => b.id !== bookId && String(b.id) !== String(bookId));
+    localStorage.setItem('rc_curriculum_books_seeded', 'true');
     localStorage.setItem('rc_curriculum_books', JSON.stringify(local));
+    return { success: true };
+  },
+
+  async clearAllCurriculumBooks() {
+    const allSampleIds = ['book_math_y4', 'book_eng_y4', 'book_sci_y4', 'book_math_y5', 'book_eng_y5', 'book_sci_y6'];
+    localStorage.setItem('rc_deleted_curriculum_books', JSON.stringify(allSampleIds));
+    localStorage.setItem('rc_curriculum_books_seeded', 'true');
+    localStorage.setItem('rc_curriculum_books', JSON.stringify([]));
+    return { success: true };
+  },
+
+  // Daily Teaching Planner & Lesson Agenda (To-Do)
+  async getPlannerTasks() {
+    const local = localStorage.getItem('rc_daily_planner');
+    if (local !== null) {
+      try {
+        const parsed = JSON.parse(local);
+        if (Array.isArray(parsed)) return parsed;
+      } catch (e) {}
+    }
+    const todayStr = new Date().toISOString().split('T')[0];
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+    const defaultTasks = [
+      {
+        id: 'plan_seed_1',
+        date: todayStr,
+        time: '04:00 PM',
+        student_id: '1',
+        student_name: 'Alex Morgan (Year 4)',
+        lesson_title: 'Cambridge Maths: Fractions & Mixed Numbers',
+        topics_to_take: 'Explain improper fractions to mixed numbers, solve Learner Book pages 42-45, practice 5 questions on place value.',
+        materials_needed: 'Learner Book 4, Study Sheet #3',
+        homework_assigned: 'Answer exercise 3.2 on page 46',
+        status: 'pending',
+        created_at: new Date().toISOString()
+      },
+      {
+        id: 'plan_seed_2',
+        date: todayStr,
+        time: '05:30 PM',
+        student_id: '2',
+        student_name: 'Sarah Smith (Year 5)',
+        lesson_title: 'Oxford English: Reading Comprehension & Vocabulary',
+        topics_to_take: 'Read story text on pages 18-20, analyze story characters, explain 10 new vocabulary terms and sentence construction.',
+        materials_needed: 'English Student Book 5',
+        homework_assigned: 'Write a 1-paragraph summary using 5 vocabulary words',
+        status: 'pending',
+        created_at: new Date().toISOString()
+      },
+      {
+        id: 'plan_seed_3',
+        date: tomorrowStr,
+        time: '04:30 PM',
+        student_id: 'all',
+        student_name: 'All Year 4 Students',
+        lesson_title: 'Cambridge Science: States of Matter & Experiments',
+        topics_to_take: 'Demonstrate solids, liquids, and gases, heating & cooling effects, review student workbook questions.',
+        materials_needed: 'Science Learner Book 4',
+        homework_assigned: 'Complete observations table on page 33',
+        status: 'pending',
+        created_at: new Date().toISOString()
+      }
+    ];
+    localStorage.setItem('rc_daily_planner', JSON.stringify(defaultTasks));
+    return defaultTasks;
+  },
+
+  async savePlannerTask(taskData) {
+    let local = await this.getPlannerTasks();
+    const newTask = {
+      id: taskData.id || ('plan_' + Date.now()),
+      date: taskData.date || new Date().toISOString().split('T')[0],
+      time: taskData.time || '16:00',
+      student_id: taskData.student_id || 'all',
+      student_name: taskData.student_name || 'All Students',
+      lesson_title: taskData.lesson_title || 'Class Lesson',
+      topics_to_take: taskData.topics_to_take || '',
+      materials_needed: taskData.materials_needed || '',
+      homework_assigned: taskData.homework_assigned || '',
+      status: taskData.status || 'pending',
+      created_at: new Date().toISOString()
+    };
+    local.unshift(newTask);
+    localStorage.setItem('rc_daily_planner', JSON.stringify(local));
+    return { success: true, task: newTask };
+  },
+
+  async togglePlannerTaskStatus(taskId) {
+    let local = await this.getPlannerTasks();
+    let updated = null;
+    local = local.map(t => {
+      if (t.id === taskId || String(t.id) === String(taskId)) {
+        t.status = (t.status === 'completed' ? 'pending' : 'completed');
+        updated = t;
+      }
+      return t;
+    });
+    localStorage.setItem('rc_daily_planner', JSON.stringify(local));
+    return { success: true, task: updated };
+  },
+
+  async deletePlannerTask(taskId) {
+    let local = await this.getPlannerTasks();
+    local = local.filter(t => t.id !== taskId && String(t.id) !== String(taskId));
+    localStorage.setItem('rc_daily_planner', JSON.stringify(local));
     return { success: true };
   }
 
@@ -2606,6 +2734,7 @@ async function renderStudentReportView() {
 async function renderTeacherConsoleView() {
   if (!el.teacherRosterTableBody) return;
   renderTeacherAssignments();
+  renderPlannerView();
 
   el.teacherRosterTableBody.innerHTML = '<tr><td colspan="9" style="text-align:center;">Loading classroom data...</td></tr>';
 
@@ -2771,7 +2900,8 @@ window.switchTeacherTab = function(tabName) {
     payments: document.getElementById('teacherPanelPayments'),
     sessions: document.getElementById('teacherPanelSessions'),
     homework: document.getElementById('teacherPanelHomework'),
-    books: document.getElementById('teacherPanelBooks')
+    books: document.getElementById('teacherPanelBooks'),
+    planner: document.getElementById('teacherPanelPlanner')
   };
 
   Object.keys(panels).forEach(k => {
@@ -2788,6 +2918,8 @@ window.switchTeacherTab = function(tabName) {
     renderTeacherAssignments();
   } else if (tabName === 'books') {
     renderTeacherCurriculumBooks();
+  } else if (tabName === 'planner') {
+    renderPlannerView();
   }
 };
 
@@ -3304,6 +3436,309 @@ window.deleteCurriculumBookItem = async function(bookId) {
   showToast('Curriculum book removed 🗑️');
   await renderCurriculumBooksView();
   await renderTeacherCurriculumBooks();
+};
+
+window.clearAllCurriculumBooksBtn = async function() {
+  if (!confirm('Are you sure you want to remove all sample curriculum books? This allows you to add and display only your own official textbooks.')) return;
+  await DB.clearAllCurriculumBooks();
+  showToast('All sample curriculum books removed 🗑️');
+  await renderCurriculumBooksView();
+  await renderTeacherCurriculumBooks();
+};
+
+// =============================================================================
+// DAILY TEACHING PLANNER & TO-DO AGENDA CONTROLLER
+// =============================================================================
+
+if (!AppState.plannerFilter) {
+  AppState.plannerFilter = 'today';
+}
+AppState.plannerSpecificDate = null;
+
+window.filterPlannerTasks = function(filter) {
+  AppState.plannerFilter = filter;
+  AppState.plannerSpecificDate = null;
+  const dateInput = document.getElementById('plannerDateFilterInput');
+  if (dateInput) dateInput.value = '';
+
+  document.querySelectorAll('.planner-filter-btn').forEach(btn => {
+    const isAct = btn.dataset.filter === filter;
+    btn.classList.toggle('active', isAct);
+    if (isAct) {
+      btn.className = 'planner-filter-btn px-3 py-1.5 rounded-xl font-bold text-xs bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 transition-all cursor-pointer active';
+    } else {
+      btn.className = 'planner-filter-btn px-3 py-1.5 rounded-xl font-bold text-xs bg-surface-container-high text-slate-300 hover:text-white transition-all cursor-pointer';
+    }
+  });
+
+  const label = document.getElementById('plannerCurrentViewDateLabel');
+  if (label) {
+    if (filter === 'today') label.textContent = 'Today';
+    else if (filter === 'tomorrow') label.textContent = 'Tomorrow';
+    else if (filter === 'upcoming') label.textContent = 'Next 7 Days';
+    else if (filter === 'completed') label.textContent = 'Completed';
+    else label.textContent = 'All Lessons';
+  }
+
+  renderPlannerView();
+};
+
+window.handlePlannerDateChange = function(dateStr) {
+  if (!dateStr) return;
+  AppState.plannerFilter = 'specific';
+  AppState.plannerSpecificDate = dateStr;
+
+  document.querySelectorAll('.planner-filter-btn').forEach(btn => {
+    btn.classList.remove('active');
+    btn.className = 'planner-filter-btn px-3 py-1.5 rounded-xl font-bold text-xs bg-surface-container-high text-slate-300 hover:text-white transition-all cursor-pointer';
+  });
+
+  const label = document.getElementById('plannerCurrentViewDateLabel');
+  if (label) label.textContent = new Date(dateStr).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+
+  renderPlannerView();
+};
+
+window.renderPlannerView = async function() {
+  const container = document.getElementById('plannerTasksListContainer');
+  if (!container) return;
+
+  container.innerHTML = '<div class="text-center py-8 text-slate-400">Loading daily teaching agenda...</div>';
+
+  try {
+    const allTasks = await DB.getPlannerTasks();
+    const todayStr = new Date().toISOString().split('T')[0];
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+    // Compute badges and KPIs
+    const todayTasks = allTasks.filter(t => t.date === todayStr);
+    const todayPending = todayTasks.filter(t => t.status !== 'completed');
+
+    const badge = document.getElementById('tTodayPlannerBadge');
+    if (badge) {
+      if (todayPending.length > 0) {
+        badge.textContent = todayPending.length;
+        badge.style.display = 'inline-block';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+
+    const totalEl = document.getElementById('plannerTotalCount');
+    const pendingEl = document.getElementById('plannerPendingCount');
+    const completedEl = document.getElementById('plannerCompletedCount');
+
+    let filtered = [];
+    if (AppState.plannerFilter === 'today') {
+      filtered = allTasks.filter(t => t.date === todayStr);
+      if (totalEl) totalEl.textContent = filtered.length;
+      if (pendingEl) pendingEl.textContent = filtered.filter(t => t.status !== 'completed').length;
+      if (completedEl) completedEl.textContent = filtered.filter(t => t.status === 'completed').length;
+    } else if (AppState.plannerFilter === 'tomorrow') {
+      filtered = allTasks.filter(t => t.date === tomorrowStr);
+      if (totalEl) totalEl.textContent = filtered.length;
+      if (pendingEl) pendingEl.textContent = filtered.filter(t => t.status !== 'completed').length;
+      if (completedEl) completedEl.textContent = filtered.filter(t => t.status === 'completed').length;
+    } else if (AppState.plannerFilter === 'upcoming') {
+      const nextWeek = new Date();
+      nextWeek.setDate(nextWeek.getDate() + 7);
+      const nextWeekStr = nextWeek.toISOString().split('T')[0];
+      filtered = allTasks.filter(t => t.date >= todayStr && t.date <= nextWeekStr);
+      if (totalEl) totalEl.textContent = filtered.length;
+      if (pendingEl) pendingEl.textContent = filtered.filter(t => t.status !== 'completed').length;
+      if (completedEl) completedEl.textContent = filtered.filter(t => t.status === 'completed').length;
+    } else if (AppState.plannerFilter === 'completed') {
+      filtered = allTasks.filter(t => t.status === 'completed');
+      if (totalEl) totalEl.textContent = allTasks.length;
+      if (pendingEl) pendingEl.textContent = allTasks.filter(t => t.status !== 'completed').length;
+      if (completedEl) completedEl.textContent = filtered.length;
+    } else if (AppState.plannerFilter === 'specific' && AppState.plannerSpecificDate) {
+      filtered = allTasks.filter(t => t.date === AppState.plannerSpecificDate);
+      if (totalEl) totalEl.textContent = filtered.length;
+      if (pendingEl) pendingEl.textContent = filtered.filter(t => t.status !== 'completed').length;
+      if (completedEl) completedEl.textContent = filtered.filter(t => t.status === 'completed').length;
+    } else {
+      filtered = allTasks;
+      if (totalEl) totalEl.textContent = allTasks.length;
+      if (pendingEl) pendingEl.textContent = allTasks.filter(t => t.status !== 'completed').length;
+      if (completedEl) completedEl.textContent = allTasks.filter(t => t.status === 'completed').length;
+    }
+
+    // Sort by date, then by time
+    filtered.sort((a, b) => (a.date + ' ' + a.time).localeCompare(b.date + ' ' + b.time));
+
+    if (!filtered.length) {
+      container.innerHTML = `
+        <div class="text-center py-12 px-4 bg-slate-900/40 rounded-2xl border border-dashed border-white/10">
+          <div class="text-4xl mb-3">📅</div>
+          <h3 class="text-white font-bold text-base">No lessons scheduled for this view</h3>
+          <p class="text-slate-400 text-xs mt-1">Click "Add Lesson Plan" above to schedule who will take lessons and what topics to cover.</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = filtered.map(t => {
+      const isDone = t.status === 'completed';
+      const formattedDate = new Date(t.date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+      return `
+        <div class="planner-task-card ${isDone ? 'completed' : ''}" id="planCard_${t.id}">
+          <div class="flex flex-col md:flex-row md:items-start justify-between gap-3">
+            <div class="space-y-1.5 flex-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="px-2.5 py-0.5 rounded-lg bg-cyan-500/20 text-cyan-300 font-bold text-xs border border-cyan-500/30">
+                  🕒 ${t.time}
+                </span>
+                <span class="px-2.5 py-0.5 rounded-lg bg-white/10 text-slate-300 text-xs font-semibold">
+                  📅 ${formattedDate}
+                </span>
+                <span class="px-2.5 py-0.5 rounded-full ${isDone ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-300'} text-xs font-bold">
+                  ${isDone ? '✅ Completed' : '⏳ Pending'}
+                </span>
+                <span class="px-2.5 py-0.5 rounded-lg bg-indigo-500/20 text-indigo-300 font-bold text-xs border border-indigo-500/30">
+                  👤 ${t.student_name}
+                </span>
+              </div>
+              <h3 class="planner-lesson-title text-base font-bold text-white mt-1">${t.lesson_title}</h3>
+              <div class="text-xs text-slate-300 mt-1 leading-relaxed bg-slate-900/60 p-3 rounded-xl border border-white/5">
+                <span class="text-cyan-400 font-bold uppercase tracking-wider block text-[10px] mb-1">What They Will Take (Topics &amp; Objectives):</span>
+                ${t.topics_to_take || 'General curriculum instruction and exercises.'}
+              </div>
+              ${(t.materials_needed || t.homework_assigned) ? `
+                <div class="flex flex-wrap gap-3 text-xs text-slate-400 pt-1">
+                  ${t.materials_needed ? `<span>🎒 <strong>Materials:</strong> ${t.materials_needed}</span>` : ''}
+                  ${t.homework_assigned ? `<span>📝 <strong>Homework:</strong> ${t.homework_assigned}</span>` : ''}
+                </div>
+              ` : ''}
+            </div>
+
+            <!-- Action Controls -->
+            <div class="flex items-center gap-2 shrink-0 pt-2 md:pt-0">
+              <button type="button" class="action-btn-sm" onclick="togglePlannerTaskItem('${t.id}')" style="background:${isDone ? 'rgba(255,255,255,0.1)' : 'rgba(16,185,129,0.2)'}; color:${isDone ? '#cbd5e1' : '#34d399'}; border:1px solid ${isDone ? 'rgba(255,255,255,0.2)' : 'rgba(16,185,129,0.4)'}; padding:0.4rem 0.75rem; border-radius:8px; font-weight:700; font-size:0.75rem; cursor:pointer;">
+                ${isDone ? '↩️ Reopen' : '✅ Mark Done'}
+              </button>
+              <button type="button" class="action-btn-sm" onclick="sharePlannerTaskWhatsApp('${t.id}')" style="background:rgba(34,197,94,0.15); color:#22c55e; border:1px solid rgba(34,197,94,0.3); padding:0.4rem 0.65rem; border-radius:8px; font-weight:700; font-size:0.75rem; cursor:pointer;" title="Send WhatsApp Lesson Reminder">
+                💬
+              </button>
+              <button type="button" class="action-btn-sm delete" onclick="deletePlannerTaskItem('${t.id}')" style="background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.3); padding:0.4rem 0.65rem; border-radius:8px; cursor:pointer;" title="Delete Lesson">
+                🗑️
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  } catch (err) {
+    console.error('Error rendering planner:', err);
+    container.innerHTML = '<div class="text-center py-8 text-rose-400">Failed to load daily agenda.</div>';
+  }
+};
+
+window.openAddPlannerTaskModal = async function() {
+  const modal = document.getElementById('addPlannerTaskModal');
+  if (!modal) return;
+
+  const dateInput = document.getElementById('planDateInput');
+  if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+
+  const timeInput = document.getElementById('planTimeInput');
+  if (timeInput) {
+    const now = new Date();
+    now.setHours(now.getHours() + 1, 0, 0, 0);
+    timeInput.value = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  const studentSelect = document.getElementById('planStudentSelect');
+  if (studentSelect) {
+    studentSelect.innerHTML = `
+      <option value="all" selected>All Students (Class Group)</option>
+      <option value="Year 4 Group">Year 4 Group</option>
+      <option value="Year 5 Group">Year 5 Group</option>
+      <option value="Year 6 Group">Year 6 Group</option>
+    `;
+    try {
+      const roster = await DB.getTeacherStudents();
+      if (roster && roster.length) {
+        studentSelect.innerHTML += roster.map(s => `
+          <option value="${s.id}" data-name="${s.full_name} (${s.grade_level || 'Student'})">
+            👤 ${s.full_name} (${s.grade_level || 'Student'})
+          </option>
+        `).join('');
+      }
+    } catch (e) {}
+  }
+
+  modal.classList.add('open');
+};
+
+window.togglePlannerTaskItem = async function(taskId) {
+  await DB.togglePlannerTaskStatus(taskId);
+  showToast('Lesson status updated ⭐');
+  await renderPlannerView();
+};
+
+window.deletePlannerTaskItem = async function(taskId) {
+  if (!confirm('Are you sure you want to remove this scheduled lesson?')) return;
+  await DB.deletePlannerTask(taskId);
+  showToast('Lesson removed 🗑️');
+  await renderPlannerView();
+};
+
+window.sharePlannerTaskWhatsApp = async function(taskId) {
+  try {
+    const list = await DB.getPlannerTasks();
+    const t = list.find(x => x.id === taskId || String(x.id) === String(taskId));
+    if (!t) return;
+    const formattedDate = new Date(t.date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+    const msg = `📅 *Lesson Schedule Reminder - Miss Rania*\n\n` +
+      `👤 *Student / Group:* ${t.student_name}\n` +
+      `🕒 *Time & Date:* ${formattedDate} at ${t.time}\n` +
+      `📘 *Lesson:* ${t.lesson_title}\n` +
+      `📝 *What will be covered:* ${t.topics_to_take}\n` +
+      (t.materials_needed ? `🎒 *Materials:* ${t.materials_needed}\n` : '') +
+      (t.homework_assigned ? `✍️ *Homework:* ${t.homework_assigned}\n` : '') +
+      `\n🔗 *Classroom Portal:* https://mbechr.github.io/rcroom/\n` +
+      `See you in class on time! ⭐`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+  } catch (e) {
+    console.error(e);
+  }
+};
+
+window.copyTodayAgendaWhatsApp = async function() {
+  try {
+    const list = await DB.getPlannerTasks();
+    const todayStr = new Date().toISOString().split('T')[0];
+    const todayTasks = list.filter(t => t.date === todayStr);
+
+    if (!todayTasks.length) {
+      showToast('No lessons scheduled for today.');
+      return;
+    }
+
+    const todayDateFormatted = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    let msg = `📅 *Today's Teaching Schedule - Miss Rania*\n_${todayDateFormatted}_\n\n`;
+
+    todayTasks.forEach((t, i) => {
+      msg += `*${i + 1}. [${t.time}] ${t.student_name}*\n` +
+        `📘 *Lesson:* ${t.lesson_title}\n` +
+        `📝 *Topics:* ${t.topics_to_take}\n` +
+        (t.homework_assigned ? `✍️ *HW:* ${t.homework_assigned}\n` : '') +
+        `Status: ${t.status === 'completed' ? '✅ Completed' : '⏳ Pending'}\n\n`;
+    });
+
+    msg += `🌐 *Portal:* https://mbechr.github.io/rcroom/`;
+
+    if (navigator.clipboard) {
+      await navigator.clipboard.writeText(msg);
+      showToast('Today\'s agenda copied to clipboard! 📋');
+    }
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+  } catch (e) {
+    console.error(e);
+  }
 };
 
 async function renderStudentSessions() {
@@ -5442,6 +5877,66 @@ function setupEventListeners() {
     addBookModal.addEventListener('click', (e) => {
       if (e.target === addBookModal) {
         addBookModal.classList.remove('open');
+      }
+    });
+  }
+
+  // Teacher Add Planner Task Form
+  const addPlannerForm = document.getElementById('addPlannerTaskForm');
+  if (addPlannerForm) {
+    addPlannerForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const dateVal = document.getElementById('planDateInput')?.value;
+      const timeVal = document.getElementById('planTimeInput')?.value?.trim();
+      const studentSelect = document.getElementById('planStudentSelect');
+      const selectedOption = studentSelect ? studentSelect.options[studentSelect.selectedIndex] : null;
+      const studentId = studentSelect?.value || 'all';
+      const studentName = selectedOption ? (selectedOption.dataset.name || selectedOption.text.replace('👤 ', '')) : 'All Students';
+      const titleVal = document.getElementById('planTitleInput')?.value?.trim();
+      const topicsVal = document.getElementById('planTopicsInput')?.value?.trim();
+      const materialsVal = document.getElementById('planMaterialsInput')?.value?.trim();
+      const homeworkVal = document.getElementById('planHomeworkInput')?.value?.trim();
+
+      if (!titleVal || !dateVal) {
+        showToast('Please provide lesson title and date', '⚠️');
+        return;
+      }
+
+      const res = await DB.savePlannerTask({
+        date: dateVal,
+        time: timeVal || '16:00',
+        student_id: studentId,
+        student_name: studentName,
+        lesson_title: titleVal,
+        topics_to_take: topicsVal || '',
+        materials_needed: materialsVal || '',
+        homework_assigned: homeworkVal || '',
+        status: 'pending'
+      });
+
+      if (res && res.success) {
+        showToast('Lesson added to daily schedule! 📅');
+        document.getElementById('addPlannerTaskModal')?.classList.remove('open');
+        addPlannerForm.reset();
+        await renderPlannerView();
+      } else {
+        showToast('Failed to save lesson plan', '⚠️');
+      }
+    });
+  }
+
+  const closePlannerModalBtn = document.getElementById('closeAddPlannerTaskModalBtn');
+  if (closePlannerModalBtn) {
+    closePlannerModalBtn.addEventListener('click', () => {
+      document.getElementById('addPlannerTaskModal')?.classList.remove('open');
+    });
+  }
+
+  const plannerModal = document.getElementById('addPlannerTaskModal');
+  if (plannerModal) {
+    plannerModal.addEventListener('click', (e) => {
+      if (e.target === plannerModal) {
+        plannerModal.classList.remove('open');
       }
     });
   }
