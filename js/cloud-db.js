@@ -375,9 +375,10 @@
         }, { merge: true });
 
         console.log('✅ Payment submitted to Google Cloud Firestore:', id);
-        return id;
+        return { success: true, id: id, payment_id: id };
       } catch (err) {
         console.warn('Failed to submit payment to Firestore:', err);
+        return { success: false, error: err.message };
       }
     },
 

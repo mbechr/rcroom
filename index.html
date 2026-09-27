@@ -110,7 +110,7 @@
   <meta http-equiv="Expires" content="0">
 
   <!-- Core Project Styles -->
-  <link rel="stylesheet" href="style.css?v=3.0.0">
+  <link rel="stylesheet" href="style.css?v=3.0.1">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><rect width='48' height='48' rx='12' fill='%230062e3'/><path d='M14 15h9a6 6 0 0 1 0 12h-9V15zm6 7h3a1 1 0 0 0 0-2h-3v2z' fill='%23ffffff'/><path d='M22 27l5 9h-6l-4.5-8h4.5z' fill='%23ffffff'/><path d='M34 16l1.2 3.8 3.8 1.2-3.8 1.2-1.2 3.8-1.2-3.8-3.8-1.2 3.8-1.2z' fill='%23f59e0b'/></svg>">
 
   <style>
@@ -1715,7 +1715,7 @@
         </div>
         <button class="modal-close-btn" id="closeSubmitPaymentModalBtn" onclick="document.getElementById('submitPaymentModal').classList.remove('open')">✕</button>
       </div>
-      <form id="submitPaymentForm" class="auth-form" onsubmit="return false;">
+      <form id="submitPaymentForm" class="auth-form" onsubmit="handlePaymentReceiptSubmit(event)">
         <div class="form-row">
           <div class="form-group flex-1">
             <label for="payDateInput">Payment Date</label>
@@ -1748,7 +1748,7 @@
             <img id="payReceiptPreview" src="" alt="Receipt Preview" style="max-height: 140px; margin: 0 auto; border-radius: 12px; border: 1px solid rgba(0, 229, 255, 0.3);">
           </div>
         </div>
-        <button type="submit" class="primary-glow-btn full-width" id="submitPaymentReceiptBtn" style="font-weight: 700; padding: 0.85rem; margin-top: 0.5rem;">
+        <button type="submit" class="primary-glow-btn full-width" id="submitPaymentReceiptBtn" onclick="handlePaymentReceiptSubmit(event)" style="font-weight: 700; padding: 0.85rem; margin-top: 0.5rem;">
           Send Receipt to Miss Rania 🚀
         </button>
       </form>
@@ -2162,7 +2162,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <script src="js/cloud-db.js"></script>
-  <script src="app.js?v=3.0.0"></script>
+  <script src="app.js?v=3.0.1"></script>
 </body>
 </html>
 

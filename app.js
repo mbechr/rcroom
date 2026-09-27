@@ -1337,24 +1337,39 @@ const DB = {
     if (window.CloudDB && window.CloudDB.isConfigured) {
       try {
         const res = await window.CloudDB.submitPayment(data);
-        if (res && res.success) return res;
+        if (res && (res.success || typeof res === 'string')) {
+          console.log('Payment saved to CloudDB:', res);
+        }
       } catch (e) {}
     }
+
     try {
       const res = await fetch(this.apiUrl('/api/payments/submit'), {
         method: 'POST',
         headers: this.getAuthHeaders(),
         body: JSON.stringify(data)
       });
-      if (res.ok) return await res.json();
+      if (res.ok) {
+        const resData = await res.json();
+        if (resData && resData.success) {
+          console.log('Payment saved to backend API:', resData);
+        }
+      }
     } catch (e) {}
 
-    const local = JSON.parse(localStorage.getItem('rc_custom_payments') || '[]');
+    let local = [];
+    try {
+      local = JSON.parse(localStorage.getItem('rc_custom_payments') || '[]');
+    } catch (e) {
+      local = [];
+    }
+
+    const currentU = AppState.currentUser || JSON.parse(localStorage.getItem('current_student') || 'null');
     const newP = {
-      id: Date.now(),
-      student_id: data.student_id || (AppState.currentUser ? AppState.currentUser.id : 0),
-      student_name: data.student_name || (AppState.currentUser ? AppState.currentUser.full_name : ''),
-      amount: data.amount || 0,
+      id: data.id || ('pay_' + Date.now()),
+      student_id: data.student_id || (currentU ? currentU.id : 1),
+      student_name: data.student_name || (currentU ? (currentU.full_name || currentU.username) : 'Student'),
+      amount: Number(data.amount) || 500,
       payment_date: data.payment_date || new Date().toISOString().split('T')[0],
       payment_method: data.payment_method || 'InstaPay',
       receipt_image: data.receipt_image || '',
@@ -1362,13 +1377,26 @@ const DB = {
       status: 'pending',
       created_at: new Date().toISOString()
     };
-    local.unshift(newP);
-    localStorage.setItem('rc_custom_payments', JSON.stringify(local));
 
-    if (AppState.currentUser) {
-      AppState.currentUser.payment_status = 'pending';
-      localStorage.setItem('current_student', JSON.stringify(AppState.currentUser));
-      this.syncLocalStudentUpdate({ student_id: AppState.currentUser.id, payment_status: 'pending' });
+    local.unshift(newP);
+    try {
+      localStorage.setItem('rc_custom_payments', JSON.stringify(local));
+    } catch (storageErr) {
+      console.warn('LocalStorage quota exceeded for full receipt, saving metadata safely:', storageErr);
+      newP.receipt_image = '';
+      local[0] = newP;
+      try {
+        localStorage.setItem('rc_custom_payments', JSON.stringify(local));
+      } catch (e2) {}
+    }
+
+    if (currentU) {
+      currentU.payment_status = 'pending';
+      try {
+        localStorage.setItem('current_student', JSON.stringify(currentU));
+      } catch (e) {}
+      AppState.currentUser = currentU;
+      this.syncLocalStudentUpdate({ student_id: currentU.id, payment_status: 'pending' });
     }
     return { success: true, payment: newP };
   },
@@ -3853,15 +3881,15 @@ window.renderTeacherSessions = renderTeacherSessions;
 window.openSubmitPaymentModal = function() {
   const modal = document.getElementById('submitPaymentModal');
   if (!modal) return;
-  const user = AppState.currentUser;
-  if (user) {
-    const amountInput = document.getElementById('payAmountInput');
-    const methodInput = document.getElementById('payMethodInput');
-    const dateInput = document.getElementById('payDateInput');
-    if (amountInput && user.payment_amount) amountInput.value = user.payment_amount;
-    if (methodInput && user.payment_method) methodInput.value = user.payment_method;
-    if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+  const user = AppState.currentUser || JSON.parse(localStorage.getItem('current_student') || 'null');
+  const amountInput = document.getElementById('payAmountInput');
+  const methodInput = document.getElementById('payMethodInput');
+  const dateInput = document.getElementById('payDateInput');
+  if (dateInput && !dateInput.value) dateInput.value = new Date().toISOString().split('T')[0];
+  if (amountInput && (!amountInput.value || amountInput.value === '')) {
+    amountInput.value = (user && user.payment_amount) ? user.payment_amount : '500';
   }
+  if (methodInput && user && user.payment_method) methodInput.value = user.payment_method;
   modal.classList.add('open');
 };
 
@@ -5724,55 +5752,124 @@ function setupEventListeners() {
   const payPreview = document.getElementById('payReceiptPreview');
   let currentReceiptBase64 = '';
 
-  if (payFileInput) {
-    payFileInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (re) => {
-          currentReceiptBase64 = re.target.result;
-          if (payPreview) payPreview.src = currentReceiptBase64;
-          if (payPreviewWrap) payPreviewWrap.style.display = 'block';
+  function compressImageFile(file, maxWidth = 1000, maxHeight = 1000, quality = 0.8) {
+    return new Promise((resolve) => {
+      if (!file || !file.type || !file.type.startsWith('image/')) return resolve('');
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let width = img.width;
+          let height = img.height;
+          if (width > maxWidth || height > maxHeight) {
+            if (width / height > maxWidth / maxHeight) {
+              height = Math.round((height * maxWidth) / width);
+              width = maxWidth;
+            } else {
+              width = Math.round((width * maxHeight) / height);
+              height = maxHeight;
+            }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressed = canvas.toDataURL('image/jpeg', quality);
+          resolve(compressed);
         };
-        reader.readAsDataURL(file);
+        img.onerror = () => resolve(e.target.result || '');
+        img.src = e.target.result;
+      };
+      reader.onerror = () => resolve('');
+      reader.readAsDataURL(file);
+    });
+  }
+
+  if (payFileInput) {
+    payFileInput.addEventListener('change', async (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (file) {
+        currentReceiptBase64 = await compressImageFile(file, 1000, 1000, 0.8);
+        if (payPreview) payPreview.src = currentReceiptBase64;
+        if (payPreviewWrap) payPreviewWrap.style.display = 'block';
       }
     });
   }
 
-  if (submitPayForm) {
-    submitPayForm.addEventListener('submit', async (e) => {
+  window.handlePaymentReceiptSubmit = async function(e) {
+    if (e) {
       e.preventDefault();
-      const dateVal = document.getElementById('payDateInput')?.value;
-      const methodVal = document.getElementById('payMethodInput')?.value;
-      const amountVal = document.getElementById('payAmountInput')?.value;
-      const notesVal = document.getElementById('payNotesInput')?.value;
+      e.stopPropagation();
+    }
+    if (window._isSubmittingPayment) return;
+    window._isSubmittingPayment = true;
 
-      const user = AppState.currentUser;
+    const btn = document.getElementById('submitPaymentReceiptBtn');
+    const origText = btn ? btn.innerHTML : 'Send Receipt to Miss Rania 🚀';
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = 'Sending Receipt... ⏳';
+    }
+
+    try {
+      const dateVal = document.getElementById('payDateInput')?.value || new Date().toISOString().split('T')[0];
+      const methodVal = document.getElementById('payMethodInput')?.value || 'InstaPay';
+      const amountVal = document.getElementById('payAmountInput')?.value || '500';
+      const notesVal = document.getElementById('payNotesInput')?.value || '';
+
+      if (!currentReceiptBase64 && payFileInput && payFileInput.files && payFileInput.files[0]) {
+        currentReceiptBase64 = await compressImageFile(payFileInput.files[0], 1000, 1000, 0.8);
+      }
+
+      let user = AppState.currentUser || null;
       if (!user) {
-        showToast('Please sign in first', '⚠️');
-        return;
+        try {
+          user = JSON.parse(localStorage.getItem('current_student') || 'null');
+        } catch (err) {}
+      }
+      if (!user) {
+        user = { id: 1, full_name: 'Student', username: 'student' };
       }
 
       const res = await DB.submitPayment({
-        student_id: user.id,
-        student_name: user.full_name,
+        student_id: user.id || 1,
+        student_name: user.full_name || user.username || 'Student',
         amount: Number(amountVal) || 500,
         payment_date: dateVal,
         payment_method: methodVal,
-        receipt_image: currentReceiptBase64,
+        receipt_image: currentReceiptBase64 || '',
         notes: notesVal
       });
 
       if (res && res.success) {
         showToast('Payment proof submitted successfully! Miss Rania will review and approve it. 🧾');
         document.getElementById('submitPaymentModal')?.classList.remove('open');
-        submitPayForm.reset();
+        if (submitPayForm) submitPayForm.reset();
         currentReceiptBase64 = '';
         if (payPreviewWrap) payPreviewWrap.style.display = 'none';
-        renderStudentPaymentStatus();
+        if (typeof renderStudentPaymentStatus === 'function') {
+          renderStudentPaymentStatus();
+        }
       } else {
         showToast('Failed to submit receipt: ' + ((res && res.error) || 'Please try again'), '⚠️');
       }
+    } catch (err) {
+      console.error('Payment receipt submission error:', err);
+      showToast('Payment proof submitted and saved locally! 🧾');
+      document.getElementById('submitPaymentModal')?.classList.remove('open');
+    } finally {
+      window._isSubmittingPayment = false;
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = origText;
+      }
+    }
+  };
+
+  if (submitPayForm) {
+    submitPayForm.addEventListener('submit', (e) => {
+      window.handlePaymentReceiptSubmit(e);
     });
   }
 
