@@ -1492,6 +1492,128 @@ const DB = {
     return JSON.parse(localStorage.getItem('rc_class_sessions') || '[]');
   },
 
+  // Curriculum Books & Full PDFs
+  async getCurriculumBooks() {
+    if (window.CloudDB && window.CloudDB.isConfigured && typeof window.CloudDB.getCurriculumBooks === 'function') {
+      try {
+        const cloudBooks = await window.CloudDB.getCurriculumBooks();
+        if (cloudBooks && cloudBooks.length) return cloudBooks;
+      } catch (e) {}
+    }
+    const local = localStorage.getItem('rc_curriculum_books');
+    if (local) {
+      try {
+        const parsed = JSON.parse(local);
+        if (Array.isArray(parsed) && parsed.length) return parsed;
+      } catch (e) {}
+    }
+    const defaultBooks = [
+      {
+        id: 'book_math_y4',
+        title: 'Cambridge Primary Mathematics Learner Book 4',
+        age_group: 'Year 4 (Ages 8-9)',
+        grade: 'Year 4',
+        subject: 'Maths',
+        pages_count: '184 Pages',
+        pdf_url: 'https://archive.org/details/cambridge-primary-mathematics-learners-book-4',
+        description: 'Complete official curriculum textbook covering place value, operations, fractions, geometry, and data handling.',
+        created_at: new Date().toISOString()
+      },
+      {
+        id: 'book_eng_y4',
+        title: 'Cambridge Primary English Learner Book 4',
+        age_group: 'Year 4 (Ages 8-9)',
+        grade: 'Year 4',
+        subject: 'English',
+        pages_count: '176 Pages',
+        pdf_url: 'https://archive.org/details/cambridge-primary-english-learners-book-4',
+        description: 'Comprehensive English syllabus focusing on reading comprehension, story writing, grammar rules, spelling, and vocabulary.',
+        created_at: new Date().toISOString()
+      },
+      {
+        id: 'book_sci_y4',
+        title: 'Cambridge Primary Science Learner Book 4',
+        age_group: 'Year 4 (Ages 8-9)',
+        grade: 'Year 4',
+        subject: 'Science',
+        pages_count: '160 Pages',
+        pdf_url: 'https://archive.org/details/cambridge-primary-science-learners-book-4',
+        description: 'Interactive science textbook exploring living things, sound vibrations, states of matter, habitats, and electrical circuits.',
+        created_at: new Date().toISOString()
+      },
+      {
+        id: 'book_math_y5',
+        title: 'Cambridge Primary Mathematics Learner Book 5',
+        age_group: 'Year 5 (Ages 9-10)',
+        grade: 'Year 5',
+        subject: 'Maths',
+        pages_count: '208 Pages',
+        pdf_url: 'https://archive.org/details/cambridge-primary-mathematics-learners-book-5',
+        description: 'Advanced primary mathematics covering multi-step problem solving, percentages, decimals, angles, perimeter, and area.',
+        created_at: new Date().toISOString()
+      },
+      {
+        id: 'book_eng_y5',
+        title: 'Oxford International Primary English Student Book 5',
+        age_group: 'Year 5 (Ages 9-10)',
+        grade: 'Year 5',
+        subject: 'English',
+        pages_count: '192 Pages',
+        pdf_url: 'https://archive.org/details/oxford-primary-english-5',
+        description: 'Structured language arts curriculum including non-fiction articles, persuasive essays, creative poetry, and syntax mastery.',
+        created_at: new Date().toISOString()
+      },
+      {
+        id: 'book_sci_y6',
+        title: 'Cambridge Primary Science Learner Book 6',
+        age_group: 'Year 6 (Ages 10-11)',
+        grade: 'Year 6',
+        subject: 'Science',
+        pages_count: '196 Pages',
+        pdf_url: 'https://archive.org/details/cambridge-primary-science-learners-book-6',
+        description: 'Upper primary science program covering human body organs, ecosystems, reversible/irreversible changes, and forces.',
+        created_at: new Date().toISOString()
+      }
+    ];
+    localStorage.setItem('rc_curriculum_books', JSON.stringify(defaultBooks));
+    return defaultBooks;
+  },
+
+  async saveCurriculumBook(bookData) {
+    if (window.CloudDB && window.CloudDB.isConfigured && typeof window.CloudDB.saveCurriculumBook === 'function') {
+      try {
+        await window.CloudDB.saveCurriculumBook(bookData);
+      } catch (e) {}
+    }
+    let local = await this.getCurriculumBooks();
+    const newBook = {
+      id: bookData.id || ('book_' + Date.now()),
+      title: bookData.title,
+      age_group: bookData.age_group || 'All Ages',
+      grade: bookData.grade || bookData.age_group || 'All Grades',
+      subject: bookData.subject || 'General',
+      pages_count: bookData.pages_count || 'Full Book',
+      pdf_url: bookData.pdf_url || '#',
+      description: bookData.description || 'Full curriculum PDF textbook.',
+      created_at: new Date().toISOString()
+    };
+    local.unshift(newBook);
+    localStorage.setItem('rc_curriculum_books', JSON.stringify(local));
+    return { success: true, book: newBook };
+  },
+
+  async deleteCurriculumBook(bookId) {
+    if (window.CloudDB && window.CloudDB.isConfigured && typeof window.CloudDB.deleteCurriculumBook === 'function') {
+      try {
+        await window.CloudDB.deleteCurriculumBook(bookId);
+      } catch (e) {}
+    }
+    let local = await this.getCurriculumBooks();
+    local = local.filter(b => b.id !== bookId && String(b.id) !== String(bookId));
+    localStorage.setItem('rc_curriculum_books', JSON.stringify(local));
+    return { success: true };
+  }
+
 };
 
 // =============================================================================
@@ -1892,6 +2014,8 @@ function switchView(viewId) {
     renderStudentReportView();
   } else if (viewId === 'leaderboard') {
     renderLeaderboardView();
+  } else if (viewId === 'curriculum-books') {
+    renderCurriculumBooksView();
   } else if (viewId === 'teacher') {
     renderTeacherConsoleView();
   }
@@ -2646,7 +2770,8 @@ window.switchTeacherTab = function(tabName) {
     students: document.getElementById('teacherPanelStudents'),
     payments: document.getElementById('teacherPanelPayments'),
     sessions: document.getElementById('teacherPanelSessions'),
-    homework: document.getElementById('teacherPanelHomework')
+    homework: document.getElementById('teacherPanelHomework'),
+    books: document.getElementById('teacherPanelBooks')
   };
 
   Object.keys(panels).forEach(k => {
@@ -2661,6 +2786,8 @@ window.switchTeacherTab = function(tabName) {
     renderTeacherSessions();
   } else if (tabName === 'homework') {
     renderTeacherAssignments();
+  } else if (tabName === 'books') {
+    renderTeacherCurriculumBooks();
   }
 };
 
@@ -2922,6 +3049,7 @@ window.viewReceiptImage = function(imgSrc, studentName) {
 };
 
 async function renderTeacherSessions() {
+  renderTeacherDefaultZoomBanner();
   const container = document.getElementById('teacherSessionsListContainer');
   if (!container) return;
   container.innerHTML = '<div style="text-align:center; padding: 2rem; color: var(--text-muted);">Loading class sessions...</div>';
@@ -2981,6 +3109,201 @@ window.deleteClassSessionItem = async function(id) {
   showToast('Session removed successfully 🗑️');
   await renderTeacherSessions();
   await renderStudentSessions();
+};
+
+// =============================================================================
+// ZOOM PRO DEFAULT MEETING LINK HELPERS (TEACHER)
+// =============================================================================
+
+window.renderTeacherDefaultZoomBanner = function() {
+  const display = document.getElementById('teacherDefaultZoomDisplay');
+  if (display) {
+    const current = localStorage.getItem('rc_default_zoom_link');
+    display.textContent = current || 'Not configured yet (Click "Set Default Zoom" to enter link)';
+  }
+};
+
+window.promptSetDefaultZoomLink = function() {
+  const current = localStorage.getItem('rc_default_zoom_link') || '';
+  const newLink = prompt('Enter Miss Rania\'s default Zoom Pro room link (e.g. https://zoom.us/j/...):', current);
+  if (newLink !== null) {
+    const trimmed = newLink.trim();
+    if (trimmed) {
+      localStorage.setItem('rc_default_zoom_link', trimmed);
+      showToast('Default Zoom room saved! 🎥');
+    } else {
+      localStorage.removeItem('rc_default_zoom_link');
+      showToast('Default Zoom room cleared.');
+    }
+    renderTeacherDefaultZoomBanner();
+  }
+};
+
+window.useDefaultZoomLink = function() {
+  const input = document.getElementById('sessZoomLinkInput');
+  const defaultLink = localStorage.getItem('rc_default_zoom_link');
+  if (!defaultLink) {
+    promptSetDefaultZoomLink();
+    const newlySet = localStorage.getItem('rc_default_zoom_link');
+    if (newlySet && input) input.value = newlySet;
+  } else {
+    if (input) input.value = defaultLink;
+    showToast('Default Zoom Pro link applied ⚡');
+  }
+};
+
+window.saveAsDefaultZoomLink = function() {
+  const input = document.getElementById('sessZoomLinkInput');
+  if (input && input.value.trim()) {
+    localStorage.setItem('rc_default_zoom_link', input.value.trim());
+    showToast('Link saved as default Zoom room! ⚙️');
+    renderTeacherDefaultZoomBanner();
+  } else {
+    showToast('Please enter a Zoom URL in the input field first.');
+  }
+};
+
+// =============================================================================
+// CURRICULUM BOOKS & FULL TEXTBOOKS PDF LIBRARY
+// =============================================================================
+
+if (!AppState.curriculumBooksFilter) {
+  AppState.curriculumBooksFilter = { subject: 'all', search: '' };
+}
+
+window.filterCurriculumBooks = function(type, val) {
+  if (type === 'subject') {
+    AppState.curriculumBooksFilter.subject = val;
+    document.querySelectorAll('.book-subject-filter').forEach(btn => {
+      const isAct = btn.dataset.subject === val;
+      btn.classList.toggle('active', isAct);
+      if (isAct) {
+        btn.className = 'book-subject-filter px-3.5 py-1.5 rounded-xl font-bold text-xs bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 transition-all cursor-pointer active';
+      } else {
+        btn.className = 'book-subject-filter px-3.5 py-1.5 rounded-xl font-bold text-xs bg-surface-container-high text-slate-300 hover:text-white transition-all cursor-pointer';
+      }
+    });
+  }
+  renderCurriculumBooksView();
+};
+
+window.handleCurriculumBooksSearch = function(query) {
+  AppState.curriculumBooksFilter.search = (query || '').toLowerCase().trim();
+  renderCurriculumBooksView();
+};
+
+function renderCurriculumBookCardHtml(b, isTeacher = false) {
+  const subjClass = (b.subject || 'other').toLowerCase();
+  return `
+    <div class="curriculum-book-card">
+      <div>
+        <div class="book-card-header">
+          <span class="book-subject-tag ${subjClass}">${b.subject || 'General'}</span>
+          <span class="book-age-badge">👥 ${b.age_group || b.grade || 'All Ages'}</span>
+        </div>
+        <h3 class="book-card-title">${b.title}</h3>
+        <p class="book-card-desc mt-2">${b.description || 'Full curriculum PDF textbook.'}</p>
+      </div>
+      <div>
+        <div class="book-card-meta mb-3">
+          <span>📄 ${b.pages_count || 'Full Textbook'}</span>
+          <span>📅 ${b.created_at ? new Date(b.created_at).toLocaleDateString('en-GB') : 'Official'}</span>
+        </div>
+        <div class="flex items-center justify-between gap-2 pt-2 border-t border-white/10">
+          <a href="${b.pdf_url}" target="_blank" rel="noopener noreferrer" class="primary-glow-btn flex-1 text-center justify-center text-xs py-2">
+            <span>📖</span> <span>Read Full PDF</span>
+          </a>
+          <a href="${b.pdf_url}" target="_blank" download class="secondary-glass-btn text-xs px-3 py-2" title="Download Book PDF">
+            <span>⬇️</span>
+          </a>
+          ${isTeacher ? `
+            <button type="button" class="action-btn-sm delete" onclick="deleteCurriculumBookItem('${b.id}')" title="Delete Book" style="background:rgba(239,68,68,0.15); color:#ef4444; border:1px solid rgba(239,68,68,0.3); border-radius:8px; padding:0.45rem 0.65rem; cursor:pointer;">
+              🗑️
+            </button>
+          ` : ''}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+window.renderCurriculumBooksView = async function() {
+  const grid = document.getElementById('curriculumBooksGrid');
+  if (!grid) return;
+
+  const user = AppState.currentUser;
+  const isTeacher = user && (user.role === 'teacher' || user.username === 'admin' || user.username === 'rania');
+  const addBtnCol = document.getElementById('teacherAddBookBtnCol');
+  if (addBtnCol) addBtnCol.style.display = isTeacher ? 'block' : 'none';
+
+  grid.innerHTML = '<div class="col-span-full text-center py-10 text-slate-400">Loading curriculum library...</div>';
+
+  try {
+    const books = await DB.getCurriculumBooks();
+    const filterSubj = AppState.curriculumBooksFilter.subject;
+    const filterSearch = AppState.curriculumBooksFilter.search;
+
+    const filtered = books.filter(b => {
+      const matchSubj = filterSubj === 'all' || (b.subject && b.subject.toLowerCase() === filterSubj.toLowerCase());
+      const matchSearch = !filterSearch ||
+        (b.title && b.title.toLowerCase().includes(filterSearch)) ||
+        (b.age_group && b.age_group.toLowerCase().includes(filterSearch)) ||
+        (b.description && b.description.toLowerCase().includes(filterSearch)) ||
+        (b.subject && b.subject.toLowerCase().includes(filterSearch));
+      return matchSubj && matchSearch;
+    });
+
+    if (!filtered.length) {
+      grid.innerHTML = `
+        <div class="col-span-full text-center py-16 px-4 bg-surface-card rounded-2xl border border-dashed border-border-card">
+          <div class="text-4xl mb-3">📚</div>
+          <h3 class="text-white font-bold text-base">No curriculum books found</h3>
+          <p class="text-slate-400 text-xs mt-1">Try adjusting your subject filter or search query.</p>
+        </div>
+      `;
+      return;
+    }
+
+    grid.innerHTML = filtered.map(b => renderCurriculumBookCardHtml(b, isTeacher)).join('');
+  } catch (err) {
+    console.error('Error rendering curriculum books:', err);
+    grid.innerHTML = '<div class="col-span-full text-center py-10 text-rose-400">Failed to load curriculum books.</div>';
+  }
+};
+
+window.renderTeacherCurriculumBooks = async function() {
+  const grid = document.getElementById('teacherBooksGrid');
+  if (!grid) return;
+  grid.innerHTML = '<div class="col-span-full text-center py-10 text-slate-400">Loading curriculum library...</div>';
+  try {
+    const books = await DB.getCurriculumBooks();
+    if (!books.length) {
+      grid.innerHTML = `
+        <div class="col-span-full text-center py-12 px-4 bg-surface-card rounded-2xl border border-dashed border-border-card">
+          <div class="text-4xl mb-3">📚</div>
+          <h3 class="text-white font-bold text-base">No curriculum books added yet</h3>
+          <p class="text-slate-400 text-xs mt-1">Click "Add Curriculum PDF" to upload and organize syllabus books for your students.</p>
+        </div>
+      `;
+      return;
+    }
+    grid.innerHTML = books.map(b => renderCurriculumBookCardHtml(b, true)).join('');
+  } catch (err) {
+    console.error('Error rendering teacher books:', err);
+  }
+};
+
+window.openAddCurriculumBookModal = function() {
+  const modal = document.getElementById('addCurriculumBookModal');
+  if (modal) modal.classList.add('open');
+};
+
+window.deleteCurriculumBookItem = async function(bookId) {
+  if (!confirm('Are you sure you want to delete this curriculum book?')) return;
+  await DB.deleteCurriculumBook(bookId);
+  showToast('Curriculum book removed 🗑️');
+  await renderCurriculumBooksView();
+  await renderTeacherCurriculumBooks();
 };
 
 async function renderStudentSessions() {
@@ -4296,7 +4619,13 @@ async function renderTeacherAssignments() {
             <span style="font-size:0.72rem; font-weight:700; text-transform:uppercase; color:var(--text-muted); letter-spacing:0.05em;">Student Status:</span>
             <div>${completedPills}</div>
           </div>
-          <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.25rem;">Due: <strong>${a.due_date}</strong> • Goal: <strong>${a.question_goal || 10} Questions</strong></div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem; gap:0.5rem; flex-wrap:wrap;">
+            <div style="font-size:0.75rem; color:var(--text-muted);">Due: <strong>${a.due_date}</strong> &bull; Goal: <strong>${a.question_goal || 10} Questions</strong></div>
+            <button type="button" class="action-btn-sm" onclick="shareAssignmentWhatsApp('${a.id}')" style="background:rgba(34,197,94,0.15); color:#22c55e; border:1px solid rgba(34,197,94,0.3); padding:0.35rem 0.75rem; border-radius:8px; font-weight:700; font-size:0.75rem; cursor:pointer; display:flex; align-items:center; gap:0.35rem;" title="Send homework assignment to students via WhatsApp">
+              <span>💬</span>
+              <span>Send WhatsApp</span>
+            </button>
+          </div>
         </div>
       `;
     }).join('') || '<div style="color:var(--text-muted); padding:1rem;">No active class assignments. Click "Assign Homework to Students" above to send one!</div>';
@@ -4304,6 +4633,28 @@ async function renderTeacherAssignments() {
     console.error('Error loading teacher assignments:', err);
   }
 }
+
+window.shareAssignmentWhatsApp = async function(assignmentId) {
+  try {
+    const list = await DB.getAssignments();
+    const a = list.find(x => x.id === assignmentId || String(x.id) === String(assignmentId));
+    if (!a) {
+      showToast('Assignment details not found', '⚠️');
+      return;
+    }
+    const msg = `📢 *Classroom Homework - Miss Rania*\n\n` +
+      `📚 *Subject:* ${a.subject} (${a.grade})\n` +
+      `🎯 *Skill / Topic:* ${a.skill_name} (${a.skill_code})\n` +
+      `📅 *Due Date:* ${a.due_date}\n` +
+      `🎯 *Questions Goal:* ${a.question_goal || 10} Questions\n` +
+      (a.instructions ? `📝 *Instructions:* ${a.instructions}\n` : '') +
+      `\n🌐 *Solve & Practice Online:* https://mbechr.github.io/rcroom/\n` +
+      `Good luck and do your best! ⭐`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+  } catch (err) {
+    console.error(err);
+  }
+};
 
 async function exportClassroomCsv() {
   const token = localStorage.getItem('rc_auth_token') || localStorage.getItem('ixl_auth_token') || '';
@@ -5036,6 +5387,61 @@ function setupEventListeners() {
         await renderStudentSessions();
       } else {
         showToast('Failed to save session', '⚠️');
+      }
+    });
+  }
+
+  // Teacher Add Curriculum Book Form
+  const addBookForm = document.getElementById('addCurriculumBookForm');
+  if (addBookForm) {
+    addBookForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const title = document.getElementById('bookTitleInput')?.value?.trim();
+      const ageGroup = document.getElementById('bookAgeGroupInput')?.value?.trim();
+      const subject = document.getElementById('bookSubjectSelect')?.value;
+      const pages = document.getElementById('bookPagesInput')?.value?.trim();
+      const pdfUrl = document.getElementById('bookPdfUrlInput')?.value?.trim();
+      const desc = document.getElementById('bookDescInput')?.value?.trim();
+
+      if (!title || !pdfUrl) {
+        showToast('Please provide book title and PDF link', '⚠️');
+        return;
+      }
+
+      const res = await DB.saveCurriculumBook({
+        title,
+        age_group: ageGroup || 'All Ages',
+        grade: ageGroup || 'All Grades',
+        subject: subject || 'General',
+        pages_count: pages || 'Full Book',
+        pdf_url: pdfUrl,
+        description: desc || 'Full curriculum PDF textbook.'
+      });
+
+      if (res && res.success) {
+        showToast('Curriculum book added successfully! 📚');
+        document.getElementById('addCurriculumBookModal')?.classList.remove('open');
+        addBookForm.reset();
+        await renderCurriculumBooksView();
+        await renderTeacherCurriculumBooks();
+      } else {
+        showToast('Failed to save curriculum book', '⚠️');
+      }
+    });
+  }
+
+  const closeAddBookBtn = document.getElementById('closeAddCurriculumBookModalBtn');
+  if (closeAddBookBtn) {
+    closeAddBookBtn.addEventListener('click', () => {
+      document.getElementById('addCurriculumBookModal')?.classList.remove('open');
+    });
+  }
+
+  const addBookModal = document.getElementById('addCurriculumBookModal');
+  if (addBookModal) {
+    addBookModal.addEventListener('click', (e) => {
+      if (e.target === addBookModal) {
+        addBookModal.classList.remove('open');
       }
     });
   }

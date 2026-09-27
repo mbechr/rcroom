@@ -332,6 +332,10 @@
           <span class="material-symbols-outlined text-[20px] shrink-0">credit_card</span>
           <span class="sidebar-text truncate">Payment &amp; Proof 💳</span>
         </button>
+        <button class="nav-tab student-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="curriculum-books" title="Curriculum Books & Full PDFs">
+          <span class="material-symbols-outlined text-[20px] shrink-0">menu_book</span>
+          <span class="sidebar-text truncate">Curriculum PDFs 📚</span>
+        </button>
         <button class="nav-tab student-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="reports" title="My Progress">
           <span class="material-symbols-outlined text-[20px] shrink-0">analytics</span>
           <span class="sidebar-text truncate">My Progress 📊</span>
@@ -569,6 +573,47 @@
         </div>
       </div>
       <div id="fullSessionsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-4">
+        <!-- Injected via JS -->
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         VIEW: CURRICULUM BOOKS & FULL TEXTBOOKS PDF LIBRARY
+         ==================================================================== -->
+    <section id="view-curriculum-books" class="portal-view">
+      <div class="view-header-row">
+        <div>
+          <div class="view-kicker">// OFFICIAL TEXTBOOKS &amp; SYLLABUS LIBRARY</div>
+          <h1 class="view-main-title">Full Curriculum Textbooks &amp; PDFs 📚</h1>
+          <p class="view-lead-text">Browse, read online, or download complete curriculum textbooks organized by curriculum title, subject, and age group / grade level.</p>
+        </div>
+        <div class="view-actions-col teacher-only-action" id="teacherAddBookBtnCol" style="display: none;">
+          <button class="primary-glow-btn" onclick="openAddCurriculumBookModal()">
+            <span class="material-symbols-outlined text-[18px]">add_circle</span>
+            <span>Add Curriculum PDF</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Filters & Search Toolbar -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 rounded-2xl bg-surface-card border border-border-card my-6">
+        <!-- Subject Pills -->
+        <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0" id="bookSubjectFilters">
+          <button type="button" class="book-subject-filter px-3.5 py-1.5 rounded-xl font-bold text-xs bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 transition-all cursor-pointer active" data-subject="all" onclick="filterCurriculumBooks('subject', 'all')">All Subjects</button>
+          <button type="button" class="book-subject-filter px-3.5 py-1.5 rounded-xl font-bold text-xs bg-surface-container-high text-slate-300 hover:text-white transition-all cursor-pointer" data-subject="Maths" onclick="filterCurriculumBooks('subject', 'Maths')">📐 Maths</button>
+          <button type="button" class="book-subject-filter px-3.5 py-1.5 rounded-xl font-bold text-xs bg-surface-container-high text-slate-300 hover:text-white transition-all cursor-pointer" data-subject="English" onclick="filterCurriculumBooks('subject', 'English')">📖 English</button>
+          <button type="button" class="book-subject-filter px-3.5 py-1.5 rounded-xl font-bold text-xs bg-surface-container-high text-slate-300 hover:text-white transition-all cursor-pointer" data-subject="Science" onclick="filterCurriculumBooks('subject', 'Science')">🔬 Science</button>
+        </div>
+
+        <!-- Search Input -->
+        <div class="relative min-w-[260px]">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-[18px]">search</span>
+          <input type="text" id="curriculumBooksSearchInput" oninput="handleCurriculumBooksSearch(this.value)" placeholder="Search books by title, age, or unit..." class="w-full pl-9 pr-4 py-2 bg-slate-900/60 border border-slate-700/60 rounded-xl text-xs text-white placeholder-slate-400 focus:outline-none focus:border-cyan-500">
+        </div>
+      </div>
+
+      <!-- Books Grid -->
+      <div id="curriculumBooksGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
         <!-- Injected via JS -->
       </div>
     </section>
@@ -863,6 +908,10 @@
           <span class="material-symbols-outlined text-[18px]">assignment</span>
           <span>Homework Assignments 📝</span>
         </button>
+        <button type="button" class="teacher-sub-tab px-4 py-2 rounded-xl bg-surface-card hover:bg-surface-hover border border-border-card text-slate-400 font-bold text-xs flex items-center gap-2 cursor-pointer transition-all" data-ttab="books" onclick="switchTeacherTab('books')">
+          <span class="material-symbols-outlined text-[18px]">menu_book</span>
+          <span>Curriculum PDFs 📚</span>
+        </button>
       </div>
 
       <!-- ==============================================================
@@ -981,6 +1030,23 @@
               <span>➕</span> <span>Log New Class Session</span>
             </button>
           </div>
+
+          <!-- Zoom Pro Default Quick Banner -->
+          <div class="mx-4 mt-4 p-4 rounded-xl border border-cyan-500/30 bg-cyan-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">⚡</span>
+              <div>
+                <div class="text-xs font-bold uppercase tracking-wider text-cyan-400">Default Zoom Pro Room</div>
+                <div id="teacherDefaultZoomDisplay" class="text-xs text-slate-300 font-mono break-all mt-0.5">Not set (Click 'Set Default Zoom' to configure)</div>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button type="button" class="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-bold transition-all cursor-pointer" onclick="promptSetDefaultZoomLink()">
+                ⚙️ Set Default Zoom
+              </button>
+            </div>
+          </div>
+
           <div id="teacherSessionsListContainer" class="p-4 space-y-4">
             <!-- Injected via JS -->
           </div>
@@ -1002,6 +1068,26 @@
             </button>
           </div>
           <div class="assignments-teacher-grid" id="teacherAssignmentsGrid">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ==============================================================
+           PANEL 5: CURRICULUM BOOKS & FULL PDF MANAGEMENT
+           ============================================================== -->
+      <div id="teacherPanelBooks" class="teacher-tab-panel" style="display: none;">
+        <div class="report-section-card glass-panel" style="margin-bottom: 2rem;">
+          <div class="section-card-header flex items-center justify-between">
+            <div>
+              <h3 class="card-title">📚 Official Curriculum Books &amp; PDF Library</h3>
+              <p class="card-subtitle">Upload, organize, and manage full curriculum textbooks with age groups and subjects for your students.</p>
+            </div>
+            <button class="primary-glow-btn" onclick="openAddCurriculumBookModal()">
+              <span>+</span> <span>Add Curriculum PDF</span>
+            </button>
+          </div>
+          <div id="teacherBooksGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
             <!-- Injected via JS -->
           </div>
         </div>
@@ -1603,7 +1689,13 @@
           <textarea id="sessTopicInput" rows="3" placeholder="Enter curriculum units, topics covered, and key takeaways..." required style="background: rgba(14, 18, 30, 0.8); border: 1px solid rgba(255,255,255,0.15); color: #fff; width: 100%; border-radius: 8px; padding: 0.75rem; font-size: 0.9rem; resize: vertical;"></textarea>
         </div>
         <div class="form-group">
-          <label for="sessZoomLinkInput">Zoom Pro Meeting / Recording Link</label>
+          <div class="flex items-center justify-between mb-1">
+            <label for="sessZoomLinkInput" class="mb-0">Zoom Pro Meeting / Recording Link</label>
+            <div class="flex items-center gap-2">
+              <button type="button" class="text-xs text-cyan-400 hover:text-cyan-300 font-semibold cursor-pointer underline" onclick="useDefaultZoomLink()">⚡ Use Default Zoom</button>
+              <button type="button" class="text-xs text-slate-400 hover:text-slate-200 cursor-pointer" onclick="saveAsDefaultZoomLink()">⚙️ Save Default</button>
+            </div>
+          </div>
           <input type="url" id="sessZoomLinkInput" placeholder="https://zoom.us/j/... or Cloud Recording URL">
         </div>
         <div class="form-row">
@@ -1618,6 +1710,59 @@
         </div>
         <button type="submit" class="primary-glow-btn full-width" id="submitClassSessionBtn" style="font-weight: 700; padding: 0.85rem; margin-top: 0.5rem;">
           Save & Publish Session to Students 🎥
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MODAL: ADD CURRICULUM BOOK PDF (For Teacher)
+       ==================================================================== -->
+  <div class="auth-modal-backdrop" id="addCurriculumBookModal">
+    <div class="auth-modal-window" style="max-width: 600px;">
+      <div class="auth-modal-header">
+        <div>
+          <h2 class="auth-title">Add Curriculum Book PDF 📚</h2>
+          <p class="auth-subtitle">Add full curriculum textbook link, target age group, and subject for students</p>
+        </div>
+        <button class="modal-close-btn" id="closeAddCurriculumBookModalBtn" onclick="document.getElementById('addCurriculumBookModal').classList.remove('open')">✕</button>
+      </div>
+      <form id="addCurriculumBookForm" class="auth-form" onsubmit="return false;">
+        <div class="form-group">
+          <label for="bookTitleInput">Curriculum Book Title</label>
+          <input type="text" id="bookTitleInput" placeholder="e.g. Cambridge Primary Mathematics Learner Book 4" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="bookAgeGroupInput">Age Group / Year Level</label>
+            <input type="text" id="bookAgeGroupInput" placeholder="e.g. Year 4 (Ages 8-9)" required>
+          </div>
+          <div class="form-group flex-1">
+            <label for="bookSubjectSelect">Subject</label>
+            <select id="bookSubjectSelect" required>
+              <option value="Maths" selected>Maths</option>
+              <option value="English">English</option>
+              <option value="Science">Science</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="bookPagesInput">Total Pages / Edition</label>
+            <input type="text" id="bookPagesInput" placeholder="e.g. 184 Pages - 2nd Edition">
+          </div>
+          <div class="form-group flex-1">
+            <label for="bookPdfUrlInput">Full PDF URL / Cloud Drive Link</label>
+            <input type="url" id="bookPdfUrlInput" placeholder="https://... / Google Drive / Dropbox link" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="bookDescInput">Description &amp; Units Covered</label>
+          <textarea id="bookDescInput" rows="3" placeholder="Summary of units, chapters, and topics in this textbook..." style="background: rgba(14, 18, 30, 0.8); border: 1px solid rgba(255,255,255,0.15); color: #fff; width: 100%; border-radius: 8px; padding: 0.75rem; font-size: 0.9rem; resize: vertical;"></textarea>
+        </div>
+        <button type="submit" class="primary-glow-btn full-width" id="submitCurriculumBookBtn" style="font-weight: 700; padding: 0.85rem; margin-top: 0.5rem;">
+          Publish Curriculum Book 📚
         </button>
       </form>
     </div>
