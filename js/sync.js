@@ -1,8 +1,6 @@
 /**
  * Rania Classroom — Offline Sync & Dual-Mode Reconciliation Manager
- * Fixes:
- * 1. Desynchronization between localStorage and SQLite database
- * 2. Unsynchronized offline sessions causing conflicting stats in Student Report
+ * Secure, per-user sync queue with proper acknowledgement and event-driven flushing
  */
 
 const SyncManager = {
@@ -13,19 +11,13 @@ const SyncManager = {
       console.log('Online event detected, flushing offline queue...');
       this.flushQueue();
     });
-
-    // Heartbeat sync attempt every 20 seconds if queue not empty
-    setInterval(() => {
-      if (navigator.onLine && this.getQueue().length > 0) {
-        this.flushQueue();
-      }
-    }, 20000);
   },
 
   getQueue() {
     try {
-      return JSON.parse(localStorage.getItem(this.QUEUE_KEY) || localStorage.getItem('ixl_offline_sync_queue') || '[]');
+      return JSON.parse(localStorage.getItem(this.QUEUE_KEY) || '[]');
     } catch (e) {
+      console.warn('Could not parse sync queue:', e);
       return [];
     }
   },
@@ -33,37 +25,54 @@ const SyncManager = {
   saveQueue(queue) {
     try {
       localStorage.setItem(this.QUEUE_KEY, JSON.stringify(queue));
-    } catch (e) {}
+    } catch (e) {
+      console.error('Could not save sync queue:', e);
+    }
   },
 
   enqueue(sessionData) {
+    const user = window.AppState ? window.AppState.currentUser : null;
+    if (!user || !user.id) {
+      console.warn('Cannot enqueue practice session without authenticated user.');
+      return;
+    }
+
     const queue = this.getQueue();
     const sessionWithMeta = Object.assign({}, sessionData, {
+      student_id: user.id,
       queued_at: new Date().toISOString()
     });
     queue.push(sessionWithMeta);
     this.saveQueue(queue);
 
-    // Also update local cache for immediate student report view
-    const localLogsKey = 'practice_logs_' + sessionData.student_id;
-    const localLogs = JSON.parse(localStorage.getItem(localLogsKey) || '[]');
-    localLogs.unshift(sessionWithMeta);
-    localStorage.setItem(localLogsKey, JSON.stringify(localLogs));
+    // Update local logs cache
+    try {
+      const localLogsKey = 'practice_logs_' + user.id;
+      const localLogs = JSON.parse(localStorage.getItem(localLogsKey) || '[]');
+      localLogs.unshift(sessionWithMeta);
+      localStorage.setItem(localLogsKey, JSON.stringify(localLogs));
+    } catch (e) {
+      console.warn('Could not update local practice cache:', e);
+    }
 
-    // Try flushing immediately
-    this.flushQueue();
+    // Attempt immediate flush if online
+    if (navigator.onLine) {
+      this.flushQueue();
+    }
   },
 
   async flushQueue() {
     const queue = this.getQueue();
     if (!queue.length) return;
 
-    const token = localStorage.getItem('rc_auth_token') || localStorage.getItem('ixl_auth_token') || '';
     const user = window.AppState ? window.AppState.currentUser : null;
-    const studentId = user ? user.id : (queue[0] ? queue[0].student_id : null);
+    if (!user || !user.id) return;
 
-    if (!studentId) return;
+    // Strict user matching — only sync sessions belonging to the current authenticated student
+    const userSessions = queue.filter(s => s.student_id === user.id);
+    if (!userSessions.length) return;
 
+    const token = localStorage.getItem('rc_auth_token') || localStorage.getItem('ixl_auth_token') || '';
     const isStaticHost = typeof window !== 'undefined' && window.location && window.location.hostname.endsWith('github.io');
     if (isStaticHost) return;
 
@@ -76,25 +85,26 @@ const SyncManager = {
         method: 'POST',
         headers: headers,
         body: JSON.stringify({
-          student_id: studentId,
-          sessions: queue
+          student_id: user.id,
+          sessions: userSessions
         })
       });
 
       if (res.ok) {
         const data = await res.json();
         if (data.success) {
-          console.log('Successfully synced ' + data.synced_count + ' offline sessions with SQLite server.');
-          // Clear queue
-          this.saveQueue([]);
+          console.log(`Successfully synced ${data.synced_count} sessions for student ${user.id}.`);
+          // Remove only synced items from queue (per-user ack)
+          const remaining = this.getQueue().filter(s => s.student_id !== user.id);
+          this.saveQueue(remaining);
+
           if (window.showToast) {
             window.showToast('✅ Offline practice sessions synced to server!');
           }
         }
       }
     } catch (err) {
-      // Still offline, will retry next interval or on 'online' event
-      console.warn('Sync attempt failed (server unreachable):', err.message);
+      console.warn('Sync attempt failed (network error):', err.message);
     }
   }
 };

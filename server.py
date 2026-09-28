@@ -6,22 +6,72 @@ import hashlib
 import os
 import urllib.parse
 import secrets
-from datetime import datetime, timedelta
+import threading
+import html
+from collections import defaultdict
+from datetime import datetime, timezone, timedelta
 
 PORT = int(os.environ.get('PORT', 8000))
+HOST = os.environ.get('HOST', '127.0.0.1')
 DB_PATH = os.path.join(os.path.dirname(__file__), 'data', 'ixl_curriculum.db')
+
+# Strict CORS Allowlist (No wildcard startswith, No null with credentials)
 ALLOWED_ORIGINS = {
     'http://localhost:8000',
     'http://127.0.0.1:8000',
     'http://localhost:3000',
+    'http://127.0.0.1:3000',
     'http://localhost:5173',
-    'null'
+    'http://127.0.0.1:5173'
 }
 
+# -----------------------------------------------------------------------------
+# Rate Limiting (IP-Based with Automatic TTL Cleanup)
+# -----------------------------------------------------------------------------
+LOGIN_ATTEMPTS = defaultdict(list)
+LOGIN_LOCK = threading.Lock()
+RATE_LIMIT_WINDOW = 300  # 5 minutes
+RATE_LIMIT_MAX_ATTEMPTS = 5
+
+def check_rate_limit(ip):
+    now = datetime.now(timezone.utc)
+    cutoff = now - timedelta(seconds=RATE_LIMIT_WINDOW)
+    with LOGIN_LOCK:
+        if len(LOGIN_ATTEMPTS) > 500:
+            stale = [k for k, v in LOGIN_ATTEMPTS.items() if not v or v[-1] < cutoff]
+            for k in stale:
+                del LOGIN_ATTEMPTS[k]
+
+        attempts = [t for t in LOGIN_ATTEMPTS[ip] if t > cutoff]
+        LOGIN_ATTEMPTS[ip] = attempts
+        if len(attempts) >= RATE_LIMIT_MAX_ATTEMPTS:
+            return False
+        return True
+
+def record_login_attempt(ip):
+    with LOGIN_LOCK:
+        LOGIN_ATTEMPTS[ip].append(datetime.now(timezone.utc))
+
+def clear_login_attempts(ip):
+    with LOGIN_LOCK:
+        if ip in LOGIN_ATTEMPTS:
+            del LOGIN_ATTEMPTS[ip]
+
 def get_db():
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=10)
     conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA journal_mode=WAL;")
+    conn.execute("PRAGMA busy_timeout=5000;")
     return conn
+
+def cleanup_expired_sessions():
+    try:
+        conn = get_db()
+        conn.execute("DELETE FROM user_sessions WHERE datetime('now') >= datetime(expires_at)")
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        print(f"Notice: Session cleanup failed: {e}")
 
 def init_auth_db():
     conn = get_db()
@@ -34,17 +84,26 @@ def init_auth_db():
         FOREIGN KEY(user_id) REFERENCES users(id)
     )
     ''')
-    # Ensure plain_password and CRM / billing columns exist for teacher dashboard management
+
     cursor = conn.cursor()
     cursor.execute("PRAGMA table_info(users)")
     cols = [r['name'] for r in cursor.fetchall()]
-    if 'plain_password' not in cols:
+
+    if 'must_reset_password' not in cols:
         try:
-            conn.execute("ALTER TABLE users ADD COLUMN plain_password TEXT")
-            conn.execute("UPDATE users SET plain_password = 'password123' WHERE role != 'teacher' AND plain_password IS NULL")
-            conn.execute("UPDATE users SET plain_password = 'admin123' WHERE role = 'teacher' AND plain_password IS NULL")
+            conn.execute("ALTER TABLE users ADD COLUMN must_reset_password INTEGER DEFAULT 0")
+        except Exception as e:
+            print(f"Notice: Could not add must_reset_password: {e}")
+
+    if 'plain_password' in cols:
+        try:
+            conn.execute("UPDATE users SET must_reset_password = 1 WHERE plain_password IS NOT NULL")
+            conn.execute("ALTER TABLE users DROP COLUMN plain_password")
         except Exception:
-            pass
+            try:
+                conn.execute("UPDATE users SET plain_password = NULL")
+            except Exception as e:
+                print(f"Notice: Could not nullify plain_password: {e}")
 
     crm_columns = {
         'parent_name': 'TEXT DEFAULT ""',
@@ -59,8 +118,8 @@ def init_auth_db():
         if col_name not in cols:
             try:
                 conn.execute(f"ALTER TABLE users ADD COLUMN {col_name} {col_def}")
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"Notice: Could not add CRM column {col_name}: {e}")
 
     conn.execute('''
     CREATE TABLE IF NOT EXISTS payment_receipts (
@@ -94,11 +153,11 @@ def init_auth_db():
     ''')
     conn.commit()
     conn.close()
+    cleanup_expired_sessions()
 
 def hash_pw(pw, salt=None):
     if not salt:
         salt = secrets.token_hex(16)
-    # PBKDF2 with 100,000 iterations for secure password derivation
     dk = hashlib.pbkdf2_hmac('sha256', pw.encode('utf-8'), salt.encode('utf-8'), 100000)
     return f"{salt}${dk.hex()}"
 
@@ -109,17 +168,16 @@ def verify_pw(pw, stored_hash):
         salt, hash_val = stored_hash.split('$', 1)
         dk = hashlib.pbkdf2_hmac('sha256', pw.encode('utf-8'), salt.encode('utf-8'), 100000)
         is_valid = secrets.compare_digest(dk.hex(), hash_val)
-        return is_valid, False # Already modern hash, no upgrade needed
+        return is_valid, False
     else:
-        # Legacy unsalted SHA-256 fallback (for existing database records)
         legacy = hashlib.sha256(pw.encode('utf-8')).hexdigest()
         is_valid = secrets.compare_digest(legacy, stored_hash)
-        return is_valid, True # Needs upgrade to PBKDF2
+        return is_valid, True
 
 def create_session(user_id, days=7):
     token = secrets.token_hex(32)
-    created_at = datetime.utcnow().isoformat()
-    expires_at = (datetime.utcnow() + timedelta(days=days)).isoformat()
+    created_at = datetime.now(timezone.utc).isoformat()
+    expires_at = (datetime.now(timezone.utc) + timedelta(days=days)).isoformat()
     
     conn = get_db()
     cursor = conn.cursor()
@@ -131,11 +189,23 @@ def create_session(user_id, days=7):
     conn.close()
     return token
 
-def get_authenticated_user(headers):
+def get_session_token(headers):
     auth_header = headers.get('Authorization', '')
-    if not auth_header.startswith('Bearer '):
-        return None
-    token = auth_header[7:].strip()
+    if auth_header.startswith('Bearer '):
+        token = auth_header[7:].strip()
+        if token:
+            return token
+    
+    cookie_header = headers.get('Cookie', '')
+    if 'session_token=' in cookie_header:
+        for item in cookie_header.split(';'):
+            item = item.strip()
+            if item.startswith('session_token='):
+                return item.split('=', 1)[1].strip()
+    return None
+
+def get_authenticated_user(headers, allow_must_reset=False):
+    token = get_session_token(headers)
     if not token:
         return None
     
@@ -148,18 +218,48 @@ def get_authenticated_user(headers):
     ''', (token,))
     user = cursor.fetchone()
     conn.close()
-    return dict(user) if user else None
+    if not user:
+        return None
+    user_dict = dict(user)
+    if user_dict.get('must_reset_password') == 1 and not allow_must_reset:
+        user_dict['_requires_password_reset'] = True
+    return user_dict
+
 
 class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
     def end_headers(self):
         origin = self.headers.get('Origin', '')
-        if origin in ALLOWED_ORIGINS or origin.startswith('http://localhost:') or origin.startswith('http://127.0.0.1:'):
+        if origin in ALLOWED_ORIGINS:
             self.send_header('Access-Control-Allow-Origin', origin)
             self.send_header('Access-Control-Allow-Credentials', 'true')
-        elif not origin:
-            self.send_header('Access-Control-Allow-Origin', '*')
+        
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cookie')
+        
+        # Standard Modern Security Headers
+        self.send_header('X-Content-Type-Options', 'nosniff')
+        self.send_header('X-Frame-Options', 'DENY')
+        self.send_header('Referrer-Policy', 'strict-origin-when-cross-origin')
+        self.send_header('Permissions-Policy', 'camera=(), microphone=(), geolocation=()')
+        self.send_header('Content-Security-Policy', (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://www.gstatic.com; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net; "
+            "font-src 'self' https://fonts.gstatic.com data:; "
+            "img-src 'self' data: https:; "
+            "connect-src 'self' http://localhost:* http://127.0.0.1:* https://*.firebaseio.com https://*.googleapis.com;"
+        ))
+
+        # Cache-Control: Force browsers to always fetch fresh code
+        if self.path.startswith('/api/'):
+            self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            self.send_header('Pragma', 'no-cache')
+        elif self.path.endswith('.html') or self.path == '/' or '.' not in self.path.split('/')[-1]:
+            self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0')
+            self.send_header('Pragma', 'no-cache')
+        else:
+            self.send_header('Cache-Control', 'no-cache, must-revalidate, max-age=0')
+
         super().end_headers()
 
     def do_OPTIONS(self):
@@ -169,6 +269,13 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
     def send_json(self, data, status=200):
         self.send_response(status)
         self.send_header('Content-Type', 'application/json; charset=utf-8')
+        self.end_headers()
+        self.wfile.write(json.dumps(data).encode('utf-8'))
+
+    def send_json_with_cookie(self, data, token, status=200):
+        self.send_response(status)
+        self.send_header('Content-Type', 'application/json; charset=utf-8')
+        self.send_header('Set-Cookie', f'session_token={token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=604800')
         self.end_headers()
         self.wfile.write(json.dumps(data).encode('utf-8'))
 
@@ -182,20 +289,54 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
         except Exception:
             return {}
 
+    def translate_path(self, path):
+        fs_path = super().translate_path(path)
+        root = os.path.realpath(os.getcwd())
+        real = os.path.realpath(fs_path) if fs_path else ""
+        
+        # 1) Must stay strictly within the root directory
+        if not real or (not real.startswith(root + os.sep) and real != root):
+            return ""
+            
+        # 2) If it is a directory, serve index.html if present
+        if os.path.isdir(real):
+            index_path = os.path.join(real, 'index.html')
+            if os.path.exists(index_path):
+                real = index_path
+            else:
+                return ""
+            
+        # 3) Strict whitelist for static asset extensions
+        allowed = {".html", ".js", ".css", ".ico", ".png", ".jpg", ".jpeg", ".svg", ".woff2", ".woff", ".ttf", ".json"}
+        ext = os.path.splitext(real)[1].lower()
+        if ext not in allowed:
+            return ""
+            
+        # 4) Block sensitive paths
+        rel = os.path.relpath(real, root).replace("\\", "/").lower()
+        if rel.startswith(("data/", "tests/", "tools/", ".github/", "__pycache__/", ".git/", "scratch/")):
+            return ""
+            
+        return real
+
     def do_POST(self):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
 
         # ---------------------------------------------------------------------
-        # Authentication: Secure Login
+        # Authentication: Secure Login (IP Rate Limiting + Cookie)
         # ---------------------------------------------------------------------
         if path == '/api/login':
+            client_ip = self.client_address[0] if self.client_address else '127.0.0.1'
             data = self.parse_body()
             username = data.get('username', '').strip().lower()
             password = data.get('password', '')
 
             if not username or not password:
                 return self.send_json({'success': False, 'error': 'Username and password required.'}, status=400)
+
+            if not check_rate_limit(client_ip):
+                return self.send_json({'success': False, 'error': 'Too many failed login attempts. Please wait 5 minutes.'}, status=429)
 
             conn = get_db()
             cursor = conn.cursor()
@@ -204,40 +345,76 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
 
             if not user:
                 conn.close()
-                return self.send_json({'success': False, 'error': 'Student username not found.'}, status=401)
+                record_login_attempt(client_ip)
+                return self.send_json({'success': False, 'error': 'Invalid username or password.'}, status=401)
 
-            # Check password securely with PBKDF2 / upgrade legacy hash
             is_valid, needs_upgrade = verify_pw(password, user['password_hash'])
             if not is_valid:
                 conn.close()
-                return self.send_json({'success': False, 'error': 'Incorrect password.'}, status=401)
+                record_login_attempt(client_ip)
+                return self.send_json({'success': False, 'error': 'Invalid username or password.'}, status=401)
+
+            clear_login_attempts(client_ip)
 
             if needs_upgrade:
                 new_hash = hash_pw(password)
                 cursor.execute('UPDATE users SET password_hash = ? WHERE id = ?', (new_hash, user['id']))
                 conn.commit()
 
-            # Create session token
             token = create_session(user['id'])
 
             user_data = dict(user)
             if 'password_hash' in user_data:
                 del user_data['password_hash']
+            if 'plain_password' in user_data:
+                del user_data['plain_password']
 
-            # Fetch badges
             cursor.execute('SELECT badge_id, badge_name, badge_icon, badge_desc, awarded_at FROM student_badges WHERE student_id = ?', (user['id'],))
             user_data['badges'] = [dict(b) for b in cursor.fetchall()]
 
             conn.close()
-            return self.send_json({'success': True, 'token': token, 'student': user_data})
+            return self.send_json_with_cookie({'success': True, 'token': token, 'student': user_data}, token)
 
         # ---------------------------------------------------------------------
-        # Authentication: Register
+        # Authentication: User Self Password Change (Resets must_reset_password)
+        # ---------------------------------------------------------------------
+        elif path == '/api/user/change_password':
+            auth_user = get_authenticated_user(self.headers, allow_must_reset=True)
+            if not auth_user:
+                return self.send_json({'success': False, 'error': 'Authentication required.'}, status=401)
+
+            data = self.parse_body()
+            current_pw = data.get('current_password', '')
+            new_pw = data.get('new_password', '')
+
+            if not new_pw or len(new_pw) < 6:
+                return self.send_json({'success': False, 'error': 'New password must be at least 6 characters.'}, status=400)
+
+            conn = get_db()
+            cursor = conn.cursor()
+            cursor.execute('SELECT password_hash FROM users WHERE id = ?', (auth_user['id'],))
+            user_row = cursor.fetchone()
+
+            if current_pw:
+                is_valid, _ = verify_pw(current_pw, user_row['password_hash'])
+                if not is_valid:
+                    conn.close()
+                    return self.send_json({'success': False, 'error': 'Current password is incorrect.'}, status=401)
+
+            new_salted_hash = hash_pw(new_pw)
+            cursor.execute('UPDATE users SET password_hash = ?, must_reset_password = 0 WHERE id = ?', (new_salted_hash, auth_user['id']))
+            conn.commit()
+            conn.close()
+            return self.send_json({'success': True, 'message': 'Password changed successfully.'})
+
+        # ---------------------------------------------------------------------
+        # Authentication: Register (HTML Sanitized)
         # ---------------------------------------------------------------------
         elif path == '/api/register':
             data = self.parse_body()
             username = data.get('username', '').strip().lower()
-            full_name = data.get('full_name', '').strip()
+            raw_full_name = data.get('full_name', '').strip()
+            full_name = html.escape(raw_full_name)
             password = data.get('password', '')
             grade = data.get('grade_level', 'Year 4')
             avatar = data.get('avatar', '🦊')
@@ -250,12 +427,11 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
             try:
                 salted_hash = hash_pw(password)
                 cursor.execute('''
-                INSERT INTO users (username, password_hash, full_name, grade_level, avatar, xp, streak_days, role)
-                VALUES (?, ?, ?, ?, ?, 100, 1, 'student')
+                INSERT INTO users (username, password_hash, full_name, grade_level, avatar, xp, streak_days, role, must_reset_password)
+                VALUES (?, ?, ?, ?, ?, 100, 1, 'student', 0)
                 ''', (username, salted_hash, full_name, grade, avatar))
                 user_id = cursor.lastrowid
 
-                # Award Welcome Badge
                 cursor.execute('''
                 INSERT INTO student_badges (student_id, badge_id, badge_name, badge_icon, badge_desc)
                 VALUES (?, 'welcome', 'Welcome Explorer', '🎓', 'Joined Rania Classroom')
@@ -266,7 +442,11 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
 
                 cursor.execute('SELECT * FROM users WHERE id = ?', (user_id,))
                 user_data = dict(cursor.fetchone())
-                del user_data['password_hash']
+                if 'password_hash' in user_data:
+                    del user_data['password_hash']
+                if 'plain_password' in user_data:
+                    del user_data['plain_password']
+
                 user_data['badges'] = [{
                     'badge_id': 'welcome',
                     'badge_name': 'Welcome Explorer',
@@ -275,25 +455,47 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
                 }]
 
                 conn.close()
-                return self.send_json({'success': True, 'token': token, 'student': user_data})
+                return self.send_json_with_cookie({'success': True, 'token': token, 'student': user_data}, token)
             except sqlite3.IntegrityError:
                 conn.close()
                 return self.send_json({'success': False, 'error': 'Username is already taken.'}, status=409)
 
         # ---------------------------------------------------------------------
-        # Practice Session Submit (Token protected)
+        # Authentication: Logout
+        # ---------------------------------------------------------------------
+        elif path == '/api/logout':
+            token = get_session_token(self.headers)
+            if token:
+                conn = get_db()
+                conn.execute('DELETE FROM user_sessions WHERE token = ?', (token,))
+                conn.commit()
+                conn.close()
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.send_header('Set-Cookie', 'session_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Strict')
+            self.end_headers()
+            self.wfile.write(json.dumps({'success': True, 'message': 'Logged out successfully.'}).encode('utf-8'))
+            return
+
+        # ---------------------------------------------------------------------
+        # Practice Session Submit (Token protected, IDOR verified, Password Reset Enforced)
         # ---------------------------------------------------------------------
         elif path == '/api/practice/submit':
             auth_user = get_authenticated_user(self.headers)
+            if not auth_user:
+                return self.send_json({'success': False, 'error': 'Authentication required.'}, status=401)
+            if auth_user.get('_requires_password_reset'):
+                return self.send_json({'success': False, 'error': 'Password reset required.', 'must_reset_password': True}, status=403)
+
             data = self.parse_body()
             student_id = data.get('student_id')
+            try:
+                student_id = int(student_id)
+            except (TypeError, ValueError):
+                return self.send_json({'success': False, 'error': 'Valid student_id required.'}, status=400)
 
-            if auth_user:
-                # Enforce that user can only submit for themselves unless teacher
-                if auth_user['role'] != 'teacher' and auth_user['id'] != int(student_id):
-                    return self.send_json({'success': False, 'error': 'Unauthorized student ID submission.'}, status=403)
-            elif not student_id:
-                return self.send_json({'success': False, 'error': 'Authentication token or valid student_id is required.'}, status=401)
+            if auth_user['role'] != 'teacher' and auth_user['id'] != student_id:
+                return self.send_json({'success': False, 'error': 'Unauthorized student ID submission.'}, status=403)
 
             skill_code = data.get('skill_code', 'A.1')
             skill_name = data.get('skill_name', 'General Skill')
@@ -316,14 +518,12 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
             xp_earned = (correct * 15) + (50 if smart_score >= 90 else 20)
             cursor.execute('UPDATE users SET xp = xp + ? WHERE id = ?', (xp_earned, student_id))
 
-            # Auto-complete assignment if practicing an assigned skill with score >= 70
             if smart_score >= 70:
                 cursor.execute('SELECT id FROM assignments WHERE skill_code = ?', (skill_code,))
                 assigned_row = cursor.fetchone()
                 if assigned_row:
                     cursor.execute('INSERT OR IGNORE INTO assignment_completions (assignment_id, student_id) VALUES (?, ?)', (assigned_row['id'], student_id))
 
-            # Check new badges
             new_badges = []
             if smart_score == 100:
                 cursor.execute('SELECT id FROM student_badges WHERE student_id = ? AND badge_id = ?', (student_id, 'perfectionist'))
@@ -335,11 +535,10 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
                     new_badges.append({'name': 'Perfectionist', 'icon': '💎'})
 
             conn.commit()
-
             cursor.execute('SELECT xp, streak_days FROM users WHERE id = ?', (student_id,))
             updated_user = cursor.fetchone()
-
             conn.close()
+
             return self.send_json({
                 'success': True,
                 'xp_earned': xp_earned,
@@ -352,23 +551,28 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
         # ---------------------------------------------------------------------
         elif path == '/api/sync':
             auth_user = get_authenticated_user(self.headers)
+            if not auth_user:
+                return self.send_json({'success': False, 'error': 'Authentication required.'}, status=401)
+            if auth_user.get('_requires_password_reset'):
+                return self.send_json({'success': False, 'error': 'Password reset required.', 'must_reset_password': True}, status=403)
+
             data = self.parse_body()
             student_id = data.get('student_id')
+            try:
+                student_id = int(student_id)
+            except (TypeError, ValueError):
+                return self.send_json({'success': False, 'error': 'Valid student_id required.'}, status=400)
+
+            if auth_user['role'] != 'teacher' and auth_user['id'] != student_id:
+                return self.send_json({'success': False, 'error': 'Unauthorized.'}, status=403)
+
             sessions = data.get('sessions', [])
-
-            if auth_user:
-                if auth_user['role'] != 'teacher' and auth_user['id'] != int(student_id):
-                    return self.send_json({'success': False, 'error': 'Unauthorized.'}, status=403)
-            elif not student_id:
-                return self.send_json({'success': False, 'error': 'student_id required.'}, status=401)
-
             conn = get_db()
             cursor = conn.cursor()
             synced_count = 0
             total_xp_added = 0
 
             for s in sessions:
-                # Avoid duplicate insertion if timestamp and skill match
                 cursor.execute('''
                 SELECT id FROM practice_sessions 
                 WHERE student_id = ? AND skill_code = ? AND smart_score = ? AND completed_at = ?
@@ -458,7 +662,7 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
             return self.send_json({'success': True})
 
         # ---------------------------------------------------------------------
-        # Teacher: Student Roster Management
+        # Teacher: Student Roster Management (Zero Plaintext Passwords)
         # ---------------------------------------------------------------------
         elif path == '/api/teacher/student/create':
             auth_user = get_authenticated_user(self.headers)
@@ -466,13 +670,14 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
                 return self.send_json({'success': False, 'error': 'Teacher authorization required.'}, status=403)
 
             data = self.parse_body()
-            full_name = data.get('full_name', '').strip()
+            raw_full_name = data.get('full_name', '').strip()
+            full_name = html.escape(raw_full_name)
             username = data.get('username', '').strip().lower()
             password = data.get('password', 'StudentPass123!')
             grade = data.get('grade_level', 'Year 4')
             avatar = data.get('avatar', '🦊')
 
-            parent_name = data.get('parent_name', '').strip()
+            parent_name = html.escape(data.get('parent_name', '').strip())
             student_phone = data.get('student_phone', '').strip()
             parent_phone = data.get('parent_phone', '').strip()
             payment_method = data.get('payment_method', 'InstaPay').strip()
@@ -489,12 +694,12 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
                 salted_hash = hash_pw(password)
                 cursor.execute('''
                 INSERT INTO users (
-                    username, password_hash, full_name, grade_level, avatar, xp, streak_days, role, plain_password,
-                    parent_name, student_phone, parent_phone, payment_method, payment_date, payment_amount, payment_status
+                    username, password_hash, full_name, grade_level, avatar, xp, streak_days, role,
+                    parent_name, student_phone, parent_phone, payment_method, payment_date, payment_amount, payment_status, must_reset_password
                 )
-                VALUES (?, ?, ?, ?, ?, 100, 1, 'student', ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?, 100, 1, 'student', ?, ?, ?, ?, ?, ?, ?, 0)
                 ''', (
-                    username, salted_hash, full_name, grade, avatar, password,
+                    username, salted_hash, full_name, grade, avatar,
                     parent_name, student_phone, parent_phone, payment_method, payment_date, payment_amount, payment_status
                 ))
                 student_id = cursor.lastrowid
@@ -516,12 +721,13 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
 
             data = self.parse_body()
             student_id = data.get('student_id')
-            full_name = data.get('full_name', '').strip()
+            raw_full_name = data.get('full_name', '').strip()
+            full_name = html.escape(raw_full_name)
             username = data.get('username', '').strip().lower()
             grade = data.get('grade_level', '').strip()
             avatar = data.get('avatar', '').strip()
             password = data.get('password', '').strip()
-            parent_name = data.get('parent_name', '').strip()
+            parent_name = html.escape(data.get('parent_name', '').strip())
             student_phone = data.get('student_phone', '').strip()
             parent_phone = data.get('parent_phone', '').strip()
             payment_method = data.get('payment_method', '').strip()
@@ -535,7 +741,6 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
             conn = get_db()
             cursor = conn.cursor()
 
-            # Check if username is taken by another student
             cursor.execute('SELECT id FROM users WHERE LOWER(username) = ? AND id != ?', (username, student_id))
             if cursor.fetchone():
                 conn.close()
@@ -567,8 +772,6 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
                 salted_hash = hash_pw(password)
                 updates.append('password_hash = ?')
                 params.append(salted_hash)
-                updates.append('plain_password = ?')
-                params.append(password)
 
             params.append(student_id)
             sql = f"UPDATE users SET {', '.join(updates)} WHERE id = ? AND role != 'teacher'"
@@ -592,7 +795,7 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
 
             conn = get_db()
             cursor = conn.cursor()
-            cursor.execute('UPDATE users SET password_hash = ?, plain_password = ? WHERE id = ? AND role != \'teacher\'', (hash_pw(new_password), new_password, student_id))
+            cursor.execute('UPDATE users SET password_hash = ?, must_reset_password = 0 WHERE id = ? AND role != \'teacher\'', (hash_pw(new_password), student_id))
             conn.commit()
             conn.close()
             return self.send_json({'success': True})
@@ -623,40 +826,38 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
         # Payments Management
         # ---------------------------------------------------------------------
         elif path == '/api/payments/submit':
+            auth_user = get_authenticated_user(self.headers)
+            if not auth_user:
+                return self.send_json({'success': False, 'error': 'Authentication required.'}, status=401)
+            if auth_user.get('_requires_password_reset'):
+                return self.send_json({'success': False, 'error': 'Password reset required.', 'must_reset_password': True}, status=403)
+
             data = self.parse_body()
             student_id = data.get('student_id')
-            student_name = data.get('student_name', '')
+            try:
+                student_id = int(student_id)
+            except (TypeError, ValueError):
+                student_id = auth_user['id']
+
+            if auth_user['role'] != 'teacher' and auth_user['id'] != student_id:
+                return self.send_json({'success': False, 'error': 'Unauthorized payment submission.'}, status=403)
+
+            student_name = html.escape(data.get('student_name', auth_user.get('full_name', '')))
             amount = float(data.get('amount', 0) or 0)
             payment_method = data.get('payment_method', 'InstaPay')
-            payment_date = data.get('payment_date', datetime.utcnow().strftime('%Y-%m-%d'))
+            payment_date = data.get('payment_date', datetime.now(timezone.utc).strftime('%Y-%m-%d'))
             receipt_image = data.get('receipt_image', '')
-            notes = data.get('notes', '')
+            notes = html.escape(data.get('notes', ''))
             receipt_id = data.get('id') or secrets.token_hex(8)
 
             conn = get_db()
             cursor = conn.cursor()
-
-            try:
-                student_id = int(student_id)
-            except (TypeError, ValueError):
-                student_id = None
-
-            if not student_id:
-                cursor.execute('SELECT id, full_name FROM users WHERE role != "teacher" LIMIT 1')
-                fallback = cursor.fetchone()
-                if fallback:
-                    student_id = fallback['id']
-                    if not student_name:
-                        student_name = fallback['full_name']
-                else:
-                    student_id = 1
 
             cursor.execute('''
             INSERT INTO payment_receipts (id, student_id, student_name, amount, payment_method, payment_date, receipt_image, notes, status, submitted_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending_review', datetime('now'))
             ''', (receipt_id, student_id, student_name, amount, payment_method, payment_date, receipt_image, notes))
 
-            # Update student status to pending
             cursor.execute('''
             UPDATE users SET payment_status = 'pending', payment_amount = ?, payment_date = ?, payment_method = ?
             WHERE id = ?
@@ -673,7 +874,7 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
 
             data = self.parse_body()
             receipt_id = data.get('receipt_id') or data.get('payment_id')
-            action = data.get('action') or data.get('status') or 'approved' # 'approved' or 'rejected'
+            action = data.get('action') or data.get('status') or 'approved'
 
             if not receipt_id:
                 return self.send_json({'success': False, 'error': 'receipt_id or payment_id required'}, status=400)
@@ -689,7 +890,6 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
             new_status = 'approved' if action == 'approved' else 'rejected'
             cursor.execute('UPDATE payment_receipts SET status = ?, reviewed_at = datetime("now") WHERE id = ?', (new_status, receipt_id))
 
-            # If approved, update student user record to paid
             if action == 'approved':
                 cursor.execute('''
                 UPDATE users SET payment_status = 'paid', payment_date = ?, payment_amount = ?, payment_method = ?
@@ -712,14 +912,14 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
 
             data = self.parse_body()
             session_id = data.get('id') or secrets.token_hex(8)
-            date_str = data.get('session_date') or data.get('date', datetime.utcnow().strftime('%Y-%m-%d'))
-            title = data.get('title', 'Class Session')
-            topic = data.get('topic') or data.get('topic_covered', '')
+            date_str = data.get('session_date') or data.get('date', datetime.now(timezone.utc).strftime('%Y-%m-%d'))
+            title = html.escape(data.get('title', 'Class Session'))
+            topic = html.escape(data.get('topic') or data.get('topic_covered', ''))
             zoom_link = data.get('zoom_link', '')
             recording_link = data.get('recording_link', '')
             pdf_url = data.get('pdf_link') or data.get('pdf_url', '')
-            pdf_title = data.get('pdf_title', '')
-            notes = data.get('notes', '')
+            pdf_title = html.escape(data.get('pdf_title', ''))
+            notes = html.escape(data.get('notes', ''))
 
             conn = get_db()
             cursor = conn.cursor()
@@ -748,368 +948,462 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
             conn.close()
             return self.send_json({'success': True})
 
-        super().do_POST()
+        # Unknown POST endpoint
+        return self.send_json({'error': 'Endpoint not found'}, status=404)
 
     def do_GET(self):
         parsed = urllib.parse.urlparse(self.path)
         path = parsed.path
 
         # ---------------------------------------------------------------------
-        # Reports Endpoint with IDOR protection
+        # API Endpoints
         # ---------------------------------------------------------------------
-        if path.startswith('/api/reports/'):
-            try:
-                student_id = int(path.split('/')[-1])
-            except ValueError:
-                return self.send_json({'success': False, 'error': 'Invalid student ID'}, status=400)
+        if path.startswith('/api/'):
+            # Curriculum Query API (Paginated & Lazy Loaded)
+            if path == '/api/curriculum/skills':
+                query_params = urllib.parse.parse_qs(parsed.query)
+                subject = query_params.get('subject', [None])[0]
+                grade = query_params.get('grade', [None])[0]
+                category = query_params.get('category', [None])[0]
+                search = query_params.get('search', [None])[0]
+                
+                try:
+                    page = max(1, int(query_params.get('page', [1])[0]))
+                except ValueError:
+                    page = 1
+                try:
+                    limit = min(200, max(1, int(query_params.get('limit', [100])[0])))
+                except ValueError:
+                    limit = 100
+                    
+                offset = (page - 1) * limit
 
-            auth_user = get_authenticated_user(self.headers)
-            if auth_user and auth_user['role'] != 'teacher' and auth_user['id'] != student_id:
-                return self.send_json({'success': False, 'error': 'Unauthorized to view this report.'}, status=403)
+                conditions = []
+                params = []
+                if subject:
+                    conditions.append("subject_name = ?")
+                    params.append(subject)
+                if grade:
+                    conditions.append("grade_name = ?")
+                    params.append(grade)
+                if category:
+                    conditions.append("category_code = ?")
+                    params.append(category)
+                if search:
+                    conditions.append("(skill_name LIKE ? OR skill_code LIKE ? OR permacode LIKE ?)")
+                    search_pat = f"%{search}%"
+                    params.extend([search_pat, search_pat, search_pat])
 
-            conn = get_db()
-            cursor = conn.cursor()
+                where_clause = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+                
+                conn = get_db()
+                cursor = conn.cursor()
+                cursor.execute(f"SELECT COUNT(*) FROM skills {where_clause}", tuple(params))
+                total_count = cursor.fetchone()[0]
 
-            # Student basic info
-            cursor.execute('SELECT id, username, full_name, grade_level, avatar, xp, streak_days, created_at FROM users WHERE id = ?', (student_id,))
-            student = cursor.fetchone()
-            if not student:
+                cursor.execute(f'''
+                SELECT id, skill_id, subject_name, grade_name, category_code, category_name, super_category, skill_code, permacode, skill_name, preview_text
+                FROM skills
+                {where_clause}
+                ORDER BY id ASC
+                LIMIT ? OFFSET ?
+                ''', tuple(params + [limit, offset]))
+
+                skills = [dict(s) for s in cursor.fetchall()]
                 conn.close()
-                return self.send_json({'success': False, 'error': 'Student not found'}, status=404)
 
-            # Overall Stats
-            cursor.execute('''
-            SELECT 
-                COUNT(*) as total_sessions,
-                COALESCE(SUM(questions_answered), 0) as total_questions,
-                COALESCE(SUM(questions_correct), 0) as total_correct,
-                COALESCE(SUM(duration_seconds), 0) as total_time_spent,
-                COALESCE(AVG(smart_score), 0) as avg_smart_score,
-                COALESCE(MAX(smart_score), 0) as max_smart_score,
-                COUNT(DISTINCT skill_code) as unique_skills_practiced,
-                SUM(CASE WHEN smart_score >= 90 THEN 1 ELSE 0 END) as mastered_skills
-            FROM practice_sessions
-            WHERE student_id = ?
-            ''', (student_id,))
-            stats = dict(cursor.fetchone())
+                return self.send_json({
+                    'success': True,
+                    'total': total_count,
+                    'page': page,
+                    'limit': limit,
+                    'total_pages': (total_count + limit - 1) // limit if limit else 1,
+                    'skills': skills
+                })
 
-            total_q = stats['total_questions']
-            accuracy = round((stats['total_correct'] / total_q * 100), 1) if total_q > 0 else 0
-            stats['accuracy_rate'] = accuracy
-            stats['avg_smart_score'] = round(stats['avg_smart_score'], 1)
+            # Reports Endpoint with Strict IDOR protection
+            elif path.startswith('/api/reports/'):
+                try:
+                    student_id = int(path.split('/')[-1])
+                except ValueError:
+                    return self.send_json({'success': False, 'error': 'Invalid student ID'}, status=400)
 
-            # Subject Breakdown
-            cursor.execute('''
-            SELECT 
-                subject,
-                COUNT(*) as sessions_count,
-                COALESCE(SUM(questions_answered), 0) as questions,
-                COALESCE(SUM(questions_correct), 0) as correct,
-                COALESCE(AVG(smart_score), 0) as avg_score,
-                SUM(CASE WHEN smart_score >= 90 THEN 1 ELSE 0 END) as mastered
-            FROM practice_sessions
-            WHERE student_id = ?
-            GROUP BY subject
-            ''', (student_id,))
-            subject_rows = cursor.fetchall()
-            subjects_breakdown = {}
-            for r in subject_rows:
-                q_count = r['questions']
-                subj_acc = round((r['correct'] / q_count * 100), 1) if q_count > 0 else 0
-                subjects_breakdown[r['subject']] = {
-                    'sessions': r['sessions_count'],
-                    'questions': q_count,
-                    'correct': r['correct'],
-                    'accuracy': subj_acc,
-                    'avg_score': round(r['avg_score'], 1),
-                    'mastered': r['mastered']
+                auth_user = get_authenticated_user(self.headers)
+                if not auth_user:
+                    return self.send_json({'success': False, 'error': 'Authentication required.'}, status=401)
+                if auth_user.get('_requires_password_reset'):
+                    return self.send_json({'success': False, 'error': 'Password reset required.', 'must_reset_password': True}, status=403)
+                if auth_user['role'] != 'teacher' and auth_user['id'] != student_id:
+                    return self.send_json({'success': False, 'error': 'Unauthorized to view this report.'}, status=403)
+
+                conn = get_db()
+                cursor = conn.cursor()
+
+                cursor.execute('SELECT id, username, full_name, grade_level, avatar, xp, streak_days, created_at FROM users WHERE id = ?', (student_id,))
+                student = cursor.fetchone()
+                if not student:
+                    conn.close()
+                    return self.send_json({'success': False, 'error': 'Student not found'}, status=404)
+
+                cursor.execute('''
+                SELECT 
+                    COUNT(*) as total_sessions,
+                    COALESCE(SUM(questions_answered), 0) as total_questions,
+                    COALESCE(SUM(questions_correct), 0) as total_correct,
+                    COALESCE(SUM(duration_seconds), 0) as total_time_spent,
+                    COALESCE(AVG(smart_score), 0) as avg_smart_score,
+                    COALESCE(MAX(smart_score), 0) as max_smart_score,
+                    COUNT(DISTINCT skill_code) as unique_skills_practiced,
+                    SUM(CASE WHEN smart_score >= 90 THEN 1 ELSE 0 END) as mastered_skills
+                FROM practice_sessions
+                WHERE student_id = ?
+                ''', (student_id,))
+                stats = dict(cursor.fetchone())
+
+                total_q = stats['total_questions']
+                accuracy = round((stats['total_correct'] / total_q * 100), 1) if total_q > 0 else 0
+                stats['accuracy_rate'] = accuracy
+                stats['avg_smart_score'] = round(stats['avg_smart_score'], 1)
+
+                cursor.execute('''
+                SELECT 
+                    subject,
+                    COUNT(*) as sessions_count,
+                    COALESCE(SUM(questions_answered), 0) as questions,
+                    COALESCE(SUM(questions_correct), 0) as correct,
+                    COALESCE(AVG(smart_score), 0) as avg_score,
+                    SUM(CASE WHEN smart_score >= 90 THEN 1 ELSE 0 END) as mastered
+                FROM practice_sessions
+                WHERE student_id = ?
+                GROUP BY subject
+                ''', (student_id,))
+                subject_rows = cursor.fetchall()
+                subjects_breakdown = {}
+                for r in subject_rows:
+                    q_count = r['questions']
+                    subj_acc = round((r['correct'] / q_count * 100), 1) if q_count > 0 else 0
+                    subjects_breakdown[r['subject']] = {
+                        'sessions': r['sessions_count'],
+                        'questions': q_count,
+                        'correct': r['correct'],
+                        'accuracy': subj_acc,
+                        'avg_score': round(r['avg_score'], 1),
+                        'mastered': r['mastered']
+                    }
+
+                cursor.execute('''
+                SELECT id, skill_code, skill_name, subject, grade, smart_score, questions_answered, questions_correct, duration_seconds, completed_at
+                FROM practice_sessions
+                WHERE student_id = ?
+                ORDER BY completed_at DESC
+                LIMIT 30
+                ''', (student_id,))
+                history = [dict(h) for h in cursor.fetchall()]
+
+                cursor.execute('SELECT badge_id, badge_name, badge_icon, badge_desc, awarded_at FROM student_badges WHERE student_id = ?', (student_id,))
+                badges = [dict(b) for b in cursor.fetchall()]
+
+                conn.close()
+
+                report = {
+                    'student': dict(student),
+                    'summary': stats,
+                    'subjects': subjects_breakdown,
+                    'history': history,
+                    'badges': badges
                 }
+                return self.send_json({'success': True, 'report': report})
 
-            # Recent Practice History Log (last 30)
-            cursor.execute('''
-            SELECT id, skill_code, skill_name, subject, grade, smart_score, questions_answered, questions_correct, duration_seconds, completed_at
-            FROM practice_sessions
-            WHERE student_id = ?
-            ORDER BY completed_at DESC
-            LIMIT 30
-            ''', (student_id,))
-            history = [dict(h) for h in cursor.fetchall()]
+            # Leaderboard (Auth Protected & Sanitized)
+            elif path == '/api/leaderboard':
+                auth_user = get_authenticated_user(self.headers)
+                if not auth_user:
+                    return self.send_json({'success': False, 'error': 'Authentication required.'}, status=401)
 
-            # Badges
-            cursor.execute('SELECT badge_id, badge_name, badge_icon, badge_desc, awarded_at FROM student_badges WHERE student_id = ?', (student_id,))
-            badges = [dict(b) for b in cursor.fetchall()]
+                conn = get_db()
+                cursor = conn.cursor()
+                cursor.execute('''
+                SELECT id, username, full_name, grade_level, avatar, xp, streak_days
+                FROM users
+                WHERE role != 'teacher'
+                ORDER BY xp DESC
+                LIMIT 10
+                ''')
+                leaders = []
+                for l in cursor.fetchall():
+                    d = dict(l)
+                    raw_name = html.unescape(d.get('full_name', ''))
+                    d['full_name'] = html.escape(raw_name)
+                    leaders.append(d)
+                conn.close()
+                return self.send_json({'success': True, 'leaderboard': leaders})
 
-            conn.close()
+            # Teacher: Overview & Class Metrics (Zero Plaintext Passwords Exposed)
+            elif path == '/api/teacher/overview':
+                auth_user = get_authenticated_user(self.headers)
+                if not auth_user or auth_user.get('role') != 'teacher':
+                    return self.send_json({'success': False, 'error': 'Teacher authorization required.'}, status=403)
 
-            report = {
-                'student': dict(student),
-                'summary': stats,
-                'subjects': subjects_breakdown,
-                'history': history,
-                'badges': badges
-            }
-            return self.send_json({'success': True, 'report': report})
+                conn = get_db()
+                cursor = conn.cursor()
+                
+                cursor.execute("SELECT COUNT(*) FROM users WHERE role != 'teacher'")
+                total_students = cursor.fetchone()[0]
+                
+                cursor.execute('''
+                SELECT 
+                    COUNT(*) as total_sessions,
+                    COALESCE(SUM(questions_answered), 0) as total_questions,
+                    COALESCE(SUM(questions_correct), 0) as total_correct,
+                    COALESCE(SUM(duration_seconds), 0) as total_time_spent,
+                    COALESCE(AVG(smart_score), 0) as avg_smart_score
+                FROM practice_sessions p
+                JOIN users u ON p.student_id = u.id
+                WHERE u.role != 'teacher'
+                ''')
+                class_stats = dict(cursor.fetchone())
+                tot_q = class_stats['total_questions']
+                class_stats['accuracy_rate'] = round((class_stats['total_correct'] / tot_q * 100), 1) if tot_q > 0 else 0
+                class_stats['avg_smart_score'] = round(class_stats['avg_smart_score'], 1)
+                class_stats['total_hours'] = round(class_stats['total_time_spent'] / 3600, 1)
+
+                cursor.execute('''
+                SELECT 
+                    u.id, u.username, u.full_name, u.grade_level, u.avatar, u.xp, u.streak_days,
+                    COALESCE(u.parent_name, '') as parent_name,
+                    COALESCE(u.student_phone, '') as student_phone,
+                    COALESCE(u.parent_phone, '') as parent_phone,
+                    COALESCE(u.payment_method, 'InstaPay') as payment_method,
+                    COALESCE(u.payment_date, '') as payment_date,
+                    COALESCE(u.payment_amount, 0) as payment_amount,
+                    COALESCE(u.payment_status, 'overdue') as payment_status,
+                    COUNT(p.id) as sessions_count,
+                    COALESCE(SUM(p.questions_answered), 0) as questions_answered,
+                    COALESCE(SUM(p.questions_correct), 0) as questions_correct,
+                    COALESCE(AVG(p.smart_score), 0) as avg_smart_score,
+                    COALESCE(MAX(p.completed_at), 'Never') as last_active,
+                    (SELECT COUNT(*) FROM student_badges b WHERE b.student_id = u.id) as badges_count
+                FROM users u
+                LEFT JOIN practice_sessions p ON u.id = p.student_id
+                WHERE u.role != 'teacher'
+                GROUP BY u.id
+                ORDER BY u.xp DESC
+                ''')
+                roster = []
+                for r in cursor.fetchall():
+                    row = dict(r)
+                    q = row['questions_answered']
+                    row['accuracy_rate'] = round((row['questions_correct'] / q * 100), 1) if q > 0 else 0
+                    row['avg_smart_score'] = round(row['avg_smart_score'], 1)
+                    roster.append(row)
+
+                cursor.execute('''
+                SELECT 
+                    skill_code, skill_name, subject, grade,
+                    COUNT(*) as attempts,
+                    SUM(questions_answered) as questions,
+                    SUM(questions_correct) as correct,
+                    ROUND(AVG(smart_score), 1) as avg_score
+                FROM practice_sessions
+                GROUP BY skill_code
+                HAVING (CAST(SUM(questions_correct) AS FLOAT) / NULLIF(SUM(questions_answered), 0)) < 0.85
+                ORDER BY avg_score ASC
+                LIMIT 6
+                ''')
+                attention_skills = [dict(s) for s in cursor.fetchall()]
+
+                cursor.execute('''
+                SELECT 
+                    skill_code, skill_name, subject, grade,
+                    COUNT(*) as attempts,
+                    ROUND(AVG(smart_score), 1) as avg_score
+                FROM practice_sessions
+                GROUP BY skill_code
+                HAVING AVG(smart_score) >= 90
+                ORDER BY attempts DESC
+                LIMIT 6
+                ''')
+                mastered_skills = [dict(s) for s in cursor.fetchall()]
+
+                conn.close()
+                return self.send_json({
+                    'success': True,
+                    'overview': {
+                        'total_students': total_students,
+                        'class_stats': class_stats,
+                        'roster': roster,
+                        'attention_skills': attention_skills,
+                        'mastered_skills': mastered_skills
+                    }
+                })
+
+            # Teacher: Export Grade Roster to CSV
+            elif path == '/api/teacher/export_csv':
+                auth_user = get_authenticated_user(self.headers)
+                if not auth_user or auth_user.get('role') != 'teacher':
+                    return self.send_json({'success': False, 'error': 'Teacher authorization required.'}, status=403)
+
+                conn = get_db()
+                cursor = conn.cursor()
+                cursor.execute('''
+                SELECT 
+                    u.id, u.username, u.full_name, u.grade_level, u.xp, u.streak_days,
+                    COUNT(p.id) as sessions,
+                    COALESCE(SUM(p.questions_answered), 0) as questions,
+                    COALESCE(SUM(p.questions_correct), 0) as correct,
+                    COALESCE(ROUND(AVG(p.smart_score), 1), 0) as avg_score,
+                    COALESCE(MAX(p.completed_at), 'Never') as last_active
+                FROM users u
+                LEFT JOIN practice_sessions p ON u.id = p.student_id
+                WHERE u.role != 'teacher'
+                GROUP BY u.id
+                ORDER BY u.xp DESC
+                ''')
+                rows = cursor.fetchall()
+                conn.close()
+
+                csv_lines = ['Student ID,Username,Full Name,Grade,XP,Streak Days,Sessions,Total Questions,Correct,Accuracy Rate (%),Avg SmartScore,Last Active']
+                for r in rows:
+                    q = r['questions']
+                    acc = round((r['correct'] / q * 100), 1) if q > 0 else 0
+                    csv_lines.append(f"{r['id']},{r['username']},{r['full_name']},{r['grade_level']},{r['xp']},{r['streak_days']},{r['sessions']},{q},{r['correct']},{acc},{r['avg_score']},{r['last_active']}")
+
+                csv_data = '\n'.join(csv_lines).encode('utf-8-sig')
+                self.send_response(200)
+                self.send_header('Content-Type', 'text/csv; charset=utf-8')
+                self.send_header('Content-Disposition', 'attachment; filename="Rania_Classroom_Roster.csv"')
+                self.send_header('Content-Length', str(len(csv_data)))
+                self.end_headers()
+                self.wfile.write(csv_data)
+                return
+
+            # Demo Students (Auth Protected)
+            elif path == '/api/demo_students':
+                auth_user = get_authenticated_user(self.headers)
+                if not auth_user:
+                    return self.send_json({'success': False, 'error': 'Authentication required.'}, status=401)
+
+                conn = get_db()
+                cursor = conn.cursor()
+                cursor.execute("SELECT id, username, full_name, grade_level, avatar, xp, streak_days, role FROM users WHERE role != 'teacher' LIMIT 6")
+                demos = [dict(d) for d in cursor.fetchall()]
+                conn.close()
+                return self.send_json({'success': True, 'students': demos})
+
+            # Assignments Query (Token Protected)
+            elif path == '/api/assignments':
+                auth_user = get_authenticated_user(self.headers)
+                if not auth_user:
+                    return self.send_json({'success': False, 'error': 'Authentication required.'}, status=401)
+                if auth_user.get('_requires_password_reset'):
+                    return self.send_json({'success': False, 'error': 'Password reset required.', 'must_reset_password': True}, status=403)
+
+                conn = get_db()
+                cursor = conn.cursor()
+                cursor.execute('''
+                SELECT 
+                    a.id, a.skill_code, a.skill_name, a.subject, a.grade, a.due_date, a.instructions, a.created_at,
+                    (SELECT COUNT(*) FROM assignment_completions ac WHERE ac.assignment_id = a.id) as completions_count,
+                    (SELECT COUNT(*) FROM users u WHERE u.role != 'teacher') as total_students
+                FROM assignments a
+                ORDER BY a.due_date ASC
+                ''')
+                assignments = [dict(r) for r in cursor.fetchall()]
+                conn.close()
+                return self.send_json({'success': True, 'assignments': assignments})
+
+            elif path.startswith('/api/assignments/student/'):
+                try:
+                    student_id = int(path.split('/')[-1])
+                except ValueError:
+                    return self.send_json({'success': False, 'error': 'Invalid student ID'}, status=400)
+
+                auth_user = get_authenticated_user(self.headers)
+                if not auth_user:
+                    return self.send_json({'success': False, 'error': 'Authentication required.'}, status=401)
+                if auth_user.get('_requires_password_reset'):
+                    return self.send_json({'success': False, 'error': 'Password reset required.', 'must_reset_password': True}, status=403)
+                if auth_user['role'] != 'teacher' and auth_user['id'] != student_id:
+                    return self.send_json({'success': False, 'error': 'Unauthorized to view student assignments.'}, status=403)
+
+                conn = get_db()
+                cursor = conn.cursor()
+                cursor.execute('''
+                SELECT 
+                    a.id, a.skill_code, a.skill_name, a.subject, a.grade, a.due_date, a.instructions, a.created_at,
+                    CASE WHEN ac.id IS NOT NULL THEN 1 ELSE 0 END as is_completed,
+                    ac.completed_at
+                FROM assignments a
+                LEFT JOIN assignment_completions ac ON a.id = ac.assignment_id AND ac.student_id = ?
+                ORDER BY a.due_date ASC
+                ''', (student_id,))
+                assignments = [dict(r) for r in cursor.fetchall()]
+                conn.close()
+                return self.send_json({'success': True, 'assignments': assignments})
+
+            # Payments Query (Teacher Only)
+            elif path == '/api/payments/list':
+                auth_user = get_authenticated_user(self.headers)
+                if not auth_user or auth_user.get('role') != 'teacher':
+                    return self.send_json({'success': False, 'error': 'Teacher authorization required.'}, status=403)
+
+                conn = get_db()
+                cursor = conn.cursor()
+                cursor.execute('SELECT * FROM payment_receipts ORDER BY submitted_at DESC LIMIT 100')
+                receipts = [dict(r) for r in cursor.fetchall()]
+                conn.close()
+                return self.send_json({'success': True, 'receipts': receipts, 'payments': receipts})
+
+            # Class Sessions Query (Token Protected)
+            elif path == '/api/sessions/list':
+                auth_user = get_authenticated_user(self.headers)
+                if not auth_user:
+                    return self.send_json({'success': False, 'error': 'Authentication required.'}, status=401)
+
+                conn = get_db()
+                cursor = conn.cursor()
+                cursor.execute('SELECT * FROM class_sessions ORDER BY date DESC, created_at DESC LIMIT 100')
+                sessions = []
+                for s in cursor.fetchall():
+                    d = dict(s)
+                    d['session_date'] = d.get('date')
+                    d['topic'] = d.get('topic_covered')
+                    d['pdf_link'] = d.get('pdf_url')
+                    sessions.append(d)
+                conn.close()
+                return self.send_json({'success': True, 'sessions': sessions})
+
+            # Unrecognized API endpoint
+            return self.send_json({'error': 'API endpoint not found'}, status=404)
 
         # ---------------------------------------------------------------------
-        # Leaderboard
+        # Static Files Serving (Strict Whitelist Protected)
         # ---------------------------------------------------------------------
-        elif path == '/api/leaderboard':
-            conn = get_db()
-            cursor = conn.cursor()
-            cursor.execute('''
-            SELECT id, username, full_name, grade_level, avatar, xp, streak_days
-            FROM users
-            WHERE role != 'teacher'
-            ORDER BY xp DESC
-            LIMIT 10
-            ''')
-            leaders = [dict(l) for l in cursor.fetchall()]
-            conn.close()
-            return self.send_json({'success': True, 'leaderboard': leaders})
+        translated = self.translate_path(self.path)
+        if not translated or not os.path.exists(translated):
+            return self.send_json({'error': 'Forbidden or Not Found'}, status=403)
 
-        # ---------------------------------------------------------------------
-        # Teacher: Overview & Class Metrics
-        # ---------------------------------------------------------------------
-        elif path == '/api/teacher/overview':
-            auth_user = get_authenticated_user(self.headers)
-            if not auth_user or auth_user.get('role') != 'teacher':
-                return self.send_json({'success': False, 'error': 'Teacher authorization required.'}, status=403)
-
-            conn = get_db()
-            cursor = conn.cursor()
-            
-            cursor.execute("SELECT COUNT(*) FROM users WHERE role != 'teacher'")
-            total_students = cursor.fetchone()[0]
-            
-            cursor.execute('''
-            SELECT 
-                COUNT(*) as total_sessions,
-                COALESCE(SUM(questions_answered), 0) as total_questions,
-                COALESCE(SUM(questions_correct), 0) as total_correct,
-                COALESCE(SUM(duration_seconds), 0) as total_time_spent,
-                COALESCE(AVG(smart_score), 0) as avg_smart_score
-            FROM practice_sessions p
-            JOIN users u ON p.student_id = u.id
-            WHERE u.role != 'teacher'
-            ''')
-            class_stats = dict(cursor.fetchone())
-            tot_q = class_stats['total_questions']
-            class_stats['accuracy_rate'] = round((class_stats['total_correct'] / tot_q * 100), 1) if tot_q > 0 else 0
-            class_stats['avg_smart_score'] = round(class_stats['avg_smart_score'], 1)
-            class_stats['total_hours'] = round(class_stats['total_time_spent'] / 3600, 1)
-
-            cursor.execute('''
-            SELECT 
-                u.id, u.username, u.full_name, u.grade_level, u.avatar, u.xp, u.streak_days,
-                COALESCE(u.plain_password, 'password123') as password,
-                COALESCE(u.parent_name, '') as parent_name,
-                COALESCE(u.student_phone, '') as student_phone,
-                COALESCE(u.parent_phone, '') as parent_phone,
-                COALESCE(u.payment_method, 'InstaPay') as payment_method,
-                COALESCE(u.payment_date, '') as payment_date,
-                COALESCE(u.payment_amount, 0) as payment_amount,
-                COALESCE(u.payment_status, 'overdue') as payment_status,
-                COUNT(p.id) as sessions_count,
-                COALESCE(SUM(p.questions_answered), 0) as questions_answered,
-                COALESCE(SUM(p.questions_correct), 0) as questions_correct,
-                COALESCE(AVG(p.smart_score), 0) as avg_smart_score,
-                COALESCE(MAX(p.completed_at), 'Never') as last_active,
-                (SELECT COUNT(*) FROM student_badges b WHERE b.student_id = u.id) as badges_count
-            FROM users u
-            LEFT JOIN practice_sessions p ON u.id = p.student_id
-            WHERE u.role != 'teacher'
-            GROUP BY u.id
-            ORDER BY u.xp DESC
-            ''')
-            roster = []
-            for r in cursor.fetchall():
-                row = dict(r)
-                q = row['questions_answered']
-                row['accuracy_rate'] = round((row['questions_correct'] / q * 100), 1) if q > 0 else 0
-                row['avg_smart_score'] = round(row['avg_smart_score'], 1)
-                roster.append(row)
-
-            # Attention Needed Skills (accuracy < 85%)
-            cursor.execute('''
-            SELECT 
-                skill_code, skill_name, subject, grade,
-                COUNT(*) as attempts,
-                SUM(questions_answered) as questions,
-                SUM(questions_correct) as correct,
-                ROUND(AVG(smart_score), 1) as avg_score
-            FROM practice_sessions
-            GROUP BY skill_code
-            HAVING (CAST(SUM(questions_correct) AS FLOAT) / NULLIF(SUM(questions_answered), 0)) < 0.85
-            ORDER BY avg_score ASC
-            LIMIT 6
-            ''')
-            attention_skills = [dict(s) for s in cursor.fetchall()]
-
-            # Mastered Skills (avg_score >= 90)
-            cursor.execute('''
-            SELECT 
-                skill_code, skill_name, subject, grade,
-                COUNT(*) as attempts,
-                ROUND(AVG(smart_score), 1) as avg_score
-            FROM practice_sessions
-            GROUP BY skill_code
-            HAVING AVG(smart_score) >= 90
-            ORDER BY attempts DESC
-            LIMIT 6
-            ''')
-            mastered_skills = [dict(s) for s in cursor.fetchall()]
-
-            conn.close()
-            return self.send_json({
-                'success': True,
-                'overview': {
-                    'total_students': total_students,
-                    'class_stats': class_stats,
-                    'roster': roster,
-                    'attention_skills': attention_skills,
-                    'mastered_skills': mastered_skills
-                }
-            })
-
-        # ---------------------------------------------------------------------
-        # Teacher: Export Grade Roster to CSV
-        # ---------------------------------------------------------------------
-        elif path == '/api/teacher/export_csv':
-            auth_user = get_authenticated_user(self.headers)
-            if not auth_user or auth_user.get('role') != 'teacher':
-                return self.send_json({'success': False, 'error': 'Teacher authorization required.'}, status=403)
-
-            conn = get_db()
-            cursor = conn.cursor()
-            cursor.execute('''
-            SELECT 
-                u.id, u.username, u.full_name, u.grade_level, u.xp, u.streak_days,
-                COUNT(p.id) as sessions,
-                COALESCE(SUM(p.questions_answered), 0) as questions,
-                COALESCE(SUM(p.questions_correct), 0) as correct,
-                COALESCE(ROUND(AVG(p.smart_score), 1), 0) as avg_score,
-                COALESCE(MAX(p.completed_at), 'Never') as last_active
-            FROM users u
-            LEFT JOIN practice_sessions p ON u.id = p.student_id
-            WHERE u.role != 'teacher'
-            GROUP BY u.id
-            ORDER BY u.xp DESC
-            ''')
-            rows = cursor.fetchall()
-            conn.close()
-
-            csv_lines = ['Student ID,Username,Full Name,Grade,XP,Streak Days,Sessions,Total Questions,Correct,Accuracy Rate (%),Avg SmartScore,Last Active']
-            for r in rows:
-                q = r['questions']
-                acc = round((r['correct'] / q * 100), 1) if q > 0 else 0
-                csv_lines.append(f"{r['id']},{r['username']},{r['full_name']},{r['grade_level']},{r['xp']},{r['streak_days']},{r['sessions']},{q},{r['correct']},{acc},{r['avg_score']},{r['last_active']}")
-
-            csv_data = '\n'.join(csv_lines).encode('utf-8-sig') # with BOM for Excel Arabic/Unicode compatibility
-            self.send_response(200)
-            self.send_header('Content-Type', 'text/csv; charset=utf-8')
-            self.send_header('Content-Disposition', 'attachment; filename="Rania_Classroom_Roster.csv"')
-            self.send_header('Content-Length', str(len(csv_data)))
-            self.end_headers()
-            self.wfile.write(csv_data)
-            return
-
-        # ---------------------------------------------------------------------
-        # Demo Students (Public helper for easy exploration)
-        # ---------------------------------------------------------------------
-        elif path == '/api/demo_students':
-            conn = get_db()
-            cursor = conn.cursor()
-            cursor.execute("SELECT id, username, full_name, grade_level, avatar, xp, streak_days, role FROM users WHERE role != 'teacher' LIMIT 6")
-            demos = [dict(d) for d in cursor.fetchall()]
-            conn.close()
-            return self.send_json({'success': True, 'students': demos})
-
-        # ---------------------------------------------------------------------
-        # Assignments Query
-        # ---------------------------------------------------------------------
-        elif path == '/api/assignments':
-            conn = get_db()
-            cursor = conn.cursor()
-            cursor.execute('''
-            SELECT 
-                a.id, a.skill_code, a.skill_name, a.subject, a.grade, a.due_date, a.instructions, a.created_at,
-                (SELECT COUNT(*) FROM assignment_completions ac WHERE ac.assignment_id = a.id) as completions_count,
-                (SELECT COUNT(*) FROM users u WHERE u.role != 'teacher') as total_students
-            FROM assignments a
-            ORDER BY a.due_date ASC
-            ''')
-            assignments = [dict(r) for r in cursor.fetchall()]
-            conn.close()
-            return self.send_json({'success': True, 'assignments': assignments})
-
-        elif path.startswith('/api/assignments/student/'):
-            try:
-                student_id = int(path.split('/')[-1])
-            except ValueError:
-                return self.send_json({'success': False, 'error': 'Invalid student ID'}, status=400)
-
-            conn = get_db()
-            cursor = conn.cursor()
-            cursor.execute('''
-            SELECT 
-                a.id, a.skill_code, a.skill_name, a.subject, a.grade, a.due_date, a.instructions, a.created_at,
-                CASE WHEN ac.id IS NOT NULL THEN 1 ELSE 0 END as is_completed,
-                ac.completed_at
-            FROM assignments a
-            LEFT JOIN assignment_completions ac ON a.id = ac.assignment_id AND ac.student_id = ?
-            ORDER BY a.due_date ASC
-            ''', (student_id,))
-            assignments = [dict(r) for r in cursor.fetchall()]
-            conn.close()
-            return self.send_json({'success': True, 'assignments': assignments})
-
-        # ---------------------------------------------------------------------
-        # Payments Query
-        # ---------------------------------------------------------------------
-        elif path == '/api/payments/list':
-            conn = get_db()
-            cursor = conn.cursor()
-            cursor.execute('SELECT * FROM payment_receipts ORDER BY submitted_at DESC LIMIT 100')
-            receipts = [dict(r) for r in cursor.fetchall()]
-            conn.close()
-            return self.send_json({'success': True, 'receipts': receipts, 'payments': receipts})
-
-        # ---------------------------------------------------------------------
-        # Class Sessions Query
-        # ---------------------------------------------------------------------
-        elif path == '/api/sessions/list':
-            conn = get_db()
-            cursor = conn.cursor()
-            cursor.execute('SELECT * FROM class_sessions ORDER BY date DESC, created_at DESC LIMIT 100')
-            sessions = []
-            for s in cursor.fetchall():
-                d = dict(s)
-                d['session_date'] = d.get('date')
-                d['topic'] = d.get('topic_covered')
-                d['pdf_link'] = d.get('pdf_url')
-                sessions.append(d)
-            conn.close()
-            return self.send_json({'success': True, 'sessions': sessions})
-
-        # Static files
         super().do_GET()
 
-class ReusableTCPServer(socketserver.TCPServer):
-    allow_reuse_address = True
 
-def create_server(port=PORT):
+class ReusableThreadingServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
+    allow_reuse_address = True
+    daemon_threads = True
+
+
+def create_server(port=PORT, host=HOST):
     os.chdir(os.path.dirname(__file__))
     init_auth_db()
-    return ReusableTCPServer(('', port), StudentPortalHandler)
+    return ReusableThreadingServer((host, port), StudentPortalHandler)
 
-def run_server(port=PORT):
+def run_server(port=PORT, host=HOST):
     os.chdir(os.path.dirname(__file__))
     init_auth_db()
     ports_to_try = [port, 8080, 8001, 8088]
     for p in ports_to_try:
         try:
-            with create_server(p) as httpd:
-                print(f'Rania Classroom Secure Server running on http://localhost:{p}')
+            with create_server(p, host=host) as httpd:
+                print(f'Rania Classroom Secure Server running on http://{host}:{p}')
                 httpd.serve_forever()
                 break
         except OSError as e:
@@ -1120,6 +1414,3 @@ def run_server(port=PORT):
 
 if __name__ == '__main__':
     run_server()
-
-
-

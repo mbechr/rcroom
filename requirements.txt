@@ -1,1 +1,5 @@
-# Standard library only (no external dependencies required)
+# Application runtime uses Python Standard Library only (Zero external runtime dependencies)
+
+# Developer & CI/CD Dependencies
+pytest>=8.0.0
+ruff>=0.3.0

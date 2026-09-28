@@ -3,6 +3,16 @@
  * Generates an official, print-ready certificate when a student reaches SmartScore 100
  */
 
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 const MasteryCertificate = {
   open(student, skill) {
     const modal = document.getElementById('masteryCertModal');
@@ -19,6 +29,7 @@ const MasteryCertificate = {
     const sName = (student && student.full_name) ? student.full_name : 'Alex Turner';
     const sCode = skill ? (skill.code || skill.skill_code || 'A.1') : 'A.1';
     const sTitle = skill ? (skill.name || skill.skill_name || 'Curriculum Skill') : 'Curriculum Skill';
+    const subj = escapeHtml(skill ? (skill.subject || 'Maths') : 'Maths');
 
     const today = new Date();
     const dateStr = today.toLocaleDateString('en-US', {
@@ -34,7 +45,7 @@ const MasteryCertificate = {
     if (titleEl) titleEl.textContent = 'CERTIFICATE OF MASTERY';
     if (introEl) introEl.textContent = 'This certifies that';
     if (reasonEl) {
-      reasonEl.innerHTML = `has demonstrated exceptional diligence and achieved a perfect <span class="cert-skill-highlight">100 SmartScore</span> in <span class="cert-skill-highlight">${skill.subject || 'Maths'}</span>.`;
+      reasonEl.innerHTML = `has demonstrated exceptional diligence and achieved a perfect <span class="cert-skill-highlight">100 SmartScore</span> in <span class="cert-skill-highlight">${subj}</span>.`;
     }
     if (instructorEl) instructorEl.textContent = 'Miss Rania';
 

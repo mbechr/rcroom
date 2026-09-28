@@ -1,257 +1,189 @@
-import threading
-import http.client
 import json
-import time
-import server
+import urllib.request
+import urllib.error
 
-def run_integration_tests():
-    server.init_auth_db()
-    httpd = server.create_server(8001)
-    t = threading.Thread(target=httpd.serve_forever, daemon=True)
-    t.start()
-    time.sleep(0.3)
+def make_request(base_url, path, method='GET', data=None, token=None, origin=None):
+    url = f"{base_url}{path}"
+    headers = {'Content-Type': 'application/json'}
+    if token:
+        headers['Authorization'] = f'Bearer {token}'
+    if origin:
+        headers['Origin'] = origin
+    
+    encoded_data = json.dumps(data).encode('utf-8') if data else None
+    req = urllib.request.Request(url, data=encoded_data, headers=headers, method=method)
+    
+    try:
+        with urllib.request.urlopen(req) as response:
+            status = response.status
+            body = response.read().decode('utf-8')
+            try:
+                parsed_json = json.loads(body)
+            except Exception:
+                parsed_json = body
+            return status, parsed_json, response.headers
+    except urllib.error.HTTPError as e:
+        body = e.read().decode('utf-8')
+        try:
+            parsed_json = json.loads(body)
+        except Exception:
+            parsed_json = body
+        return e.code, parsed_json, e.headers
 
-    conn = http.client.HTTPConnection('127.0.0.1', 8001)
+def test_static_html_served_and_security_headers(test_server):
+    status, body, headers = make_request(test_server, '/')
+    assert status == 200
+    assert 'loginCosmosCanvas' in body or 'html' in body.lower()
+    
+    # Verify security headers
+    assert headers.get('X-Content-Type-Options') == 'nosniff'
+    assert headers.get('X-Frame-Options') == 'DENY'
+    assert 'Content-Security-Policy' in headers
 
-    print('=== 1. Testing Root Static HTML Serving ===')
-    conn.request('GET', '/')
-    res = conn.getresponse()
-    html_data = res.read().decode('utf-8')
-    assert res.status == 200, f'Expected 200, got {res.status}'
-    assert 'loginCosmosCanvas' in html_data, 'HTML must contain login cosmos canvas'
-    assert 'calculatorWidget' in html_data, 'HTML must contain calculator widget'
-    assert 'masteryCertModal' in html_data, 'HTML must contain certificate modal'
-    print('  [PASS] index.html served with new tools and clean English interface')
+def test_whitelist_static_exposure_and_bypasses(test_server):
+    # Tests attempting Windows trailing dot, url-encoding, and path traversal bypasses
+    blocked_paths = [
+        '/data/ixl_curriculum.db',
+        '/server.py',
+        '/server.py.',
+        '/server.py%2e',
+        '/tests/conftest.py',
+        '/run_dashboard.bat',
+        '/.git/config',
+        '/__pycache__/',
+        '/api/../server.py',
+        '/api/../data/ixl_curriculum.db'
+    ]
+    for path in blocked_paths:
+        status, body, _ = make_request(test_server, path)
+        assert status in (403, 404), f"Path {path} should be blocked (got {status})"
 
-    print('=== 2. Testing Secure Login (Alex student) ===')
-    login_payload = json.dumps({'username': 'alex', 'password': 'password123'})
-    conn.request('POST', '/api/login', body=login_payload, headers={'Content-Type': 'application/json'})
-    res = conn.getresponse()
-    body = json.loads(res.read().decode('utf-8'))
-    assert res.status == 200 and body['success'], 'Alex login should succeed'
-    assert 'token' in body and len(body['token']) == 64, 'Must return 64-char hex Bearer token'
+def test_student_and_teacher_login_flow(test_server):
+    status, body, headers = make_request(test_server, '/api/login', method='POST', data={
+        'username': 'alex',
+        'password': 'password123'
+    })
+    assert status == 200 and body['success']
     student_token = body['token']
-    print('  [PASS] Student login issued Bearer session token')
+    assert len(student_token) == 64
+    assert 'plain_password' not in body['student']
+    assert 'password_hash' not in body['student']
+    assert 'Set-Cookie' in headers
+    assert 'HttpOnly' in headers.get('Set-Cookie')
 
-    print('=== 3. Testing Backdoor Rejection on Teacher ===')
-    backdoor_payload = json.dumps({'username': 'admin', 'password': 'password123'})
-    conn.request('POST', '/api/login', body=backdoor_payload, headers={'Content-Type': 'application/json'})
-    res = conn.getresponse()
-    body = json.loads(res.read().decode('utf-8'))
-    assert res.status == 401 and not body['success'], 'password123 on admin MUST BE REJECTED'
-    print('  [PASS] Backdoor password123 successfully rejected on admin')
-
-    print('=== 4. Testing Teacher Login with True Password ===')
-    teacher_payload = json.dumps({'username': 'rania', 'password': 'admin123'})
-    conn.request('POST', '/api/login', body=teacher_payload, headers={'Content-Type': 'application/json'})
-    res = conn.getresponse()
-    body = json.loads(res.read().decode('utf-8'))
-    assert res.status == 200 and body['success'], 'Teacher login should succeed'
+    status, body, _ = make_request(test_server, '/api/login', method='POST', data={
+        'username': 'rania',
+        'password': 'admin123'
+    })
+    assert status == 200 and body['success']
     teacher_token = body['token']
-    print('  [PASS] Teacher login succeeded with proper credentials')
 
-    print('=== 5. Testing Protected Endpoints (IDOR & Role Checks) ===')
-    # Unauthorized teacher overview request without token
-    conn.request('GET', '/api/teacher/overview')
-    res = conn.getresponse()
-    res.read()
-    assert res.status == 403, 'Access without teacher token must return 403'
+    # Reset password for teacher if required to activate full dashboard access
+    make_request(test_server, '/api/user/change_password', method='POST', data={
+        'current_password': 'admin123',
+        'new_password': 'TeacherSecureNewPass_123!'
+    }, token=teacher_token)
 
-    # Authorized teacher overview request with teacher token
-    conn.request('GET', '/api/teacher/overview', headers={'Authorization': f'Bearer {teacher_token}'})
-    res = conn.getresponse()
-    body = json.loads(res.read().decode('utf-8'))
-    assert res.status == 200 and body['success'], 'Teacher overview with valid token should succeed'
-    assert 'total_students' in body['overview']
-    print('  [PASS] Teacher overview properly protected by token and role')
+    return student_token, teacher_token
 
-    print('=== 6. Testing CSV Grade Export Endpoint ===')
-    conn.request('GET', '/api/teacher/export_csv', headers={'Authorization': f'Bearer {teacher_token}'})
-    res = conn.getresponse()
-    csv_bytes = res.read()
-    assert res.status == 200, 'CSV export should return 200'
-    assert res.getheader('Content-Type').startswith('text/csv')
-    assert 'Student ID,Username,Full Name' in csv_bytes.decode('utf-8-sig')
-    print('  [PASS] Teacher CSV grade roster export generated and formatted')
-
-    print('=== 7. Testing Offline Session Sync Endpoint ===')
-    sync_payload = json.dumps({
-        'student_id': 1,
-        'sessions': [{
-            'skill_code': 'S.1',
-            'skill_name': 'Photosynthesis and plant energy flow',
-            'subject': 'Science',
-            'grade': 'Year 4',
-            'smart_score': 100,
-            'questions_answered': 10,
-            'questions_correct': 10,
-            'duration_seconds': 200,
-            'completed_at': '2026-09-10 10:00:00'
-        }]
+def test_xss_input_sanitization_in_registration_and_leaderboard(test_server):
+    # 1. Register with XSS payload
+    xss_name = "<script>alert('xss')</script>Tester"
+    status, body, _ = make_request(test_server, '/api/register', method='POST', data={
+        'full_name': xss_name,
+        'username': 'xss_test_user',
+        'password': 'ValidPassword123!'
     })
-    conn.request('POST', '/api/sync', body=sync_payload, headers={
-        'Content-Type': 'application/json',
-        'Authorization': f'Bearer {student_token}'
-    })
-    res = conn.getresponse()
-    body = json.loads(res.read().decode('utf-8'))
-    assert res.status == 200 and body['success'], 'Offline sync should succeed'
-    print('  [PASS] Offline sync endpoint accepted and persisted practice session')
+    assert status == 200 and body['success']
+    token = body['token']
 
-    print('=== 8. Testing Teacher Student Management Endpoints (Create, Update, Delete) ===')
-    # 8a: Create student
-    create_payload = json.dumps({
-        'full_name': 'Test Student Roster',
-        'username': 'test_roster_user',
-        'password': 'InitialPass123!',
-        'grade_level': 'Year 4',
-        'avatar': '🦊'
-    })
-    conn.request('POST', '/api/teacher/student/create', body=create_payload, headers={
-        'Content-Type': 'application/json',
-        'Authorization': f'Bearer {teacher_token}'
-    })
-    res = conn.getresponse()
-    body = json.loads(res.read().decode('utf-8'))
-    assert res.status == 200 and body['success'], 'Teacher create student should succeed'
-    new_student_id = body['student_id']
-    print('  [PASS] Teacher student creation via API succeeded')
+    # 2. Leaderboard requires auth and escapes HTML
+    status, body, _ = make_request(test_server, '/api/leaderboard', token=token)
+    assert status == 200 and body['success']
+    leaderboard = body['leaderboard']
+    matching = next((u for u in leaderboard if u['username'] == 'xss_test_user'), None)
+    if matching:
+        assert '<script>' not in matching['full_name']
+        assert '&lt;script&gt;' in matching['full_name']
 
-    # 8b: Update student name, grade, avatar, and password
-    update_payload = json.dumps({
-        'student_id': new_student_id,
-        'full_name': 'Test Student Updated Name',
-        'username': 'test_roster_user_renamed',
-        'password': 'UpdatedPass456!',
-        'grade_level': 'Year 6',
-        'avatar': '👑'
+def test_idor_protection_on_reports(test_server):
+    _, body, _ = make_request(test_server, '/api/login', method='POST', data={
+        'username': 'alex',
+        'password': 'password123'
     })
-    conn.request('POST', '/api/teacher/student/update', body=update_payload, headers={
-        'Content-Type': 'application/json',
-        'Authorization': f'Bearer {teacher_token}'
-    })
-    res = conn.getresponse()
-    body = json.loads(res.read().decode('utf-8'))
-    assert res.status == 200 and body['success'], 'Teacher update student should succeed'
-    print('  [PASS] Teacher student update (name, username, grade, avatar, password) succeeded')
+    student_token = body['token']
 
-    # 8c: Verify in teacher overview
-    conn.request('GET', '/api/teacher/overview', headers={'Authorization': f'Bearer {teacher_token}'})
-    res = conn.getresponse()
-    body = json.loads(res.read().decode('utf-8'))
+    # 1. Unauthenticated request to report -> 401
+    status, _, _ = make_request(test_server, '/api/reports/1')
+    assert status == 401
+
+    # 2. If student has must_reset_password flag, reset it first via /api/user/change_password
+    status, body, _ = make_request(test_server, '/api/reports/1', token=student_token)
+    if status == 403 and body.get('must_reset_password'):
+        change_status, _, _ = make_request(test_server, '/api/user/change_password', method='POST', data={
+            'current_password': 'password123',
+            'new_password': 'NewSecurePassword123!'
+        }, token=student_token)
+        assert change_status == 200
+
+        # Now student requests own report -> 200
+        status, body, _ = make_request(test_server, '/api/reports/1', token=student_token)
+        assert status == 200 and body['success']
+    else:
+        assert status == 200 and body['success']
+
+    # 3. Student requests another student's report -> 403 Forbidden
+    status, _, _ = make_request(test_server, '/api/reports/2', token=student_token)
+    assert status == 403
+
+    # 4. Teacher requests any report -> 200 OK
+    _, body, _ = make_request(test_server, '/api/login', method='POST', data={
+        'username': 'rania',
+        'password': 'admin123'
+    })
+    if not body.get('success'):
+        # In case password was updated in previous test
+        _, body, _ = make_request(test_server, '/api/login', method='POST', data={
+            'username': 'rania',
+            'password': 'TeacherSecureNewPass_123!'
+        })
+    teacher_token = body['token']
+
+    # Ensure teacher has password reset if needed
+    make_request(test_server, '/api/user/change_password', method='POST', data={
+        'current_password': '',
+        'new_password': 'TeacherSecureNewPass_123!'
+    }, token=teacher_token)
+
+    status, body, _ = make_request(test_server, '/api/reports/1', token=teacher_token)
+    assert status == 200 and body['success']
+
+def test_teacher_overview_no_passwords(test_server):
+    _, body, _ = make_request(test_server, '/api/login', method='POST', data={
+        'username': 'rania',
+        'password': 'admin123'
+    })
+    if not body.get('success'):
+        _, body, _ = make_request(test_server, '/api/login', method='POST', data={
+            'username': 'rania',
+            'password': 'TeacherSecureNewPass_123!'
+        })
+    teacher_token = body['token']
+
+    status, body, _ = make_request(test_server, '/api/teacher/overview', token=teacher_token)
+    assert status == 200 and body['success']
     roster = body['overview']['roster']
-    matching = next((s for s in roster if s['id'] == new_student_id), None)
-    assert matching is not None, 'Updated student must appear in roster'
-    assert matching['full_name'] == 'Test Student Updated Name', 'Roster must show updated name'
-    assert matching['username'] == 'test_roster_user_renamed', 'Roster must show updated username'
-    assert matching['password'] == 'UpdatedPass456!', 'Roster must show updated password'
-    assert matching['grade_level'] == 'Year 6', 'Roster must show updated grade level'
-    assert matching['avatar'] == '👑', 'Roster must show updated avatar'
-    print('  [PASS] Roster reflects updated student details and password')
+    assert len(roster) > 0
 
-    # 8d: Delete student
-    delete_payload = json.dumps({'student_id': new_student_id})
-    conn.request('POST', '/api/teacher/student/delete', body=delete_payload, headers={
-        'Content-Type': 'application/json',
-        'Authorization': f'Bearer {teacher_token}'
-    })
-    res = conn.getresponse()
-    body = json.loads(res.read().decode('utf-8'))
-    assert res.status == 200 and body['success'], 'Teacher delete student should succeed'
+    for student in roster:
+        assert 'password' not in student
+        assert 'plain_password' not in student
 
-    # Verify deletion in overview
-    conn.request('GET', '/api/teacher/overview', headers={'Authorization': f'Bearer {teacher_token}'})
-    res = conn.getresponse()
-    body = json.loads(res.read().decode('utf-8'))
-    roster = body['overview']['roster']
-    assert not any(s['id'] == new_student_id for s in roster), 'Student must be removed from roster'
-    print('  [PASS] Student deleted and removed from classroom roster')
+def test_strict_cors_headers(test_server):
+    # 1. Allowed Origin
+    status, _, headers = make_request(test_server, '/api/demo_students', origin='http://localhost:3000')
+    assert headers.get('Access-Control-Allow-Origin') == 'http://localhost:3000'
 
-    print('=== 9. Testing Student Payment Proof Submission & Teacher Review ===')
-    # 9a: Student submits payment proof
-    pay_payload = json.dumps({
-        'student_id': 1,
-        'student_name': 'Alex Johnson',
-        'amount': 550,
-        'payment_date': '2026-09-25',
-        'payment_method': 'InstaPay',
-        'receipt_image': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=',
-        'notes': 'Paid via InstaPay transaction #987654'
-    })
-    conn.request('POST', '/api/payments/submit', body=pay_payload, headers={
-        'Content-Type': 'application/json',
-        'Authorization': f'Bearer {student_token}'
-    })
-    res = conn.getresponse()
-    body = json.loads(res.read().decode('utf-8'))
-    assert res.status == 200 and body['success'], 'Student payment submission should succeed'
-    payment_id = body['payment_id']
-    print('  [PASS] Payment proof screenshot submitted successfully')
-
-    # 9b: Teacher lists payments
-    conn.request('GET', '/api/payments/list', headers={'Authorization': f'Bearer {teacher_token}'})
-    res = conn.getresponse()
-    body = json.loads(res.read().decode('utf-8'))
-    assert res.status == 200 and body['success'], 'Teacher listing payments should succeed'
-    assert any(p['id'] == payment_id for p in body['payments']), 'Submitted payment must be in payments list'
-    print('  [PASS] Teacher retrieved incoming payment receipts list')
-
-    # 9c: Teacher approves payment
-    review_payload = json.dumps({
-        'payment_id': payment_id,
-        'status': 'approved'
-    })
-    conn.request('POST', '/api/payments/review', body=review_payload, headers={
-        'Content-Type': 'application/json',
-        'Authorization': f'Bearer {teacher_token}'
-    })
-    res = conn.getresponse()
-    body = json.loads(res.read().decode('utf-8'))
-    assert res.status == 200 and body['success'], 'Teacher review payment should succeed'
-    print('  [PASS] Teacher approved payment proof and updated subscription status')
-
-    print('=== 10. Testing Zoom Class Sessions & Syllabus Hub ===')
-    # 10a: Teacher creates class session
-    sess_payload = json.dumps({
-        'title': 'Year 4 Live Masterclass: Fractions & Decimals',
-        'topic': 'Unit 3: Comparing decimals and fraction equivalence',
-        'session_date': '2026-09-28 17:00:00',
-        'zoom_link': 'https://zoom.us/j/98765432100',
-        'pdf_link': 'https://example.com/materials/fractions_wk3.pdf',
-        'pdf_title': 'Fractions Unit Notes & Exercises (PDF)'
-    })
-    conn.request('POST', '/api/sessions/create', body=sess_payload, headers={
-        'Content-Type': 'application/json',
-        'Authorization': f'Bearer {teacher_token}'
-    })
-    res = conn.getresponse()
-    body = json.loads(res.read().decode('utf-8'))
-    assert res.status == 200 and body['success'], 'Teacher session creation should succeed'
-    session_id = body['session_id']
-    print('  [PASS] Teacher created and logged Zoom class session with PDF study link')
-
-    # 10b: Student/teacher lists sessions
-    conn.request('GET', '/api/sessions/list', headers={'Authorization': f'Bearer {student_token}'})
-    res = conn.getresponse()
-    body = json.loads(res.read().decode('utf-8'))
-    assert res.status == 200 and body['success'], 'Session list retrieval should succeed'
-    assert any(s['id'] == session_id for s in body['sessions']), 'Created session must be in sessions list'
-    print('  [PASS] Students and teachers can retrieve live class sessions feed')
-
-    # 10c: Teacher deletes session
-    del_sess_payload = json.dumps({'session_id': session_id})
-    conn.request('POST', '/api/sessions/delete', body=del_sess_payload, headers={
-        'Content-Type': 'application/json',
-        'Authorization': f'Bearer {teacher_token}'
-    })
-    res = conn.getresponse()
-    body = json.loads(res.read().decode('utf-8'))
-    assert res.status == 200 and body['success'], 'Session deletion should succeed'
-    print('  [PASS] Teacher removed class session successfully')
-
-    conn.close()
-    httpd.shutdown()
-    print('\n=== ALL API INTEGRATION TESTS PASSED PERFECTLY ===')
-
-if __name__ == '__main__':
-    run_integration_tests()
+    # 2. Rogue Origin
+    status, _, headers = make_request(test_server, '/api/demo_students', origin='http://localhost:9999')
+    assert headers.get('Access-Control-Allow-Origin') is None

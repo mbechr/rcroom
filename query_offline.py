@@ -73,9 +73,10 @@ def search_skills(query=None, subject=None, grade=None, permacode=None, limit=25
         sql += " AND (skill_name LIKE ? OR category_name LIKE ? OR skill_code LIKE ?)"
         params.extend([f"%{query}%", f"%{query}%", f"%{query}%"])
         
-    sql += f" ORDER BY id ASC LIMIT {limit}"
+    sql += " ORDER BY id ASC LIMIT ?"
+    params.append(limit)
     
-    cur.execute(sql, params)
+    cur.execute(sql, tuple(params))
     rows = cur.fetchall()
     conn.close()
     
