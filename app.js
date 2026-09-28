@@ -1037,43 +1037,44 @@ const DB = {
 
   syncLocalStudentUpdate(data) {
     const numId = Number(data.student_id);
-    const fullName = (data.full_name || '').trim();
-    const cleanUser = (data.username || '').trim().toLowerCase();
-    const cleanPw = (data.password || '').trim();
-    const grade = data.grade_level;
-    const avatar = data.avatar;
-
-    if (!fullName || !cleanUser) {
-      return { success: false, error: 'Full name and username are required' };
-    }
+    const existing = this.findStudentById(numId) || {};
+    const fullName = (data.full_name !== undefined ? data.full_name : (existing.full_name || '')).trim();
+    const cleanUser = (data.username !== undefined ? data.username : (existing.username || '')).trim().toLowerCase();
+    const cleanPw = data.password !== undefined ? (data.password || '').trim() : (existing.password || '');
+    const grade = data.grade_level !== undefined ? data.grade_level : existing.grade_level;
+    const avatar = data.avatar !== undefined ? data.avatar : existing.avatar;
 
     // Update in rc_custom_students
     let localStudents = JSON.parse(localStorage.getItem('rc_custom_students') || '[]');
-    const existing = localStudents.find(s => s.id === numId);
-    if (existing) {
-      existing.full_name = fullName;
-      existing.username = cleanUser;
-      if (grade) existing.grade_level = grade;
-      if (avatar) existing.avatar = avatar;
-      if (cleanPw) existing.password = cleanPw;
-      if (data.parent_name !== undefined) existing.parent_name = data.parent_name;
-      if (data.student_phone !== undefined) existing.student_phone = data.student_phone;
-      if (data.parent_phone !== undefined) existing.parent_phone = data.parent_phone;
-      if (data.payment_method !== undefined) existing.payment_method = data.payment_method;
-      if (data.payment_date !== undefined) existing.payment_date = data.payment_date;
-      if (data.payment_amount !== undefined) existing.payment_amount = (data.payment_amount !== '' && data.payment_amount !== null) ? Number(data.payment_amount) : '';
-      if (data.payment_status !== undefined) existing.payment_status = data.payment_status;
+    const existingInCustom = localStudents.find(s => s.id === numId);
+    if (existingInCustom) {
+      if (fullName) existingInCustom.full_name = fullName;
+      if (cleanUser) existingInCustom.username = cleanUser;
+      if (grade) existingInCustom.grade_level = grade;
+      if (avatar) existingInCustom.avatar = avatar;
+      if (cleanPw) existingInCustom.password = cleanPw;
+      if (data.parent_name !== undefined) existingInCustom.parent_name = data.parent_name;
+      if (data.student_phone !== undefined) existingInCustom.student_phone = data.student_phone;
+      if (data.parent_phone !== undefined) existingInCustom.parent_phone = data.parent_phone;
+      if (data.payment_method !== undefined) existingInCustom.payment_method = data.payment_method;
+      if (data.payment_date !== undefined) existingInCustom.payment_date = data.payment_date;
+      if (data.payment_amount !== undefined) existingInCustom.payment_amount = (data.payment_amount !== '' && data.payment_amount !== null) ? Number(data.payment_amount) : '';
+      if (data.payment_status !== undefined) existingInCustom.payment_status = data.payment_status;
       localStorage.setItem('rc_custom_students', JSON.stringify(localStudents));
     }
 
     // Update in demoStudents and persist to rc_modified_demo_students
     const demo = this.demoStudents.find(s => s.id === numId);
     if (demo) {
-      demo.full_name = fullName;
-      demo.username = cleanUser;
+      if (fullName) demo.full_name = fullName;
+      if (cleanUser) demo.username = cleanUser;
       if (grade) demo.grade_level = grade;
       if (avatar) demo.avatar = avatar;
       if (cleanPw) demo.password = cleanPw;
+      if (data.payment_status !== undefined) demo.payment_status = data.payment_status;
+      if (data.payment_amount !== undefined) demo.payment_amount = data.payment_amount;
+      if (data.payment_date !== undefined) demo.payment_date = data.payment_date;
+      if (data.payment_method !== undefined) demo.payment_method = data.payment_method;
 
       let modifiedDemo = {};
       try {
@@ -1082,10 +1083,15 @@ const DB = {
         modifiedDemo = {};
       }
       modifiedDemo[numId] = {
-        full_name: fullName,
-        username: cleanUser,
+        ...(modifiedDemo[numId] || {}),
+        full_name: fullName || demo.full_name,
+        username: cleanUser || demo.username,
         grade_level: grade || demo.grade_level,
         avatar: avatar || demo.avatar,
+        ...(data.payment_status !== undefined ? { payment_status: data.payment_status } : {}),
+        ...(data.payment_amount !== undefined ? { payment_amount: data.payment_amount } : {}),
+        ...(data.payment_date !== undefined ? { payment_date: data.payment_date } : {}),
+        ...(data.payment_method !== undefined ? { payment_method: data.payment_method } : {}),
         ...(cleanPw ? { password: cleanPw } : (demo.password ? { password: demo.password } : {}))
       };
       localStorage.setItem('rc_modified_demo_students', JSON.stringify(modifiedDemo));
@@ -1093,10 +1099,11 @@ const DB = {
 
     // Update current session if the edited student is currently logged in
     if (AppState.currentUser && AppState.currentUser.id === numId) {
-      AppState.currentUser.full_name = fullName;
-      AppState.currentUser.username = cleanUser;
+      if (fullName) AppState.currentUser.full_name = fullName;
+      if (cleanUser) AppState.currentUser.username = cleanUser;
       if (grade) AppState.currentUser.grade_level = grade;
       if (avatar) AppState.currentUser.avatar = avatar;
+      if (data.payment_status !== undefined) AppState.currentUser.payment_status = data.payment_status;
       localStorage.setItem('current_student', JSON.stringify(AppState.currentUser));
       if (typeof updateNavProfile === 'function') updateNavProfile();
     }
@@ -1108,8 +1115,7 @@ const DB = {
         full_name: fullName,
         username: cleanUser,
         grade_level: grade,
-        avatar: avatar,
-        password: cleanPw
+        payment_status: data.payment_status || 'paid'
       };
       window.CloudDB.saveStudent(updatedStudent);
     }
@@ -1479,37 +1485,61 @@ const DB = {
 
   async reviewPayment(paymentId, status) {
     let local = JSON.parse(localStorage.getItem('rc_custom_payments') || '[]');
-    const p = local.find(x => x.id === paymentId || String(x.id) === String(paymentId));
+    let p = local.find(x => x.id === paymentId || String(x.id) === String(paymentId));
+    let studentId = p ? p.student_id : null;
 
-    if (window.CloudDB && window.CloudDB.isConfigured) {
+    if (!studentId && paymentId) {
       try {
-        await window.CloudDB.reviewPayment(paymentId, status, p ? p.student_id : null, p);
+        const all = await this.getPayments();
+        const found = all.find(x => x.id === paymentId || String(x.id) === String(paymentId));
+        if (found && found.student_id) {
+          studentId = found.student_id;
+          if (!p) p = found;
+        }
       } catch (e) {}
     }
+
+    // 1. Sync to Google Cloud Firebase Firestore
+    if (window.CloudDB && window.CloudDB.isConfigured) {
+      try {
+        await window.CloudDB.reviewPayment(paymentId, status, studentId, p);
+      } catch (e) {}
+    }
+
+    // 2. Sync to Backend API
     const isStaticHost = window.location.hostname.endsWith('github.io');
     if (!isStaticHost) {
       try {
-        const res = await fetch(this.apiUrl('/api/payments/review'), {
+        await fetch(this.apiUrl('/api/payments/review'), {
           method: 'POST',
           headers: this.getAuthHeaders(),
-          body: JSON.stringify({ payment_id: paymentId, status: status })
+          body: JSON.stringify({ payment_id: paymentId, status: status, student_id: studentId })
         });
-        if (res.ok) return await res.json();
       } catch (e) {}
     }
 
+    // 3. Update local payments array
     if (p) {
       p.status = status;
       localStorage.setItem('rc_custom_payments', JSON.stringify(local));
-      if (p.student_id) {
-        const studentStatus = status === 'approved' ? 'paid' : 'overdue';
-        this.syncLocalStudentUpdate({ student_id: p.student_id, payment_status: studentStatus });
-        if (AppState.currentUser && AppState.currentUser.id === p.student_id) {
-          AppState.currentUser.payment_status = studentStatus;
-          localStorage.setItem('current_student', JSON.stringify(AppState.currentUser));
-        }
+    }
+
+    // 4. Update student payment status in all local student caches & Firestore
+    const studentStatus = status === 'approved' ? 'paid' : 'overdue';
+    if (studentId) {
+      this.syncLocalStudentUpdate({
+        student_id: studentId,
+        payment_status: studentStatus,
+        payment_date: p && p.payment_date ? p.payment_date : new Date().toISOString().slice(0, 10),
+        payment_amount: p && (p.amount !== undefined && p.amount !== '') ? p.amount : '',
+        payment_method: p && p.payment_method ? p.payment_method : 'InstaPay'
+      });
+      if (AppState.currentUser && (AppState.currentUser.id === studentId || String(AppState.currentUser.id) === String(studentId))) {
+        AppState.currentUser.payment_status = studentStatus;
+        localStorage.setItem('current_student', JSON.stringify(AppState.currentUser));
       }
     }
+
     return { success: true };
   },
 
@@ -3646,10 +3676,10 @@ window.reviewPaymentReceipt = async function(paymentId, status) {
 };
 
 window.deletePaymentReceipt = async function(paymentId) {
-  if (!confirm('Are you sure you want to delete this payment record? هل تريد مسح هذا السجل؟')) return;
+  if (!confirm('Are you sure you want to delete this payment record?')) return;
   try {
     await DB.deletePayment(paymentId);
-    showToast('Payment record deleted successfully! تم حذف السجل بنجاح 🗑️');
+    showToast('Payment record deleted successfully! 🗑️');
     await renderTeacherPayments();
     await renderTeacherConsoleView();
   } catch (e) {
@@ -3658,10 +3688,10 @@ window.deletePaymentReceipt = async function(paymentId) {
 };
 
 window.clearAllPaymentReceipts = async function() {
-  if (!confirm('Are you sure you want to delete ALL payment records? هل تريد مسح جميع سجلات الدفع؟')) return;
+  if (!confirm('Are you sure you want to delete ALL payment records?')) return;
   try {
     await DB.clearAllPayments();
-    showToast('All payment records cleared! تم مسح جميع الإيصالات 🗑️');
+    showToast('All payment records cleared successfully! 🗑️');
     await renderTeacherPayments();
     await renderTeacherConsoleView();
   } catch (e) {

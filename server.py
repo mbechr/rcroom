@@ -885,28 +885,39 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
             data = self.parse_body()
             receipt_id = data.get('receipt_id') or data.get('payment_id')
             action = data.get('action') or data.get('status') or 'approved'
+            student_id = data.get('student_id')
 
-            if not receipt_id:
-                return self.send_json({'success': False, 'error': 'receipt_id or payment_id required'}, status=400)
+            if not receipt_id and not student_id:
+                return self.send_json({'success': False, 'error': 'receipt_id, payment_id, or student_id required'}, status=400)
 
             conn = get_db()
             cursor = conn.cursor()
-            cursor.execute('SELECT * FROM payment_receipts WHERE id = ?', (receipt_id,))
-            receipt = cursor.fetchone()
-            if not receipt:
-                conn.close()
-                return self.send_json({'success': False, 'error': 'Receipt not found'}, status=404)
+            receipt = None
+            if receipt_id:
+                cursor.execute('SELECT * FROM payment_receipts WHERE id = ?', (str(receipt_id),))
+                receipt = cursor.fetchone()
 
             new_status = 'approved' if action == 'approved' else 'rejected'
-            cursor.execute('UPDATE payment_receipts SET status = ?, reviewed_at = datetime("now") WHERE id = ?', (new_status, receipt_id))
-
-            if action == 'approved':
-                cursor.execute('''
-                UPDATE users SET payment_status = 'paid', payment_date = ?, payment_amount = ?, payment_method = ?
-                WHERE id = ?
-                ''', (receipt['payment_date'], receipt['amount'], receipt['payment_method'], receipt['student_id']))
+            if receipt:
+                cursor.execute('UPDATE payment_receipts SET status = ?, reviewed_at = datetime("now") WHERE id = ?', (new_status, str(receipt['id'])))
+                target_student_id = receipt['student_id']
+                p_date = receipt['payment_date']
+                p_amount = receipt['amount']
+                p_method = receipt['payment_method']
             else:
-                cursor.execute('UPDATE users SET payment_status = "overdue" WHERE id = ?', (receipt['student_id'],))
+                target_student_id = int(student_id) if student_id else None
+                p_date = data.get('payment_date', datetime.now(timezone.utc).strftime('%Y-%m-%d'))
+                p_amount = float(data.get('amount', 0) or 0)
+                p_method = data.get('payment_method', 'InstaPay')
+
+            if target_student_id:
+                if action == 'approved':
+                    cursor.execute('''
+                    UPDATE users SET payment_status = 'paid', payment_date = ?, payment_amount = ?, payment_method = ?
+                    WHERE id = ?
+                    ''', (p_date, p_amount, p_method, target_student_id))
+                else:
+                    cursor.execute('UPDATE users SET payment_status = "overdue" WHERE id = ?', (target_student_id,))
 
             conn.commit()
             conn.close()

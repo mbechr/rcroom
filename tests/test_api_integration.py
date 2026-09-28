@@ -244,5 +244,58 @@ def test_curriculum_access_and_permissions(test_server):
     status, s_curr_res2, _ = make_request(test_server, '/api/student/curriculum_access', token=student_token)
     assert status == 200 and len(s_curr_res2['unlocked_skills']) == 0
 
+def test_payment_submission_and_teacher_approval(test_server):
+    # 1. Login Teacher and Student
+    _, t_body, _ = make_request(test_server, '/api/login', method='POST', data={
+        'username': 'rania', 'password': 'TeacherSecureNewPass_123!'
+    })
+    teacher_token = t_body['token']
+
+    status, s_body, _ = make_request(test_server, '/api/login', method='POST', data={
+        'username': 'alex', 'password': 'NewSecurePassword123!'
+    })
+    if status != 200 or not s_body.get('success'):
+        status, s_body, _ = make_request(test_server, '/api/login', method='POST', data={
+            'username': 'alex', 'password': 'password123'
+        })
+    student_token = s_body['token']
+    student_id = s_body['student']['id']
+
+    # 2. Student submits payment proof
+    status, pay_res, _ = make_request(test_server, '/api/payments/submit', method='POST', token=student_token, data={
+        'student_id': student_id,
+        'student_name': 'Alex',
+        'amount': 500,
+        'payment_method': 'InstaPay',
+        'payment_date': '2026-09-28',
+        'receipt_image': 'data:image/png;base64,sample',
+        'notes': 'September Tuition'
+    })
+    assert status == 200 and pay_res['success']
+    receipt_id = pay_res['receipt_id']
+
+    # 3. Teacher lists payment receipts -> receipt appears with pending_review
+    status, list_res, _ = make_request(test_server, '/api/payments/list', token=teacher_token)
+    assert status == 200 and list_res['success']
+    matched_receipt = next((r for r in list_res['receipts'] if r['id'] == receipt_id), None)
+    assert matched_receipt is not None
+    assert matched_receipt['status'] == 'pending_review'
+
+    # 4. Teacher approves payment receipt
+    status, rev_res, _ = make_request(test_server, '/api/payments/review', method='POST', token=teacher_token, data={
+        'receipt_id': receipt_id,
+        'action': 'approved'
+    })
+    assert status == 200 and rev_res['success']
+
+    # 5. Check teacher overview -> student's payment_status is 'paid'
+    status, ov_res, _ = make_request(test_server, '/api/teacher/overview', token=teacher_token)
+    assert status == 200 and ov_res['success']
+    roster_student = next((s for s in ov_res['overview']['roster'] if s['id'] == student_id), None)
+    assert roster_student is not None
+    assert roster_student['payment_status'] == 'paid'
+    assert roster_student['payment_amount'] == 500
+
+
 
 

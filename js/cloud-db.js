@@ -445,18 +445,35 @@
       if (!this.isConfigured || !this.firestore) return;
       try {
         const newStatus = action === 'approved' ? 'approved' : 'rejected';
-        await this.firestore.collection('payments').doc(String(paymentId)).update({
+        const payDocRef = this.firestore.collection('payments').doc(String(paymentId));
+
+        let targetStudentId = studentId;
+        let pData = paymentData;
+
+        if (!targetStudentId || !pData) {
+          try {
+            const snap = await payDocRef.get();
+            if (snap.exists) {
+              const d = snap.data();
+              if (!targetStudentId) targetStudentId = d.student_id;
+              if (!pData) pData = d;
+            }
+          } catch (e) {}
+        }
+
+        await payDocRef.set({
           status: newStatus,
           reviewed_at: new Date().toISOString()
-        });
+        }, { merge: true });
 
-        if (studentId) {
-          const studentRef = this.firestore.collection('students').doc(String(studentId));
+        if (targetStudentId) {
+          const studentRef = this.firestore.collection('students').doc(String(targetStudentId));
           if (action === 'approved') {
             await studentRef.set({
               payment_status: 'paid',
-              payment_date: paymentData && paymentData.payment_date ? paymentData.payment_date : new Date().toISOString().slice(0, 10),
-              payment_amount: paymentData && paymentData.amount ? paymentData.amount : 0
+              payment_date: (pData && pData.payment_date) ? pData.payment_date : new Date().toISOString().slice(0, 10),
+              payment_amount: (pData && pData.amount !== undefined) ? pData.amount : 0,
+              payment_method: (pData && pData.payment_method) ? pData.payment_method : 'InstaPay'
             }, { merge: true });
           } else {
             await studentRef.set({
@@ -464,7 +481,7 @@
             }, { merge: true });
           }
         }
-        console.log(`✅ Payment ${paymentId} reviewed as ${newStatus} in Firestore`);
+        console.log(`✅ Payment ${paymentId} reviewed as ${newStatus} for student ${targetStudentId} in Firestore`);
       } catch (err) {
         console.warn('Failed to review payment in Firestore:', err);
       }
