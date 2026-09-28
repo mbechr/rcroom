@@ -360,7 +360,7 @@ window.AppState = AppState;
 const DB = {
   // Preloaded Demo Students & Teacher for instant client-side offline fallback
   demoStudents: [
-    { id: 101, username: 'beshr', full_name: 'Beshr Mohamed', parent_name: 'Mohamed Beshr', student_phone: '01012345678', parent_phone: '01098765432', payment_method: 'InstaPay', payment_date: '2026-09-20', payment_amount: 500, payment_status: 'paid', grade_level: 'Year 4', avatar: '🦊', password: '123456', xp: 450, streak_days: 3, role: 'student' },
+    { id: 101, username: 'beshr', full_name: 'Beshr Mohamed', parent_name: 'Mohamed Beshr', student_phone: '01012345678', parent_phone: '01098765432', payment_method: 'InstaPay', payment_date: '2026-09-20', payment_amount: '', payment_status: 'paid', grade_level: 'Year 4', avatar: '🦊', password: '123456', xp: 450, streak_days: 3, role: 'student' },
     { id: 5, username: 'admin', full_name: 'Miss Rania', grade_level: 'Instructor', avatar: '👩‍🏫', xp: 0, streak_days: 0, role: 'teacher' },
     { id: 6, username: 'rania', full_name: 'Miss Rania', grade_level: 'Instructor', avatar: '👩‍🏫', xp: 0, streak_days: 0, role: 'teacher' }
   ],
@@ -985,7 +985,7 @@ const DB = {
       parent_phone: data.parent_phone || '',
       payment_method: data.payment_method || 'InstaPay',
       payment_date: data.payment_date || new Date().toISOString().split('T')[0],
-      payment_amount: data.payment_amount !== undefined ? Number(data.payment_amount) : 500,
+      payment_amount: (data.payment_amount !== undefined && data.payment_amount !== '' && data.payment_amount !== null) ? Number(data.payment_amount) : '',
       payment_status: data.payment_status || 'paid',
       grade_level: data.grade_level || 'Year 4',
       avatar: data.avatar || '🦊',
@@ -1056,7 +1056,7 @@ const DB = {
       if (data.parent_phone !== undefined) existing.parent_phone = data.parent_phone;
       if (data.payment_method !== undefined) existing.payment_method = data.payment_method;
       if (data.payment_date !== undefined) existing.payment_date = data.payment_date;
-      if (data.payment_amount !== undefined) existing.payment_amount = Number(data.payment_amount);
+      if (data.payment_amount !== undefined) existing.payment_amount = (data.payment_amount !== '' && data.payment_amount !== null) ? Number(data.payment_amount) : '';
       if (data.payment_status !== undefined) existing.payment_status = data.payment_status;
       localStorage.setItem('rc_custom_students', JSON.stringify(localStudents));
     }
@@ -1271,7 +1271,7 @@ const DB = {
         parent_phone: s.parent_phone || '',
         payment_method: s.payment_method || 'InstaPay',
         payment_date: s.payment_date || '',
-        payment_amount: s.payment_amount !== undefined ? s.payment_amount : 500,
+        payment_amount: (s.payment_amount !== undefined && s.payment_amount !== null && s.payment_amount !== '') ? s.payment_amount : '',
         payment_status: s.payment_status || 'paid',
         grade_level: s.grade_level,
         avatar: s.avatar || '🦊',
@@ -1356,7 +1356,7 @@ const DB = {
       id: data.id || ('pay_' + Date.now()),
       student_id: data.student_id || (currentU ? currentU.id : 1),
       student_name: data.student_name || (currentU ? (currentU.full_name || currentU.username) : 'Student'),
-      amount: Number(data.amount) || 500,
+      amount: (data.amount !== undefined && data.amount !== '' && data.amount !== null) ? Number(data.amount) : '',
       payment_date: data.payment_date || new Date().toISOString().split('T')[0],
       payment_method: data.payment_method || 'InstaPay',
       receipt_image: data.receipt_image || '',
@@ -2904,7 +2904,7 @@ async function renderTeacherConsoleView() {
             <span class="payment-badge ${badgeClass}">${badgeText}</span>
           </td>
           <td>
-            <strong style="color:var(--text-main); font-size:0.85rem;">${s.payment_amount !== undefined ? s.payment_amount : 500} EGP</strong>
+            <strong style="color:var(--text-main); font-size:0.85rem;">${(s.payment_amount !== undefined && s.payment_amount !== null && s.payment_amount !== '') ? s.payment_amount : '—'}</strong>
             <div style="font-size:0.72rem; color:var(--text-muted);">${s.payment_method || 'InstaPay'}</div>
           </td>
           <td>
@@ -3058,12 +3058,12 @@ window.sendPaymentReminderWhatsApp = function(studentId) {
   const cleanPhone = cleanWhatsAppNumber(parentPhone);
   const studentName = student.full_name || student.username;
   const parentName = student.parent_name ? ` (Parent: ${student.parent_name})` : '';
-  const amount = student.payment_amount !== undefined ? student.payment_amount : 500;
+  const amount = (student.payment_amount !== undefined && student.payment_amount !== null && student.payment_amount !== '') ? student.payment_amount : '';
   const method = student.payment_method || 'InstaPay / Vodafone Cash';
   const monthName = new Date().toLocaleString('ar-EG', { month: 'long' });
 
   const msg = `Hello! Greetings from Miss Rania 🌸${parentName ? ' (Parent of ' + studentName + ')' : ''}.
-This is a friendly reminder regarding the monthly tuition fee for ${studentName} (${amount} EGP) for ${monthName}.
+This is a friendly reminder regarding the monthly tuition fee for ${studentName}${amount ? ' (' + amount + ')' : ''} for ${monthName}.
 Selected payment method: ${method}.
 You can transfer the amount and upload the payment receipt directly through the student portal.
 Thank you very much for your continuous cooperation and support! ✨`;
@@ -3129,6 +3129,7 @@ window.openStudentReportModal = function(studentId) {
   const acc = stats.accuracy_rate || student.accuracy_rate || 0;
   const xp = Math.max(stats.xp, student.xp || 0);
   const smart = stats.avg_smart_score || student.avg_smart_score || 0;
+  const displayFee = (student.payment_amount !== undefined && student.payment_amount !== null && student.payment_amount !== '') ? student.payment_amount : '—';
 
   content.innerHTML = `
     <div style="display:flex; flex-direction:column; gap:1.25rem;">
@@ -3142,7 +3143,7 @@ window.openStudentReportModal = function(studentId) {
         </div>
         <div style="text-align: right;">
           <span class="payment-badge ${student.payment_status || 'paid'}">${(student.payment_status || 'paid').toUpperCase()}</span>
-          <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 4px;">Fee: ${student.payment_amount !== undefined ? student.payment_amount : 500} EGP (${student.payment_method || 'InstaPay'})</div>
+          <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 4px;">Fee: ${displayFee} (${student.payment_method || 'InstaPay'})</div>
         </div>
       </div>
 
@@ -3244,7 +3245,7 @@ async function renderTeacherPayments() {
               <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
                 <strong class="teacher-item-title">${p.student_name || 'Student'}</strong>
                 <span class="payment-badge ${badgeClass}">${(p.status || 'pending').toUpperCase()}</span>
-                <span style="font-size: 0.8rem; color: var(--color-primary); font-weight: 700; background: var(--bg-hover); border: 1px solid var(--border-subtle); padding: 2px 8px; border-radius: 6px;">${p.amount || 0} EGP</span>
+                <span style="font-size: 0.8rem; color: var(--color-primary); font-weight: 700; background: var(--bg-hover); border: 1px solid var(--border-subtle); padding: 2px 8px; border-radius: 6px;">${(p.amount !== undefined && p.amount !== null && p.amount !== '') ? p.amount : '—'}</span>
               </div>
               <div class="teacher-item-meta">
                 <span>📅 ${p.payment_date || 'Recent'}</span> &bull; 
@@ -3944,7 +3945,7 @@ function renderStudentPaymentStatus() {
   if (!user || user.role === 'teacher') return;
 
   const status = user.payment_status || 'paid';
-  const amount = user.payment_amount !== undefined ? user.payment_amount : 500;
+  const amount = (user.payment_amount !== undefined && user.payment_amount !== null && user.payment_amount !== '') ? user.payment_amount : '—';
   const method = user.payment_method || 'InstaPay / Vodafone Cash';
   const payDate = user.payment_date || 'Active';
 
@@ -3981,7 +3982,7 @@ function renderStudentPaymentStatus() {
           <span class="text-xs text-on-surface-variant font-bold">${statusAr}</span>
         </div>
         <div class="text-xs text-on-surface-variant flex items-center gap-3 flex-wrap pt-0.5">
-          <span>💰 Monthly Tuition: <strong class="text-on-surface">${amount} EGP</strong></span>
+          <span>💰 Monthly Tuition: <strong class="text-on-surface">${amount}</strong></span>
           <span>&bull;</span>
           <span>💳 Method: <strong class="text-on-surface">${method}</strong></span>
           <span>&bull;</span>
@@ -4015,7 +4016,7 @@ window.openSubmitPaymentModal = function() {
   const dateInput = document.getElementById('payDateInput');
   if (dateInput && !dateInput.value) dateInput.value = new Date().toISOString().split('T')[0];
   if (amountInput && (!amountInput.value || amountInput.value === '')) {
-    amountInput.value = (user && user.payment_amount) ? user.payment_amount : '500';
+    amountInput.value = (user && user.payment_amount !== undefined && user.payment_amount !== null && user.payment_amount !== '') ? user.payment_amount : '';
   }
   if (methodInput && user && user.payment_method) methodInput.value = user.payment_method;
   modal.classList.add('open');
@@ -5289,7 +5290,7 @@ window.openEditStudentModal = function(studentId) {
   const pMethod = document.getElementById('editStudentPaymentMethod');
   if (pMethod) pMethod.value = s.payment_method || 'InstaPay';
   const pAmt = document.getElementById('editStudentAmount');
-  if (pAmt) pAmt.value = s.payment_amount !== undefined ? s.payment_amount : 500;
+  if (pAmt) pAmt.value = (s.payment_amount !== undefined && s.payment_amount !== null) ? s.payment_amount : '';
   const pStatus = document.getElementById('editStudentPaymentStatus');
   if (pStatus) pStatus.value = s.payment_status || 'paid';
   if (el.editStudentPass) el.editStudentPass.value = s.password || '';
@@ -5785,7 +5786,8 @@ function setupEventListeners() {
       const grade = el.tNewStudentGrade.value;
       const avatar = el.tNewStudentAvatar.value;
       const payMethod = document.getElementById('tNewStudentPaymentMethod')?.value || 'InstaPay';
-      const payAmt = Number(document.getElementById('tNewStudentAmount')?.value) || 500;
+      const payAmtRaw = document.getElementById('tNewStudentAmount')?.value;
+      const payAmt = (payAmtRaw !== undefined && payAmtRaw !== '' && payAmtRaw !== null) ? Number(payAmtRaw) : '';
       const payStatus = document.getElementById('tNewStudentPaymentStatus')?.value || 'paid';
 
       const res = await DB.teacherCreateStudent({
@@ -5805,6 +5807,8 @@ function setupEventListeners() {
       if (res.success) {
         el.addStudentForm.reset();
         if (el.tNewStudentPass) el.tNewStudentPass.value = 'password123';
+        const amtInput = document.getElementById('tNewStudentAmount');
+        if (amtInput) amtInput.value = '';
         el.addStudentModal.classList.remove('open');
         showToast(`Student ${name} registered successfully! 👤`);
         renderTeacherConsoleView();
@@ -5842,7 +5846,8 @@ function setupEventListeners() {
       const avatar = el.editStudentAvatar.value;
       const pass = el.editStudentPass.value.trim();
       const payMethod = document.getElementById('editStudentPaymentMethod')?.value || 'InstaPay';
-      const payAmt = Number(document.getElementById('editStudentAmount')?.value) || 0;
+      const payAmtRaw = document.getElementById('editStudentAmount')?.value;
+      const payAmt = (payAmtRaw !== undefined && payAmtRaw !== '' && payAmtRaw !== null) ? Number(payAmtRaw) : '';
       const payStatus = document.getElementById('editStudentPaymentStatus')?.value || 'paid';
 
       if (!name || !user) {
@@ -5992,7 +5997,7 @@ function setupEventListeners() {
     try {
       const dateVal = document.getElementById('payDateInput')?.value || new Date().toISOString().split('T')[0];
       const methodVal = document.getElementById('payMethodInput')?.value || 'InstaPay';
-      const amountVal = document.getElementById('payAmountInput')?.value || '500';
+      const amountVal = document.getElementById('payAmountInput')?.value || '';
       const notesVal = document.getElementById('payNotesInput')?.value || '';
 
       if (!currentReceiptBase64 && payFileInput && payFileInput.files && payFileInput.files[0]) {
@@ -6012,7 +6017,7 @@ function setupEventListeners() {
       const res = await DB.submitPayment({
         student_id: user.id || 1,
         student_name: user.full_name || user.username || 'Student',
-        amount: Number(amountVal) || 500,
+        amount: (amountVal !== '' && amountVal !== null) ? Number(amountVal) : '',
         payment_date: dateVal,
         payment_method: methodVal,
         receipt_image: currentReceiptBase64 || '',
