@@ -1414,22 +1414,26 @@ const DB = {
   },
 
   async reviewPayment(paymentId, status) {
-    if (window.CloudDB && window.CloudDB.isConfigured) {
-      try {
-        await window.CloudDB.reviewPayment(paymentId, status);
-      } catch (e) {}
-    }
-    try {
-      const res = await fetch(this.apiUrl('/api/payments/review'), {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify({ payment_id: paymentId, status: status })
-      });
-      if (res.ok) return await res.json();
-    } catch (e) {}
-
     let local = JSON.parse(localStorage.getItem('rc_custom_payments') || '[]');
     const p = local.find(x => x.id === paymentId || String(x.id) === String(paymentId));
+
+    if (window.CloudDB && window.CloudDB.isConfigured) {
+      try {
+        await window.CloudDB.reviewPayment(paymentId, status, p ? p.student_id : null, p);
+      } catch (e) {}
+    }
+    const isStaticHost = window.location.hostname.endsWith('github.io');
+    if (!isStaticHost) {
+      try {
+        const res = await fetch(this.apiUrl('/api/payments/review'), {
+          method: 'POST',
+          headers: this.getAuthHeaders(),
+          body: JSON.stringify({ payment_id: paymentId, status: status })
+        });
+        if (res.ok) return await res.json();
+      } catch (e) {}
+    }
+
     if (p) {
       p.status = status;
       localStorage.setItem('rc_custom_payments', JSON.stringify(local));
@@ -1445,6 +1449,39 @@ const DB = {
     return { success: true };
   },
 
+  async deletePayment(paymentId) {
+    if (window.CloudDB && window.CloudDB.isConfigured) {
+      try {
+        await window.CloudDB.deletePayment(paymentId);
+      } catch (e) {}
+    }
+    const isStaticHost = window.location.hostname.endsWith('github.io');
+    if (!isStaticHost) {
+      try {
+        await fetch(this.apiUrl('/api/payments/delete'), {
+          method: 'POST',
+          headers: this.getAuthHeaders(),
+          body: JSON.stringify({ payment_id: paymentId })
+        });
+      } catch (e) {}
+    }
+
+    let local = JSON.parse(localStorage.getItem('rc_custom_payments') || '[]');
+    local = local.filter(x => x.id !== paymentId && String(x.id) !== String(paymentId));
+    localStorage.setItem('rc_custom_payments', JSON.stringify(local));
+    return { success: true };
+  },
+
+  async clearAllPayments() {
+    if (window.CloudDB && window.CloudDB.isConfigured) {
+      try {
+        await window.CloudDB.clearAllPayments();
+      } catch (e) {}
+    }
+    localStorage.removeItem('rc_custom_payments');
+    return { success: true };
+  },
+
   async getPayments() {
     if (window.CloudDB && window.CloudDB.isConfigured) {
       try {
@@ -1452,13 +1489,16 @@ const DB = {
         if (cloudPayments && cloudPayments.length) return cloudPayments;
       } catch (e) {}
     }
-    try {
-      const res = await fetch(this.apiUrl('/api/payments/list'), { headers: this.getAuthHeaders() });
-      if (res.ok) {
-        const json = await res.json();
-        if (json.success && json.payments) return json.payments;
-      }
-    } catch (e) {}
+    const isStaticHost = window.location.hostname.endsWith('github.io');
+    if (!isStaticHost) {
+      try {
+        const res = await fetch(this.apiUrl('/api/payments/list'), { headers: this.getAuthHeaders() });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && json.payments) return json.payments;
+        }
+      } catch (e) {}
+    }
     return JSON.parse(localStorage.getItem('rc_custom_payments') || '[]');
   },
 
@@ -3174,13 +3214,22 @@ async function renderTeacherPayments() {
       return;
     }
 
-    container.innerHTML = list.map(p => {
-      const isPending = p.status === 'pending';
+    const clearHeader = `
+      <div style="display: flex; justify-content: flex-end; margin-bottom: 0.75rem; gap: 0.5rem;">
+        <button type="button" class="action-btn-sm delete" onclick="clearAllPaymentReceipts()" style="padding: 6px 14px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+          🗑️ Clear All Receipts / مسح الكل
+        </button>
+      </div>
+    `;
+
+    container.innerHTML = clearHeader + list.map(p => {
+      const isPending = p.status === 'pending' || p.status === 'pending_review';
       const badgeClass = isPending ? 'pending' : (p.status === 'approved' ? 'paid' : 'overdue');
       const safeImg = p.receipt_image ? p.receipt_image.replace(/"/g, '&quot;') : '';
+      const safeId = String(p.id).replace(/'/g, "\\'");
 
       return `
-        <div class="teacher-item-card">
+        <div class="teacher-item-card" id="pay-card-${safeId}">
           <div style="display: flex; gap: 1rem; min-width: 0; flex: 1;">
             ${p.receipt_image ? `
               <div onclick="viewReceiptImage('${safeImg}', '${(p.student_name || 'Receipt').replace(/'/g, "\\'")}')" class="receipt-thumb shrink-0 cursor-pointer" title="Click to enlarge screenshot">
@@ -3204,17 +3253,20 @@ async function renderTeacherPayments() {
               ${p.notes ? `<div class="teacher-item-notes">📝 ${p.notes}</div>` : ''}
             </div>
           </div>
-          <div style="display: flex; align-items: center; gap: 0.5rem; shrink-0; align-self: flex-end;">
+          <div style="display: flex; align-items: center; gap: 0.5rem; shrink-0; align-self: flex-end; flex-wrap: wrap;">
             ${isPending ? `
-              <button type="button" class="action-btn-sm" onclick="reviewPaymentReceipt(${p.id}, 'approved')" style="background: rgba(16, 185, 129, 0.12); color: #059669; border-color: rgba(16, 185, 129, 0.25); font-weight: 700; padding: 6px 14px; border-radius: 8px; cursor: pointer;">
+              <button type="button" class="action-btn-sm" onclick="reviewPaymentReceipt('${safeId}', 'approved')" style="background: rgba(16, 185, 129, 0.12); color: #059669; border-color: rgba(16, 185, 129, 0.25); font-weight: 700; padding: 6px 14px; border-radius: 8px; cursor: pointer;">
                 ✓ Approve
               </button>
-              <button type="button" class="action-btn-sm delete" onclick="reviewPaymentReceipt(${p.id}, 'rejected')" style="padding: 6px 12px; border-radius: 8px; cursor: pointer;">
+              <button type="button" class="action-btn-sm delete" onclick="reviewPaymentReceipt('${safeId}', 'rejected')" style="padding: 6px 12px; border-radius: 8px; cursor: pointer;">
                 ✕ Reject
               </button>
             ` : `
-              <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Reviewed</span>
+              <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Reviewed (${p.status})</span>
             `}
+            <button type="button" class="action-btn-sm delete" onclick="deletePaymentReceipt('${safeId}')" title="Delete this receipt record" style="padding: 6px 10px; border-radius: 8px; cursor: pointer; background: rgba(239, 68, 68, 0.08); color: #ef4444; border-color: rgba(239, 68, 68, 0.2);">
+              🗑️ Delete
+            </button>
           </div>
         </div>
       `;
@@ -3233,6 +3285,30 @@ window.reviewPaymentReceipt = async function(paymentId, status) {
     await renderTeacherConsoleView();
   } catch (e) {
     showToast('Failed to update receipt status: ' + e.message, '⚠️');
+  }
+};
+
+window.deletePaymentReceipt = async function(paymentId) {
+  if (!confirm('Are you sure you want to delete this payment record? هل تريد مسح هذا السجل؟')) return;
+  try {
+    await DB.deletePayment(paymentId);
+    showToast('Payment record deleted successfully! تم حذف السجل بنجاح 🗑️');
+    await renderTeacherPayments();
+    await renderTeacherConsoleView();
+  } catch (e) {
+    showToast('Failed to delete payment: ' + e.message, '⚠️');
+  }
+};
+
+window.clearAllPaymentReceipts = async function() {
+  if (!confirm('Are you sure you want to delete ALL payment records? هل تريد مسح جميع سجلات الدفع؟')) return;
+  try {
+    await DB.clearAllPayments();
+    showToast('All payment records cleared! تم مسح جميع الإيصالات 🗑️');
+    await renderTeacherPayments();
+    await renderTeacherConsoleView();
+  } catch (e) {
+    showToast('Failed to clear payments: ' + e.message, '⚠️');
   }
 };
 

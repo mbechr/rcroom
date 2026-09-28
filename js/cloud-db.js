@@ -390,6 +390,55 @@
     },
 
     /**
+     * Get payments from Firestore
+     */
+    async getPayments() {
+      if (!this.isConfigured || !this.firestore) return [];
+      try {
+        const snap = await this.firestore.collection('payments').get();
+        const payments = [];
+        snap.forEach(doc => {
+          payments.push({ id: doc.id, ...doc.data() });
+        });
+        return payments.sort((a, b) => (b.submitted_at || b.payment_date || '').localeCompare(a.submitted_at || a.payment_date || ''));
+      } catch (err) {
+        console.warn('Failed to get payments from Firestore:', err);
+        return [];
+      }
+    },
+
+    /**
+     * Delete payment from Firestore
+     */
+    async deletePayment(paymentId) {
+      if (!this.isConfigured || !this.firestore) return;
+      try {
+        await this.firestore.collection('payments').doc(String(paymentId)).delete();
+        console.log(`✅ Payment ${paymentId} deleted from Firestore`);
+      } catch (err) {
+        console.warn('Failed to delete payment from Firestore:', err);
+      }
+    },
+
+    /**
+     * Clear all payments from Firestore
+     */
+    async clearAllPayments() {
+      if (!this.isConfigured || !this.firestore) return;
+      try {
+        const snap = await this.firestore.collection('payments').get();
+        const batch = this.firestore.batch();
+        snap.forEach(doc => {
+          batch.delete(doc.ref);
+        });
+        await batch.commit();
+        console.log('✅ All payments cleared from Firestore');
+      } catch (err) {
+        console.warn('Failed to clear payments from Firestore:', err);
+      }
+    },
+
+    /**
      * Review payment (Approve / Reject) in Firestore
      */
     async reviewPayment(paymentId, action, studentId, paymentData) {
