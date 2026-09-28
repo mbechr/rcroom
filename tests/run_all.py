@@ -60,6 +60,7 @@ def run():
         test_api_integration.test_idor_protection_on_reports(base_url)
         test_api_integration.test_teacher_overview_no_passwords(base_url)
         test_api_integration.test_strict_cors_headers(base_url)
+        test_api_integration.test_curriculum_access_and_permissions(base_url)
         print("  -> All API, Bypass, XSS & Security Header Tests PASSED!")
 
         print("\n==================================================")

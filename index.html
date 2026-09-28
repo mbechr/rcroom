@@ -931,6 +931,10 @@
           <span>Daily Planner &amp; To-Do</span>
           <span class="teacher-tab-badge emerald" id="tTodayPlannerBadge" style="display:none;">0</span>
         </button>
+        <button type="button" class="teacher-sub-tab" data-ttab="curriculum" onclick="switchTeacherTab('curriculum')">
+          <span class="material-symbols-outlined">lock_open</span>
+          <span>Curriculum Access</span>
+        </button>
       </div>
 
       <!-- ==============================================================
@@ -1182,6 +1186,83 @@
 
           <!-- List Container -->
           <div id="plannerTasksListContainer" class="p-4 space-y-4">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ==============================================================
+           PANEL 7: STUDENT CURRICULUM ACCESS CONTROL
+           ============================================================== -->
+      <div id="teacherPanelCurriculum" class="teacher-tab-panel" style="display: none;">
+        <div class="report-section-card glass-panel mb-6">
+          <div class="section-card-header flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <div class="flex items-center gap-2.5">
+                <h3 class="card-title">Curriculum Access &amp; Lesson Permissions 🔒</h3>
+                <span class="planner-meta-pill time" id="curriculumGradeBadge">Select Student</span>
+              </div>
+              <p class="card-subtitle">Control exactly which curriculum lessons and practice topics each student is permitted to view and practice.</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button type="button" class="secondary-glass-btn" onclick="unlockAllGradeSkills()" title="Unlock all lessons for this student's grade level">
+                <span class="material-symbols-outlined text-[18px]">lock_open</span>
+                <span>Unlock All (Grade)</span>
+              </button>
+              <button type="button" class="secondary-glass-btn text-rose-400 hover:text-rose-300 border-rose-500/30" onclick="lockAllStudentSkills()" title="Lock all lessons for this student">
+                <span class="material-symbols-outlined text-[18px]">lock</span>
+                <span>Lock All</span>
+              </button>
+              <button type="button" class="primary-glow-btn" onclick="saveCurriculumAccess()">
+                <span class="material-symbols-outlined text-[18px]">save</span>
+                <span>Save Permissions</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Student Selector & Quick Filters Toolbar -->
+          <div class="planner-toolbar flex-wrap gap-3">
+            <div class="flex items-center gap-2">
+              <label for="curriculumStudentSelect" class="text-xs font-bold uppercase tracking-wider text-secondary">Student:</label>
+              <select id="curriculumStudentSelect" onchange="handleCurriculumStudentChange(this.value)" class="px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-semibold text-sm focus:outline-none focus:border-primary">
+                <!-- Injected dynamically -->
+              </select>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <label for="curriculumSubjectFilter" class="text-xs font-bold uppercase tracking-wider text-secondary">Subject:</label>
+              <select id="curriculumSubjectFilter" onchange="filterCurriculumSkillsTree()" class="px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-semibold text-sm focus:outline-none focus:border-primary">
+                <option value="all">All Subjects</option>
+                <option value="Maths" selected>Maths</option>
+                <option value="English">English</option>
+                <option value="Science">Science</option>
+                <option value="Social Studies">Social Studies</option>
+              </select>
+            </div>
+
+            <div class="flex items-center gap-2 flex-1 min-w-[200px]">
+              <input type="text" id="curriculumSkillSearch" placeholder="Search skills by title or code (e.g. A.1)..." oninput="filterCurriculumSkillsTree()" class="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white text-sm focus:outline-none focus:border-primary">
+            </div>
+          </div>
+
+          <!-- Curriculum KPI / Status Strip -->
+          <div class="planner-kpi-strip">
+            <div class="planner-kpi-item">
+              <span class="planner-kpi-label">Total Grade Skills</span>
+              <span class="planner-kpi-val" id="curriculumTotalGradeSkills">0</span>
+            </div>
+            <div class="planner-kpi-item completed">
+              <span class="planner-kpi-label">Unlocked Lessons</span>
+              <span class="planner-kpi-val" id="curriculumUnlockedCount">0</span>
+            </div>
+            <div class="planner-kpi-item pending">
+              <span class="planner-kpi-label">Locked Lessons</span>
+              <span class="planner-kpi-val" id="curriculumLockedCount">0</span>
+            </div>
+          </div>
+
+          <!-- Skills Selection Tree / Checkbox List -->
+          <div id="curriculumSkillsTree" class="p-4 space-y-4">
             <!-- Injected via JS -->
           </div>
         </div>

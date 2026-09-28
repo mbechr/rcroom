@@ -4925,4 +4925,81 @@ html[dir="rtl"] #mainContentWrapper {
   margin-right: auto;
 }
 
+/* ==========================================================================
+   Curriculum Access & Skill Lock Styling
+   ========================================================================== */
+.skill-status-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.skill-status-tag.unlocked {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+.skill-status-tag.locked {
+  background: rgba(148, 163, 184, 0.12);
+  color: #94a3b8;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+.skill-status-tag.assigned {
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+.learn-pill-btn.locked {
+  background: var(--bg-hover) !important;
+  color: var(--text-muted) !important;
+  border: 1px solid var(--border-subtle) !important;
+  box-shadow: none !important;
+  cursor: not-allowed !important;
+}
+.learn-pill-btn.locked:hover {
+  transform: none !important;
+  background: var(--bg-hover) !important;
+}
+
+/* Curriculum Access Tree in Teacher Panel */
+.curriculum-cat-box {
+  background: var(--bg-card-solid);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+.curriculum-cat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.25rem;
+  background: var(--bg-hover);
+  border-bottom: 1px solid var(--border-subtle);
+  cursor: pointer;
+  user-select: none;
+}
+.curriculum-cat-header:hover {
+  background: var(--bg-card-hover);
+}
+.curriculum-skill-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--border-subtle);
+  transition: background 0.15s ease;
+}
+.curriculum-skill-item:last-child {
+  border-bottom: none;
+}
+.curriculum-skill-item:hover {
+  background: var(--bg-hover);
+}
+
+
 

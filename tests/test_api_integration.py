@@ -187,3 +187,62 @@ def test_strict_cors_headers(test_server):
     # 2. Rogue Origin
     status, _, headers = make_request(test_server, '/api/demo_students', origin='http://localhost:9999')
     assert headers.get('Access-Control-Allow-Origin') is None
+
+def test_curriculum_access_and_permissions(test_server):
+    # 1. Login Teacher and Student
+    status, t_body, _ = make_request(test_server, '/api/login', method='POST', data={
+        'username': 'rania', 'password': 'TeacherSecureNewPass_123!'
+    })
+    assert status == 200 and t_body.get('success')
+    teacher_token = t_body['token']
+
+    status, s_body, _ = make_request(test_server, '/api/login', method='POST', data={
+        'username': 'alex', 'password': 'NewSecurePassword123!'
+    })
+    if status != 200 or not s_body.get('success'):
+        status, s_body, _ = make_request(test_server, '/api/login', method='POST', data={
+            'username': 'alex', 'password': 'password123'
+        })
+    assert status == 200 and s_body.get('success')
+    student_token = s_body['token']
+    student_id = s_body['student']['id']
+
+    # 2. Unauthenticated student curriculum access -> 401
+    status, _, _ = make_request(test_server, '/api/student/curriculum_access')
+    assert status == 401
+
+    # 3. Student tries teacher endpoint -> 403
+    status, _, _ = make_request(test_server, f'/api/teacher/student_skills/{student_id}', token=student_token)
+    assert status == 403
+
+    # 4. Teacher sets unlocked skills for student
+    status, set_res, _ = make_request(test_server, '/api/teacher/student_skills/update', method='POST', token=teacher_token, data={
+        'student_id': student_id,
+        'action': 'set',
+        'skill_codes': ['A.1', 'B.2', 'C.3']
+    })
+    assert status == 200 and set_res['success'] and set_res['unlocked_count'] == 3
+
+    # 5. Teacher fetches student's unlocked skills
+    status, t_skills_res, _ = make_request(test_server, f'/api/teacher/student_skills/{student_id}', token=teacher_token)
+    assert status == 200 and t_skills_res['success']
+    assert set(t_skills_res['unlocked_skills']) == {'A.1', 'B.2', 'C.3'}
+
+    # 6. Student fetches their own unlocked skills
+    status, s_curr_res, _ = make_request(test_server, '/api/student/curriculum_access', token=student_token)
+    assert status == 200 and s_curr_res['success']
+    assert set(s_curr_res['unlocked_skills']) == {'A.1', 'B.2', 'C.3'}
+
+    # 7. Teacher locks all skills for student
+    status, lock_res, _ = make_request(test_server, '/api/teacher/student_skills/update', method='POST', token=teacher_token, data={
+        'student_id': student_id,
+        'action': 'lock_all'
+    })
+    assert status == 200 and lock_res['success'] and lock_res['unlocked_count'] == 0
+
+    # 8. Student now has 0 unlocked skills
+    status, s_curr_res2, _ = make_request(test_server, '/api/student/curriculum_access', token=student_token)
+    assert status == 200 and len(s_curr_res2['unlocked_skills']) == 0
+
+
+

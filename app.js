@@ -339,6 +339,11 @@ const AppState = {
   // Active User Session (Null if not logged in; requires username & password)
   currentUser: JSON.parse(localStorage.getItem('current_student') || 'null'),
 
+  // Curriculum Access & Lesson Permissions (Option 3 Hybrid Model)
+  unlockedSkills: new Set(),
+  teacherSelectedStudentUnlocked: new Set(),
+  selectedCurriculumStudentId: null,
+
   // Practice Room State
   practice: {
     activeSkill: null,
@@ -1308,6 +1313,65 @@ const DB = {
     };
   },
 
+  async getStudentCurriculumAccess() {
+    try {
+      const res = await fetch(this.apiUrl('/api/student/curriculum_access'), {
+        headers: this.getAuthHeaders()
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {}
+    return { success: false, unlocked_skills: [] };
+  },
+
+  async getTeacherStudentSkills(studentId) {
+    try {
+      const res = await fetch(this.apiUrl(`/api/teacher/student_skills/${studentId}`), {
+        headers: this.getAuthHeaders()
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {}
+    return { success: false, unlocked_skills: [] };
+  },
+
+  async updateStudentSkills(studentId, action, skillCodes = [], grade = null) {
+    try {
+      const res = await fetch(this.apiUrl('/api/teacher/student_skills/update'), {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify({
+          student_id: Number(studentId),
+          action: action,
+          skill_codes: skillCodes,
+          grade: grade
+        })
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (e) {}
+    return { success: false };
+  },
+
+  async loadStudentCurriculumAccess() {
+    if (!AppState.currentUser || AppState.currentUser.role === 'teacher') return;
+    const res = await this.getStudentCurriculumAccess();
+    if (res && res.success && Array.isArray(res.unlocked_skills)) {
+      AppState.unlockedSkills = new Set(res.unlocked_skills);
+      localStorage.setItem(`rc_unlocked_${AppState.currentUser.id}`, JSON.stringify(res.unlocked_skills));
+    } else {
+      try {
+        const stored = JSON.parse(localStorage.getItem(`rc_unlocked_${AppState.currentUser.id}`) || '[]');
+        AppState.unlockedSkills = new Set(stored);
+      } catch (e) {
+        AppState.unlockedSkills = new Set();
+      }
+    }
+  },
+
   async getLeaderboard() {
     try {
       const res = await fetch(this.apiUrl('/api/leaderboard'));
@@ -2117,6 +2181,7 @@ async function loadAndRenderPortal() {
     if (isTeacher) {
       renderTeacherConsole();
     } else {
+      await DB.loadStudentCurriculumAccess();
       renderDashboard();
       renderTracksView();
       renderSkillsCanvas();
@@ -2595,6 +2660,25 @@ function renderGradesSidebar() {
   });
 }
 
+function isSkillAccessibleToStudent(skill) {
+  if (!skill) return false;
+  const user = AppState.currentUser;
+  if (!user) return false;
+  if (user.role === 'teacher' || user.username === 'admin' || user.username === 'rania') return true;
+
+  // Homework assignments are always accessible
+  if (skill.assignment_id) return true;
+
+  // Check teacher unlocked skills set
+  if (AppState.unlockedSkills) {
+    if (skill.code && AppState.unlockedSkills.has(skill.code)) return true;
+    if (skill.permacode && AppState.unlockedSkills.has(skill.permacode)) return true;
+    if (skill.id && AppState.unlockedSkills.has(String(skill.id))) return true;
+  }
+  return false;
+}
+window.isSkillAccessibleToStudent = isSkillAccessibleToStudent;
+
 function renderSkillsCanvas() {
   if (!AppState.data) return;
   el.skillsCategoriesContainer.innerHTML = '';
@@ -2641,6 +2725,9 @@ function renderSkillsCanvas() {
     return;
   }
 
+  const user = AppState.currentUser;
+  const isTeacher = user && (user.role === 'teacher' || user.username === 'admin' || user.username === 'rania');
+
   // Group by category
   const groups = new Map();
   for (const s of filtered) {
@@ -2668,11 +2755,23 @@ function renderSkillsCanvas() {
         ${catData.items.map(s => {
           const isFav = AppState.favorites.has(s.id);
           const isMas = AppState.mastered.has(s.id);
+          const isAccessible = isTeacher || isSkillAccessibleToStudent(s);
+          const statusBadge = isTeacher
+            ? ''
+            : (s.assignment_id 
+                ? '<span class="skill-status-tag assigned">📌 Homework</span>' 
+                : (isAccessible 
+                    ? '<span class="skill-status-tag unlocked">🔓 Unlocked</span>' 
+                    : '<span class="skill-status-tag locked">🔒 Locked</span>'));
+          const btnClass = isAccessible ? 'learn-pill-btn' : 'learn-pill-btn locked';
+          const btnLabel = isAccessible ? 'Learn' : 'Locked';
+
           return `
             <div class="skill-row-card">
               <div class="skill-row-left">
                 <span class="skill-number-tag">${s.code}</span>
                 <span class="skill-title-name" title="${s.name}">${s.name}</span>
+                ${statusBadge}
               </div>
               <div class="skill-row-right">
                 <button class="action-icon-btn ${isFav ? 'favorited' : ''}" data-fav="${s.id}" title="Star as favorite">
@@ -2681,8 +2780,8 @@ function renderSkillsCanvas() {
                 <button class="action-icon-btn ${isMas ? 'mastered' : ''}" data-mas="${s.id}" title="Mark as mastered">
                   ${isMas ? '✓' : '○'}
                 </button>
-                <button class="learn-pill-btn" onclick="startPracticeByPermacode('${s.permacode}', '${encodeURIComponent(s.name)}')">
-                  <span>Learn</span>
+                <button class="${btnClass}" onclick="startPracticeByPermacode('${s.permacode}', '${encodeURIComponent(s.name)}')">
+                  <span>${btnLabel}</span>
                 </button>
               </div>
             </div>
@@ -3013,7 +3112,8 @@ window.switchTeacherTab = function(tabName) {
     sessions: document.getElementById('teacherPanelSessions'),
     homework: document.getElementById('teacherPanelHomework'),
     books: document.getElementById('teacherPanelBooks'),
-    planner: document.getElementById('teacherPanelPlanner')
+    planner: document.getElementById('teacherPanelPlanner'),
+    curriculum: document.getElementById('teacherPanelCurriculum')
   };
 
   Object.keys(panels).forEach(k => {
@@ -3032,7 +3132,263 @@ window.switchTeacherTab = function(tabName) {
     renderTeacherCurriculumBooks();
   } else if (tabName === 'planner') {
     renderPlannerView();
+  } else if (tabName === 'curriculum') {
+    renderCurriculumAccessManager();
   }
+};
+
+// =============================================================================
+// Student Curriculum Access & Permission Controller (100% English UI)
+// =============================================================================
+
+window.renderCurriculumAccessManager = async function() {
+  const container = document.getElementById('curriculumSkillsTree');
+  const studentSelect = document.getElementById('curriculumStudentSelect');
+  if (!container || !studentSelect) return;
+
+  // 1. Fetch student list if needed
+  let students = AppState.currentTeacherRoster || [];
+  if (!students.length) {
+    try {
+      const overview = await DB.getTeacherOverview();
+      if (overview && overview.students) {
+        students = overview.students;
+        AppState.currentTeacherRoster = students;
+      }
+    } catch (e) {}
+  }
+  if (!students.length) {
+    students = (await DB.getDemoStudents()).filter(s => s.role !== 'teacher');
+  }
+
+  // Populate student select
+  const studentOptions = students.map(s => `
+    <option value="${s.id}" ${String(s.id) === String(AppState.selectedCurriculumStudentId || students[0]?.id) ? 'selected' : ''}>
+      ${s.full_name || s.username} (${s.grade_level || 'Year 4'})
+    </option>
+  `).join('');
+  studentSelect.innerHTML = studentOptions;
+
+  if (!AppState.selectedCurriculumStudentId && students.length > 0) {
+    AppState.selectedCurriculumStudentId = students[0].id;
+  }
+
+  await loadStudentCurriculumInTeacherPanel(AppState.selectedCurriculumStudentId);
+};
+
+window.handleCurriculumStudentChange = async function(studentId) {
+  AppState.selectedCurriculumStudentId = studentId;
+  await loadStudentCurriculumInTeacherPanel(studentId);
+};
+
+async function loadStudentCurriculumInTeacherPanel(studentId) {
+  const container = document.getElementById('curriculumSkillsTree');
+  const gradeBadge = document.getElementById('curriculumGradeBadge');
+  if (!container) return;
+
+  container.innerHTML = '<div class="p-8 text-center text-slate-400 font-semibold"><span class="animate-spin inline-block mr-2">⏳</span> Loading student curriculum permissions...</div>';
+
+  // Find student info
+  const students = AppState.currentTeacherRoster || (await DB.getDemoStudents());
+  const student = students.find(s => String(s.id) === String(studentId)) || DB.findStudentById(studentId) || { grade_level: 'Year 4', full_name: 'Student' };
+  const studentGrade = student.grade_level || 'Year 4';
+
+  if (gradeBadge) {
+    gradeBadge.textContent = `${student.full_name || student.username} • ${studentGrade}`;
+  }
+
+  // Fetch unlocked skills from backend
+  const res = await DB.getTeacherStudentSkills(studentId);
+  const unlockedSet = new Set(res && res.success && Array.isArray(res.unlocked_skills) ? res.unlocked_skills : []);
+  AppState.teacherSelectedStudentUnlocked = unlockedSet;
+
+  filterCurriculumSkillsTree();
+}
+
+window.filterCurriculumSkillsTree = function() {
+  const container = document.getElementById('curriculumSkillsTree');
+  const subjectFilter = document.getElementById('curriculumSubjectFilter')?.value || 'Maths';
+  const searchQuery = (document.getElementById('curriculumSkillSearch')?.value || '').trim().toLowerCase();
+  const studentId = AppState.selectedCurriculumStudentId;
+  if (!container || !studentId) return;
+
+  const students = AppState.currentTeacherRoster || [];
+  const student = students.find(s => String(s.id) === String(studentId)) || DB.findStudentById(studentId) || { grade_level: 'Year 4' };
+  const studentGrade = student.grade_level || 'Year 4';
+
+  // Filter skills by student grade and subject
+  let skills = (AppState.flatSkills || []).filter(s => s.grade === studentGrade);
+  if (subjectFilter !== 'all') {
+    skills = skills.filter(s => s.subject === subjectFilter);
+  }
+  if (searchQuery) {
+    skills = skills.filter(s => (s.name && s.name.toLowerCase().includes(searchQuery)) || (s.code && s.code.toLowerCase().includes(searchQuery)));
+  }
+
+  // Update KPI counters for this grade
+  const totalGradeSkills = (AppState.flatSkills || []).filter(s => s.grade === studentGrade).length;
+  const gradeUnlockedCount = (AppState.flatSkills || []).filter(s => s.grade === studentGrade && AppState.teacherSelectedStudentUnlocked.has(s.code)).length;
+  const gradeLockedCount = Math.max(0, totalGradeSkills - gradeUnlockedCount);
+
+  const kpiTotal = document.getElementById('curriculumTotalGradeSkills');
+  const kpiUnlocked = document.getElementById('curriculumUnlockedCount');
+  const kpiLocked = document.getElementById('curriculumLockedCount');
+  if (kpiTotal) kpiTotal.textContent = totalGradeSkills;
+  if (kpiUnlocked) kpiUnlocked.textContent = gradeUnlockedCount;
+  if (kpiLocked) kpiLocked.textContent = gradeLockedCount;
+
+  if (!skills.length) {
+    container.innerHTML = `
+      <div class="p-8 text-center text-slate-400 bg-slate-900/40 rounded-2xl border border-slate-800">
+        <div class="text-3xl mb-2">🔍</div>
+        <div class="font-bold text-base text-slate-200">No skills found</div>
+        <p class="text-xs text-slate-500 mt-1">Try selecting a different subject or clearing search query.</p>
+      </div>
+    `;
+    return;
+  }
+
+  // Group by Category
+  const groups = new Map();
+  for (const s of skills) {
+    const catKey = `${s.subject} • ${s.category_code} • ${s.category_name}`;
+    if (!groups.has(catKey)) {
+      groups.set(catKey, { subject: s.subject, code: s.category_code, name: s.category_name, skills: [] });
+    }
+    groups.get(catKey).skills.push(s);
+  }
+
+  let html = '';
+  for (const [catKey, group] of groups) {
+    const allChecked = group.skills.length > 0 && group.skills.every(s => AppState.teacherSelectedStudentUnlocked.has(s.code));
+
+    html += `
+      <div class="curriculum-cat-box" data-cat="${encodeURIComponent(catKey)}">
+        <div class="curriculum-cat-header">
+          <div class="flex items-center gap-3">
+            <input type="checkbox" class="cat-master-checkbox w-4 h-4 rounded text-cyan-500 cursor-pointer" 
+              ${allChecked ? 'checked' : ''} 
+              onchange="toggleCategoryCurriculumSkills('${encodeURIComponent(catKey)}', this.checked)">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-cyan-400 mr-2">${group.subject}</span>
+              <span class="font-bold text-sm text-slate-200">${group.code}. ${group.name}</span>
+              <span class="text-xs text-slate-400 ml-2">(${group.skills.filter(s => AppState.teacherSelectedStudentUnlocked.has(s.code)).length}/${group.skills.length} unlocked)</span>
+            </div>
+          </div>
+          <button type="button" class="text-xs text-slate-400 hover:text-white px-2 py-1" onclick="this.closest('.curriculum-cat-box').querySelector('.curriculum-skills-sublist').classList.toggle('hidden')">
+            Toggle ▾
+          </button>
+        </div>
+        <div class="curriculum-skills-sublist p-2 space-y-1 bg-slate-950/40">
+          ${group.skills.map(s => {
+            const isUnlocked = AppState.teacherSelectedStudentUnlocked.has(s.code);
+            return `
+              <div class="curriculum-skill-item">
+                <label class="flex items-center gap-3 cursor-pointer flex-1 py-1">
+                  <input type="checkbox" class="skill-checkbox w-4 h-4 rounded text-cyan-500 cursor-pointer" 
+                    data-skill-code="${s.code}" 
+                    data-cat="${encodeURIComponent(catKey)}"
+                    ${isUnlocked ? 'checked' : ''} 
+                    onchange="handleSkillCheckboxChange('${s.code}', this.checked, '${encodeURIComponent(catKey)}')">
+                  <span class="text-xs font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">${s.code}</span>
+                  <span class="text-sm font-medium text-slate-200">${s.name}</span>
+                </label>
+                <div class="flex items-center gap-2">
+                  <span class="skill-status-tag ${isUnlocked ? 'unlocked' : 'locked'}">
+                    ${isUnlocked ? '🔓 Unlocked' : '🔒 Locked'}
+                  </span>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  container.innerHTML = html;
+};
+
+window.handleSkillCheckboxChange = function(skillCode, isChecked) {
+  if (isChecked) {
+    AppState.teacherSelectedStudentUnlocked.add(skillCode);
+  } else {
+    AppState.teacherSelectedStudentUnlocked.delete(skillCode);
+  }
+  filterCurriculumSkillsTree();
+};
+
+window.toggleCategoryCurriculumSkills = function(encodedCatKey, isChecked) {
+  const catKey = decodeURIComponent(encodedCatKey);
+  const studentGrade = AppState.studentGradeLevel || 'Year 4';
+  const targetSkills = (AppState.flatSkills || []).filter(s => {
+    const k = `${s.subject} • ${s.category_code} • ${s.category_name}`;
+    return k === catKey;
+  });
+
+  targetSkills.forEach(s => {
+    if (isChecked) {
+      AppState.teacherSelectedStudentUnlocked.add(s.code);
+    } else {
+      AppState.teacherSelectedStudentUnlocked.delete(s.code);
+    }
+  });
+
+  filterCurriculumSkillsTree();
+};
+
+window.unlockAllGradeSkills = async function() {
+  const studentId = AppState.selectedCurriculumStudentId;
+  if (!studentId) return;
+
+  const students = AppState.currentTeacherRoster || [];
+  const student = students.find(s => String(s.id) === String(studentId)) || DB.findStudentById(studentId) || { grade_level: 'Year 4' };
+  const studentGrade = student.grade_level || 'Year 4';
+
+  const gradeSkills = (AppState.flatSkills || []).filter(s => s.grade === studentGrade);
+  gradeSkills.forEach(s => AppState.teacherSelectedStudentUnlocked.add(s.code));
+
+  const res = await DB.updateStudentSkills(studentId, 'unlock_all_grade', [], studentGrade);
+  if (res && res.success) {
+    showToast(`All ${studentGrade} skills unlocked successfully! 🔓`, '✅');
+  } else {
+    showToast(`All ${studentGrade} skills unlocked locally! 🔓`, '✅');
+  }
+  filterCurriculumSkillsTree();
+};
+
+window.lockAllStudentSkills = async function() {
+  const studentId = AppState.selectedCurriculumStudentId;
+  if (!studentId) return;
+
+  AppState.teacherSelectedStudentUnlocked.clear();
+
+  const res = await DB.updateStudentSkills(studentId, 'lock_all');
+  if (res && res.success) {
+    showToast('All curriculum skills locked for student 🔒', 'ℹ️');
+  } else {
+    showToast('All curriculum skills locked locally 🔒', 'ℹ️');
+  }
+  filterCurriculumSkillsTree();
+};
+
+window.saveCurriculumAccess = async function() {
+  const studentId = AppState.selectedCurriculumStudentId;
+  if (!studentId) {
+    showToast('Please select a student first', '⚠️');
+    return;
+  }
+
+  const skillCodes = Array.from(AppState.teacherSelectedStudentUnlocked);
+  const res = await DB.updateStudentSkills(studentId, 'set', skillCodes);
+
+  if (res && res.success) {
+    showToast(`Saved ${skillCodes.length} unlocked permissions successfully! 💾`, '✅');
+  } else {
+    localStorage.setItem(`rc_unlocked_${studentId}`, JSON.stringify(skillCodes));
+    showToast(`Saved ${skillCodes.length} permissions locally! 💾`, '✅');
+  }
+  filterCurriculumSkillsTree();
 };
 
 window.filterTeacherRoster = function(filter) {
@@ -4224,12 +4580,6 @@ async function renderLeaderboardView() {
 // =============================================================================
 
 function startPracticeByPermacode(permacode, encodedTitle) {
-  const user = AppState.currentUser;
-  const isTeacher = user && (user.role === 'teacher' || user.username === 'admin' || user.username === 'rania');
-  if (!isTeacher) {
-    showToast('Open practice is disabled. Please solve your assigned homework below 🔒', '⚠️');
-    return;
-  }
   const title = decodeURIComponent(encodedTitle);
   let targetSkill = AppState.flatSkills.find(s => s.permacode === permacode);
   if (!targetSkill) {
@@ -4242,6 +4592,14 @@ function startPracticeByPermacode(permacode, encodedTitle) {
       grade: AppState.currentGrade || 'Year 4'
     };
   }
+
+  const user = AppState.currentUser;
+  const isTeacher = user && (user.role === 'teacher' || user.username === 'admin' || user.username === 'rania');
+  if (!isTeacher && !isSkillAccessibleToStudent(targetSkill)) {
+    showToast('This lesson is locked by your teacher. Please complete your assigned homework first 🔒', '⚠️');
+    return;
+  }
+
   openPracticeModal(targetSkill);
 }
 
@@ -4249,9 +4607,9 @@ function openPracticeModal(skill) {
   const user = AppState.currentUser;
   const isTeacher = user && (user.role === 'teacher' || user.username === 'admin' || user.username === 'rania');
 
-  // STRICT LOCKDOWN: Students can ONLY open assigned homework!
-  if (!isTeacher && !skill.assignment_id) {
-    showToast('This topic has not been assigned by Miss Rania 🔒', '⚠️');
+  // Strict check: Accessible only if teacher, homework assignment, or unlocked by teacher
+  if (!isTeacher && !isSkillAccessibleToStudent(skill)) {
+    showToast('This lesson is locked by your teacher. Please complete your assigned homework first 🔒', '⚠️');
     return;
   }
 

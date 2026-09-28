@@ -151,6 +151,16 @@ def init_auth_db():
         created_at TEXT
     )
     ''')
+
+    conn.execute('''
+    CREATE TABLE IF NOT EXISTS student_unlocked_skills (
+        student_id INTEGER NOT NULL,
+        skill_code TEXT NOT NULL,
+        unlocked_at TEXT NOT NULL,
+        PRIMARY KEY(student_id, skill_code),
+        FOREIGN KEY(student_id) REFERENCES users(id)
+    )
+    ''')
     conn.commit()
     conn.close()
     cleanup_expired_sessions()
@@ -945,8 +955,53 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
             cursor = conn.cursor()
             cursor.execute('DELETE FROM class_sessions WHERE id = ?', (session_id,))
             conn.commit()
+        # ---------------------------------------------------------------------
+        # Teacher: Curriculum Access & Lesson Assigner
+        # ---------------------------------------------------------------------
+        elif path == '/api/teacher/student_skills/update':
+            auth_user = get_authenticated_user(self.headers)
+            if not auth_user or auth_user.get('role') != 'teacher':
+                return self.send_json({'success': False, 'error': 'Teacher authorization required.'}, status=403)
+
+            data = self.parse_body()
+            student_id = data.get('student_id')
+            action = data.get('action', 'set')
+            skill_codes = data.get('skill_codes', [])
+            grade = data.get('grade')
+
+            if not student_id:
+                return self.send_json({'success': False, 'error': 'student_id required.'}, status=400)
+
+            conn = get_db()
+            cursor = conn.cursor()
+
+            if action == 'lock_all':
+                cursor.execute('DELETE FROM student_unlocked_skills WHERE student_id = ?', (student_id,))
+            elif action == 'unlock_all_grade':
+                cursor.execute('DELETE FROM student_unlocked_skills WHERE student_id = ?', (student_id,))
+                if not grade:
+                    cursor.execute('SELECT grade_level FROM users WHERE id = ?', (student_id,))
+                    row = cursor.fetchone()
+                    grade = row['grade_level'] if row else 'Year 4'
+                cursor.execute('''
+                INSERT OR IGNORE INTO student_unlocked_skills (student_id, skill_code, unlocked_at)
+                SELECT ?, skill_code, datetime('now') FROM skills WHERE grade_name = ?
+                ''', (student_id, grade))
+            else:
+                cursor.execute('DELETE FROM student_unlocked_skills WHERE student_id = ?', (student_id,))
+                for code in skill_codes:
+                    clean_code = str(code).strip()
+                    if clean_code:
+                        cursor.execute('''
+                        INSERT OR IGNORE INTO student_unlocked_skills (student_id, skill_code, unlocked_at)
+                        VALUES (?, ?, datetime('now'))
+                        ''', (student_id, clean_code))
+
+            conn.commit()
+            cursor.execute('SELECT COUNT(*) FROM student_unlocked_skills WHERE student_id = ?', (student_id,))
+            unlocked_count = cursor.fetchone()[0]
             conn.close()
-            return self.send_json({'success': True})
+            return self.send_json({'success': True, 'student_id': student_id, 'unlocked_count': unlocked_count})
 
         # Unknown POST endpoint
         return self.send_json({'error': 'Endpoint not found'}, status=404)
@@ -1372,6 +1427,55 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
                     sessions.append(d)
                 conn.close()
                 return self.send_json({'success': True, 'sessions': sessions})
+
+            # Student Curriculum Access (Allowed Grade & Unlocked Skills)
+            elif path == '/api/student/curriculum_access':
+                auth_user = get_authenticated_user(self.headers)
+                if not auth_user:
+                    return self.send_json({'success': False, 'error': 'Authentication required.'}, status=401)
+
+                student_id = auth_user['id']
+                conn = get_db()
+                cursor = conn.cursor()
+                cursor.execute('SELECT skill_code FROM student_unlocked_skills WHERE student_id = ?', (student_id,))
+                unlocked_codes = [r['skill_code'] for r in cursor.fetchall()]
+                conn.close()
+
+                return self.send_json({
+                    'success': True,
+                    'grade_level': auth_user.get('grade_level', 'Year 4'),
+                    'unlocked_skills': unlocked_codes,
+                    'has_custom_access': len(unlocked_codes) > 0
+                })
+
+            # Teacher: Get Student Skills Access
+            elif path.startswith('/api/teacher/student_skills/'):
+                auth_user = get_authenticated_user(self.headers)
+                if not auth_user or auth_user.get('role') != 'teacher':
+                    return self.send_json({'success': False, 'error': 'Teacher authorization required.'}, status=403)
+
+                try:
+                    student_id = int(path.split('/')[-1])
+                except ValueError:
+                    return self.send_json({'success': False, 'error': 'Invalid student ID.'}, status=400)
+
+                conn = get_db()
+                cursor = conn.cursor()
+                cursor.execute('SELECT id, full_name, username, grade_level FROM users WHERE id = ?', (student_id,))
+                student = cursor.fetchone()
+                if not student:
+                    conn.close()
+                    return self.send_json({'success': False, 'error': 'Student not found.'}, status=404)
+
+                cursor.execute('SELECT skill_code FROM student_unlocked_skills WHERE student_id = ?', (student_id,))
+                unlocked_codes = [r['skill_code'] for r in cursor.fetchall()]
+                conn.close()
+
+                return self.send_json({
+                    'success': True,
+                    'student': dict(student),
+                    'unlocked_skills': unlocked_codes
+                })
 
             # Unrecognized API endpoint
             return self.send_json({'error': 'API endpoint not found'}, status=404)
