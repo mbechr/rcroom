@@ -321,6 +321,9 @@
                 if (typeof window.renderDashboardAssignments === 'function' && window.AppState.currentView === 'dashboard') {
                   window.renderDashboardAssignments();
                 }
+                if (typeof window.renderDashboardUnlockedSkills === 'function' && window.AppState.currentView === 'dashboard') {
+                  window.renderDashboardUnlockedSkills();
+                }
               }
             }
           });

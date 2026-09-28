@@ -2340,9 +2340,9 @@ function switchView(viewId) {
   const user = AppState.currentUser;
   const isTeacher = user && (user.role === 'teacher' || user.username === 'admin' || user.username === 'rania');
 
-  // STRICT LOCKDOWN: Students cannot browse open skills bank or curriculum tracks
-  if (!isTeacher && (viewId === 'tracks' || viewId === 'skills')) {
-    showToast('Skills Bank is managed exclusively by Miss Rania 🔒', 'ℹ️');
+  // Teacher Command Center is restricted to teacher role
+  if (!isTeacher && viewId === 'teacher') {
+    showToast('Teacher Command Center is restricted to Miss Rania 🔒', '⚠️');
     viewId = 'dashboard';
   }
 
@@ -2511,21 +2511,19 @@ function updateStudentHeader() {
     if (sidebarTeacherTab) {
       sidebarTeacherTab.style.display = 'none'; // Strictly hidden for students
     }
-    // STRICT LOCKDOWN: Students cannot browse open curriculum tracks & skills bank
-    document.querySelectorAll('.nav-tab[data-view="tracks"], .nav-tab[data-view="skills"]').forEach(t => t.style.display = 'none');
+    // Students can access Curriculum & Practice view (unlocked lessons enabled, locked lessons protected)
+    document.querySelectorAll('.nav-tab[data-view="skills"]').forEach(t => t.style.display = 'flex');
+    document.querySelectorAll('.nav-tab[data-view="tracks"]').forEach(t => t.style.display = 'none');
     const topSearch = document.getElementById('topSearchIconBtn');
-    if (topSearch) topSearch.style.display = 'none';
+    if (topSearch) topSearch.style.display = 'flex';
     const dashTracks = document.getElementById('dashTracksPreviewContainer');
     if (dashTracks && dashTracks.closest('section')) dashTracks.closest('section').style.display = 'none';
 
-    // Focus Hero Button directly on Homework
+    // Focus Hero Button on Practice
     const heroBtn = document.getElementById('dashStartPracticeBtn');
     if (heroBtn) {
-      heroBtn.innerHTML = '<span>🚀</span><span>Start Homework</span>';
-      heroBtn.onclick = () => {
-        const sec = document.getElementById('dashAssignmentsSection');
-        if (sec) sec.scrollIntoView({ behavior: 'smooth' });
-      };
+      heroBtn.innerHTML = '<span>🚀</span><span>Start Daily Practice</span>';
+      heroBtn.onclick = () => switchView('skills');
     }
 
     if (el.navStudentAvatar) el.navStudentAvatar.textContent = user.avatar || '🦊';
@@ -2571,6 +2569,7 @@ async function renderDashboard() {
   const user = AppState.currentUser;
   if (!user) return;
   renderDashboardAssignments();
+  renderDashboardUnlockedSkills();
 
   renderStudentPaymentStatus();
   renderStudentSessions();
@@ -2796,6 +2795,8 @@ function renderSkillsCanvas() {
     filtered = filtered.filter(s => AppState.favorites.has(s.id));
   } else if (AppState.statusFilter === 'mastered') {
     filtered = filtered.filter(s => AppState.mastered.has(s.id));
+  } else if (AppState.statusFilter === 'unlocked') {
+    filtered = filtered.filter(s => isSkillAccessibleToStudent(s));
   }
 
   if (filtered.length === 0) {
@@ -5602,6 +5603,63 @@ async function renderDashboardAssignments() {
     console.error('Error loading student assignments:', err);
   }
 }
+
+async function renderDashboardUnlockedSkills() {
+  const container = document.getElementById('dashUnlockedSkillsGrid');
+  const badge = document.getElementById('dashUnlockedCountBadge');
+  if (!container) return;
+  const user = AppState.currentUser;
+  if (!user || user.role === 'teacher') return;
+
+  // Make sure curriculum access is loaded
+  if (!AppState.unlockedSkills || AppState.unlockedSkills.size === 0) {
+    await DB.loadStudentCurriculumAccess();
+  }
+
+  const studentGrade = user.grade_level || 'Year 4';
+
+  // Find all skills matching the unlocked codes
+  const matchingSkills = (AppState.flatSkills || []).filter(s => 
+    s.grade === studentGrade && isSkillAccessibleToStudent(s) && !s.assignment_id
+  );
+
+  if (badge) {
+    badge.textContent = `${matchingSkills.length} Lessons Unlocked`;
+  }
+
+  if (matchingSkills.length === 0) {
+    container.innerHTML = `
+      <div class="col-span-full py-8 px-6 rounded-2xl bg-surface-card border border-slate-100 text-center text-on-surface-variant">
+        <div class="text-3xl mb-2">🔒</div>
+        <div class="font-bold text-base text-on-surface">No individual lessons unlocked yet</div>
+        <p class="text-xs text-on-surface-variant mt-1 max-w-md mx-auto">
+          Miss Rania will unlock customized practice topics for your Year level. You can start working on your assigned homework above!
+        </p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = matchingSkills.map(s => `
+    <div class="assignment-card" style="border: 1px solid rgba(99,102,241,0.2); background: var(--bg-surface-solid); border-radius: 16px; padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between; gap: 0.85rem; box-shadow: var(--shadow-sm);">
+      <div class="assign-card-top" style="display:flex; justify-content:space-between; align-items:center;">
+        <span class="assign-skill-code" style="font-weight:700; font-size:0.825rem; color:var(--color-primary);">${s.code} &bull; ${s.subject}</span>
+        <span class="skill-status-tag unlocked" style="font-size:0.75rem;">🔓 Unlocked</span>
+      </div>
+      <div>
+        <div class="assign-skill-title" style="font-size:1.05rem; font-weight:700; color:var(--text-primary); margin-bottom:0.25rem; line-height:1.35;">${s.name}</div>
+        <div class="assign-instructions" style="font-size:0.8rem; color:var(--text-secondary);">${s.category_name || s.subject}</div>
+      </div>
+      <div class="assign-card-footer" style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border-subtle); padding-top:0.75rem; margin-top:0.25rem;">
+        <span style="font-size:0.78rem; font-weight:600; color:var(--text-muted);">${s.grade}</span>
+        <button type="button" class="primary-glow-btn" onclick="startPracticeByPermacode('${s.permacode}', '${encodeURIComponent(s.name)}')" style="padding:0.45rem 1.15rem; font-size:0.825rem; font-weight:700; border-radius:10px;">
+          Practice Lesson 🚀
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+window.renderDashboardUnlockedSkills = renderDashboardUnlockedSkills;
 
 async function renderTeacherAssignments() {
   if (!el.teacherAssignmentsGrid) return;

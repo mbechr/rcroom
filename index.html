@@ -324,6 +324,10 @@
           <span class="material-symbols-outlined text-[20px] shrink-0">space_dashboard</span>
           <span class="sidebar-text truncate">Portal &amp; Tasks 📝</span>
         </button>
+        <button class="nav-tab student-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="skills" title="Interactive Practice & Unlocked Lessons">
+          <span class="material-symbols-outlined text-[20px] shrink-0">psychology</span>
+          <span class="sidebar-text truncate">Curriculum &amp; Practice 🎯</span>
+        </button>
         <button class="nav-tab student-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="sessions" title="Zoom & Class Logs">
           <span class="material-symbols-outlined text-[20px] shrink-0">videocam</span>
           <span class="sidebar-text truncate">Zoom &amp; Lessons 🎥</span>
@@ -526,6 +530,32 @@
             </div>
           </section>
 
+          <!-- Section 1.5: Unlocked Curriculum Lessons & Practice Topics -->
+          <section class="space-y-5" id="dashUnlockedSkillsSection">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
+              <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
+                  <span class="material-symbols-outlined text-[24px]">psychology</span>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2.5">
+                    <h2 class="text-xl font-bold text-on-surface">Unlocked Practice Lessons</h2>
+                    <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 font-bold text-xs" id="dashUnlockedCountBadge">0 Lessons</span>
+                  </div>
+                  <p class="text-xs sm:text-sm text-on-surface-variant mt-0.5">Curriculum topics specifically unlocked for your self-paced practice by Miss Rania.</p>
+                </div>
+              </div>
+              <button type="button" class="text-xs sm:text-sm text-primary hover:underline font-bold flex items-center gap-1.5 cursor-pointer self-start sm:self-auto" onclick="switchView('skills')">
+                <span>Browse All Curriculum</span>
+                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+              </button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="dashUnlockedSkillsGrid">
+              <!-- Dynamically populated by renderDashboardUnlockedSkills() -->
+            </div>
+          </section>
+
           <!-- Section 2: Live Zoom Pro Classes & Materials -->
           <section class="space-y-5" id="dashSessionsSection">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
@@ -707,6 +737,7 @@
 
         <div class="segmented-control" id="statusFilterControl">
           <button class="segmented-btn active" data-filter="all">All Skills</button>
+          <button class="segmented-btn" data-filter="unlocked">🔓 Unlocked Only</button>
           <button class="segmented-btn" data-filter="favorites">★ Starred</button>
           <button class="segmented-btn" data-filter="mastered">✓ Mastered</button>
         </div>
