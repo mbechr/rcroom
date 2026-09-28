@@ -304,6 +304,30 @@
             console.warn('Class sessions realtime listener error:', err.message);
           });
       } catch (e) {}
+
+      // 6. Realtime Curriculum Permissions Listener
+      try {
+        this.firestore.collection('curriculum_permissions').onSnapshot(snapshot => {
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            const sId = Number(doc.id) || Number(data.student_id);
+            if (sId && Array.isArray(data.unlocked_skills)) {
+              localStorage.setItem(`rc_unlocked_${sId}`, JSON.stringify(data.unlocked_skills));
+              if (window.AppState && window.AppState.currentUser && Number(window.AppState.currentUser.id) === sId) {
+                window.AppState.unlockedSkills = new Set(data.unlocked_skills);
+                if (typeof window.renderSkillsCanvas === 'function' && window.AppState.currentView === 'skills') {
+                  window.renderSkillsCanvas();
+                }
+                if (typeof window.renderDashboardAssignments === 'function' && window.AppState.currentView === 'dashboard') {
+                  window.renderDashboardAssignments();
+                }
+              }
+            }
+          });
+        }, err => {
+          console.warn('Curriculum permissions realtime listener error:', err.message);
+        });
+      } catch (e) {}
     },
 
     // -------------------------------------------------------------------------
@@ -635,6 +659,60 @@
     },
 
     /**
+     * Save student unlocked skills / curriculum permissions to Google Cloud Firestore
+     */
+    async saveStudentUnlockedSkills(studentId, unlockedSkills) {
+      if (!this.isConfigured || !this.firestore) return;
+      try {
+        const docId = String(studentId);
+        const skillsArray = Array.isArray(unlockedSkills) ? unlockedSkills : [];
+        const payload = {
+          student_id: Number(studentId),
+          unlocked_skills: skillsArray,
+          updated_at: new Date().toISOString()
+        };
+
+        // 1. Save in dedicated curriculum_permissions collection
+        await this.firestore.collection('curriculum_permissions').doc(docId).set(payload, { merge: true });
+
+        // 2. Also update student document
+        await this.firestore.collection('students').doc(docId).set({
+          unlocked_skills: skillsArray,
+          updated_at: new Date().toISOString()
+        }, { merge: true });
+
+        console.log(`✅ CloudDB: Saved ${skillsArray.length} unlocked curriculum skills for student ${studentId}`);
+      } catch (err) {
+        console.warn('Failed to save unlocked skills to Firestore:', err);
+      }
+    },
+
+    /**
+     * Get student unlocked skills from Google Cloud Firestore
+     */
+    async getStudentUnlockedSkills(studentId) {
+      if (!this.isConfigured || !this.firestore) return null;
+      try {
+        const docId = String(studentId);
+        // Try curriculum_permissions first
+        const docSnap = await this.firestore.collection('curriculum_permissions').doc(docId).get();
+        if (docSnap.exists && Array.isArray(docSnap.data().unlocked_skills)) {
+          return docSnap.data().unlocked_skills;
+        }
+
+        // Fallback to students collection
+        const studentSnap = await this.firestore.collection('students').doc(docId).get();
+        if (studentSnap.exists && Array.isArray(studentSnap.data().unlocked_skills)) {
+          return studentSnap.data().unlocked_skills;
+        }
+        return [];
+      } catch (err) {
+        console.warn('Failed to get unlocked skills from Firestore:', err);
+        return null;
+      }
+    },
+
+    /**
      * Upload initial/local students to cloud in 1 click
      */
     async syncAllLocalStudentsToCloud() {
@@ -677,11 +755,11 @@
       if (isConnected) {
         badge.className = 'cloud-status-pill connected';
         badge.innerHTML = '<span class="status-dot green"></span> 🟢 Google Cloud Active';
-        badge.title = '   Google Cloud Firebase (  )';
+        badge.title = 'Connected to Google Cloud Firebase Firestore (Realtime Active)';
       } else {
         badge.className = 'cloud-status-pill local';
-        badge.innerHTML = '<span class="status-dot amber"></span> ☁️   (Google Cloud)';
-        badge.title = '   Google Cloud Firebase   ';
+        badge.innerHTML = '<span class="status-dot amber"></span> ☁️ Local Storage Mode';
+        badge.title = 'Working in Local Storage Mode (Click to connect Google Cloud)';
       }
     }
   };

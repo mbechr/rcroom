@@ -1328,6 +1328,22 @@ const DB = {
         return await res.json();
       }
     } catch (e) {}
+
+    const studentId = AppState.currentUser?.id;
+    if (studentId) {
+      if (window.CloudDB && window.CloudDB.isConfigured && typeof window.CloudDB.getStudentUnlockedSkills === 'function') {
+        try {
+          const cloudSkills = await window.CloudDB.getStudentUnlockedSkills(studentId);
+          if (Array.isArray(cloudSkills)) {
+            return { success: true, unlocked_skills: cloudSkills };
+          }
+        } catch (e) {}
+      }
+      try {
+        const stored = JSON.parse(localStorage.getItem(`rc_unlocked_${studentId}`) || '[]');
+        return { success: true, unlocked_skills: stored };
+      } catch (e) {}
+    }
     return { success: false, unlocked_skills: [] };
   },
 
@@ -1340,10 +1356,47 @@ const DB = {
         return await res.json();
       }
     } catch (e) {}
+
+    if (studentId) {
+      if (window.CloudDB && window.CloudDB.isConfigured && typeof window.CloudDB.getStudentUnlockedSkills === 'function') {
+        try {
+          const cloudSkills = await window.CloudDB.getStudentUnlockedSkills(studentId);
+          if (Array.isArray(cloudSkills)) {
+            return { success: true, unlocked_skills: cloudSkills };
+          }
+        } catch (e) {}
+      }
+      try {
+        const stored = JSON.parse(localStorage.getItem(`rc_unlocked_${studentId}`) || '[]');
+        return { success: true, unlocked_skills: stored };
+      } catch (e) {}
+    }
     return { success: false, unlocked_skills: [] };
   },
 
   async updateStudentSkills(studentId, action, skillCodes = [], grade = null) {
+    let finalSkills = [];
+    if (action === 'set') {
+      finalSkills = skillCodes;
+    } else if (action === 'unlock_all_grade') {
+      const targetGrade = grade || 'Year 4';
+      finalSkills = (AppState.flatSkills || []).filter(s => s.grade === targetGrade).map(s => s.code);
+    } else if (action === 'lock_all') {
+      finalSkills = [];
+    }
+
+    // Save locally
+    localStorage.setItem(`rc_unlocked_${studentId}`, JSON.stringify(finalSkills));
+
+    // Save to Google Cloud Firestore (CloudDB)
+    if (window.CloudDB && window.CloudDB.isConfigured && typeof window.CloudDB.saveStudentUnlockedSkills === 'function') {
+      try {
+        await window.CloudDB.saveStudentUnlockedSkills(studentId, finalSkills);
+      } catch (e) {
+        console.warn('CloudDB saveStudentUnlockedSkills error:', e);
+      }
+    }
+
     try {
       const res = await fetch(this.apiUrl('/api/teacher/student_skills/update'), {
         method: 'POST',
@@ -1359,7 +1412,8 @@ const DB = {
         return await res.json();
       }
     } catch (e) {}
-    return { success: false };
+
+    return { success: true, unlocked_skills: finalSkills };
   },
 
   async loadStudentCurriculumAccess() {
@@ -3339,16 +3393,22 @@ window.filterCurriculumSkillsTree = function() {
   container.innerHTML = html;
 };
 
-window.handleSkillCheckboxChange = function(skillCode, isChecked) {
+window.handleSkillCheckboxChange = async function(skillCode, isChecked) {
   if (isChecked) {
     AppState.teacherSelectedStudentUnlocked.add(skillCode);
   } else {
     AppState.teacherSelectedStudentUnlocked.delete(skillCode);
   }
   filterCurriculumSkillsTree();
+
+  const studentId = AppState.selectedCurriculumStudentId;
+  if (studentId) {
+    const skillCodes = Array.from(AppState.teacherSelectedStudentUnlocked);
+    await DB.updateStudentSkills(studentId, 'set', skillCodes);
+  }
 };
 
-window.toggleCategoryCurriculumSkills = function(encodedCatKey, isChecked) {
+window.toggleCategoryCurriculumSkills = async function(encodedCatKey, isChecked) {
   const catKey = decodeURIComponent(encodedCatKey);
   const studentGrade = AppState.studentGradeLevel || 'Year 4';
   const targetSkills = (AppState.flatSkills || []).filter(s => {
@@ -3365,6 +3425,12 @@ window.toggleCategoryCurriculumSkills = function(encodedCatKey, isChecked) {
   });
 
   filterCurriculumSkillsTree();
+
+  const studentId = AppState.selectedCurriculumStudentId;
+  if (studentId) {
+    const skillCodes = Array.from(AppState.teacherSelectedStudentUnlocked);
+    await DB.updateStudentSkills(studentId, 'set', skillCodes);
+  }
 };
 
 window.unlockAllGradeSkills = async function() {
@@ -3604,7 +3670,7 @@ async function renderTeacherPayments() {
     const clearHeader = `
       <div style="display: flex; justify-content: flex-end; margin-bottom: 0.75rem; gap: 0.5rem;">
         <button type="button" class="action-btn-sm delete" onclick="clearAllPaymentReceipts()" style="padding: 6px 14px; border-radius: 8px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px;">
-          🗑️ Clear All Receipts / مسح الكل
+          🗑️ Clear All Receipts
         </button>
       </div>
     `;
