@@ -474,6 +474,16 @@ const DB = {
     });
   },
 
+  async getTeacherStudents() {
+    try {
+      const overview = await this.getTeacherOverview();
+      if (overview && Array.isArray(overview.roster) && overview.roster.length) {
+        return overview.roster;
+      }
+    } catch (e) {}
+    return await this.getDemoStudents();
+  },
+
   getAuthHeaders() {
     const token = localStorage.getItem('rc_auth_token') || localStorage.getItem('ixl_auth_token') || '';
     const headers = { 'Content-Type': 'application/json' };
@@ -1572,7 +1582,7 @@ const DB = {
         grade: 'Year 4',
         subject: 'Maths',
         pages_count: '184 Pages',
-        pdf_url: 'https://archive.org/details/cambridge-primary-mathematics-learners-book-4',
+        pdf_url: 'https://archive.org/search.php?query=Cambridge+Primary+Mathematics+Learners+Book+4',
         description: 'Complete official curriculum textbook covering place value, operations, fractions, geometry, and data handling.',
         created_at: new Date().toISOString()
       },
@@ -1583,7 +1593,7 @@ const DB = {
         grade: 'Year 4',
         subject: 'English',
         pages_count: '176 Pages',
-        pdf_url: 'https://archive.org/details/cambridge-primary-english-learners-book-4',
+        pdf_url: 'https://archive.org/search.php?query=Cambridge+Primary+English+Learners+Book+4',
         description: 'Comprehensive English syllabus focusing on reading comprehension, story writing, grammar rules, spelling, and vocabulary.',
         created_at: new Date().toISOString()
       },
@@ -1594,7 +1604,7 @@ const DB = {
         grade: 'Year 4',
         subject: 'Science',
         pages_count: '160 Pages',
-        pdf_url: 'https://archive.org/details/cambridge-primary-science-learners-book-4',
+        pdf_url: 'https://archive.org/search.php?query=Cambridge+Primary+Science+Learners+Book+4',
         description: 'Interactive science textbook exploring living things, sound vibrations, states of matter, habitats, and electrical circuits.',
         created_at: new Date().toISOString()
       },
@@ -1605,7 +1615,7 @@ const DB = {
         grade: 'Year 5',
         subject: 'Maths',
         pages_count: '208 Pages',
-        pdf_url: 'https://archive.org/details/cambridge-primary-mathematics-learners-book-5',
+        pdf_url: 'https://archive.org/search.php?query=Cambridge+Primary+Mathematics+Learners+Book+5',
         description: 'Advanced primary mathematics covering multi-step problem solving, percentages, decimals, angles, perimeter, and area.',
         created_at: new Date().toISOString()
       },
@@ -1616,7 +1626,7 @@ const DB = {
         grade: 'Year 5',
         subject: 'English',
         pages_count: '192 Pages',
-        pdf_url: 'https://archive.org/details/oxford-primary-english-5',
+        pdf_url: 'https://archive.org/search.php?query=Oxford+International+Primary+English+Student+Book+5',
         description: 'Structured language arts curriculum including non-fiction articles, persuasive essays, creative poetry, and syntax mastery.',
         created_at: new Date().toISOString()
       },
@@ -1627,7 +1637,7 @@ const DB = {
         grade: 'Year 6',
         subject: 'Science',
         pages_count: '196 Pages',
-        pdf_url: 'https://archive.org/details/cambridge-primary-science-learners-book-6',
+        pdf_url: 'https://archive.org/search.php?query=Cambridge+Primary+Science+Learners+Book+6',
         description: 'Upper primary science program covering human body organs, ecosystems, reversible/irreversible changes, and forces.',
         created_at: new Date().toISOString()
       }
@@ -2938,6 +2948,18 @@ function cleanWhatsAppNumber(phone) {
 
 window.cleanWhatsAppNumber = cleanWhatsAppNumber;
 
+function sanitizeExternalUrl(url) {
+  if (!url) return '#';
+  url = String(url).trim();
+  if (!url || url === '#' || url.startsWith('javascript:')) return '#';
+  if (/^(https?:\/\/|data:|blob:|mailto:|tel:|\/\/)/i.test(url)) {
+    return url;
+  }
+  return 'https://' + url;
+}
+
+window.sanitizeExternalUrl = sanitizeExternalUrl;
+
 window.switchTeacherTab = function(tabName) {
   const tabs = document.querySelectorAll('#teacherSubTabs .teacher-sub-tab');
   tabs.forEach(t => {
@@ -3258,12 +3280,12 @@ async function renderTeacherSessions() {
           </div>
           <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 8px;">
             ${s.zoom_link ? `
-              <a href="${s.zoom_link}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(0, 113, 227, 0.1); color: var(--color-primary); border: 1px solid rgba(0, 113, 227, 0.25); padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; text-decoration: none;">
+              <a href="${sanitizeExternalUrl(s.zoom_link)}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(0, 113, 227, 0.1); color: var(--color-primary); border: 1px solid rgba(0, 113, 227, 0.25); padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; text-decoration: none;">
                 🎥 Zoom Meeting
               </a>
             ` : ''}
             ${s.pdf_link ? `
-              <a href="${s.pdf_link}" target="_blank" style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(239, 68, 68, 0.1); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.25); padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; text-decoration: none;">
+              <a href="${sanitizeExternalUrl(s.pdf_link)}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(239, 68, 68, 0.1); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.25); padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; text-decoration: none;">
                 📄 ${s.pdf_title || 'PDF Sheet'}
               </a>
             ` : ''}
@@ -3371,6 +3393,9 @@ window.handleCurriculumBooksSearch = function(query) {
 
 function renderCurriculumBookCardHtml(b, isTeacher = false) {
   const subjClass = (b.subject || 'other').toLowerCase();
+  const safePdfUrl = sanitizeExternalUrl(b.pdf_url);
+  const isBlobOrData = safePdfUrl.startsWith('data:') || safePdfUrl.startsWith('blob:');
+
   return `
     <div class="curriculum-book-card">
       <div>
@@ -3387,10 +3412,10 @@ function renderCurriculumBookCardHtml(b, isTeacher = false) {
           <span>📅 ${b.created_at ? new Date(b.created_at).toLocaleDateString('en-GB') : 'Official'}</span>
         </div>
         <div class="flex items-center justify-between gap-2 pt-2 border-t border-white/10">
-          <a href="${b.pdf_url}" target="_blank" rel="noopener noreferrer" class="primary-glow-btn flex-1 text-center justify-center text-xs py-2">
+          <a href="${safePdfUrl}" target="_blank" rel="noopener noreferrer" class="primary-glow-btn flex-1 text-center justify-center text-xs py-2">
             <span>📖</span> <span>Read Full PDF</span>
           </a>
-          <a href="${b.pdf_url}" target="_blank" download class="secondary-glass-btn text-xs px-3 py-2" title="Download Book PDF">
+          <a href="${safePdfUrl}" target="_blank" rel="noopener noreferrer" ${isBlobOrData ? 'download="Curriculum_Book.pdf"' : ''} class="secondary-glass-btn text-xs px-3 py-2" title="Download / Open Book PDF">
             <span>⬇️</span>
           </a>
           ${isTeacher ? `
@@ -3812,13 +3837,13 @@ async function renderStudentSessions() {
         </div>
         <div class="space-y-2 pt-2 border-t border-border-subtle">
           ${s.zoom_link ? `
-            <a href="${s.zoom_link}" target="_blank" class="w-full py-2.5 px-4 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold flex items-center justify-center gap-2 shadow-sm transition-all text-sm no-underline">
+            <a href="${sanitizeExternalUrl(s.zoom_link)}" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold flex items-center justify-center gap-2 shadow-sm transition-all text-sm no-underline">
               <span>🎥</span>
               <span>Join Zoom Pro Meeting</span>
             </a>
           ` : ''}
           ${s.pdf_link ? `
-            <a href="${s.pdf_link}" target="_blank" class="w-full py-2 px-4 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface font-semibold flex items-center justify-center gap-2 transition-all text-xs no-underline">
+            <a href="${sanitizeExternalUrl(s.pdf_link)}" target="_blank" rel="noopener noreferrer" class="w-full py-2 px-4 rounded-xl bg-surface-container-low hover:bg-surface-container text-on-surface font-semibold flex items-center justify-center gap-2 transition-all text-xs no-underline">
               <span>📄</span>
               <span>${s.pdf_title || 'Download Study Sheet (PDF)'}</span>
             </a>
@@ -5130,26 +5155,29 @@ window.shareAssignmentWhatsApp = async function(assignmentId) {
 };
 
 async function exportClassroomCsv() {
-  const token = localStorage.getItem('rc_auth_token') || localStorage.getItem('ixl_auth_token') || '';
   try {
-    const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-    const res = await fetch('/api/teacher/export_csv', { headers });
-    if (res.ok) {
-      const blob = await res.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'Rania_Classroom_Roster.csv';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      window.URL.revokeObjectURL(url);
-      showToast('Grade roster CSV downloaded! 📥');
-    } else {
-      showToast('Please log in with teacher account to export data.');
+    const overview = await DB.getTeacherOverview();
+    if (!overview || !overview.roster || !overview.roster.length) {
+      showToast('No student roster records found to export.', '⚠️');
+      return;
     }
+    const roster = overview.roster;
+    let csv = 'Student ID,Full Name,Username,Grade,Parent Name,Student Phone,Parent WhatsApp,Payment Status,Payment Amount,Payment Method,Questions Answered,Questions Correct,Accuracy Rate,Avg SmartScore,Total XP,Daily Streak,Last Active\n';
+    roster.forEach(s => {
+      csv += `"${s.id}","${s.full_name || ''}","${s.username || ''}","${s.grade_level || ''}","${s.parent_name || ''}","${s.student_phone || ''}","${s.parent_phone || ''}","${s.payment_status || 'paid'}","${s.payment_amount !== undefined ? s.payment_amount : 500}","${s.payment_method || 'InstaPay'}","${s.questions_answered || 0}","${s.questions_correct || 0}","${s.accuracy_rate || 0}%","${s.avg_smart_score || 0}","${s.xp || 0}","${s.streak_days || 1}","${s.last_active || ''}"\n`;
+    });
+    const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Rania_Classroom_Roster_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+    showToast('Classroom CSV Report exported! 📥');
   } catch (err) {
-    showToast('Export failed: ' + err.message);
+    showToast('Export failed: ' + err.message, '⚠️');
   }
 }
 

@@ -64,11 +64,15 @@ const SyncManager = {
 
     if (!studentId) return;
 
+    const isStaticHost = typeof window !== 'undefined' && window.location && window.location.hostname.endsWith('github.io');
+    if (isStaticHost) return;
+
     try {
       const headers = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = 'Bearer ' + token;
+      const apiEndpoint = (window.DB && typeof window.DB.apiUrl === 'function') ? window.DB.apiUrl('/api/sync') : '/api/sync';
 
-      const res = await fetch('/api/sync', {
+      const res = await fetch(apiEndpoint, {
         method: 'POST',
         headers: headers,
         body: JSON.stringify({

@@ -1,6 +1,7 @@
 @echo off
 title Upload RC Classroom to GitHub
 chcp 65001 >nul
+set "PATH=%PATH%;C:\Users\mbechr\MinGit\cmd"
 echo ========================================================
 echo   Uploading RC Classroom to GitHub
 echo   Repository: https://github.com/mbechr/rcroom
