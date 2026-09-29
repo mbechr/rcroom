@@ -293,15 +293,10 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
             "connect-src 'self' http://localhost:* http://127.0.0.1:* https://*.firebaseio.com https://*.googleapis.com;"
         ))
 
-        # Cache-Control: Force browsers to always fetch fresh code
-        if self.path.startswith('/api/'):
-            self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
-            self.send_header('Pragma', 'no-cache')
-        elif self.path.endswith('.html') or self.path == '/' or '.' not in self.path.split('/')[-1]:
-            self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate, max-age=0')
-            self.send_header('Pragma', 'no-cache')
-        else:
-            self.send_header('Cache-Control', 'no-cache, must-revalidate, max-age=0')
+        # Cache-Control: Force browsers to always fetch fresh code (Zero Caching)
+        self.send_header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0, post-check=0, pre-check=0')
+        self.send_header('Pragma', 'no-cache')
+        self.send_header('Expires', '0')
 
         super().end_headers()
 

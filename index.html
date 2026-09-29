@@ -109,8 +109,23 @@
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 
-  <!-- Core Project Styles -->
-  <link rel="stylesheet" href="style.css?v=3.1.0">
+  <script>
+    // Zero-Cache: Immediately unregister legacy service workers and clear caches
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(r => r.forEach(reg => reg.unregister()));
+    }
+    if ('caches' in window) {
+      caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
+    }
+    // Dynamic Zero-Cache Stylesheet Loader
+    (function() {
+      const buster = Date.now();
+      const css = document.createElement('link');
+      css.rel = 'stylesheet';
+      css.href = 'style.css?_t=' + buster;
+      document.head.appendChild(css);
+    })();
+  </script>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'><rect width='48' height='48' rx='12' fill='%230062e3'/><path d='M14 15h9a6 6 0 0 1 0 12h-9V15zm6 7h3a1 1 0 0 0 0-2h-3v2z' fill='%23ffffff'/><path d='M22 27l5 9h-6l-4.5-8h4.5z' fill='%23ffffff'/><path d='M34 16l1.2 3.8 3.8 1.2-3.8 1.2-1.2 3.8-1.2-3.8-3.8-1.2 3.8-1.2z' fill='%23f59e0b'/></svg>">
 
   <style>
@@ -2540,20 +2555,55 @@
     <span class="toast-message" id="toastMessage">Notification</span>
   </div>
 
-  <!-- Scripts (Cache-Busted v=3.1.0) -->
-  <script src="data/curriculum_data.js?v=3.1.0"></script>
-  <script src="data/teacher_curriculum.js?v=3.1.0"></script>
-  <script src="js/i18n.js?v=3.1.0"></script>
-  <script src="js/scratchpad.js?v=3.1.0"></script>
-  <script src="js/audio.js?v=3.1.0"></script>
-  <script src="js/sync.js?v=3.1.0"></script>
-  <script src="js/question-engine.js?v=3.1.0"></script>
-  <script src="js/classroom-tools.js?v=3.1.0"></script>
-  <script src="js/certificate.js?v=3.1.0"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-  <script src="js/cloud-db.js?v=3.1.0"></script>
-  <script src="app.js?v=3.1.0"></script>
+  <!-- Dynamic Zero-Cache Script Loader (Bypasses GitHub Pages & Local Caching) -->
+  <script>
+    (function() {
+      const buster = Date.now();
+      const appScripts = [
+        'data/curriculum_data.js',
+        'data/teacher_curriculum.js',
+        'js/i18n.js',
+        'js/scratchpad.js',
+        'js/audio.js',
+        'js/sync.js',
+        'js/question-engine.js',
+        'js/classroom-tools.js',
+        'js/certificate.js',
+        'js/cloud-db.js',
+        'app.js'
+      ];
+
+      function loadNextScript(idx) {
+        if (idx >= appScripts.length) return;
+        const s = document.createElement('script');
+        s.src = appScripts[idx] + '?_t=' + buster;
+        s.async = false;
+        s.onload = () => loadNextScript(idx + 1);
+        s.onerror = (err) => {
+          console.warn('Script load notice:', appScripts[idx], err);
+          loadNextScript(idx + 1);
+        };
+        document.body.appendChild(s);
+      }
+
+      // Load Firebase Compat CDN scripts, then load application scripts sequentially
+      const fbApp = document.createElement('script');
+      fbApp.src = 'https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js';
+      fbApp.async = false;
+      fbApp.onload = () => {
+        const fbStore = document.createElement('script');
+        fbStore.src = 'https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js';
+        fbStore.async = false;
+        fbStore.onload = () => {
+          loadNextScript(0);
+        };
+        fbStore.onerror = () => loadNextScript(0);
+        document.body.appendChild(fbStore);
+      };
+      fbApp.onerror = () => loadNextScript(0);
+      document.body.appendChild(fbApp);
+    })();
+  </script>
 </body>
 </html>
 
