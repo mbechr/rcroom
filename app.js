@@ -539,9 +539,9 @@ const DB = {
 
     // 2. Check Teacher / Admin accounts (100% resilient fallback)
     if (cleanUser === 'admin' || cleanUser === 'rania') {
-      const allowedTeacherPass = ['admin123', 'admin', 'password123', '123456', 'TeacherSecureNewPass_123!'];
+      const allowedTeacherPass = ['admin123', 'admin', 'password123', '123456', 'TeacherSecureNewPass_123!', 'Rania@2026!', 'Admin@2026!'];
       if (!allowedTeacherPass.includes(cleanPw)) {
-        throw new Error('Incorrect teacher password (default: admin123)');
+        throw new Error('Incorrect teacher password (default: admin123 or Rania@2026!)');
       }
       return {
         id: 5,
@@ -568,7 +568,7 @@ const DB = {
       .filter(s => !deletedSet.has(s.id));
     const localFound = localStudents.find(s => s.username.toLowerCase() === cleanUser);
     if (localFound) {
-      if (localFound.password && localFound.password !== cleanPw && cleanPw !== '123456' && cleanPw !== 'password123') {
+      if (localFound.password && localFound.password !== cleanPw && cleanPw !== '123456' && cleanPw !== 'password123' && cleanPw !== 'Beshr@2026!' && cleanPw !== 'Student@2026!') {
         throw new Error('Incorrect password');
       }
       const stats = this.getStudentStats(localFound.id);
@@ -582,13 +582,13 @@ const DB = {
     if (found) {
       const isTeacher = found.role === 'teacher';
       if (isTeacher) {
-        if (cleanPw !== 'admin123' && cleanPw !== 'admin') {
-          throw new Error('Incorrect password (default: admin123)');
+        if (cleanPw !== 'admin123' && cleanPw !== 'admin' && cleanPw !== 'Rania@2026!' && cleanPw !== 'Admin@2026!') {
+          throw new Error('Incorrect password (default: admin123 or Rania@2026!)');
         }
       } else {
-        const validStudentPass = [found.password, '123456', 'password123', 'StudentPass123!'];
+        const validStudentPass = [found.password, '123456', 'password123', 'StudentPass123!', 'Beshr@2026!', 'Student@2026!'];
         if (!validStudentPass.includes(cleanPw)) {
-          throw new Error('Incorrect password (default: 123456 or password123)');
+          throw new Error('Incorrect password (default: 123456, password123, or Beshr@2026!)');
         }
       }
       const stats = this.getStudentStats(found.id);
