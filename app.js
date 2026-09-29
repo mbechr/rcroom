@@ -2492,6 +2492,7 @@ function updateStudentHeader() {
       sidebarTeacherTab.classList.add('bg-purple-600', 'text-white');
       sidebarTeacherTab.classList.remove('text-purple-700', 'hover:bg-purple-50');
     }
+    document.querySelectorAll('.teacher-sidebar-header').forEach(h => h.style.display = 'block');
     // Teacher sees curriculum tracks and skills bank
     document.querySelectorAll('.nav-tab[data-view="tracks"], .nav-tab[data-view="skills"]').forEach(t => t.style.display = 'flex');
     const topSearch = document.getElementById('topSearchIconBtn');
@@ -2511,6 +2512,7 @@ function updateStudentHeader() {
     if (sidebarTeacherTab) {
       sidebarTeacherTab.style.display = 'none'; // Strictly hidden for students
     }
+    document.querySelectorAll('.teacher-sidebar-header').forEach(h => h.style.display = 'none');
     // Students can access Curriculum & Practice view (unlocked lessons enabled, locked lessons protected)
     document.querySelectorAll('.nav-tab[data-view="skills"]').forEach(t => t.style.display = 'flex');
     document.querySelectorAll('.nav-tab[data-view="tracks"]').forEach(t => t.style.display = 'none');

@@ -319,33 +319,38 @@
     <div class="flex flex-col gap-5 px-3">
       
       <nav class="flex flex-col gap-1.5" id="sidebarNavTabs">
-        <!-- Student Views -->
+        <!-- Student Section: Learning Hub -->
+        <div class="px-3 pt-1 pb-0.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Learning Hub</div>
         <button class="nav-tab student-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all bg-primary-container text-on-primary font-bold shadow-sm active text-left w-full cursor-pointer" data-view="dashboard" title="Dashboard & Homework">
-          <span class="material-symbols-outlined text-[20px] shrink-0">space_dashboard</span>
-          <span class="sidebar-text truncate">Portal &amp; Tasks 📝</span>
+          <span class="material-symbols-outlined text-[20px] shrink-0">home</span>
+          <span class="sidebar-text truncate">Home Dashboard</span>
         </button>
         <button class="nav-tab student-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="skills" title="Interactive Practice & Unlocked Lessons">
           <span class="material-symbols-outlined text-[20px] shrink-0">psychology</span>
-          <span class="sidebar-text truncate">Curriculum &amp; Practice 🎯</span>
+          <span class="sidebar-text truncate">Practice &amp; Skills 🎯</span>
         </button>
         <button class="nav-tab student-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="sessions" title="Zoom & Class Logs">
           <span class="material-symbols-outlined text-[20px] shrink-0">videocam</span>
-          <span class="sidebar-text truncate">Zoom &amp; Lessons 🎥</span>
-        </button>
-        <button class="nav-tab student-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="payments" title="Subscription & Payment">
-          <span class="material-symbols-outlined text-[20px] shrink-0">credit_card</span>
-          <span class="sidebar-text truncate">Payment &amp; Proof 💳</span>
+          <span class="sidebar-text truncate">Live Classes 🎥</span>
         </button>
         <button class="nav-tab student-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="curriculum-books" title="Curriculum Books & Full PDFs">
           <span class="material-symbols-outlined text-[20px] shrink-0">menu_book</span>
-          <span class="sidebar-text truncate">Curriculum PDFs 📚</span>
+          <span class="sidebar-text truncate">PDF Textbooks 📚</span>
         </button>
+
+        <!-- Student Section: Account & Scores -->
+        <div class="px-3 pt-3 pb-0.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Account &amp; Scores</div>
         <button class="nav-tab student-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="reports" title="My Progress">
           <span class="material-symbols-outlined text-[20px] shrink-0">analytics</span>
-          <span class="sidebar-text truncate">My Progress 📊</span>
+          <span class="sidebar-text truncate">My Report Card 📊</span>
+        </button>
+        <button class="nav-tab student-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="payments" title="Subscription & Payment">
+          <span class="material-symbols-outlined text-[20px] shrink-0">credit_card</span>
+          <span class="sidebar-text truncate">Tuition &amp; Receipts 💳</span>
         </button>
 
         <!-- Teacher Console Access (Only visible when logged in as Teacher) -->
+        <div class="px-3 pt-3 pb-0.5 text-[10px] font-bold text-cyan-400 uppercase tracking-wider teacher-sidebar-header" style="display: none;">Teacher Console</div>
         <button class="nav-tab teacher-nav-tab flex items-center justify-between px-3 py-2.5 rounded-xl font-label-md text-label-md text-cyan-400 hover:bg-cyan-500/10 transition-all text-left w-full cursor-pointer border border-cyan-500/30" data-view="teacher" id="sidebarTeacherTabBtn" style="display: none;" title="Teacher Command Center">
           <div class="flex items-center gap-3 min-w-0">
             <span class="material-symbols-outlined text-[20px] shrink-0 text-cyan-400">admin_panel_settings</span>
@@ -934,38 +939,57 @@
         </div>
       </div>
 
-      <!-- Teacher Navigation Sub-Tabs -->
-      <div class="teacher-sub-nav" id="teacherSubTabs">
-        <button type="button" class="teacher-sub-tab active" data-ttab="students" onclick="switchTeacherTab('students')">
-          <span class="material-symbols-outlined">group</span>
-          <span>Students &amp; Subscriptions</span>
-        </button>
-        <button type="button" class="teacher-sub-tab" data-ttab="payments" onclick="switchTeacherTab('payments')">
-          <span class="material-symbols-outlined">receipt_long</span>
-          <span>Payment Receipts</span>
-          <span class="teacher-tab-badge amber" id="tPendingReceiptsBadge" style="display:none;">0</span>
-        </button>
-        <button type="button" class="teacher-sub-tab" data-ttab="sessions" onclick="switchTeacherTab('sessions')">
-          <span class="material-symbols-outlined">videocam</span>
-          <span>Zoom &amp; Syllabus Log</span>
-        </button>
-        <button type="button" class="teacher-sub-tab" data-ttab="homework" onclick="switchTeacherTab('homework')">
-          <span class="material-symbols-outlined">assignment</span>
-          <span>Homework Assignments</span>
-        </button>
-        <button type="button" class="teacher-sub-tab" data-ttab="books" onclick="switchTeacherTab('books')">
-          <span class="material-symbols-outlined">menu_book</span>
-          <span>Curriculum PDFs</span>
-        </button>
-        <button type="button" class="teacher-sub-tab" data-ttab="planner" onclick="switchTeacherTab('planner')">
-          <span class="material-symbols-outlined">event_note</span>
-          <span>Daily Planner &amp; To-Do</span>
-          <span class="teacher-tab-badge emerald" id="tTodayPlannerBadge" style="display:none;">0</span>
-        </button>
-        <button type="button" class="teacher-sub-tab" data-ttab="curriculum" onclick="switchTeacherTab('curriculum')">
-          <span class="material-symbols-outlined">lock_open</span>
-          <span>Curriculum Access</span>
-        </button>
+      <!-- Teacher Navigation Sub-Tabs (Categorized by Purpose) -->
+      <div class="teacher-nav-groups-container mb-6" id="teacherSubTabs">
+        <!-- Group 1: Teaching & Curriculum -->
+        <div class="teacher-tab-group">
+          <div class="teacher-group-header">
+            <span class="material-symbols-outlined text-[16px]">school</span>
+            <span>Teaching &amp; Curriculum</span>
+          </div>
+          <div class="teacher-group-buttons">
+            <button type="button" class="teacher-sub-tab" data-ttab="homework" onclick="switchTeacherTab('homework')">
+              <span class="material-symbols-outlined">assignment</span>
+              <span>Homework</span>
+            </button>
+            <button type="button" class="teacher-sub-tab" data-ttab="curriculum" onclick="switchTeacherTab('curriculum')">
+              <span class="material-symbols-outlined">lock_open</span>
+              <span>Lesson Permissions</span>
+            </button>
+            <button type="button" class="teacher-sub-tab" data-ttab="sessions" onclick="switchTeacherTab('sessions')">
+              <span class="material-symbols-outlined">videocam</span>
+              <span>Zoom &amp; Syllabus</span>
+            </button>
+            <button type="button" class="teacher-sub-tab" data-ttab="books" onclick="switchTeacherTab('books')">
+              <span class="material-symbols-outlined">menu_book</span>
+              <span>PDF Textbooks</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Group 2: Classroom Management -->
+        <div class="teacher-tab-group">
+          <div class="teacher-group-header">
+            <span class="material-symbols-outlined text-[16px]">manage_accounts</span>
+            <span>Classroom &amp; Operations</span>
+          </div>
+          <div class="teacher-group-buttons">
+            <button type="button" class="teacher-sub-tab active" data-ttab="students" onclick="switchTeacherTab('students')">
+              <span class="material-symbols-outlined">group</span>
+              <span>Students Roster</span>
+            </button>
+            <button type="button" class="teacher-sub-tab" data-ttab="payments" onclick="switchTeacherTab('payments')">
+              <span class="material-symbols-outlined">receipt_long</span>
+              <span>Payment Approvals</span>
+              <span class="teacher-tab-badge amber" id="tPendingReceiptsBadge" style="display:none;">0</span>
+            </button>
+            <button type="button" class="teacher-sub-tab" data-ttab="planner" onclick="switchTeacherTab('planner')">
+              <span class="material-symbols-outlined">event_note</span>
+              <span>Daily Planner</span>
+              <span class="teacher-tab-badge emerald" id="tTodayPlannerBadge" style="display:none;">0</span>
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- ==============================================================
