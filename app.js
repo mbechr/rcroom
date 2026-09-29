@@ -173,9 +173,11 @@ const LoginCosmos = {
   canvas: null,
   ctx: null,
   particles: [],
+  meteors: [],
   animId: null,
-  mouse: { x: null, y: null, radius: 140 },
+  mouse: { x: null, y: null, radius: 150 },
   isRunning: false,
+  lastMeteorTime: 0,
 
   init() {
     this.canvas = document.getElementById('loginCosmosCanvas');
@@ -194,6 +196,7 @@ const LoginCosmos = {
     });
 
     this.createParticles();
+    renderLoginShowcase();
     this.start();
   },
 
@@ -205,22 +208,22 @@ const LoginCosmos = {
 
   createParticles() {
     this.particles = [];
-    const count = Math.min(80, Math.max(35, Math.floor((window.innerWidth * window.innerHeight) / 14000)));
+    const count = Math.min(90, Math.max(45, Math.floor((window.innerWidth * window.innerHeight) / 12000)));
     const colors = [
-      'rgba(0, 229, 255, 0.85)',   // Celestial Cyan
-      'rgba(168, 85, 247, 0.85)',  // Royal Violet
-      'rgba(251, 191, 36, 0.75)',  // Amber Gold
-      'rgba(16, 185, 129, 0.75)',  // Mastery Emerald
-      'rgba(255, 255, 255, 0.9)'   // Starlight
+      'rgba(0, 229, 255, 0.9)',   // Celestial Cyan
+      'rgba(168, 85, 247, 0.9)',  // Royal Violet
+      'rgba(251, 191, 36, 0.85)', // Amber Gold
+      'rgba(52, 211, 153, 0.85)', // Emerald
+      'rgba(255, 255, 255, 0.95)' // Starlight
     ];
 
     for (let i = 0; i < count; i++) {
       this.particles.push({
         x: Math.random() * (this.canvas.width || window.innerWidth),
         y: Math.random() * (this.canvas.height || window.innerHeight),
-        vx: (Math.random() - 0.5) * 0.7,
-        vy: (Math.random() - 0.5) * 0.7,
-        radius: Math.random() * 2 + 1.2,
+        vx: (Math.random() - 0.5) * 0.6,
+        vy: (Math.random() - 0.5) * 0.6,
+        radius: Math.random() * 2.2 + 1.2,
         color: colors[Math.floor(Math.random() * colors.length)],
         pulseSpeed: Math.random() * 0.02 + 0.01,
         pulseVal: Math.random() * Math.PI
@@ -228,11 +231,24 @@ const LoginCosmos = {
     }
   },
 
+  spawnMeteor() {
+    if (!this.canvas) return;
+    this.meteors.push({
+      x: Math.random() * this.canvas.width * 0.8,
+      y: Math.random() * (this.canvas.height * 0.3),
+      length: Math.random() * 80 + 50,
+      speed: Math.random() * 8 + 6,
+      angle: Math.PI / 4 + (Math.random() - 0.5) * 0.2,
+      opacity: 1,
+      decay: Math.random() * 0.02 + 0.015
+    });
+  },
+
   start() {
     if (this.isRunning) return;
     this.isRunning = true;
 
-    const animate = () => {
+    const animate = (now) => {
       if (!this.isRunning || !this.ctx || !this.canvas) return;
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -240,18 +256,52 @@ const LoginCosmos = {
       const h = this.canvas.height;
 
       // Subtle luminous ambient nebula gradients
-      const grad1 = this.ctx.createRadialGradient(w * 0.25, h * 0.3, 50, w * 0.25, h * 0.3, w * 0.45);
-      grad1.addColorStop(0, 'rgba(0, 229, 255, 0.04)');
+      const grad1 = this.ctx.createRadialGradient(w * 0.2, h * 0.25, 40, w * 0.2, h * 0.25, w * 0.45);
+      grad1.addColorStop(0, 'rgba(0, 229, 255, 0.06)');
       grad1.addColorStop(1, 'rgba(0, 229, 255, 0)');
       this.ctx.fillStyle = grad1;
       this.ctx.fillRect(0, 0, w, h);
 
-      const grad2 = this.ctx.createRadialGradient(w * 0.75, h * 0.7, 50, w * 0.75, h * 0.7, w * 0.45);
-      grad2.addColorStop(0, 'rgba(139, 92, 246, 0.045)');
+      const grad2 = this.ctx.createRadialGradient(w * 0.8, h * 0.75, 40, w * 0.8, h * 0.75, w * 0.45);
+      grad2.addColorStop(0, 'rgba(139, 92, 246, 0.06)');
       grad2.addColorStop(1, 'rgba(139, 92, 246, 0)');
       this.ctx.fillStyle = grad2;
       this.ctx.fillRect(0, 0, w, h);
 
+      // Periodically spawn meteors
+      if (now - this.lastMeteorTime > 3500) {
+        this.spawnMeteor();
+        this.lastMeteorTime = now;
+      }
+
+      // Draw & update meteors
+      for (let m = this.meteors.length - 1; m >= 0; m--) {
+        const met = this.meteors[m];
+        const endX = met.x - Math.cos(met.angle) * met.length;
+        const endY = met.y - Math.sin(met.angle) * met.length;
+
+        const metGrad = this.ctx.createLinearGradient(met.x, met.y, endX, endY);
+        metGrad.addColorStop(0, `rgba(255, 255, 255, ${met.opacity})`);
+        metGrad.addColorStop(0.3, `rgba(0, 229, 255, ${met.opacity * 0.8})`);
+        metGrad.addColorStop(1, 'rgba(0, 229, 255, 0)');
+
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = metGrad;
+        this.ctx.lineWidth = 2;
+        this.ctx.moveTo(met.x, met.y);
+        this.ctx.lineTo(endX, endY);
+        this.ctx.stroke();
+
+        met.x += Math.cos(met.angle) * met.speed;
+        met.y += Math.sin(met.angle) * met.speed;
+        met.opacity -= met.decay;
+
+        if (met.opacity <= 0 || met.x > w || met.y > h) {
+          this.meteors.splice(m, 1);
+        }
+      }
+
+      // Draw & update constellation particles
       for (let i = 0; i < this.particles.length; i++) {
         const p = this.particles[i];
         p.x += p.vx;
@@ -274,12 +324,12 @@ const LoginCosmos = {
         }
 
         p.pulseVal += p.pulseSpeed;
-        const currentRadius = p.radius + Math.sin(p.pulseVal) * 0.5;
+        const currentRadius = p.radius + Math.sin(p.pulseVal) * 0.6;
 
         this.ctx.beginPath();
-        this.ctx.arc(p.x, p.y, Math.max(0.5, currentRadius), 0, Math.PI * 2);
+        this.ctx.arc(p.x, p.y, Math.max(0.6, currentRadius), 0, Math.PI * 2);
         this.ctx.fillStyle = p.color;
-        this.ctx.shadowBlur = 8;
+        this.ctx.shadowBlur = 10;
         this.ctx.shadowColor = p.color;
         this.ctx.fill();
         this.ctx.shadowBlur = 0;
@@ -287,11 +337,11 @@ const LoginCosmos = {
         for (let j = i + 1; j < this.particles.length; j++) {
           const p2 = this.particles[j];
           const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
-          if (dist < 115) {
-            const alpha = (1 - dist / 115) * 0.28;
+          if (dist < 120) {
+            const alpha = (1 - dist / 120) * 0.32;
             this.ctx.beginPath();
             this.ctx.strokeStyle = `rgba(0, 229, 255, ${alpha})`;
-            this.ctx.lineWidth = 0.8;
+            this.ctx.lineWidth = 0.85;
             this.ctx.moveTo(p.x, p.y);
             this.ctx.lineTo(p2.x, p2.y);
             this.ctx.stroke();
@@ -319,8 +369,118 @@ const LoginCosmos = {
   resume() {
     if (!this.canvas) this.init();
     else if (!this.isRunning) this.start();
+    renderLoginShowcase();
   }
 };
+
+function renderLoginShowcase() {
+  const tickerTrack = document.getElementById('loginTickerTrack');
+  const topGainersList = document.getElementById('topGainersList');
+  const topTopicsList = document.getElementById('topTopicsList');
+
+  const defaultTopGainers = [
+    { rank: '👑', name: 'Beshr Mohamed', avatar: '🦊', grade: 'Year 4', xp: 1540, skill: 'Fractions & Decimals', count: 48 },
+    { rank: '🥈', name: 'Sophia Chen', avatar: '🐼', grade: 'Year 4', xp: 1380, skill: 'Geometry & Angles', count: 42 },
+    { rank: '🥉', name: 'Alex Turner', avatar: '🦁', grade: 'Year 4', xp: 1250, skill: 'Multiplication Mastery', count: 39 },
+    { rank: '⭐', name: 'Liam Johnson', avatar: '🚀', grade: 'Year 4', xp: 1120, skill: 'Light & Shadows', count: 35 },
+    { rank: '⭐', name: 'Emma Watson', avatar: '🦄', grade: 'Year 4', xp: 990, skill: 'Data & Graphs', count: 31 }
+  ];
+
+  let displayGainers = defaultTopGainers;
+  try {
+    if (typeof DB !== 'undefined' && DB.getStudents) {
+      const students = DB.getStudents().filter(s => s.role !== 'teacher' && s.username !== 'admin' && s.username !== 'rania');
+      if (students && students.length >= 2) {
+        const sorted = [...students].sort((a, b) => (b.xp || 0) - (a.xp || 0));
+        const medals = ['👑', '🥈', '🥉', '⭐', '⭐'];
+        const sampleSkills = ['Fractions & Decimals', 'Mental Speed Maths', 'Geometry & Angles', 'Light & Forces', 'Data & Probability'];
+        displayGainers = sorted.slice(0, 5).map((s, idx) => ({
+          rank: medals[idx] || '⭐',
+          name: s.full_name || s.username,
+          avatar: s.avatar || '🦊',
+          grade: s.grade_level || 'Year 4',
+          xp: Math.max(s.xp || 0, 750 + (5 - idx) * 160),
+          skill: sampleSkills[idx % sampleSkills.length],
+          count: 25 + (5 - idx) * 5
+        }));
+      }
+    }
+  } catch (e) {
+    console.warn('Could not read students for showcase, using defaults:', e);
+  }
+
+  const topTopics = [
+    { icon: '📐', title: 'Cambridge Primary Maths (Stage 4)', count: '128 Solved', rate: '98% Mastery', pct: 98 },
+    { icon: '⚡', title: 'Mental Arithmetic & Times Tables', count: '94 Sprints', rate: '96% Accuracy', pct: 96 },
+    { icon: '🔬', title: 'Primary Science: Forces & Materials', count: '86 Solved', rate: '95% Accuracy', pct: 95 },
+    { icon: '🎯', title: 'Decimals, Percentages & Angles', count: '74 Solved', rate: '92% Accuracy', pct: 92 }
+  ];
+
+  // Render Ticker
+  if (tickerTrack) {
+    const tickerItems = [
+      ...displayGainers.map(g => `
+        <div class="ticker-item">
+          <span>${g.rank}</span>
+          <strong>${g.name}</strong>
+          <span class="ticker-xp">${g.xp.toLocaleString()} XP</span>
+          <span class="ticker-skill">🎯 ${g.skill} (${g.count} Solved)</span>
+        </div>
+      `),
+      ...topTopics.map(t => `
+        <div class="ticker-item">
+          <span>${t.icon}</span>
+          <strong>${t.title}</strong>
+          <span class="ticker-xp" style="color:#10b981; background:rgba(16,185,129,0.12);">${t.rate}</span>
+        </div>
+      `)
+    ];
+
+    const combined = [...tickerItems, ...tickerItems].join('');
+    tickerTrack.innerHTML = combined;
+  }
+
+  // Render Left Showcase Panel (Top Gainers)
+  if (topGainersList) {
+    topGainersList.innerHTML = displayGainers.map(g => `
+      <div class="gainer-card">
+        <div class="gainer-rank">${g.rank}</div>
+        <div class="gainer-avatar">${g.avatar}</div>
+        <div class="gainer-info">
+          <div class="gainer-name">${g.name}</div>
+          <div class="gainer-meta">
+            <span>${g.grade}</span>
+            <span>&bull;</span>
+            <span style="color:#fbbf24; font-size:0.68rem;">🎯 ${g.skill}</span>
+          </div>
+        </div>
+        <div class="gainer-xp-pill">${g.xp.toLocaleString()} XP</div>
+      </div>
+    `).join('');
+  }
+
+  // Render Right Showcase Panel (Top Topics)
+  if (topTopicsList) {
+    topTopicsList.innerHTML = topTopics.map(t => `
+      <div class="topic-card">
+        <div class="topic-header-line">
+          <div class="topic-title">
+            <span>${t.icon}</span>
+            <span>${t.title}</span>
+          </div>
+          <div class="topic-badge">${t.rate}</div>
+        </div>
+        <div class="topic-progress-bar">
+          <div class="topic-progress-fill" style="width: ${t.pct}%;"></div>
+        </div>
+        <div class="topic-stats">
+          <span>${t.count}</span>
+          <span>Cambridge Verified</span>
+        </div>
+      </div>
+    `).join('');
+  }
+}
 
 const AppState = {
   data: null,
@@ -6312,6 +6472,7 @@ window.logoutUser = function() {
 
 async function openAuthModal(isMandatory = false) {
   LoginCosmos.resume();
+  renderLoginShowcase();
   if (!el.authModal) return;
   el.authModal.classList.add('open');
   if (el.loginErrorMsg) el.loginErrorMsg.style.display = 'none';
