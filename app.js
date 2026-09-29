@@ -181,7 +181,7 @@ const ConfettiFX = {
 
 
 // =============================================================================
-// Velvet Obsidian Cosmos Canvas (Interactive Animated Login Screen Background)
+// Ethereal Pearl Aurora Canvas (Bright White Animated Login Screen Background)
 // =============================================================================
 
 const LoginCosmos = {
@@ -190,7 +190,7 @@ const LoginCosmos = {
   particles: [],
   meteors: [],
   animId: null,
-  mouse: { x: null, y: null, radius: 150 },
+  mouse: { x: null, y: null, radius: 160 },
   isRunning: false,
   lastMeteorTime: 0,
 
@@ -223,22 +223,23 @@ const LoginCosmos = {
 
   createParticles() {
     this.particles = [];
-    const count = Math.min(90, Math.max(45, Math.floor((window.innerWidth * window.innerHeight) / 12000)));
+    const count = Math.min(85, Math.max(40, Math.floor((window.innerWidth * window.innerHeight) / 13000)));
     const colors = [
-      'rgba(0, 229, 255, 0.9)',   // Celestial Cyan
-      'rgba(168, 85, 247, 0.9)',  // Royal Violet
-      'rgba(251, 191, 36, 0.85)', // Amber Gold
-      'rgba(52, 211, 153, 0.85)', // Emerald
-      'rgba(255, 255, 255, 0.95)' // Starlight
+      'rgba(2, 132, 199, 0.85)',   // Sapphire Sky
+      'rgba(99, 102, 241, 0.85)',  // Royal Indigo
+      'rgba(16, 185, 129, 0.85)',  // Emerald Green
+      'rgba(217, 119, 6, 0.85)',   // Warm Amber Gold
+      'rgba(236, 72, 153, 0.85)',  // Coral Rose
+      'rgba(147, 51, 234, 0.85)'   // Amethyst Purple
     ];
 
     for (let i = 0; i < count; i++) {
       this.particles.push({
         x: Math.random() * (this.canvas.width || window.innerWidth),
         y: Math.random() * (this.canvas.height || window.innerHeight),
-        vx: (Math.random() - 0.5) * 0.6,
-        vy: (Math.random() - 0.5) * 0.6,
-        radius: Math.random() * 2.2 + 1.2,
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: (Math.random() - 0.5) * 0.5,
+        radius: Math.random() * 2.5 + 1.2,
         color: colors[Math.floor(Math.random() * colors.length)],
         pulseSpeed: Math.random() * 0.02 + 0.01,
         pulseVal: Math.random() * Math.PI
@@ -250,9 +251,9 @@ const LoginCosmos = {
     if (!this.canvas) return;
     this.meteors.push({
       x: Math.random() * this.canvas.width * 0.8,
-      y: Math.random() * (this.canvas.height * 0.3),
-      length: Math.random() * 80 + 50,
-      speed: Math.random() * 8 + 6,
+      y: Math.random() * (this.canvas.height * 0.35),
+      length: Math.random() * 90 + 50,
+      speed: Math.random() * 7 + 5,
       angle: Math.PI / 4 + (Math.random() - 0.5) * 0.2,
       opacity: 1,
       decay: Math.random() * 0.02 + 0.015
@@ -265,26 +266,37 @@ const LoginCosmos = {
 
     const animate = (now) => {
       if (!this.isRunning || !this.ctx || !this.canvas) return;
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
+      
       const w = this.canvas.width;
       const h = this.canvas.height;
 
-      // Subtle luminous ambient nebula gradients
-      const grad1 = this.ctx.createRadialGradient(w * 0.2, h * 0.25, 40, w * 0.2, h * 0.25, w * 0.45);
-      grad1.addColorStop(0, 'rgba(0, 229, 255, 0.06)');
-      grad1.addColorStop(1, 'rgba(0, 229, 255, 0)');
+      // Base bright pearl gradient
+      this.ctx.fillStyle = '#f8fafc';
+      this.ctx.fillRect(0, 0, w, h);
+
+      // Subtle luminous ambient aurora waves
+      const grad1 = this.ctx.createRadialGradient(w * 0.15, h * 0.2, 50, w * 0.15, h * 0.2, w * 0.5);
+      grad1.addColorStop(0, 'rgba(2, 132, 199, 0.09)');
+      grad1.addColorStop(0.5, 'rgba(56, 189, 248, 0.04)');
+      grad1.addColorStop(1, 'rgba(248, 250, 252, 0)');
       this.ctx.fillStyle = grad1;
       this.ctx.fillRect(0, 0, w, h);
 
-      const grad2 = this.ctx.createRadialGradient(w * 0.8, h * 0.75, 40, w * 0.8, h * 0.75, w * 0.45);
-      grad2.addColorStop(0, 'rgba(139, 92, 246, 0.06)');
-      grad2.addColorStop(1, 'rgba(139, 92, 246, 0)');
+      const grad2 = this.ctx.createRadialGradient(w * 0.85, h * 0.75, 50, w * 0.85, h * 0.75, w * 0.5);
+      grad2.addColorStop(0, 'rgba(99, 102, 241, 0.08)');
+      grad2.addColorStop(0.5, 'rgba(168, 85, 247, 0.04)');
+      grad2.addColorStop(1, 'rgba(248, 250, 252, 0)');
       this.ctx.fillStyle = grad2;
       this.ctx.fillRect(0, 0, w, h);
 
-      // Periodically spawn meteors
-      if (now - this.lastMeteorTime > 3500) {
+      const grad3 = this.ctx.createRadialGradient(w * 0.5, h * 0.5, 30, w * 0.5, h * 0.5, w * 0.4);
+      grad3.addColorStop(0, 'rgba(245, 158, 11, 0.05)');
+      grad3.addColorStop(1, 'rgba(248, 250, 252, 0)');
+      this.ctx.fillStyle = grad3;
+      this.ctx.fillRect(0, 0, w, h);
+
+      // Periodically spawn bright prismatic meteors
+      if (now - this.lastMeteorTime > 3200) {
         this.spawnMeteor();
         this.lastMeteorTime = now;
       }
@@ -296,13 +308,14 @@ const LoginCosmos = {
         const endY = met.y - Math.sin(met.angle) * met.length;
 
         const metGrad = this.ctx.createLinearGradient(met.x, met.y, endX, endY);
-        metGrad.addColorStop(0, `rgba(255, 255, 255, ${met.opacity})`);
-        metGrad.addColorStop(0.3, `rgba(0, 229, 255, ${met.opacity * 0.8})`);
-        metGrad.addColorStop(1, 'rgba(0, 229, 255, 0)');
+        metGrad.addColorStop(0, `rgba(2, 132, 199, ${met.opacity * 0.9})`);
+        metGrad.addColorStop(0.4, `rgba(99, 102, 241, ${met.opacity * 0.6})`);
+        metGrad.addColorStop(1, 'rgba(248, 250, 252, 0)');
 
         this.ctx.beginPath();
         this.ctx.strokeStyle = metGrad;
-        this.ctx.lineWidth = 2;
+        this.ctx.lineWidth = 2.5;
+        this.ctx.lineCap = 'round';
         this.ctx.moveTo(met.x, met.y);
         this.ctx.lineTo(endX, endY);
         this.ctx.stroke();
@@ -316,7 +329,7 @@ const LoginCosmos = {
         }
       }
 
-      // Draw & update constellation particles
+      // Draw constellation lines
       for (let i = 0; i < this.particles.length; i++) {
         const p = this.particles[i];
         p.x += p.vx;
@@ -333,18 +346,18 @@ const LoginCosmos = {
           const dist = Math.sqrt(dx * dx + dy * dy);
           if (dist < this.mouse.radius) {
             const force = (this.mouse.radius - dist) / this.mouse.radius;
-            p.x -= (dx / dist) * force * 1.5;
-            p.y -= (dy / dist) * force * 1.5;
+            p.x -= (dx / dist) * force * 1.8;
+            p.y -= (dy / dist) * force * 1.8;
           }
         }
 
         p.pulseVal += p.pulseSpeed;
-        const currentRadius = p.radius + Math.sin(p.pulseVal) * 0.6;
+        const currentRadius = p.radius + Math.sin(p.pulseVal) * 0.5;
 
         this.ctx.beginPath();
-        this.ctx.arc(p.x, p.y, Math.max(0.6, currentRadius), 0, Math.PI * 2);
+        this.ctx.arc(p.x, p.y, Math.max(0.8, currentRadius), 0, Math.PI * 2);
         this.ctx.fillStyle = p.color;
-        this.ctx.shadowBlur = 10;
+        this.ctx.shadowBlur = 8;
         this.ctx.shadowColor = p.color;
         this.ctx.fill();
         this.ctx.shadowBlur = 0;
@@ -352,11 +365,11 @@ const LoginCosmos = {
         for (let j = i + 1; j < this.particles.length; j++) {
           const p2 = this.particles[j];
           const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
-          if (dist < 120) {
-            const alpha = (1 - dist / 120) * 0.32;
+          if (dist < 125) {
+            const alpha = (1 - dist / 125) * 0.28;
             this.ctx.beginPath();
-            this.ctx.strokeStyle = `rgba(0, 229, 255, ${alpha})`;
-            this.ctx.lineWidth = 0.85;
+            this.ctx.strokeStyle = `rgba(2, 132, 199, ${alpha})`;
+            this.ctx.lineWidth = 0.9;
             this.ctx.moveTo(p.x, p.y);
             this.ctx.lineTo(p2.x, p2.y);
             this.ctx.stroke();
