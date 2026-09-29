@@ -3268,56 +3268,55 @@ async function renderTeacherConsoleView() {
           <td>
             <div class="student-leader-cell">
               <div class="leader-avatar">${s.avatar || '🦊'}</div>
-              <div>
-                <div class="leader-name" style="font-weight:700;">${s.full_name}</div>
-                <div style="font-size:0.75rem; color:var(--text-muted); display:flex; gap:6px; align-items:center;">
-                  <code style="color:var(--color-primary); font-size:0.75rem;">@${s.username}</code>
-                  <span>&bull;</span>
+              <div style="min-width: 0;">
+                <div class="leader-name">${s.full_name}</div>
+                <div style="font-size:0.72rem; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                  <code style="color:var(--color-primary); font-size:0.7rem;">@${s.username}</code> &bull;
                   <span style="color:var(--color-primary); font-weight:700;">${s.grade_level || 'Year 4'}</span>
                 </div>
               </div>
             </div>
           </td>
           <td>
-            <strong style="color:var(--text-main); font-size:0.85rem;">${s.parent_name || '—'}</strong>
+            <div style="font-weight:600; font-size:0.8rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${s.parent_name || '—'}">${s.parent_name || '—'}</div>
           </td>
           <td>
-            ${s.student_phone ? `<a href="tel:${s.student_phone}" style="color:var(--text-muted); text-decoration:none; font-size:0.85rem;">📞 ${s.student_phone}</a>` : '<span style="color:var(--text-muted);">—</span>'}
+            ${s.student_phone ? `<a href="tel:${s.student_phone}" style="color:var(--text-secondary); text-decoration:none; font-size:0.78rem; white-space:nowrap;">📞 ${s.student_phone}</a>` : '<span style="color:var(--text-muted); font-size:0.8rem;">—</span>'}
           </td>
           <td>
             ${waLink ? `
-              <a href="${waLink}" target="_blank" class="whatsapp-btn" title="Open WhatsApp Chat with Parent">
+              <a href="${waLink}" target="_blank" class="whatsapp-btn" style="padding:2px 8px; font-size:0.72rem; white-space:nowrap;" title="Open WhatsApp Chat with Parent">
                 <span>💬</span>
                 <span>${s.parent_phone}</span>
               </a>
-            ` : (s.parent_phone ? `<span style="font-size:0.85rem;">${s.parent_phone}</span>` : '<span style="color:var(--text-muted);">—</span>')}
+            ` : (s.parent_phone ? `<span style="font-size:0.78rem; white-space:nowrap;">${s.parent_phone}</span>` : '<span style="color:var(--text-muted); font-size:0.8rem;">—</span>')}
+          </td>
+          <td style="text-align:center;">
+            <span class="payment-badge ${badgeClass}" style="font-size:0.68rem; padding:2px 6px;">${badgeText}</span>
           </td>
           <td>
-            <span class="payment-badge ${badgeClass}">${badgeText}</span>
+            <div style="font-weight:700; font-size:0.8rem;">${(s.payment_amount !== undefined && s.payment_amount !== null && s.payment_amount !== '') ? s.payment_amount : '—'}</div>
+            <div style="font-size:0.68rem; color:var(--text-muted); white-space:nowrap;">${s.payment_method || 'InstaPay'}</div>
           </td>
           <td>
-            <strong style="color:var(--text-main); font-size:0.85rem;">${(s.payment_amount !== undefined && s.payment_amount !== null && s.payment_amount !== '') ? s.payment_amount : '—'}</strong>
-            <div style="font-size:0.72rem; color:var(--text-muted);">${s.payment_method || 'InstaPay'}</div>
+            <span style="font-size:0.75rem; color:var(--text-muted); white-space:nowrap;">${s.payment_date || '—'}</span>
           </td>
-          <td>
-            <span style="font-size:0.8rem; color:var(--text-muted);">${s.payment_date || '—'}</span>
-          </td>
-          <td>
+          <td style="text-align:right;">
             <div class="actions-cell">
               <button class="action-btn-sm" onclick="openStudentReportModal(${s.id})" title="View Student Academic Report">
-                <span class="btn-icon">📊</span> Report
+                <span>📊</span>
               </button>
               <button class="action-btn-sm" onclick="sendPaymentReminderWhatsApp(${s.id})" title="Send Tuition Reminder via WhatsApp" style="background:rgba(37,211,102,0.15); color:#25d366; border:1px solid rgba(37,211,102,0.3);">
-                <span class="btn-icon">💬</span> Reminder
+                <span>💬</span>
               </button>
               <button class="action-btn-sm edit" onclick="openEditStudentModal(${s.id})" title="Edit Student Profile & Tuition">
-                <span class="btn-icon">✏️</span> Edit
+                <span>✏️</span>
               </button>
               <button class="action-btn-sm key" onclick="openResetPasswordModal(${s.id}, '${safeName}')" title="Reset Password">
-                <span class="btn-icon">🔑</span>
+                <span>🔑</span>
               </button>
               <button class="action-btn-sm delete" onclick="confirmDeleteStudent(${s.id}, '${safeName}')" title="Delete Student">
-                <span class="btn-icon">🗑️</span>
+                <span>🗑️</span>
               </button>
             </div>
           </td>

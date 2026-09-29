@@ -4271,38 +4271,54 @@ html[dir="rtl"] #mainContentWrapper {
   box-shadow: var(--shadow-sm);
 }
 
-/* Roster Table Design */
+/* Roster Table Design - Fixed Compact Layout without Scrollbar */
 .table-responsive-wrap {
-  overflow-x: auto;
+  overflow-x: hidden !important;
+  width: 100%;
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
   background: var(--bg-surface-solid);
 }
 
 .report-history-table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   text-align: left;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
 }
 
 .report-history-table th {
-  padding: 0.85rem 1.15rem;
+  padding: 0.55rem 0.5rem;
   background: var(--bg-hover);
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.05em;
   color: var(--text-secondary);
   border-bottom: 1px solid var(--border-card);
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .report-history-table td {
-  padding: 0.85rem 1.15rem;
+  padding: 0.55rem 0.5rem;
   border-bottom: 1px solid var(--border-subtle);
   color: var(--text-primary);
   vertical-align: middle;
+  font-size: 0.8rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
+.report-history-table th:nth-child(1), .report-history-table td:nth-child(1) { width: 22%; }
+.report-history-table th:nth-child(2), .report-history-table td:nth-child(2) { width: 13%; }
+.report-history-table th:nth-child(3), .report-history-table td:nth-child(3) { width: 11%; }
+.report-history-table th:nth-child(4), .report-history-table td:nth-child(4) { width: 13%; }
+.report-history-table th:nth-child(5), .report-history-table td:nth-child(5) { width: 10%; text-align: center; }
+.report-history-table th:nth-child(6), .report-history-table td:nth-child(6) { width: 10%; }
+.report-history-table th:nth-child(7), .report-history-table td:nth-child(7) { width: 9%; }
+.report-history-table th:nth-child(8), .report-history-table td:nth-child(8) { width: 12%; text-align: right; }
 
 .report-history-table tr:last-child td {
   border-bottom: none;
