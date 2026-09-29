@@ -461,7 +461,7 @@ function renderLoginShowcase() {
     `).join('');
   }
 
-  // Render Right Showcase Panel (Top Topics)
+  // Render Right Showcase Panel (Top Topics / Fallback)
   if (topTopicsList) {
     topTopicsList.innerHTML = topTopics.map(t => `
       <div class="topic-card">
@@ -478,6 +478,48 @@ function renderLoginShowcase() {
         <div class="topic-stats">
           <span>${t.sub}</span>
           <span>Cambridge Verified</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Render Featured Student Blogs on Landing Showcase
+  const featuredBlogList = document.getElementById('featuredBlogList');
+  if (featuredBlogList && window.StudentBlog) {
+    const featured = StudentBlog.getFeaturedArticles();
+    if (featured && featured.length > 0) {
+      featuredBlogList.innerHTML = featured.map(art => `
+        <div class="featured-blog-card" onclick="StudentBlog.openArticleReader(${art.id})">
+          <div class="featured-blog-header">
+            <span class="featured-blog-author">${art.avatar} ${art.author} (${art.grade})</span>
+            <span class="featured-blog-tag">${art.category}</span>
+          </div>
+          <h4 class="featured-blog-title">${art.title}</h4>
+          <p class="featured-blog-excerpt">${art.summary}</p>
+          <div class="featured-blog-footer">
+            <span>📅 ${art.date}</span>
+            <span class="read-btn">Read Essay 📖</span>
+          </div>
+        </div>
+      `).join('');
+    } else {
+      featuredBlogList.innerHTML = '<div style="padding: 1.5rem; text-align: center; color: #94a3b8; font-size: 0.85rem;">No featured student essays yet.</div>';
+    }
+  }
+
+  // Render Horizontal Curriculum Bar below login stage
+  const curriculumGrid = document.getElementById('loginCurriculumGrid');
+  if (curriculumGrid) {
+    curriculumGrid.innerHTML = topTopics.map(t => `
+      <div class="curriculum-bar-card">
+        <div class="curriculum-bar-header">
+          <div class="curriculum-bar-icon">${t.icon}</div>
+          <div class="curriculum-bar-badge">${t.rate}</div>
+        </div>
+        <div class="curriculum-bar-title">${t.title}</div>
+        <div class="curriculum-bar-sub">${t.sub}</div>
+        <div class="topic-progress-bar" style="margin-top: 6px;">
+          <div class="topic-progress-fill" style="width: ${t.pct}%;"></div>
         </div>
       </div>
     `).join('');
@@ -2766,6 +2808,10 @@ function switchView(viewId) {
     renderLeaderboardView();
   } else if (viewId === 'curriculum-books') {
     renderCurriculumBooksView();
+  } else if (viewId === 'vocab') {
+    if (window.VocabEngine) VocabEngine.init();
+  } else if (viewId === 'blog') {
+    if (window.StudentBlog) StudentBlog.renderBlogView();
   } else if (viewId === 'teacher') {
     renderTeacherConsoleView();
   }
@@ -4449,23 +4495,65 @@ window.sendWhatsAppReport = function(studentId) {
   const acc = stats.accuracy_rate || student.accuracy_rate || 0;
   const xp = Math.max(stats.xp, student.xp || 0);
   const smart = stats.avg_smart_score || student.avg_smart_score || 0;
-  const statusStr = student.payment_status === 'paid' ? 'Active & Paid 🟢' : (student.payment_status === 'pending' ? 'Under Review 🟡' : 'Payment Due 🔴');
-
   const englishStatus = student.payment_status === 'paid' ? 'Active & Paid 🟢' : (student.payment_status === 'pending' ? 'Under Review 🟡' : 'Payment Due 🔴');
-  const msg = `🌟 Academic Progress Report: ${student.full_name} 🌟
+  
+  let msg = `🌟 Academic Progress Report: ${student.full_name} 🌟
 📚 Grade Level: ${student.grade_level || 'General'}
 ━━━━━━━━━━━━━━━━━━━━
 ✅ Questions Completed: ${q.toLocaleString()}
 🎯 Accuracy Rate: ${acc}%
 🏅 Average SmartScore: ${smart}/100
 🏆 Mastery Points: ${xp.toLocaleString()} XP
-💳 Tuition Status: ${englishStatus}
-━━━━━━━━━━━━━━━━━━━━
-Best regards, Miss Rania 🌸 RC Classroom Portal`;
+💳 Tuition Status: ${englishStatus}`;
+
+  if (student.assessment_grade) {
+    msg += `\n⭐ Teacher Assessment: ${student.assessment_grade}`;
+  }
+  if (student.teacher_comment) {
+    msg += `\n📝 Teacher Notes: ${student.teacher_comment}`;
+  }
+
+  msg += `\n━━━━━━━━━━━━━━━━━━━━\nBest regards, Miss Rania 🌸 RC Classroom Portal`;
 
   const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
   window.open(url, '_blank');
   showToast('Opening WhatsApp to send progress report 📤');
+};
+
+window.saveTeacherReportAssessment = function(studentId) {
+  const student = (AppState.currentTeacherRoster || []).find(s => s.id === studentId || String(s.id) === String(studentId)) ||
+                  DB.findStudentById(studentId);
+  if (!student) return;
+
+  const gradeInput = document.getElementById('reportAssessmentGradeInput');
+  const commentInput = document.getElementById('reportTeacherCommentInput');
+
+  const grade = gradeInput ? gradeInput.value.trim() : '';
+  const comment = commentInput ? commentInput.value.trim() : '';
+
+  student.assessment_grade = grade;
+  student.teacher_comment = comment;
+
+  if (typeof DB !== 'undefined' && DB.updateStudentStats) {
+    DB.updateStudentStats(student.id, {
+      assessment_grade: grade,
+      teacher_comment: comment
+    });
+  }
+
+  try {
+    const roster = DB.getStudents ? DB.getStudents() : [];
+    const target = roster.find(s => s.id === student.id || String(s.id) === String(student.id));
+    if (target) {
+      target.assessment_grade = grade;
+      target.teacher_comment = comment;
+      localStorage.setItem('students_roster', JSON.stringify(roster));
+    }
+  } catch (e) {
+    console.warn(e);
+  }
+
+  showToast('Assessment grade and comment saved! 📝', '✅');
 };
 
 window.openStudentReportModal = function(studentId) {
@@ -4521,6 +4609,31 @@ window.openStudentReportModal = function(studentId) {
         <div style="background: rgba(14, 18, 30, 0.8); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1rem; text-align: center;">
           <div style="font-size: 0.75rem; color: #94a3b8; font-weight: 700;">MASTERY XP</div>
           <div style="font-size: 1.6rem; font-weight: 800; color: #8b5cf6; margin-top: 4px;">${xp.toLocaleString()}</div>
+        </div>
+      </div>
+
+      <!-- Teacher Evaluation & Grade Input Block -->
+      <div style="background: rgba(14, 18, 30, 0.9); border: 1px solid rgba(0, 229, 255, 0.25); border-radius: 12px; padding: 1.1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+          <div style="font-weight: 700; font-size: 0.9rem; color: #38bdf8; display: flex; align-items: center; gap: 0.4rem;">
+            <span>👩‍🏫</span>
+            <span>Teacher Evaluation &amp; Custom Assessment</span>
+          </div>
+          <span style="font-size: 0.72rem; color: #94a3b8;">Miss Rania</span>
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+          <div>
+            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #cbd5e1; margin-bottom: 4px;">Assessment Grade / Score</label>
+            <input type="text" id="reportAssessmentGradeInput" class="custom-input" style="width: 100%; padding: 0.55rem 0.8rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff; font-size: 0.85rem;" placeholder="e.g. 98/100, A+, Distinction, Excellent" value="${escapeHtml(student.assessment_grade || '')}">
+          </div>
+          <div>
+            <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #cbd5e1; margin-bottom: 4px;">Teacher Feedback &amp; Comments</label>
+            <textarea id="reportTeacherCommentInput" rows="2" class="custom-input" style="width: 100%; padding: 0.55rem 0.8rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; color: #fff; font-size: 0.85rem; resize: vertical;" placeholder="Write personal remarks, strengths, and next targets...">${escapeHtml(student.teacher_comment || '')}</textarea>
+          </div>
+          <button type="button" class="primary-glow-btn" onclick="saveTeacherReportAssessment(${student.id})" style="padding: 0.55rem 1rem; font-size: 0.82rem; font-weight: 700; align-self: flex-end;">
+            💾 Save Evaluation
+          </button>
         </div>
       </div>
 

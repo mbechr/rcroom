@@ -339,6 +339,18 @@
           <span class="material-symbols-outlined text-[20px] shrink-0">psychology</span>
           <span class="sidebar-text truncate">Practice &amp; Skills 🎯</span>
         </button>
+        <button class="nav-tab student-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="vocab" title="Vocabulary Game: Spellings, Meanings & Sentences">
+          <span class="material-symbols-outlined text-[20px] shrink-0">spellcheck</span>
+          <span class="sidebar-text truncate">Vocabulary Game 🔤</span>
+        </button>
+        <button class="nav-tab student-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="sat" title="Digital SAT Prep & Diagnostics">
+          <span class="material-symbols-outlined text-[20px] shrink-0">school</span>
+          <span class="sidebar-text truncate">SAT Prep 🎯</span>
+        </button>
+        <button class="nav-tab student-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="blog" title="Student Knowledge & Creative Blog">
+          <span class="material-symbols-outlined text-[20px] shrink-0">article</span>
+          <span class="sidebar-text truncate">Student Blog ✍️</span>
+        </button>
         <button class="nav-tab student-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="sessions" title="Zoom & Class Logs">
           <span class="material-symbols-outlined text-[20px] shrink-0">videocam</span>
           <span class="sidebar-text truncate">Live Classes 🎥</span>
@@ -693,6 +705,111 @@
       </div>
       <div id="studentFullPaymentCard" class="space-y-6 pt-4">
         <!-- Injected via JS -->
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         VIEW: VOCABULARY GAME (Spellings, Meanings, Sentences)
+         ==================================================================== -->
+    <section id="view-vocab" class="portal-view">
+      <div class="view-header-row">
+        <div>
+          <div class="view-kicker">// ACADEMIC VOCABULARY ARENA</div>
+          <h1 class="view-main-title">Vocabulary Challenge &amp; Spelling Bee 🔤</h1>
+          <p class="view-lead-text">Master Cambridge academic vocabulary with spelling bees, audio pronunciation, definition matcher, and contextual sentence completion.</p>
+        </div>
+        <div class="view-actions-col">
+          <button class="primary-glow-btn teacher-only-btn" id="addVocabWordBtn" onclick="openAddVocabWordModal()" style="display: none;">
+            <span>➕ Add Word (Teacher)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Mode Selector -->
+      <div class="vocab-mode-bar" style="display: flex; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+        <button type="button" class="segmented-btn active" id="vocabModeSpellingBtn" onclick="VocabEngine.startSession('spelling')">
+          <span>🐝 Spelling Arena</span>
+        </button>
+        <button type="button" class="segmented-btn" id="vocabModeMeaningBtn" onclick="VocabEngine.startSession('meaning')">
+          <span>📖 Meaning Matcher</span>
+        </button>
+        <button type="button" class="segmented-btn" id="vocabModeSentenceBtn" onclick="VocabEngine.startSession('sentence')">
+          <span>✍️ Sentence Context</span>
+        </button>
+      </div>
+
+      <!-- Game Arena Host -->
+      <div id="vocabGameArena" class="vocab-arena-wrap">
+        <!-- Injected via JS VocabEngine -->
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         VIEW: SAT PREPARATION & DIGITAL TESTING
+         ==================================================================== -->
+    <section id="view-sat" class="portal-view">
+      <div class="view-header-row">
+        <div>
+          <div class="view-kicker">// DIGITAL SAT PREPARATION &amp; DIAGNOSTICS</div>
+          <h1 class="view-main-title">Digital SAT Testing Portal 🎯</h1>
+          <p class="view-lead-text">Official Digital SAT diagnostic modules, adaptive practice bank, and problem-solving clinics under preparation by Miss Rania.</p>
+        </div>
+        <div class="view-actions-col">
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-bold">
+            <span>✨ SAT Digital 2026-2027</span>
+          </span>
+        </div>
+      </div>
+
+      <!-- SAT Hub Cards -->
+      <div class="sat-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin-top: 1rem;">
+        <div class="sat-card" style="background: var(--bg-surface-solid); border: 1px solid var(--border-card); border-radius: 20px; padding: 1.5rem; display: flex; flex-direction: column; box-shadow: var(--shadow-sm);">
+          <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">📐</div>
+          <div style="font-size: 0.72rem; font-weight: 800; color: #00e5ff; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Section 1</div>
+          <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.5rem;">SAT Math (Digital)</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; flex: 1; margin-bottom: 1.25rem;">
+            Algebra, Advanced Math, Problem Solving &amp; Data Analysis, Geometry &amp; Trigonometry with Desmos graphing integration.
+          </p>
+          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 0.75rem;">
+            <span style="font-size: 0.75rem; color: #fbbf24; font-weight: 700;">Under Preparation</span>
+            <button type="button" class="secondary-glass-btn" style="font-size: 0.78rem; padding: 4px 10px;" onclick="showToast('SAT Math modules under active preparation by Miss Rania 🎯')">Preview Syllabus</button>
+          </div>
+        </div>
+
+        <div class="sat-card" style="background: var(--bg-surface-solid); border: 1px solid var(--border-card); border-radius: 20px; padding: 1.5rem; display: flex; flex-direction: column; box-shadow: var(--shadow-sm);">
+          <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">📚</div>
+          <div style="font-size: 0.72rem; font-weight: 800; color: #a855f7; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Section 2</div>
+          <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.5rem;">SAT Reading &amp; Writing</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; flex: 1; margin-bottom: 1.25rem;">
+            Craft &amp; Structure, Information &amp; Ideas, Standard English Conventions, and Expression of Ideas with passage analysis.
+          </p>
+          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 0.75rem;">
+            <span style="font-size: 0.75rem; color: #fbbf24; font-weight: 700;">Under Preparation</span>
+            <button type="button" class="secondary-glass-btn" style="font-size: 0.78rem; padding: 4px 10px;" onclick="showToast('SAT Reading modules under active preparation by Miss Rania 📚')">Preview Syllabus</button>
+          </div>
+        </div>
+
+        <div class="sat-card" style="background: var(--bg-surface-solid); border: 1px solid var(--border-card); border-radius: 20px; padding: 1.5rem; display: flex; flex-direction: column; box-shadow: var(--shadow-sm);">
+          <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">⏱️</div>
+          <div style="font-size: 0.72rem; font-weight: 800; color: #10b981; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Testing Simulator</div>
+          <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.5rem;">Timed Full Diagnostics</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; flex: 1; margin-bottom: 1.25rem;">
+            Adaptive full-length 2-module digital test simulator mimicking official Bluebook timing and question formats.
+          </p>
+          <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 0.75rem;">
+            <span style="font-size: 0.75rem; color: #10b981; font-weight: 700;">Diagnostic Suite</span>
+            <button type="button" class="secondary-glass-btn" style="font-size: 0.78rem; padding: 4px 10px;" onclick="showToast('Diagnostic testing simulator launching soon! ⏱️')">View Specs</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         VIEW: STUDENT KNOWLEDGE & CREATIVE BLOG
+         ==================================================================== -->
+    <section id="view-blog" class="portal-view">
+      <div id="studentBlogContainer">
+        <!-- Injected via StudentBlog.renderBlogView() -->
       </div>
     </section>
 
@@ -1651,18 +1768,45 @@
         </div>
       </div>
 
-      <!-- Right Showcase Panel: Popular Solved Topics & Modules -->
-      <div class="auth-showcase-panel right-panel" id="topTopicsPanel">
+      <!-- Right Showcase Panel: Student Blogs & Creative Essays Curated by Miss Rania -->
+      <div class="auth-showcase-panel right-panel" id="featuredBlogPanel">
         <div class="showcase-panel-header">
-          <div class="showcase-icon">📚</div>
+          <div class="showcase-icon">✍️</div>
           <div>
-            <div class="showcase-title">TOPICS MASTERED</div>
-            <div class="showcase-subtitle">Most Solved Cambridge Modules</div>
+            <div class="showcase-title">STUDENT BLOGS &amp; ESSAYS</div>
+            <div class="showcase-subtitle">Featured Works Selected by Miss Rania</div>
           </div>
         </div>
-        <div class="showcase-list" id="topTopicsList">
-          <!-- Populated with popular solved modules -->
+        <div class="showcase-list" id="featuredBlogList">
+          <!-- Populated with curated student blogs & essays -->
         </div>
+      </div>
+    </div>
+
+    <!-- Bottom Horizontal Verified Cambridge Curriculum Bar -->
+    <div class="login-curriculum-bar" id="loginCurriculumBar">
+      <div class="curr-bar-header">
+        <span class="curr-bar-badge">📚 VERIFIED CAMBRIDGE MODULES</span>
+        <span class="curr-bar-sub">Mastered by Cambridge Primary &amp; Secondary Cohorts</span>
+      </div>
+      <div class="curr-bar-grid" id="loginCurriculumGrid">
+        <!-- 4 horizontal modules injected dynamically -->
+      </div>
+    </div>
+
+    <!-- Bottom Footer Contact Bar -->
+    <div class="login-contact-footer" id="loginContactFooter">
+      <div class="contact-pill">
+        <span>✉️</span>
+        <a href="mailto:rania.mado@gmail.com">rania.mado@gmail.com</a>
+      </div>
+      <div class="contact-pill whatsapp">
+        <span>💬</span>
+        <a href="https://wa.me/201016499281" target="_blank">01016499281 (WhatsApp)</a>
+      </div>
+      <div class="contact-pill">
+        <span>🌸</span>
+        <span>Miss Rania's Private Academy</span>
       </div>
     </div>
   </div>
@@ -2544,26 +2688,160 @@
     </div>
   </div>
 
+  <!-- ====================================================================
+       MODAL 9: TEACHER ADD VOCABULARY WORD MODAL
+       ==================================================================== -->
+  <div class="auth-modal-backdrop" id="addVocabWordModal">
+    <div class="auth-modal-window" style="max-width: 540px;">
+      <div class="auth-modal-header">
+        <div>
+          <h2 class="auth-title">Add Academic Vocabulary 🔤</h2>
+          <p class="auth-subtitle">Add custom spelling &amp; context words for student practice</p>
+        </div>
+        <button class="modal-close-btn" onclick="VocabEngine.closeAddWordModal()">✕</button>
+      </div>
+      <div style="padding: 1.5rem;">
+        <form onsubmit="VocabEngine.saveNewWord(event)" class="space-y-4">
+          <div class="form-group">
+            <label for="newVocabWord">Target Word *</label>
+            <input type="text" id="newVocabWord" placeholder="e.g. Photosynthesis, Numerator, Habitat" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="newVocabCategory">Subject / Category</label>
+              <select id="newVocabCategory">
+                <option value="Mathematics">Mathematics</option>
+                <option value="Science">Science</option>
+                <option value="English">English</option>
+                <option value="General">General Academic</option>
+              </select>
+            </div>
+            <div class="form-group flex-1">
+              <label for="newVocabGrade">Grade / Stage</label>
+              <select id="newVocabGrade">
+                <option value="Stage 4">Primary Stage 4</option>
+                <option value="Stage 5">Primary Stage 5</option>
+                <option value="Stage 6">Primary Stage 6</option>
+                <option value="Stage 4-6">Stage 4 to 6</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="newVocabMeaning">Definition / Meaning *</label>
+            <textarea id="newVocabMeaning" rows="2" placeholder="Clear dictionary definition for students..." required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="newVocabSentence">Example Sentence (Use {word} for blank) *</label>
+            <input type="text" id="newVocabSentence" placeholder="e.g. In the fraction 3/4, the number 4 is the {word}." required>
+          </div>
+          <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+            <button type="submit" class="primary-glow-btn flex-1" style="padding: 0.8rem; font-weight: 700;">
+              💾 Save Word to Arena
+            </button>
+            <button type="button" class="secondary-glass-btn" onclick="VocabEngine.closeAddWordModal()" style="padding: 0.8rem 1.2rem;">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MODAL 10: STUDENT WRITE ARTICLE / ESSAY MODAL
+       ==================================================================== -->
+  <div class="auth-modal-backdrop" id="newArticleModal">
+    <div class="auth-modal-window" style="max-width: 620px;">
+      <div class="auth-modal-header">
+        <div>
+          <h2 class="auth-title">Publish Student Blog Essay ✍️</h2>
+          <p class="auth-subtitle">Share your academic insights, math tricks, and science experiments</p>
+        </div>
+        <button class="modal-close-btn" onclick="document.getElementById('newArticleModal').classList.remove('open')">✕</button>
+      </div>
+      <div style="padding: 1.5rem;">
+        <form onsubmit="StudentBlog.submitArticle(event)" class="space-y-4">
+          <div class="form-group">
+            <label for="articleTitle">Essay Title *</label>
+            <input type="text" id="articleTitle" placeholder="e.g. How Decimals Help Us Measure Space Trajectories" required>
+          </div>
+          <div class="form-group">
+            <label for="articleCategory">Topic / Subject</label>
+            <select id="articleCategory">
+              <option value="Science & Math">Science &amp; Math</option>
+              <option value="Mathematics">Mathematics</option>
+              <option value="Science">Science</option>
+              <option value="Geometry">Geometry</option>
+              <option value="Mental Math">Mental Math</option>
+              <option value="Study Tips">Study Tips &amp; Strategies</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="articleSummary">Short Summary / Hook (1-2 sentences) *</label>
+            <input type="text" id="articleSummary" placeholder="Brief summary of your essay..." required>
+          </div>
+          <div class="form-group">
+            <label for="articleContent">Full Essay Content *</label>
+            <textarea id="articleContent" rows="6" placeholder="Write your full essay or explanation here (use paragraphs)..." required></textarea>
+          </div>
+          <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+            <button type="submit" class="primary-glow-btn flex-1" style="padding: 0.8rem; font-weight: 700;">
+              🚀 Publish to Student Blog
+            </button>
+            <button type="button" class="secondary-glass-btn" onclick="document.getElementById('newArticleModal').classList.remove('open')" style="padding: 0.8rem 1.2rem;">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MODAL 11: STUDENT BLOG READER POPUP MODAL
+       ==================================================================== -->
+  <div class="auth-modal-backdrop" id="blogReaderModal">
+    <div class="auth-modal-window" style="max-width: 680px; max-height: 85vh; display: flex; flex-direction: column;">
+      <div class="auth-modal-header" style="border-bottom: 1px solid rgba(255,255,255,0.1); shrink-0;">
+        <div>
+          <h2 class="auth-title" id="blogReaderTitle">Article Title</h2>
+          <p class="auth-subtitle" id="blogReaderMeta" style="color: #38bdf8;">By Student Author</p>
+        </div>
+        <button class="modal-close-btn" onclick="document.getElementById('blogReaderModal').classList.remove('open')">✕</button>
+      </div>
+      <div style="padding: 1.5rem; overflow-y: auto; flex: 1;" id="blogReaderContent">
+        <!-- Injected via StudentBlog.openArticleReader -->
+      </div>
+      <div style="padding: 1rem 1.5rem; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: flex-end; background: rgba(10, 12, 20, 0.5);">
+        <button type="button" class="secondary-glass-btn" onclick="document.getElementById('blogReaderModal').classList.remove('open')">
+          Close Article ✕
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification Container -->
   <div class="toast-notification" id="portalToast" style="display: none;">
     <span class="toast-icon" id="toastIcon">🎉</span>
     <span class="toast-message" id="toastMessage">Notification</span>
   </div>
 
-  <!-- Core Application Scripts (v=3.2.0) -->
-  <script src="data/curriculum_data.js?v=3.2.0"></script>
-  <script src="data/teacher_curriculum.js?v=3.2.0"></script>
-  <script src="js/i18n.js?v=3.2.0"></script>
-  <script src="js/scratchpad.js?v=3.2.0"></script>
-  <script src="js/audio.js?v=3.2.0"></script>
-  <script src="js/sync.js?v=3.2.0"></script>
-  <script src="js/question-engine.js?v=3.2.0"></script>
-  <script src="js/classroom-tools.js?v=3.2.0"></script>
-  <script src="js/certificate.js?v=3.2.0"></script>
+  <!-- Core Application Scripts (v=3.3.0) -->
+  <script src="data/curriculum_data.js?v=3.3.0"></script>
+  <script src="data/teacher_curriculum.js?v=3.3.0"></script>
+  <script src="js/i18n.js?v=3.3.0"></script>
+  <script src="js/scratchpad.js?v=3.3.0"></script>
+  <script src="js/audio.js?v=3.3.0"></script>
+  <script src="js/sync.js?v=3.3.0"></script>
+  <script src="js/question-engine.js?v=3.3.0"></script>
+  <script src="js/vocab-game.js?v=3.3.0"></script>
+  <script src="js/student-blog.js?v=3.3.0"></script>
+  <script src="js/classroom-tools.js?v=3.3.0"></script>
+  <script src="js/certificate.js?v=3.3.0"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-  <script src="js/cloud-db.js?v=3.2.0"></script>
-  <script src="app.js?v=3.2.0"></script>
+  <script src="js/cloud-db.js?v=3.3.0"></script>
+  <script src="app.js?v=3.3.0"></script>
 </body>
 </html>
 
