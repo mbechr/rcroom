@@ -978,6 +978,11 @@
               <span class="material-symbols-outlined">group</span>
               <span>Students Roster</span>
             </button>
+            <button type="button" class="teacher-sub-tab" data-ttab="groups" onclick="switchTeacherTab('groups')">
+              <span class="material-symbols-outlined">diversity_3</span>
+              <span>Student Groups</span>
+              <span class="teacher-tab-badge indigo" id="tGroupsCountBadge" style="display:none;">0</span>
+            </button>
             <button type="button" class="teacher-sub-tab" data-ttab="payments" onclick="switchTeacherTab('payments')">
               <span class="material-symbols-outlined">receipt_long</span>
               <span>Payment Approvals</span>
@@ -1075,6 +1080,63 @@
                 <!-- Injected via JS -->
               </tbody>
             </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==============================================================
+           PANEL 1.5: STUDENT GROUPS & COHORTS
+           ============================================================== -->
+      <div id="teacherPanelGroups" class="teacher-tab-panel" style="display: none;">
+        <!-- Groups Overview KPI Banner -->
+        <div class="teacher-kpi-grid">
+          <div class="kpi-card glass-panel">
+            <div class="kpi-icon-wrap indigo" style="background: rgba(99, 102, 241, 0.15); color: #6366f1;">👥</div>
+            <div class="kpi-data-col">
+              <span class="kpi-value" id="tGroupsTotalCount">0</span>
+              <span class="kpi-label">Active Cohorts</span>
+            </div>
+          </div>
+          <div class="kpi-card glass-panel">
+            <div class="kpi-icon-wrap green">🎓</div>
+            <div class="kpi-data-col">
+              <span class="kpi-value" id="tGroupsMembersCount">0</span>
+              <span class="kpi-label">Group Enrolments</span>
+            </div>
+          </div>
+          <div class="kpi-card glass-panel">
+            <div class="kpi-icon-wrap cyan" style="background: rgba(6, 182, 212, 0.15); color: #06b6d4;">📊</div>
+            <div class="kpi-data-col">
+              <span class="kpi-value" id="tGroupsAvgSize">0</span>
+              <span class="kpi-label">Avg Students / Group</span>
+            </div>
+          </div>
+          <div class="kpi-card glass-panel">
+            <div class="kpi-icon-wrap purple" style="background: rgba(168, 85, 247, 0.15); color: #a855f7;">⚡</div>
+            <div class="kpi-data-col">
+              <span class="kpi-value" id="tGroupsQuickActionCount">1-Click</span>
+              <span class="kpi-label">Bulk Permissions</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="report-section-card glass-panel mb-6">
+          <div class="section-card-header flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h3 class="card-title">Student Cohorts &amp; Groups 👥</h3>
+              <p class="card-subtitle">Organize students into groups for bulk curriculum unlocking, targeted Zoom class scheduling, and WhatsApp broadcasts.</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button class="primary-glow-btn" id="openCreateGroupModalBtn" onclick="openCreateGroupModal()">
+                <span class="material-symbols-outlined text-[18px]">group_add</span>
+                <span>Create Student Group</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Groups Card Grid -->
+          <div id="teacherGroupsListContainer" class="p-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            <!-- Dynamically populated via renderTeacherGroups() -->
           </div>
         </div>
       </div>
@@ -1275,11 +1337,33 @@
             </div>
           </div>
 
-          <!-- Student Selector & Quick Filters Toolbar -->
+          <!-- Target Selector & Quick Filters Toolbar -->
           <div class="planner-toolbar flex-wrap gap-3">
+            <!-- Target Mode Switcher: Student vs Group -->
             <div class="flex items-center gap-2">
+              <span class="text-xs font-bold uppercase tracking-wider text-secondary">Target Mode:</span>
+              <div class="inline-flex rounded-xl bg-slate-900/90 p-1 border border-slate-700">
+                <button type="button" class="curriculum-target-mode-btn active px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer" id="curriculumModeStudentBtn" onclick="setCurriculumTargetMode('student')">
+                  👤 Individual Student
+                </button>
+                <button type="button" class="curriculum-target-mode-btn px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer" id="curriculumModeGroupBtn" onclick="setCurriculumTargetMode('group')">
+                  👥 Student Group
+                </button>
+              </div>
+            </div>
+
+            <!-- Student Selector (shown when mode == 'student') -->
+            <div class="flex items-center gap-2" id="curriculumStudentSelectWrapper">
               <label for="curriculumStudentSelect" class="text-xs font-bold uppercase tracking-wider text-secondary">Student:</label>
               <select id="curriculumStudentSelect" onchange="handleCurriculumStudentChange(this.value)" class="px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-semibold text-sm focus:outline-none focus:border-primary">
+                <!-- Injected dynamically -->
+              </select>
+            </div>
+
+            <!-- Group Selector (shown when mode == 'group') -->
+            <div class="flex items-center gap-2" id="curriculumGroupSelectWrapper" style="display:none;">
+              <label for="curriculumGroupSelect" class="text-xs font-bold uppercase tracking-wider text-secondary">Group:</label>
+              <select id="curriculumGroupSelect" onchange="handleCurriculumGroupChange(this.value)" class="px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white font-semibold text-sm focus:outline-none focus:border-primary">
                 <!-- Injected dynamically -->
               </select>
             </div>
@@ -1932,6 +2016,28 @@
         </div>
         <div class="form-row">
           <div class="form-group flex-1">
+            <label for="sessTargetAudienceSelect">Target Audience (Who can join &amp; view?)</label>
+            <select id="sessTargetAudienceSelect" onchange="handleSessionAudienceChange(this.value)">
+              <option value="all" selected>🌐 All Enrolled Students</option>
+              <option value="group">👥 Specific Student Group</option>
+              <option value="student">👤 Individual Student</option>
+            </select>
+          </div>
+          <div class="form-group flex-1" id="sessTargetGroupWrapper" style="display:none;">
+            <label for="sessTargetGroupSelect">Select Target Group</label>
+            <select id="sessTargetGroupSelect">
+              <!-- Dynamically populated -->
+            </select>
+          </div>
+          <div class="form-group flex-1" id="sessTargetStudentWrapper" style="display:none;">
+            <label for="sessTargetStudentSelect">Select Individual Student</label>
+            <select id="sessTargetStudentSelect">
+              <!-- Dynamically populated -->
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group flex-1">
             <label for="sessPdfLinkInput">Study Sheet PDF URL (Optional)</label>
             <input type="url" id="sessPdfLinkInput" placeholder="https://... / Google Drive / Dropbox link">
           </div>
@@ -1941,7 +2047,87 @@
           </div>
         </div>
         <button type="submit" class="primary-glow-btn full-width" id="submitClassSessionBtn" style="font-weight: 700; padding: 0.85rem; margin-top: 0.5rem;">
-          Save & Publish Session to Students 🎥
+          Save &amp; Publish Session to Students 🎥
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ====================================================================
+       MODAL: CREATE / EDIT STUDENT GROUP (For Teacher)
+       ==================================================================== -->
+  <div class="auth-modal-backdrop" id="createStudentGroupModal">
+    <div class="auth-modal-window" style="max-width: 620px;">
+      <div class="auth-modal-header">
+        <div>
+          <h2 class="auth-title" id="groupModalTitle">Create Student Group 👥</h2>
+          <p class="auth-subtitle">Group students into cohorts for bulk lesson unlocks and targeted Zoom classes</p>
+        </div>
+        <button class="modal-close-btn" id="closeCreateStudentGroupModalBtn" onclick="closeStudentGroupModal()">✕</button>
+      </div>
+      <form id="createStudentGroupForm" class="auth-form" onsubmit="handleSaveStudentGroup(event)">
+        <input type="hidden" id="groupEditId" value="">
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="groupNameInput">Group Name / Cohort Title</label>
+            <input type="text" id="groupNameInput" placeholder="e.g. Sunday Morning Advanced, Year 4 Group A" required>
+          </div>
+          <div class="form-group flex-1">
+            <label for="groupGradeSelect">Grade Level</label>
+            <select id="groupGradeSelect">
+              <option value="Reception">Early Years (Reception)</option>
+              <option value="Year 1">Year 1 (Key Stage 1)</option>
+              <option value="Year 2">Year 2 (Key Stage 1)</option>
+              <option value="Year 3">Year 3 (Lower KS2)</option>
+              <option value="Year 4" selected>Year 4 (Lower KS2)</option>
+              <option value="Year 5">Year 5 (Upper KS2)</option>
+              <option value="Year 6">Year 6 (Upper KS2)</option>
+              <option value="Year 7">Year 7 (Key Stage 3)</option>
+              <option value="Year 8">Year 8 (Key Stage 3)</option>
+              <option value="Year 9">Year 9 (Key Stage 3)</option>
+              <option value="Year 10">Year 10 (GCSE)</option>
+              <option value="Year 11">Year 11 (GCSE)</option>
+              <option value="Year 12">Year 12 (A-Level)</option>
+              <option value="Year 13">Year 13 (A-Level)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group flex-1">
+            <label for="groupColorSelect">Color Theme Badge</label>
+            <select id="groupColorSelect">
+              <option value="indigo" selected>🟣 Indigo / Royal Violet</option>
+              <option value="emerald">🟢 Emerald / Mastery Green</option>
+              <option value="amber">🟠 Amber / Golden Sun</option>
+              <option value="cyan">🔵 Cyan / Celestial Blue</option>
+              <option value="rose">🔴 Rose / Radiant Ruby</option>
+              <option value="purple">🔮 Purple / Deep Amethyst</option>
+            </select>
+          </div>
+          <div class="form-group flex-1">
+            <label for="groupDescInput">Schedule &amp; Notes (Optional)</label>
+            <input type="text" id="groupDescInput" placeholder="e.g. Meets Sun &amp; Wed at 5:00 PM">
+          </div>
+        </div>
+
+        <!-- Student Member Checkbox Multi-Picker -->
+        <div class="form-group">
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="mb-0 font-bold">Select Enrolled Students (<span id="groupSelectedCount">0</span> selected)</label>
+            <div class="flex items-center gap-2">
+              <button type="button" class="text-xs text-primary hover:underline font-semibold cursor-pointer" onclick="toggleAllGroupStudentCheckboxes(true)">Select All</button>
+              <span class="text-slate-500">•</span>
+              <button type="button" class="text-xs text-slate-400 hover:text-slate-200 cursor-pointer" onclick="toggleAllGroupStudentCheckboxes(false)">Clear All</button>
+            </div>
+          </div>
+          <div class="group-students-picker-box" id="groupStudentsPickerList" style="max-height: 200px; overflow-y: auto; background: rgba(14, 18, 30, 0.8); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 0.75rem;">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+
+        <button type="submit" class="primary-glow-btn full-width" id="submitStudentGroupBtn" style="font-weight: 700; padding: 0.85rem; margin-top: 0.5rem;">
+          Save Student Group 👥
         </button>
       </form>
     </div>

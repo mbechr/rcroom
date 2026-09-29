@@ -27,6 +27,7 @@
     unsubscribeStudents: null,
     unsubscribeLogs: null,
     unsubscribeAssignments: null,
+    unsubscribeGroups: null,
 
     init() {
       const config = this.getConfig();
@@ -331,6 +332,36 @@
           console.warn('Curriculum permissions realtime listener error:', err.message);
         });
       } catch (e) {}
+
+      // 7. Realtime Student Groups Listener
+      try {
+        if (this.unsubscribeGroups) this.unsubscribeGroups();
+        this.unsubscribeGroups = this.firestore.collection('student_groups')
+          .orderBy('created_at', 'desc')
+          .onSnapshot(snapshot => {
+            const cloudGroups = [];
+            snapshot.forEach(doc => {
+              const data = doc.data();
+              cloudGroups.push({
+                id: doc.id || data.id,
+                name: data.name || 'Student Group',
+                grade_level: data.grade_level || 'Year 4',
+                color: data.color || 'indigo',
+                student_ids: Array.isArray(data.student_ids) ? data.student_ids : [],
+                description: data.description || '',
+                created_at: data.created_at || new Date().toISOString()
+              });
+            });
+            console.log('⚡ Realtime Cloud Update: Loaded', cloudGroups.length, 'student groups from Firestore.');
+            localStorage.setItem('rc_student_groups', JSON.stringify(cloudGroups));
+
+            if (typeof window.renderTeacherGroups === 'function' && window.AppState && window.AppState.currentView === 'teacher') {
+              window.renderTeacherGroups();
+            }
+          }, err => {
+            console.warn('Student groups realtime listener error:', err.message);
+          });
+      } catch (e) {}
     },
 
     // -------------------------------------------------------------------------
@@ -523,14 +554,17 @@
         const id = sessionData.id || ('sess_' + Date.now());
         const payload = {
           id: id,
-          date: sessionData.date || new Date().toISOString().slice(0, 10),
+          date: sessionData.date || sessionData.session_date || new Date().toISOString().slice(0, 10),
           title: sessionData.title || 'Class Session',
-          topic_covered: sessionData.topic_covered || '',
+          topic_covered: sessionData.topic_covered || sessionData.topic || '',
           zoom_link: sessionData.zoom_link || '',
           recording_link: sessionData.recording_link || '',
-          pdf_url: sessionData.pdf_url || '',
+          pdf_url: sessionData.pdf_url || sessionData.pdf_link || '',
           pdf_title: sessionData.pdf_title || '',
           notes: sessionData.notes || '',
+          target_audience: sessionData.target_audience || 'all',
+          target_group_id: sessionData.target_group_id || '',
+          target_student_id: Number(sessionData.target_student_id) || 0,
           created_at: sessionData.created_at || new Date().toISOString()
         };
         await this.firestore.collection('class_sessions').doc(id).set(payload, { merge: true });
@@ -538,6 +572,42 @@
         return id;
       } catch (err) {
         console.warn('Failed to save class session to Firestore:', err);
+      }
+    },
+
+    /**
+     * Get class sessions from Firestore
+     */
+    async getClassSessions() {
+      if (!this.isConfigured || !this.firestore) return [];
+      try {
+        const snap = await this.firestore.collection('class_sessions').orderBy('date', 'desc').get();
+        const list = [];
+        snap.forEach(doc => {
+          const d = doc.data();
+          list.push({
+            id: doc.id,
+            date: d.date || '',
+            session_date: d.date || '',
+            title: d.title || 'Class Session',
+            topic_covered: d.topic_covered || d.topic || '',
+            topic: d.topic_covered || d.topic || '',
+            zoom_link: d.zoom_link || '',
+            recording_link: d.recording_link || '',
+            pdf_url: d.pdf_url || d.pdf_link || '',
+            pdf_link: d.pdf_url || d.pdf_link || '',
+            pdf_title: d.pdf_title || '',
+            notes: d.notes || '',
+            target_audience: d.target_audience || 'all',
+            target_group_id: d.target_group_id || '',
+            target_student_id: Number(d.target_student_id) || 0,
+            created_at: d.created_at || ''
+          });
+        });
+        return list;
+      } catch (err) {
+        console.warn('Failed to get class sessions from Firestore:', err);
+        return [];
       }
     },
 
@@ -551,6 +621,70 @@
         console.log('🗑️ Class session deleted from Firestore:', sessionId);
       } catch (err) {
         console.warn('Failed to delete class session from Firestore:', err);
+      }
+    },
+
+    /**
+     * Save student group to Firestore
+     */
+    async saveStudentGroup(groupData) {
+      if (!this.isConfigured || !this.firestore) return;
+      try {
+        const id = String(groupData.id || ('grp_' + Date.now()));
+        const payload = {
+          id: id,
+          name: groupData.name || 'Student Group',
+          grade_level: groupData.grade_level || 'Year 4',
+          color: groupData.color || 'indigo',
+          student_ids: Array.isArray(groupData.student_ids) ? groupData.student_ids.map(Number) : [],
+          description: groupData.description || '',
+          created_at: groupData.created_at || new Date().toISOString()
+        };
+        await this.firestore.collection('student_groups').doc(id).set(payload, { merge: true });
+        console.log('✅ Student group saved to Google Cloud Firestore:', id);
+        return id;
+      } catch (err) {
+        console.warn('Failed to save student group to Firestore:', err);
+      }
+    },
+
+    /**
+     * Delete student group from Firestore
+     */
+    async deleteStudentGroup(groupId) {
+      if (!this.isConfigured || !this.firestore) return;
+      try {
+        await this.firestore.collection('student_groups').doc(String(groupId)).delete();
+        console.log('🗑️ Student group deleted from Firestore:', groupId);
+      } catch (err) {
+        console.warn('Failed to delete student group from Firestore:', err);
+      }
+    },
+
+    /**
+     * Get student groups from Firestore
+     */
+    async getStudentGroups() {
+      if (!this.isConfigured || !this.firestore) return [];
+      try {
+        const snap = await this.firestore.collection('student_groups').orderBy('created_at', 'desc').get();
+        const list = [];
+        snap.forEach(doc => {
+          const d = doc.data();
+          list.push({
+            id: doc.id,
+            name: d.name || 'Student Group',
+            grade_level: d.grade_level || 'Year 4',
+            color: d.color || 'indigo',
+            student_ids: Array.isArray(d.student_ids) ? d.student_ids : [],
+            description: d.description || '',
+            created_at: d.created_at || ''
+          });
+        });
+        return list;
+      } catch (err) {
+        console.warn('Failed to get student groups from Firestore:', err);
+        return [];
       }
     },
 

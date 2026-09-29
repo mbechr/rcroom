@@ -148,6 +148,39 @@ def init_auth_db():
         pdf_url TEXT,
         pdf_title TEXT,
         notes TEXT,
+        target_audience TEXT DEFAULT 'all',
+        target_group_id TEXT DEFAULT '',
+        target_student_id INTEGER DEFAULT 0,
+        created_at TEXT
+    )
+    ''')
+
+    cursor.execute("PRAGMA table_info(class_sessions)")
+    cs_cols = [r['name'] for r in cursor.fetchall()]
+    if 'target_audience' not in cs_cols:
+        try:
+            conn.execute("ALTER TABLE class_sessions ADD COLUMN target_audience TEXT DEFAULT 'all'")
+        except Exception as e:
+            print(f"Notice: Could not add target_audience: {e}")
+    if 'target_group_id' not in cs_cols:
+        try:
+            conn.execute("ALTER TABLE class_sessions ADD COLUMN target_group_id TEXT DEFAULT ''")
+        except Exception as e:
+            print(f"Notice: Could not add target_group_id: {e}")
+    if 'target_student_id' not in cs_cols:
+        try:
+            conn.execute("ALTER TABLE class_sessions ADD COLUMN target_student_id INTEGER DEFAULT 0")
+        except Exception as e:
+            print(f"Notice: Could not add target_student_id: {e}")
+
+    conn.execute('''
+    CREATE TABLE IF NOT EXISTS student_groups (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        grade_level TEXT,
+        color TEXT DEFAULT 'indigo',
+        student_ids TEXT DEFAULT '[]',
+        description TEXT,
         created_at TEXT
     )
     ''')
@@ -941,13 +974,16 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
             pdf_url = data.get('pdf_link') or data.get('pdf_url', '')
             pdf_title = html.escape(data.get('pdf_title', ''))
             notes = html.escape(data.get('notes', ''))
+            target_audience = data.get('target_audience', 'all')
+            target_group_id = data.get('target_group_id', '')
+            target_student_id = int(data.get('target_student_id', 0) or 0)
 
             conn = get_db()
             cursor = conn.cursor()
             cursor.execute('''
-            INSERT INTO class_sessions (id, date, title, topic_covered, zoom_link, recording_link, pdf_url, pdf_title, notes, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
-            ''', (session_id, date_str, title, topic, zoom_link, recording_link, pdf_url, pdf_title, notes))
+            INSERT INTO class_sessions (id, date, title, topic_covered, zoom_link, recording_link, pdf_url, pdf_title, notes, target_audience, target_group_id, target_student_id, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+            ''', (session_id, date_str, title, topic, zoom_link, recording_link, pdf_url, pdf_title, notes, target_audience, target_group_id, target_student_id))
             conn.commit()
             conn.close()
             return self.send_json({'success': True, 'session_id': session_id})
@@ -966,6 +1002,144 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
             cursor = conn.cursor()
             cursor.execute('DELETE FROM class_sessions WHERE id = ?', (session_id,))
             conn.commit()
+            conn.close()
+            return self.send_json({'success': True})
+
+        # ---------------------------------------------------------------------
+        # Teacher: Student Groups Management
+        # ---------------------------------------------------------------------
+        elif path == '/api/teacher/groups/save':
+            auth_user = get_authenticated_user(self.headers)
+            if not auth_user or auth_user.get('role') != 'teacher':
+                return self.send_json({'success': False, 'error': 'Teacher authorization required.'}, status=403)
+
+            data = self.parse_body()
+            group_id = data.get('id') or f"grp_{int(datetime.now(timezone.utc).timestamp()*1000)}"
+            raw_name = data.get('name', 'Student Group').strip()
+            name = html.escape(raw_name)
+            grade_level = data.get('grade_level', 'Year 4').strip()
+            color = data.get('color', 'indigo').strip()
+            student_ids_raw = data.get('student_ids', [])
+            if isinstance(student_ids_raw, str):
+                try:
+                    student_ids_list = json.loads(student_ids_raw)
+                except Exception:
+                    student_ids_list = []
+            else:
+                student_ids_list = student_ids_raw
+            student_ids_json = json.dumps([int(x) for x in student_ids_list if str(x).isdigit()])
+            description = html.escape(data.get('description', '').strip())
+
+            conn = get_db()
+            cursor = conn.cursor()
+            cursor.execute('''
+            INSERT INTO student_groups (id, name, grade_level, color, student_ids, description, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
+            ON CONFLICT(id) DO UPDATE SET
+                name=excluded.name,
+                grade_level=excluded.grade_level,
+                color=excluded.color,
+                student_ids=excluded.student_ids,
+                description=excluded.description
+            ''', (group_id, name, grade_level, color, student_ids_json, description))
+            conn.commit()
+            conn.close()
+
+            return self.send_json({
+                'success': True,
+                'group_id': group_id,
+                'group': {
+                    'id': group_id,
+                    'name': name,
+                    'grade_level': grade_level,
+                    'color': color,
+                    'student_ids': json.loads(student_ids_json),
+                    'description': description
+                }
+            })
+
+        elif path == '/api/teacher/groups/delete':
+            auth_user = get_authenticated_user(self.headers)
+            if not auth_user or auth_user.get('role') != 'teacher':
+                return self.send_json({'success': False, 'error': 'Teacher authorization required.'}, status=403)
+
+            data = self.parse_body()
+            group_id = data.get('group_id') or data.get('id')
+            if not group_id:
+                return self.send_json({'success': False, 'error': 'group_id required.'}, status=400)
+
+            conn = get_db()
+            cursor = conn.cursor()
+            cursor.execute('DELETE FROM student_groups WHERE id = ?', (str(group_id),))
+            conn.commit()
+            conn.close()
+            return self.send_json({'success': True, 'group_id': group_id})
+
+        # ---------------------------------------------------------------------
+        # Teacher: Bulk Group Skills Updater
+        # ---------------------------------------------------------------------
+        elif path == '/api/teacher/group_skills/update':
+            auth_user = get_authenticated_user(self.headers)
+            if not auth_user or auth_user.get('role') != 'teacher':
+                return self.send_json({'success': False, 'error': 'Teacher authorization required.'}, status=403)
+
+            data = self.parse_body()
+            group_id = data.get('group_id')
+            student_ids = data.get('student_ids', [])
+            action = data.get('action', 'set')
+            skill_codes = data.get('skill_codes', [])
+            grade = data.get('grade')
+
+            conn = get_db()
+            cursor = conn.cursor()
+
+            # If student_ids empty, fetch from group_id
+            if not student_ids and group_id:
+                cursor.execute('SELECT student_ids, grade_level FROM student_groups WHERE id = ?', (str(group_id),))
+                grow = cursor.fetchone()
+                if grow:
+                    try:
+                        student_ids = json.loads(grow['student_ids'])
+                    except Exception:
+                        student_ids = []
+                    if not grade:
+                        grade = grow['grade_level']
+
+            updated_count = 0
+            for sid in student_ids:
+                try:
+                    s_id = int(sid)
+                except (ValueError, TypeError):
+                    continue
+
+                if action == 'lock_all':
+                    cursor.execute('DELETE FROM student_unlocked_skills WHERE student_id = ?', (s_id,))
+                elif action == 'unlock_all_grade':
+                    cursor.execute('DELETE FROM student_unlocked_skills WHERE student_id = ?', (s_id,))
+                    st_grade = grade
+                    if not st_grade:
+                        cursor.execute('SELECT grade_level FROM users WHERE id = ?', (s_id,))
+                        urow = cursor.fetchone()
+                        st_grade = urow['grade_level'] if urow else 'Year 4'
+                    cursor.execute('''
+                    INSERT OR IGNORE INTO student_unlocked_skills (student_id, skill_code, unlocked_at)
+                    SELECT ?, skill_code, datetime('now') FROM skills WHERE grade_name = ?
+                    ''', (s_id, st_grade))
+                else:
+                    cursor.execute('DELETE FROM student_unlocked_skills WHERE student_id = ?', (s_id,))
+                    for code in skill_codes:
+                        clean_code = str(code).strip()
+                        if clean_code:
+                            cursor.execute('''
+                            INSERT OR IGNORE INTO student_unlocked_skills (student_id, skill_code, unlocked_at)
+                            VALUES (?, ?, datetime('now'))
+                            ''', (s_id, clean_code))
+                updated_count += 1
+
+            conn.commit()
+            conn.close()
+            return self.send_json({'success': True, 'group_id': group_id, 'updated_students': updated_count})
+
         # ---------------------------------------------------------------------
         # Teacher: Curriculum Access & Lesson Assigner
         # ---------------------------------------------------------------------
@@ -1420,6 +1594,26 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
                 conn.close()
                 return self.send_json({'success': True, 'receipts': receipts, 'payments': receipts})
 
+            # Teacher: Student Groups Query
+            elif path == '/api/teacher/groups':
+                auth_user = get_authenticated_user(self.headers)
+                if not auth_user or auth_user.get('role') != 'teacher':
+                    return self.send_json({'success': False, 'error': 'Teacher authorization required.'}, status=403)
+
+                conn = get_db()
+                cursor = conn.cursor()
+                cursor.execute('SELECT * FROM student_groups ORDER BY created_at DESC')
+                groups = []
+                for r in cursor.fetchall():
+                    g = dict(r)
+                    try:
+                        g['student_ids'] = json.loads(g.get('student_ids', '[]'))
+                    except Exception:
+                        g['student_ids'] = []
+                    groups.append(g)
+                conn.close()
+                return self.send_json({'success': True, 'groups': groups})
+
             # Class Sessions Query (Token Protected)
             elif path == '/api/sessions/list':
                 auth_user = get_authenticated_user(self.headers)
@@ -1428,7 +1622,35 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
 
                 conn = get_db()
                 cursor = conn.cursor()
-                cursor.execute('SELECT * FROM class_sessions ORDER BY date DESC, created_at DESC LIMIT 100')
+
+                if auth_user.get('role') == 'teacher':
+                    cursor.execute('SELECT * FROM class_sessions ORDER BY date DESC, created_at DESC LIMIT 100')
+                else:
+                    student_id = auth_user['id']
+                    # Find any groups student belongs to
+                    cursor.execute('SELECT id, student_ids FROM student_groups')
+                    matched_groups = []
+                    for grow in cursor.fetchall():
+                        try:
+                            sids = json.loads(grow['student_ids'])
+                            if student_id in sids or str(student_id) in sids:
+                                matched_groups.append(str(grow['id']))
+                        except Exception:
+                            pass
+
+                    group_placeholders = ','.join('?' * len(matched_groups)) if matched_groups else "''"
+                    sql = f'''
+                    SELECT * FROM class_sessions 
+                    WHERE target_audience = 'all' 
+                       OR target_audience IS NULL 
+                       OR target_audience = '' 
+                       OR target_student_id = ?
+                       OR (target_audience = 'group' AND target_group_id IN ({group_placeholders}))
+                    ORDER BY date DESC, created_at DESC LIMIT 100
+                    '''
+                    params = [student_id] + matched_groups if matched_groups else [student_id]
+                    cursor.execute(sql, tuple(params))
+
                 sessions = []
                 for s in cursor.fetchall():
                     d = dict(s)

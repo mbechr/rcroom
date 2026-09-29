@@ -5150,5 +5150,268 @@ html[dir="rtl"] #mainContentWrapper {
   line-height: 1.4;
 }
 
+/* =============================================================================
+   Student Groups & Cohorts High-Contrast Card Styles
+   ============================================================================= */
+
+.student-group-card {
+  background: var(--bg-card-solid);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-xl);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.student-group-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--border-focus);
+}
+
+.student-group-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+}
+
+/* Color Theme Badges */
+.student-group-card.group-theme-indigo::before { background: linear-gradient(90deg, #6366f1, #818cf8); }
+.student-group-card.group-theme-emerald::before { background: linear-gradient(90deg, #10b981, #34d399); }
+.student-group-card.group-theme-amber::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.student-group-card.group-theme-cyan::before { background: linear-gradient(90deg, #06b6d4, #22d3ee); }
+.student-group-card.group-theme-rose::before { background: linear-gradient(90deg, #f43f5e, #fb7185); }
+.student-group-card.group-theme-purple::before { background: linear-gradient(90deg, #a855f7, #c084fc); }
+
+.group-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.group-avatar-badge {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--bg-hover);
+  border: 1px solid var(--border-card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  flex-shrink: 0;
+}
+
+.group-card-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.group-grade-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: var(--bg-hover);
+  color: var(--color-primary);
+  padding: 0.15rem 0.55rem;
+  border-radius: 6px;
+  border: 1px solid var(--border-subtle);
+}
+
+.group-count-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  padding: 0.15rem 0.55rem;
+  border-radius: 6px;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+[data-theme="dark"] .group-count-pill {
+  color: #34d399;
+}
+
+.group-icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.group-icon-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-card);
+}
+
+.group-icon-btn.delete:hover {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.group-card-desc {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  background: var(--bg-surface-solid);
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.group-members-preview {
+  margin-top: 0.25rem;
+}
+
+.group-members-chips-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.group-member-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: var(--bg-surface-solid);
+  border: 1px solid var(--border-card);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.group-member-chip.more {
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+  border-style: dashed;
+}
+
+.member-chip-avatar {
+  font-size: 0.9rem;
+}
+
+.group-card-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.4rem;
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.group-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: var(--transition-smooth);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.group-action-btn.unlock {
+  background: rgba(99, 102, 241, 0.12);
+  color: #6366f1;
+  border-color: rgba(99, 102, 241, 0.25);
+}
+.group-action-btn.unlock:hover {
+  background: rgba(99, 102, 241, 0.2);
+}
+
+.group-action-btn.zoom {
+  background: rgba(0, 113, 227, 0.12);
+  color: var(--color-primary);
+  border-color: rgba(0, 113, 227, 0.25);
+}
+.group-action-btn.zoom:hover {
+  background: rgba(0, 113, 227, 0.2);
+}
+
+.group-action-btn.whatsapp {
+  background: rgba(16, 185, 129, 0.12);
+  color: #059669;
+  border-color: rgba(16, 185, 129, 0.25);
+}
+[data-theme="dark"] .group-action-btn.whatsapp {
+  color: #34d399;
+}
+.group-action-btn.whatsapp:hover {
+  background: rgba(16, 185, 129, 0.2);
+}
+
+/* Multi-Student Picker Item */
+.group-student-picker-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.group-student-picker-item:last-child {
+  border-bottom: none;
+}
+.group-student-picker-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Target Mode Switcher in Curriculum */
+.curriculum-target-mode-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(15, 23, 42, 0.8);
+  padding: 0.25rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.curriculum-target-mode-pill button {
+  padding: 0.35rem 0.85rem;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+}
+
+.curriculum-target-mode-pill button.active {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.35);
+}
+
 
 

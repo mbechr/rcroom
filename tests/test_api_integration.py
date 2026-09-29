@@ -296,6 +296,80 @@ def test_payment_submission_and_teacher_approval(test_server):
     assert roster_student['payment_status'] == 'paid'
     assert roster_student['payment_amount'] == 500
 
+def test_student_groups_and_bulk_group_skills_and_sessions(test_server):
+    # 1. Login Teacher and Students
+    _, t_body, _ = make_request(test_server, '/api/login', method='POST', data={
+        'username': 'rania', 'password': 'TeacherSecureNewPass_123!'
+    })
+    teacher_token = t_body['token']
+
+    _, s_body, _ = make_request(test_server, '/api/login', method='POST', data={
+        'username': 'alex', 'password': 'NewSecurePassword123!'
+    })
+    student_token = s_body['token']
+    student_id = s_body['student']['id']
+
+    # 2. Teacher creates a student group
+    group_id = 'grp_test_cohort_alpha'
+    status, save_grp_res, _ = make_request(test_server, '/api/teacher/groups/save', method='POST', token=teacher_token, data={
+        'id': group_id,
+        'name': 'Sunday Morning Cohort',
+        'grade_level': 'Year 4',
+        'color': 'indigo',
+        'description': 'Meets Sun & Wed at 5:00 PM',
+        'student_ids': [student_id]
+    })
+    assert status == 200 and save_grp_res['success']
+
+    # 3. Teacher lists groups
+    status, list_grp_res, _ = make_request(test_server, '/api/teacher/groups', token=teacher_token)
+    assert status == 200 and list_grp_res['success']
+    matched_group = next((g for g in list_grp_res['groups'] if g['id'] == group_id), None)
+    assert matched_group is not None
+    assert matched_group['name'] == 'Sunday Morning Cohort'
+    assert student_id in matched_group['student_ids']
+
+    # 4. Teacher bulk unlocks skills for the entire group
+    status, bulk_res, _ = make_request(test_server, '/api/teacher/group_skills/update', method='POST', token=teacher_token, data={
+        'group_id': group_id,
+        'action': 'set',
+        'skill_codes': ['MATH.Y4.A1', 'MATH.Y4.A2', 'MATH.Y4.B1']
+    })
+    assert status == 200 and bulk_res['success']
+    assert bulk_res['students_updated'] >= 1
+
+    # 5. Verify student Alex now has these unlocked skills
+    status, s_curr, _ = make_request(test_server, '/api/student/curriculum_access', token=student_token)
+    assert status == 200 and s_curr['success']
+    assert 'MATH.Y4.A1' in s_curr['unlocked_skills']
+    assert 'MATH.Y4.A2' in s_curr['unlocked_skills']
+    assert 'MATH.Y4.B1' in s_curr['unlocked_skills']
+
+    # 6. Teacher creates a group-targeted session
+    status, sess_res, _ = make_request(test_server, '/api/sessions/create', method='POST', token=teacher_token, data={
+        'title': 'Sunday Live Cohort Session',
+        'topic': 'Fractions & Number Lines',
+        'session_date': '2026-09-30 17:00',
+        'zoom_link': 'https://zoom.us/j/999888777',
+        'target_audience': 'group',
+        'target_group_id': group_id
+    })
+    assert status == 200 and sess_res['success']
+
+    # 7. Student lists sessions -> should receive the group-targeted session
+    status, s_sess_res, _ = make_request(test_server, '/api/sessions/list', token=student_token)
+    assert status == 200 and s_sess_res['success']
+    matched_sess = next((s for s in s_sess_res['sessions'] if s['title'] == 'Sunday Live Cohort Session'), None)
+    assert matched_sess is not None
+    assert matched_sess['target_audience'] == 'group'
+
+    # 8. Clean up group
+    status, del_grp_res, _ = make_request(test_server, '/api/teacher/groups/delete', method='POST', token=teacher_token, data={
+        'id': group_id
+    })
+    assert status == 200 and del_grp_res['success']
+
+
 
 
 

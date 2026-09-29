@@ -339,10 +339,13 @@ const AppState = {
   // Active User Session (Null if not logged in; requires username & password)
   currentUser: JSON.parse(localStorage.getItem('current_student') || 'null'),
 
-  // Curriculum Access & Lesson Permissions (Option 3 Hybrid Model)
+  // Curriculum Access & Lesson Permissions (Option 3 Hybrid Model & Groups)
   unlockedSkills: new Set(),
   teacherSelectedStudentUnlocked: new Set(),
   selectedCurriculumStudentId: null,
+  selectedCurriculumMode: 'student', // 'student' or 'group'
+  selectedCurriculumGroupId: null,
+  currentTeacherGroups: [],
 
   // Practice Room State
   practice: {
@@ -1655,11 +1658,19 @@ const DB = {
     const sess = {
       id: data.id || ('sess_' + Date.now()),
       title: data.title || 'Live Class Session',
-      topic: data.topic || '',
-      session_date: data.session_date || new Date().toISOString(),
+      topic: data.topic || data.topic_covered || '',
+      topic_covered: data.topic || data.topic_covered || '',
+      session_date: data.session_date || data.date || new Date().toISOString(),
+      date: data.session_date || data.date || new Date().toISOString().slice(0, 10),
       zoom_link: data.zoom_link || '',
-      pdf_link: data.pdf_link || '',
+      recording_link: data.recording_link || '',
+      pdf_link: data.pdf_link || data.pdf_url || '',
+      pdf_url: data.pdf_link || data.pdf_url || '',
       pdf_title: data.pdf_title || 'Class Material PDF',
+      notes: data.notes || '',
+      target_audience: data.target_audience || 'all',
+      target_group_id: data.target_group_id || '',
+      target_student_id: Number(data.target_student_id) || 0,
       created_at: new Date().toISOString()
     };
     local.unshift(sess);
@@ -1667,7 +1678,7 @@ const DB = {
 
     if (window.CloudDB && window.CloudDB.isConfigured) {
       try {
-        const cloudP = window.CloudDB.saveClassSession(data);
+        const cloudP = window.CloudDB.saveClassSession(sess);
         const timeoutP = new Promise((resolve) => setTimeout(resolve, 2500));
         Promise.race([cloudP, timeoutP]).catch(() => {});
       } catch (e) {}
@@ -1681,7 +1692,7 @@ const DB = {
         fetch(this.apiUrl('/api/sessions/create'), {
           method: 'POST',
           headers: this.getAuthHeaders(),
-          body: JSON.stringify(data),
+          body: JSON.stringify(sess),
           signal: controller.signal
         }).then(r => r.ok && r.json()).catch(() => {}).finally(() => clearTimeout(fetchTimeout));
       } catch (e) {}
@@ -1735,6 +1746,159 @@ const DB = {
       }
     } catch (e) {}
     return JSON.parse(localStorage.getItem('rc_class_sessions') || '[]');
+  },
+
+  // Student Groups Management
+  async getStudentGroups() {
+    if (window.CloudDB && window.CloudDB.isConfigured && typeof window.CloudDB.getStudentGroups === 'function') {
+      try {
+        const cloudGroups = await window.CloudDB.getStudentGroups();
+        if (cloudGroups && cloudGroups.length) {
+          localStorage.setItem('rc_student_groups', JSON.stringify(cloudGroups));
+          return cloudGroups;
+        }
+      } catch (e) {}
+    }
+
+    const isStaticHost = window.location.hostname.endsWith('github.io');
+    if (!isStaticHost) {
+      try {
+        const res = await fetch(this.apiUrl('/api/teacher/groups'), { headers: this.getAuthHeaders() });
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success && Array.isArray(json.groups)) {
+            localStorage.setItem('rc_student_groups', JSON.stringify(json.groups));
+            return json.groups;
+          }
+        }
+      } catch (e) {}
+    }
+
+    let local = [];
+    try {
+      local = JSON.parse(localStorage.getItem('rc_student_groups') || '[]');
+    } catch (e) {
+      local = [];
+    }
+
+    // Default sample cohort if empty
+    if (!local.length) {
+      const defaultGroup = {
+        id: 'grp_y4_alpha',
+        name: 'Year 4 Primary Cohort',
+        grade_level: 'Year 4',
+        color: 'indigo',
+        student_ids: [101],
+        description: 'Sunday & Wednesday Weekly Class',
+        created_at: new Date().toISOString()
+      };
+      local = [defaultGroup];
+      localStorage.setItem('rc_student_groups', JSON.stringify(local));
+    }
+
+    return local;
+  },
+
+  async saveStudentGroup(groupData) {
+    const id = String(groupData.id || ('grp_' + Date.now()));
+    const newGroup = {
+      id: id,
+      name: groupData.name || 'Student Group',
+      grade_level: groupData.grade_level || 'Year 4',
+      color: groupData.color || 'indigo',
+      student_ids: Array.isArray(groupData.student_ids) ? groupData.student_ids.map(Number) : [],
+      description: groupData.description || '',
+      created_at: groupData.created_at || new Date().toISOString()
+    };
+
+    let local = JSON.parse(localStorage.getItem('rc_student_groups') || '[]');
+    const idx = local.findIndex(g => String(g.id) === String(id));
+    if (idx >= 0) {
+      local[idx] = newGroup;
+    } else {
+      local.unshift(newGroup);
+    }
+    localStorage.setItem('rc_student_groups', JSON.stringify(local));
+
+    if (window.CloudDB && window.CloudDB.isConfigured && typeof window.CloudDB.saveStudentGroup === 'function') {
+      try {
+        window.CloudDB.saveStudentGroup(newGroup);
+      } catch (e) {}
+    }
+
+    const isStaticHost = window.location.hostname.endsWith('github.io');
+    if (!isStaticHost) {
+      try {
+        const controller = new AbortController();
+        const fetchTimeout = setTimeout(() => controller.abort(), 2500);
+        fetch(this.apiUrl('/api/teacher/groups/save'), {
+          method: 'POST',
+          headers: this.getAuthHeaders(),
+          body: JSON.stringify(newGroup),
+          signal: controller.signal
+        }).then(r => r.ok && r.json()).catch(() => {}).finally(() => clearTimeout(fetchTimeout));
+      } catch (e) {}
+    }
+
+    return { success: true, group: newGroup };
+  },
+
+  async deleteStudentGroup(groupId) {
+    let local = JSON.parse(localStorage.getItem('rc_student_groups') || '[]');
+    local = local.filter(g => String(g.id) !== String(groupId));
+    localStorage.setItem('rc_student_groups', JSON.stringify(local));
+
+    if (window.CloudDB && window.CloudDB.isConfigured && typeof window.CloudDB.deleteStudentGroup === 'function') {
+      try {
+        window.CloudDB.deleteStudentGroup(groupId);
+      } catch (e) {}
+    }
+
+    const isStaticHost = window.location.hostname.endsWith('github.io');
+    if (!isStaticHost) {
+      try {
+        const controller = new AbortController();
+        const fetchTimeout = setTimeout(() => controller.abort(), 2500);
+        fetch(this.apiUrl('/api/teacher/groups/delete'), {
+          method: 'POST',
+          headers: this.getAuthHeaders(),
+          body: JSON.stringify({ group_id: groupId }),
+          signal: controller.signal
+        }).then(r => r.ok && r.json()).catch(() => {}).finally(() => clearTimeout(fetchTimeout));
+      } catch (e) {}
+    }
+
+    return { success: true };
+  },
+
+  async updateGroupSkills(groupId, action, skillCodes = [], grade = null) {
+    const groups = await this.getStudentGroups();
+    const grp = groups.find(g => String(g.id) === String(groupId));
+    const studentIds = grp && Array.isArray(grp.student_ids) ? grp.student_ids : [];
+    const targetGrade = grade || (grp ? grp.grade_level : 'Year 4');
+
+    for (const sid of studentIds) {
+      await this.updateStudentSkills(sid, action, skillCodes, targetGrade);
+    }
+
+    const isStaticHost = window.location.hostname.endsWith('github.io');
+    if (!isStaticHost) {
+      try {
+        fetch(this.apiUrl('/api/teacher/group_skills/update'), {
+          method: 'POST',
+          headers: this.getAuthHeaders(),
+          body: JSON.stringify({
+            group_id: groupId,
+            student_ids: studentIds,
+            action: action,
+            skill_codes: skillCodes,
+            grade: targetGrade
+          })
+        }).catch(() => {});
+      } catch (e) {}
+    }
+
+    return { success: true, updated_students: studentIds.length };
   },
 
   // Curriculum Books & Full PDFs
@@ -3195,6 +3359,7 @@ window.switchTeacherTab = function(tabName) {
 
   const panels = {
     students: document.getElementById('teacherPanelStudents'),
+    groups: document.getElementById('teacherPanelGroups'),
     payments: document.getElementById('teacherPanelPayments'),
     sessions: document.getElementById('teacherPanelSessions'),
     homework: document.getElementById('teacherPanelHomework'),
@@ -3209,6 +3374,8 @@ window.switchTeacherTab = function(tabName) {
 
   if (tabName === 'students') {
     renderTeacherConsoleView();
+  } else if (tabName === 'groups') {
+    renderTeacherGroups();
   } else if (tabName === 'payments') {
     renderTeacherPayments();
   } else if (tabName === 'sessions') {
@@ -3225,15 +3392,206 @@ window.switchTeacherTab = function(tabName) {
 };
 
 // =============================================================================
-// Student Curriculum Access & Permission Controller (100% English UI)
+// Student Groups & Cohorts Management (Teacher Controller)
 // =============================================================================
 
-window.renderCurriculumAccessManager = async function() {
-  const container = document.getElementById('curriculumSkillsTree');
-  const studentSelect = document.getElementById('curriculumStudentSelect');
-  if (!container || !studentSelect) return;
+window.renderTeacherGroups = async function() {
+  const container = document.getElementById('teacherGroupsListContainer');
+  if (!container) return;
 
-  // 1. Fetch student list if needed
+  container.innerHTML = '<div class="col-span-full text-center py-12 text-slate-400 font-semibold"><span class="animate-spin inline-block mr-2">⏳</span> Loading student cohorts...</div>';
+
+  try {
+    const [groups, allStudents] = await Promise.all([
+      DB.getStudentGroups(),
+      (async () => {
+        let students = AppState.currentTeacherRoster || [];
+        if (!students.length) {
+          try {
+            const overview = await DB.getTeacherOverview();
+            if (overview && overview.students) {
+              students = overview.students;
+              AppState.currentTeacherRoster = students;
+            }
+          } catch (e) {}
+        }
+        if (!students.length) {
+          students = (await DB.getDemoStudents()).filter(s => s.role !== 'teacher');
+        }
+        return students;
+      })()
+    ]);
+
+    AppState.currentTeacherGroups = groups || [];
+
+    // KPI Counters
+    const totalGroups = groups.length;
+    let totalMembers = 0;
+    groups.forEach(g => {
+      totalMembers += (g.student_ids && Array.isArray(g.student_ids)) ? g.student_ids.length : 0;
+    });
+    const avgSize = totalGroups > 0 ? (totalMembers / totalGroups).toFixed(1) : 0;
+
+    const kpiTotal = document.getElementById('tGroupsTotalCount');
+    const kpiMembers = document.getElementById('tGroupsMembersCount');
+    const kpiAvg = document.getElementById('tGroupsAvgSize');
+    const badgeCount = document.getElementById('tGroupsCountBadge');
+
+    if (kpiTotal) kpiTotal.textContent = totalGroups;
+    if (kpiMembers) kpiMembers.textContent = totalMembers;
+    if (kpiAvg) kpiAvg.textContent = avgSize;
+    if (badgeCount) badgeCount.textContent = totalGroups;
+
+    if (!groups.length) {
+      container.innerHTML = `
+        <div class="col-span-full p-12 text-center bg-slate-900/40 rounded-3xl border border-dashed border-slate-700/60">
+          <div class="text-5xl mb-3">👥</div>
+          <h3 class="text-lg font-bold text-white mb-1">No Student Groups Created Yet</h3>
+          <p class="text-sm text-slate-400 max-w-md mx-auto mb-5">
+            Organize students into groups or cohorts to unlock curriculum lessons and schedule Zoom meetings in bulk with one click.
+          </p>
+          <button class="primary-glow-btn" onclick="openCreateGroupModal()">
+            <span class="material-symbols-outlined text-[18px]">group_add</span>
+            <span>Create First Student Group</span>
+          </button>
+        </div>
+      `;
+      return;
+    }
+
+    const studentMap = new Map();
+    allStudents.forEach(s => studentMap.set(String(s.id), s));
+
+    container.innerHTML = groups.map(group => {
+      const studentIds = Array.isArray(group.student_ids) ? group.student_ids : [];
+      const memberCount = studentIds.length;
+      const themeColor = group.color || 'indigo';
+
+      // Build member avatar tags
+      const memberChips = studentIds.slice(0, 5).map(sid => {
+        const st = studentMap.get(String(sid)) || { full_name: `Student #${sid}`, avatar: '🦊' };
+        return `
+          <span class="group-member-chip" title="${st.full_name || st.username}">
+            <span class="member-chip-avatar">${st.avatar || '🦊'}</span>
+            <span class="member-chip-name">${(st.full_name || st.username || 'Student').split(' ')[0]}</span>
+          </span>
+        `;
+      }).join('');
+
+      const remainingCount = memberCount > 5 ? memberCount - 5 : 0;
+
+      return `
+        <div class="student-group-card group-theme-${themeColor}">
+          <div class="group-card-header">
+            <div class="flex items-center gap-3">
+              <div class="group-avatar-badge">${memberCount > 0 ? '👥' : '👤'}</div>
+              <div>
+                <h4 class="group-card-title">${group.name}</h4>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="group-grade-pill">${group.grade_level || 'Year 4'}</span>
+                  <span class="group-count-pill">${memberCount} Student${memberCount === 1 ? '' : 's'}</span>
+                </div>
+              </div>
+            </div>
+            <div class="flex items-center gap-1">
+              <button type="button" class="group-icon-btn" onclick="openEditGroupModal('${group.id}')" title="Edit Group">
+                ✏️
+              </button>
+              <button type="button" class="group-icon-btn delete" onclick="deleteStudentGroupItem('${group.id}')" title="Delete Group">
+                🗑️
+              </button>
+            </div>
+          </div>
+
+          ${group.description ? `
+            <div class="group-card-desc">
+              <span>📅</span> <span>${group.description}</span>
+            </div>
+          ` : ''}
+
+          <div class="group-members-preview">
+            <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Enrolled Students:</div>
+            <div class="group-members-chips-wrap">
+              ${memberCount > 0 ? memberChips : '<span class="text-xs text-slate-500 italic">No students assigned yet</span>'}
+              ${remainingCount > 0 ? `<span class="group-member-chip more">+${remainingCount} more</span>` : ''}
+            </div>
+          </div>
+
+          <div class="group-card-actions">
+            <button type="button" class="group-action-btn unlock" onclick="manageGroupPermissions('${group.id}')" title="Bulk Unlock Curriculum">
+              <span>🔓</span> <span>Curriculum</span>
+            </button>
+            <button type="button" class="group-action-btn zoom" onclick="broadcastZoomToGroup('${group.id}')" title="Schedule Zoom for this Group">
+              <span>🎥</span> <span>Zoom Class</span>
+            </button>
+            <button type="button" class="group-action-btn whatsapp" onclick="shareGroupWhatsApp('${group.id}')" title="Share via WhatsApp">
+              <span>💬</span> <span>WhatsApp</span>
+            </button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+  } catch (err) {
+    console.error('Failed to render teacher groups:', err);
+    container.innerHTML = '<div class="col-span-full p-8 text-center text-rose-400">Failed to load student cohorts.</div>';
+  }
+};
+
+window.openCreateGroupModal = async function() {
+  const modal = document.getElementById('createStudentGroupModal');
+  const title = document.getElementById('groupModalTitle');
+  const form = document.getElementById('createStudentGroupForm');
+  const editId = document.getElementById('groupEditId');
+  if (!modal) return;
+
+  if (title) title.textContent = 'Create Student Group 👥';
+  if (editId) editId.value = '';
+  if (form) form.reset();
+
+  await populateGroupStudentsPicker([]);
+  modal.classList.add('open');
+};
+
+window.openEditGroupModal = async function(groupId) {
+  const modal = document.getElementById('createStudentGroupModal');
+  const title = document.getElementById('groupModalTitle');
+  const editId = document.getElementById('groupEditId');
+  const nameInput = document.getElementById('groupNameInput');
+  const gradeSelect = document.getElementById('groupGradeSelect');
+  const colorSelect = document.getElementById('groupColorSelect');
+  const descInput = document.getElementById('groupDescInput');
+  if (!modal) return;
+
+  const groups = AppState.currentTeacherGroups || (await DB.getStudentGroups());
+  const group = groups.find(g => String(g.id) === String(groupId));
+  if (!group) {
+    showToast('Group not found', '⚠️');
+    return;
+  }
+
+  if (title) title.textContent = `Edit Group: ${group.name} 👥`;
+  if (editId) editId.value = group.id;
+  if (nameInput) nameInput.value = group.name || '';
+  if (gradeSelect) gradeSelect.value = group.grade_level || 'Year 4';
+  if (colorSelect) colorSelect.value = group.color || 'indigo';
+  if (descInput) descInput.value = group.description || '';
+
+  const selectedIds = (group.student_ids || []).map(id => String(id));
+  await populateGroupStudentsPicker(selectedIds);
+  modal.classList.add('open');
+};
+
+window.closeStudentGroupModal = function() {
+  const modal = document.getElementById('createStudentGroupModal');
+  if (modal) modal.classList.remove('open');
+};
+
+async function populateGroupStudentsPicker(selectedIds = []) {
+  const container = document.getElementById('groupStudentsPickerList');
+  const countEl = document.getElementById('groupSelectedCount');
+  if (!container) return;
+
   let students = AppState.currentTeacherRoster || [];
   if (!students.length) {
     try {
@@ -3248,25 +3606,292 @@ window.renderCurriculumAccessManager = async function() {
     students = (await DB.getDemoStudents()).filter(s => s.role !== 'teacher');
   }
 
-  // Populate student select
-  const studentOptions = students.map(s => `
-    <option value="${s.id}" ${String(s.id) === String(AppState.selectedCurriculumStudentId || students[0]?.id) ? 'selected' : ''}>
-      ${s.full_name || s.username} (${s.grade_level || 'Year 4'})
-    </option>
-  `).join('');
-  studentSelect.innerHTML = studentOptions;
+  const selectedSet = new Set(selectedIds.map(String));
 
-  if (!AppState.selectedCurriculumStudentId && students.length > 0) {
-    AppState.selectedCurriculumStudentId = students[0].id;
+  container.innerHTML = students.map(s => {
+    const isChecked = selectedSet.has(String(s.id));
+    return `
+      <label class="group-student-picker-item">
+        <input type="checkbox" class="group-student-checkbox w-4 h-4 rounded text-primary cursor-pointer" 
+          value="${s.id}" 
+          ${isChecked ? 'checked' : ''} 
+          onchange="updateGroupSelectedCount()">
+        <span class="text-base">${s.avatar || '🦊'}</span>
+        <div class="flex-1 min-w-0">
+          <div class="font-semibold text-white text-xs truncate">${s.full_name || s.username}</div>
+          <div class="text-[11px] text-slate-400 truncate">${s.grade_level || 'Year 4'} &bull; @${s.username}</div>
+        </div>
+      </label>
+    `;
+  }).join('');
+
+  if (countEl) countEl.textContent = selectedSet.size;
+}
+
+window.updateGroupSelectedCount = function() {
+  const countEl = document.getElementById('groupSelectedCount');
+  const checked = document.querySelectorAll('.group-student-checkbox:checked');
+  if (countEl) countEl.textContent = checked.length;
+};
+
+window.toggleAllGroupStudentCheckboxes = function(select) {
+  const checkboxes = document.querySelectorAll('.group-student-checkbox');
+  checkboxes.forEach(cb => { cb.checked = !!select; });
+  updateGroupSelectedCount();
+};
+
+window.handleSaveStudentGroup = async function(e) {
+  if (e) e.preventDefault();
+
+  const editId = document.getElementById('groupEditId')?.value;
+  const name = (document.getElementById('groupNameInput')?.value || '').trim();
+  const grade_level = document.getElementById('groupGradeSelect')?.value || 'Year 4';
+  const color = document.getElementById('groupColorSelect')?.value || 'indigo';
+  const description = (document.getElementById('groupDescInput')?.value || '').trim();
+
+  if (!name) {
+    showToast('Please enter a group name', '⚠️');
+    return;
   }
 
-  await loadStudentCurriculumInTeacherPanel(AppState.selectedCurriculumStudentId);
+  const checkedBoxes = document.querySelectorAll('.group-student-checkbox:checked');
+  const student_ids = Array.from(checkedBoxes).map(cb => {
+    const val = cb.value;
+    return isNaN(Number(val)) ? val : Number(val);
+  });
+
+  const groupData = {
+    id: editId || `grp_${Date.now()}`,
+    name,
+    grade_level,
+    color,
+    description,
+    student_ids,
+    created_at: new Date().toISOString()
+  };
+
+  const res = await DB.saveStudentGroup(groupData);
+  if (res && res.success) {
+    showToast(`Group "${name}" saved successfully! 👥`, '✅');
+    closeStudentGroupModal();
+    await renderTeacherGroups();
+  } else {
+    showToast('Failed to save student group', '⚠️');
+  }
+};
+
+window.deleteStudentGroupItem = async function(groupId) {
+  if (!confirm('Are you sure you want to delete this student group?')) return;
+  const res = await DB.deleteStudentGroup(groupId);
+  if (res && res.success) {
+    showToast('Student group deleted successfully 🗑️');
+    await renderTeacherGroups();
+  } else {
+    showToast('Failed to delete group', '⚠️');
+  }
+};
+
+window.manageGroupPermissions = function(groupId) {
+  switchTeacherTab('curriculum');
+  setCurriculumTargetMode('group');
+  setTimeout(() => {
+    const groupSelect = document.getElementById('curriculumGroupSelect');
+    if (groupSelect) {
+      groupSelect.value = groupId;
+      handleCurriculumGroupChange(groupId);
+    }
+  }, 50);
+};
+
+window.broadcastZoomToGroup = async function(groupId) {
+  const groups = AppState.currentTeacherGroups || (await DB.getStudentGroups());
+  const group = groups.find(g => String(g.id) === String(groupId));
+  if (!group) return;
+
+  const modal = document.getElementById('addClassSessionModal');
+  if (!modal) return;
+
+  modal.classList.add('open');
+  const audSelect = document.getElementById('sessTargetAudienceSelect');
+  if (audSelect) {
+    audSelect.value = 'group';
+    handleSessionAudienceChange('group');
+    setTimeout(() => {
+      const gSelect = document.getElementById('sessTargetGroupSelect');
+      if (gSelect) gSelect.value = groupId;
+    }, 50);
+  }
+
+  const titleInput = document.getElementById('sessTitleInput');
+  if (titleInput && !titleInput.value) {
+    titleInput.value = `${group.name} - Live Lecture`;
+  }
+};
+
+window.shareGroupWhatsApp = async function(groupId) {
+  const groups = AppState.currentTeacherGroups || (await DB.getStudentGroups());
+  const group = groups.find(g => String(g.id) === String(groupId));
+  if (!group) {
+    showToast('Group not found', '⚠️');
+    return;
+  }
+
+  const studentCount = (group.student_ids || []).length;
+  const zoomLink = localStorage.getItem('rc_default_zoom_link') || '';
+
+  const msg = `🌟 Miss Rania's Classroom Broadcast: ${group.name} 🌟
+📚 Grade: ${group.grade_level || 'Year 4'}
+👥 Enrolled Students: ${studentCount}
+━━━━━━━━━━━━━━━━━━━━
+📢 ${group.description || 'Welcome students to this cohort session!'}
+${zoomLink ? '🎥 Zoom Link: ' + zoomLink + '\n' : ''}
+💻 Please check your student portal for unlocked curriculum skills and study sheets.
+━━━━━━━━━━━━━━━━━━━━
+Best regards, Miss Rania 🌸`;
+
+  const url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+  showToast('Opening WhatsApp broadcast 💬');
+};
+
+// =============================================================================
+// Student & Group Curriculum Access & Permission Controller (100% English UI)
+// =============================================================================
+
+window.setCurriculumTargetMode = function(mode) {
+  AppState.selectedCurriculumMode = mode;
+
+  const studentBtn = document.getElementById('curriculumTargetStudentBtn');
+  const groupBtn = document.getElementById('curriculumTargetGroupBtn');
+  const studentWrap = document.getElementById('curriculumStudentSelectWrapper');
+  const groupWrap = document.getElementById('curriculumGroupSelectWrapper');
+
+  if (studentBtn) studentBtn.classList.toggle('active', mode === 'student');
+  if (groupBtn) groupBtn.classList.toggle('active', mode === 'group');
+
+  if (studentWrap) studentWrap.style.display = (mode === 'student' ? 'flex' : 'none');
+  if (groupWrap) groupWrap.style.display = (mode === 'group' ? 'flex' : 'none');
+
+  renderCurriculumAccessManager();
+};
+
+window.renderCurriculumAccessManager = async function() {
+  const container = document.getElementById('curriculumSkillsTree');
+  const studentSelect = document.getElementById('curriculumStudentSelect');
+  const groupSelect = document.getElementById('curriculumGroupSelect');
+  if (!container) return;
+
+  const mode = AppState.selectedCurriculumMode || 'student';
+
+  // 1. Populate Students dropdown
+  let students = AppState.currentTeacherRoster || [];
+  if (!students.length) {
+    try {
+      const overview = await DB.getTeacherOverview();
+      if (overview && overview.students) {
+        students = overview.students;
+        AppState.currentTeacherRoster = students;
+      }
+    } catch (e) {}
+  }
+  if (!students.length) {
+    students = (await DB.getDemoStudents()).filter(s => s.role !== 'teacher');
+  }
+
+  if (studentSelect) {
+    studentSelect.innerHTML = students.map(s => `
+      <option value="${s.id}" ${String(s.id) === String(AppState.selectedCurriculumStudentId || students[0]?.id) ? 'selected' : ''}>
+        ${s.full_name || s.username} (${s.grade_level || 'Year 4'})
+      </option>
+    `).join('');
+  }
+
+  // 2. Populate Groups dropdown
+  let groups = AppState.currentTeacherGroups || [];
+  if (!groups.length) {
+    groups = await DB.getStudentGroups();
+    AppState.currentTeacherGroups = groups;
+  }
+
+  if (groupSelect) {
+    if (groups.length > 0) {
+      groupSelect.innerHTML = groups.map(g => `
+        <option value="${g.id}" ${String(g.id) === String(AppState.selectedCurriculumGroupId || groups[0]?.id) ? 'selected' : ''}>
+          ${g.name} (${g.grade_level || 'Year 4'} • ${(g.student_ids || []).length} students)
+        </option>
+      `).join('');
+    } else {
+      groupSelect.innerHTML = '<option value="">No Groups Created Yet</option>';
+    }
+  }
+
+  if (mode === 'group') {
+    if (!groups.length) {
+      container.innerHTML = `
+        <div class="p-8 text-center text-slate-400 bg-slate-900/40 rounded-2xl border border-slate-800">
+          <div class="text-3xl mb-2">👥</div>
+          <div class="font-bold text-base text-slate-200">No Student Groups Found</div>
+          <p class="text-xs text-slate-500 mt-1 mb-4">Create a group first under the "Student Groups" sub-tab.</p>
+          <button class="primary-glow-btn" onclick="openCreateGroupModal()">Create Student Group</button>
+        </div>
+      `;
+      return;
+    }
+    if (!AppState.selectedCurriculumGroupId && groups.length > 0) {
+      AppState.selectedCurriculumGroupId = groups[0].id;
+    }
+    await loadGroupCurriculumInTeacherPanel(AppState.selectedCurriculumGroupId);
+  } else {
+    if (!AppState.selectedCurriculumStudentId && students.length > 0) {
+      AppState.selectedCurriculumStudentId = students[0].id;
+    }
+    await loadStudentCurriculumInTeacherPanel(AppState.selectedCurriculumStudentId);
+  }
 };
 
 window.handleCurriculumStudentChange = async function(studentId) {
   AppState.selectedCurriculumStudentId = studentId;
   await loadStudentCurriculumInTeacherPanel(studentId);
 };
+
+window.handleCurriculumGroupChange = async function(groupId) {
+  AppState.selectedCurriculumGroupId = groupId;
+  await loadGroupCurriculumInTeacherPanel(groupId);
+};
+
+async function loadGroupCurriculumInTeacherPanel(groupId) {
+  const container = document.getElementById('curriculumSkillsTree');
+  const gradeBadge = document.getElementById('curriculumGradeBadge');
+  if (!container) return;
+
+  container.innerHTML = '<div class="p-8 text-center text-slate-400 font-semibold"><span class="animate-spin inline-block mr-2">⏳</span> Loading group curriculum permissions...</div>';
+
+  const groups = AppState.currentTeacherGroups || (await DB.getStudentGroups());
+  const group = groups.find(g => String(g.id) === String(groupId)) || { name: 'Cohort', grade_level: 'Year 4', student_ids: [] };
+  const groupGrade = group.grade_level || 'Year 4';
+
+  if (gradeBadge) {
+    gradeBadge.textContent = `👥 Group: ${group.name} • ${groupGrade} (${(group.student_ids || []).length} Students)`;
+  }
+
+  // Aggregate unlocked skills across member students
+  const unlockedSet = new Set();
+  const studentIds = Array.isArray(group.student_ids) ? group.student_ids : [];
+  
+  if (studentIds.length > 0) {
+    for (const sid of studentIds) {
+      try {
+        const res = await DB.getTeacherStudentSkills(sid);
+        if (res && res.success && Array.isArray(res.unlocked_skills)) {
+          res.unlocked_skills.forEach(code => unlockedSet.add(code));
+        }
+      } catch (e) {}
+    }
+  }
+
+  AppState.teacherSelectedStudentUnlocked = unlockedSet;
+  filterCurriculumSkillsTree();
+}
 
 async function loadStudentCurriculumInTeacherPanel(studentId) {
   const container = document.getElementById('curriculumSkillsTree');
@@ -3275,16 +3900,14 @@ async function loadStudentCurriculumInTeacherPanel(studentId) {
 
   container.innerHTML = '<div class="p-8 text-center text-slate-400 font-semibold"><span class="animate-spin inline-block mr-2">⏳</span> Loading student curriculum permissions...</div>';
 
-  // Find student info
   const students = AppState.currentTeacherRoster || (await DB.getDemoStudents());
   const student = students.find(s => String(s.id) === String(studentId)) || DB.findStudentById(studentId) || { grade_level: 'Year 4', full_name: 'Student' };
   const studentGrade = student.grade_level || 'Year 4';
 
   if (gradeBadge) {
-    gradeBadge.textContent = `${student.full_name || student.username} • ${studentGrade}`;
+    gradeBadge.textContent = `👤 ${student.full_name || student.username} • ${studentGrade}`;
   }
 
-  // Fetch unlocked skills from backend
   const res = await DB.getTeacherStudentSkills(studentId);
   const unlockedSet = new Set(res && res.success && Array.isArray(res.unlocked_skills) ? res.unlocked_skills : []);
   AppState.teacherSelectedStudentUnlocked = unlockedSet;
@@ -3296,15 +3919,24 @@ window.filterCurriculumSkillsTree = function() {
   const container = document.getElementById('curriculumSkillsTree');
   const subjectFilter = document.getElementById('curriculumSubjectFilter')?.value || 'Maths';
   const searchQuery = (document.getElementById('curriculumSkillSearch')?.value || '').trim().toLowerCase();
-  const studentId = AppState.selectedCurriculumStudentId;
-  if (!container || !studentId) return;
+  const isGroupMode = AppState.selectedCurriculumMode === 'group';
 
-  const students = AppState.currentTeacherRoster || [];
-  const student = students.find(s => String(s.id) === String(studentId)) || DB.findStudentById(studentId) || { grade_level: 'Year 4' };
-  const studentGrade = student.grade_level || 'Year 4';
+  let currentGrade = 'Year 4';
+  if (isGroupMode) {
+    const groups = AppState.currentTeacherGroups || [];
+    const grp = groups.find(g => String(g.id) === String(AppState.selectedCurriculumGroupId));
+    currentGrade = grp ? (grp.grade_level || 'Year 4') : 'Year 4';
+  } else {
+    const studentId = AppState.selectedCurriculumStudentId;
+    const students = AppState.currentTeacherRoster || [];
+    const student = students.find(s => String(s.id) === String(studentId)) || DB.findStudentById(studentId) || { grade_level: 'Year 4' };
+    currentGrade = student.grade_level || 'Year 4';
+  }
 
-  // Filter skills by student grade and subject
-  let skills = (AppState.flatSkills || []).filter(s => s.grade === studentGrade);
+  if (!container) return;
+
+  // Filter skills by grade and subject
+  let skills = (AppState.flatSkills || []).filter(s => s.grade === currentGrade);
   if (subjectFilter !== 'all') {
     skills = skills.filter(s => s.subject === subjectFilter);
   }
@@ -3313,8 +3945,8 @@ window.filterCurriculumSkillsTree = function() {
   }
 
   // Update KPI counters for this grade
-  const totalGradeSkills = (AppState.flatSkills || []).filter(s => s.grade === studentGrade).length;
-  const gradeUnlockedCount = (AppState.flatSkills || []).filter(s => s.grade === studentGrade && AppState.teacherSelectedStudentUnlocked.has(s.code)).length;
+  const totalGradeSkills = (AppState.flatSkills || []).filter(s => s.grade === currentGrade).length;
+  const gradeUnlockedCount = (AppState.flatSkills || []).filter(s => s.grade === currentGrade && AppState.teacherSelectedStudentUnlocked.has(s.code)).length;
   const gradeLockedCount = Math.max(0, totalGradeSkills - gradeUnlockedCount);
 
   const kpiTotal = document.getElementById('curriculumTotalGradeSkills');
@@ -3336,22 +3968,22 @@ window.filterCurriculumSkillsTree = function() {
   }
 
   // Group by Category
-  const groups = new Map();
+  const categoryGroups = new Map();
   for (const s of skills) {
     const catKey = `${s.subject} • ${s.category_code} • ${s.category_name}`;
-    if (!groups.has(catKey)) {
-      groups.set(catKey, { subject: s.subject, code: s.category_code, name: s.category_name, skills: [] });
+    if (!categoryGroups.has(catKey)) {
+      categoryGroups.set(catKey, { subject: s.subject, code: s.category_code, name: s.category_name, skills: [] });
     }
-    groups.get(catKey).skills.push(s);
+    categoryGroups.get(catKey).skills.push(s);
   }
 
   let html = '';
-  for (const [catKey, group] of groups) {
-    const unlockedCount = group.skills.filter(s => AppState.teacherSelectedStudentUnlocked.has(s.code)).length;
-    const allChecked = group.skills.length > 0 && unlockedCount === group.skills.length;
-    const subjClass = (group.subject || '').toLowerCase().includes('math') ? 'maths' : 
-                      ((group.subject || '').toLowerCase().includes('eng') ? 'english' : 
-                      ((group.subject || '').toLowerCase().includes('sci') ? 'science' : 'general'));
+  for (const [catKey, catGroup] of categoryGroups) {
+    const unlockedCount = catGroup.skills.filter(s => AppState.teacherSelectedStudentUnlocked.has(s.code)).length;
+    const allChecked = catGroup.skills.length > 0 && unlockedCount === catGroup.skills.length;
+    const subjClass = (catGroup.subject || '').toLowerCase().includes('math') ? 'maths' : 
+                      ((catGroup.subject || '').toLowerCase().includes('eng') ? 'english' : 
+                      ((catGroup.subject || '').toLowerCase().includes('sci') ? 'science' : 'general'));
 
     html += `
       <div class="curriculum-cat-box" data-cat="${encodeURIComponent(catKey)}">
@@ -3361,9 +3993,9 @@ window.filterCurriculumSkillsTree = function() {
               ${allChecked ? 'checked' : ''} 
               onchange="toggleCategoryCurriculumSkills('${encodeURIComponent(catKey)}', this.checked)">
             <div class="flex items-center gap-2.5 flex-wrap">
-              <span class="curriculum-subject-badge ${subjClass}">${group.subject}</span>
-              <span class="curriculum-cat-title">${group.code}. ${group.name}</span>
-              <span class="curriculum-cat-count">(${unlockedCount}/${group.skills.length} unlocked)</span>
+              <span class="curriculum-subject-badge ${subjClass}">${catGroup.subject}</span>
+              <span class="curriculum-cat-title">${catGroup.code}. ${catGroup.name}</span>
+              <span class="curriculum-cat-count">(${unlockedCount}/${catGroup.skills.length} unlocked)</span>
             </div>
           </div>
           <button type="button" class="curriculum-toggle-btn" onclick="this.closest('.curriculum-cat-box').querySelector('.curriculum-skills-sublist').classList.toggle('hidden')">
@@ -3371,7 +4003,7 @@ window.filterCurriculumSkillsTree = function() {
           </button>
         </div>
         <div class="curriculum-skills-sublist">
-          ${group.skills.map(s => {
+          ${catGroup.skills.map(s => {
             const isUnlocked = AppState.teacherSelectedStudentUnlocked.has(s.code);
             return `
               <div class="curriculum-skill-item ${isUnlocked ? 'is-unlocked' : 'is-locked'}">
@@ -3408,20 +4040,28 @@ window.handleSkillCheckboxChange = async function(skillCode, isChecked) {
   }
   filterCurriculumSkillsTree();
 
-  const studentId = AppState.selectedCurriculumStudentId;
-  if (studentId) {
-    const skillCodes = Array.from(AppState.teacherSelectedStudentUnlocked);
-    await DB.updateStudentSkills(studentId, 'set', skillCodes);
+  if (AppState.selectedCurriculumMode === 'group') {
+    const groupId = AppState.selectedCurriculumGroupId;
+    if (groupId) {
+      await DB.updateGroupSkills(groupId, isChecked ? 'unlock' : 'lock', [skillCode]);
+    }
+  } else {
+    const studentId = AppState.selectedCurriculumStudentId;
+    if (studentId) {
+      const skillCodes = Array.from(AppState.teacherSelectedStudentUnlocked);
+      await DB.updateStudentSkills(studentId, 'set', skillCodes);
+    }
   }
 };
 
 window.toggleCategoryCurriculumSkills = async function(encodedCatKey, isChecked) {
   const catKey = decodeURIComponent(encodedCatKey);
-  const studentGrade = AppState.studentGradeLevel || 'Year 4';
   const targetSkills = (AppState.flatSkills || []).filter(s => {
     const k = `${s.subject} • ${s.category_code} • ${s.category_name}`;
     return k === catKey;
   });
+
+  const skillCodes = targetSkills.map(s => s.code);
 
   targetSkills.forEach(s => {
     if (isChecked) {
@@ -3433,57 +4073,122 @@ window.toggleCategoryCurriculumSkills = async function(encodedCatKey, isChecked)
 
   filterCurriculumSkillsTree();
 
-  const studentId = AppState.selectedCurriculumStudentId;
-  if (studentId) {
-    const skillCodes = Array.from(AppState.teacherSelectedStudentUnlocked);
-    await DB.updateStudentSkills(studentId, 'set', skillCodes);
+  if (AppState.selectedCurriculumMode === 'group') {
+    const groupId = AppState.selectedCurriculumGroupId;
+    if (groupId) {
+      await DB.updateGroupSkills(groupId, isChecked ? 'unlock' : 'lock', skillCodes);
+    }
+  } else {
+    const studentId = AppState.selectedCurriculumStudentId;
+    if (studentId) {
+      const allUnlocked = Array.from(AppState.teacherSelectedStudentUnlocked);
+      await DB.updateStudentSkills(studentId, 'set', allUnlocked);
+    }
   }
 };
 
 window.unlockAllGradeSkills = async function() {
-  const studentId = AppState.selectedCurriculumStudentId;
-  if (!studentId) return;
+  const isGroupMode = AppState.selectedCurriculumMode === 'group';
 
-  const students = AppState.currentTeacherRoster || [];
-  const student = students.find(s => String(s.id) === String(studentId)) || DB.findStudentById(studentId) || { grade_level: 'Year 4' };
-  const studentGrade = student.grade_level || 'Year 4';
+  if (isGroupMode) {
+    const groupId = AppState.selectedCurriculumGroupId;
+    if (!groupId) return;
+    const groups = AppState.currentTeacherGroups || [];
+    const group = groups.find(g => String(g.id) === String(groupId)) || { grade_level: 'Year 4' };
+    const groupGrade = group.grade_level || 'Year 4';
 
-  const gradeSkills = (AppState.flatSkills || []).filter(s => s.grade === studentGrade);
-  gradeSkills.forEach(s => AppState.teacherSelectedStudentUnlocked.add(s.code));
+    const gradeSkills = (AppState.flatSkills || []).filter(s => s.grade === groupGrade);
+    gradeSkills.forEach(s => AppState.teacherSelectedStudentUnlocked.add(s.code));
 
-  const res = await DB.updateStudentSkills(studentId, 'unlock_all_grade', [], studentGrade);
-  if (res && res.success) {
-    showToast(`All ${studentGrade} skills unlocked successfully! 🔓`, '✅');
+    const res = await DB.updateGroupSkills(groupId, 'unlock_all_grade', [], groupGrade);
+    if (res && res.success) {
+      showToast(`All ${groupGrade} skills unlocked for group "${group.name}"! 🔓`, '✅');
+    } else {
+      showToast(`All ${groupGrade} skills unlocked locally! 🔓`, '✅');
+    }
   } else {
-    showToast(`All ${studentGrade} skills unlocked locally! 🔓`, '✅');
+    const studentId = AppState.selectedCurriculumStudentId;
+    if (!studentId) return;
+
+    const students = AppState.currentTeacherRoster || [];
+    const student = students.find(s => String(s.id) === String(studentId)) || DB.findStudentById(studentId) || { grade_level: 'Year 4' };
+    const studentGrade = student.grade_level || 'Year 4';
+
+    const gradeSkills = (AppState.flatSkills || []).filter(s => s.grade === studentGrade);
+    gradeSkills.forEach(s => AppState.teacherSelectedStudentUnlocked.add(s.code));
+
+    const res = await DB.updateStudentSkills(studentId, 'unlock_all_grade', [], studentGrade);
+    if (res && res.success) {
+      showToast(`All ${studentGrade} skills unlocked successfully! 🔓`, '✅');
+    } else {
+      showToast(`All ${studentGrade} skills unlocked locally! 🔓`, '✅');
+    }
   }
   filterCurriculumSkillsTree();
 };
 
 window.lockAllStudentSkills = async function() {
-  const studentId = AppState.selectedCurriculumStudentId;
-  if (!studentId) return;
+  const isGroupMode = AppState.selectedCurriculumMode === 'group';
 
-  AppState.teacherSelectedStudentUnlocked.clear();
+  if (isGroupMode) {
+    const groupId = AppState.selectedCurriculumGroupId;
+    if (!groupId) return;
 
-  const res = await DB.updateStudentSkills(studentId, 'lock_all');
-  if (res && res.success) {
-    showToast('All curriculum skills locked for student 🔒', 'ℹ️');
+    AppState.teacherSelectedStudentUnlocked.clear();
+    const res = await DB.updateGroupSkills(groupId, 'lock_all');
+    if (res && res.success) {
+      showToast('All curriculum skills locked for group 🔒', 'ℹ️');
+    } else {
+      showToast('All curriculum skills locked locally 🔒', 'ℹ️');
+    }
   } else {
-    showToast('All curriculum skills locked locally 🔒', 'ℹ️');
+    const studentId = AppState.selectedCurriculumStudentId;
+    if (!studentId) return;
+
+    AppState.teacherSelectedStudentUnlocked.clear();
+    const res = await DB.updateStudentSkills(studentId, 'lock_all');
+    if (res && res.success) {
+      showToast('All curriculum skills locked for student 🔒', 'ℹ️');
+    } else {
+      showToast('All curriculum skills locked locally 🔒', 'ℹ️');
+    }
   }
   filterCurriculumSkillsTree();
 };
 
 window.saveCurriculumAccess = async function() {
-  const studentId = AppState.selectedCurriculumStudentId;
-  if (!studentId) {
-    showToast('Please select a student first', '⚠️');
-    return;
-  }
+  const isGroupMode = AppState.selectedCurriculumMode === 'group';
 
-  const skillCodes = Array.from(AppState.teacherSelectedStudentUnlocked);
-  const res = await DB.updateStudentSkills(studentId, 'set', skillCodes);
+  if (isGroupMode) {
+    const groupId = AppState.selectedCurriculumGroupId;
+    if (!groupId) {
+      showToast('Please select a group first', '⚠️');
+      return;
+    }
+    const skillCodes = Array.from(AppState.teacherSelectedStudentUnlocked);
+    const res = await DB.updateGroupSkills(groupId, 'set', skillCodes);
+    if (res && res.success) {
+      showToast(`Saved ${skillCodes.length} unlocked permissions for group! 💾`, '✅');
+    } else {
+      showToast(`Saved ${skillCodes.length} group permissions locally! 💾`, '✅');
+    }
+  } else {
+    const studentId = AppState.selectedCurriculumStudentId;
+    if (!studentId) {
+      showToast('Please select a student first', '⚠️');
+      return;
+    }
+    const skillCodes = Array.from(AppState.teacherSelectedStudentUnlocked);
+    const res = await DB.updateStudentSkills(studentId, 'set', skillCodes);
+    if (res && res.success) {
+      showToast(`Saved ${skillCodes.length} unlocked permissions successfully! 💾`, '✅');
+    } else {
+      localStorage.setItem(`rc_unlocked_${studentId}`, JSON.stringify(skillCodes));
+      showToast(`Saved ${skillCodes.length} permissions locally! 💾`, '✅');
+    }
+  }
+  filterCurriculumSkillsTree();
+};
 
   if (res && res.success) {
     showToast(`Saved ${skillCodes.length} unlocked permissions successfully! 💾`, '✅');
@@ -3782,6 +4487,28 @@ window.viewReceiptImage = function(imgSrc, studentName) {
   modal.classList.add('open');
 };
 
+window.handleSessionAudienceChange = async function(val) {
+  const groupWrap = document.getElementById('sessTargetGroupWrapper');
+  const studentWrap = document.getElementById('sessTargetStudentWrapper');
+  const groupSelect = document.getElementById('sessTargetGroupSelect');
+  const studentSelect = document.getElementById('sessTargetStudentSelect');
+
+  if (groupWrap) groupWrap.style.display = (val === 'group' ? 'block' : 'none');
+  if (studentWrap) studentWrap.style.display = (val === 'student' ? 'block' : 'none');
+
+  if (val === 'group' && groupSelect) {
+    const groups = AppState.currentTeacherGroups || (await DB.getStudentGroups());
+    groupSelect.innerHTML = groups.map(g => `
+      <option value="${g.id}">${g.name} (${g.grade_level || 'Year 4'})</option>
+    `).join('') || '<option value="">No Groups Available</option>';
+  } else if (val === 'student' && studentSelect) {
+    const students = AppState.currentTeacherRoster || (await DB.getDemoStudents()).filter(s => s.role !== 'teacher');
+    studentSelect.innerHTML = students.map(s => `
+      <option value="${s.id}">${s.full_name || s.username} (${s.grade_level || 'Year 4'})</option>
+    `).join('') || '<option value="">No Students Available</option>';
+  }
+};
+
 async function renderTeacherSessions() {
   renderTeacherDefaultZoomBanner();
   const container = document.getElementById('teacherSessionsListContainer');
@@ -3789,7 +4516,27 @@ async function renderTeacherSessions() {
   container.innerHTML = '<div style="text-align:center; padding: 2rem; color: var(--text-muted);">Loading class sessions...</div>';
 
   try {
-    const sessions = await DB.getClassSessions();
+    const [sessions, groups, students] = await Promise.all([
+      DB.getClassSessions(),
+      DB.getStudentGroups(),
+      (async () => {
+        let st = AppState.currentTeacherRoster || [];
+        if (!st.length) {
+          try {
+            const overview = await DB.getTeacherOverview();
+            if (overview && overview.students) st = overview.students;
+          } catch (e) {}
+        }
+        if (!st.length) st = await DB.getDemoStudents();
+        return st;
+      })()
+    ]);
+
+    const groupMap = new Map();
+    (groups || []).forEach(g => groupMap.set(String(g.id), g.name));
+    const studentMap = new Map();
+    (students || []).forEach(s => studentMap.set(String(s.id), s.full_name || s.username));
+
     if (!sessions || !sessions.length) {
       container.innerHTML = `
         <div class="teacher-empty-box">
@@ -3801,37 +4548,49 @@ async function renderTeacherSessions() {
       return;
     }
 
-    container.innerHTML = sessions.map(s => `
-      <div class="teacher-item-card">
-        <div style="flex: 1; min-width: 260px;">
-          <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
-            <span class="planner-meta-pill time">
-              <span class="material-symbols-outlined text-[14px]">calendar_today</span>
-              ${s.session_date ? new Date(s.session_date).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) : 'Session'}
-            </span>
-            <strong class="teacher-item-title">${s.title}</strong>
+    container.innerHTML = sessions.map(s => {
+      let audienceBadge = '<span class="planner-meta-pill audience" style="background: rgba(14, 165, 233, 0.12); color: #0284c7; border: 1px solid rgba(14, 165, 233, 0.25);">🌐 All Students</span>';
+      if (s.target_audience === 'group' && s.target_group_id) {
+        const gName = groupMap.get(String(s.target_group_id)) || `Group ${s.target_group_id}`;
+        audienceBadge = `<span class="planner-meta-pill audience" style="background: rgba(99, 102, 241, 0.15); color: #6366f1; border: 1px solid rgba(99, 102, 241, 0.3);">👥 ${gName}</span>`;
+      } else if (s.target_audience === 'student' && s.target_student_id) {
+        const sName = studentMap.get(String(s.target_student_id)) || `Student #${s.target_student_id}`;
+        audienceBadge = `<span class="planner-meta-pill audience" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);">👤 ${sName}</span>`;
+      }
+
+      return `
+        <div class="teacher-item-card">
+          <div style="flex: 1; min-width: 260px;">
+            <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+              <span class="planner-meta-pill time">
+                <span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                ${s.session_date ? new Date(s.session_date).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' }) : 'Session'}
+              </span>
+              ${audienceBadge}
+              <strong class="teacher-item-title">${s.title}</strong>
+            </div>
+            <div class="teacher-item-meta" style="margin-top: 6px;">
+              <strong style="color: var(--text-primary);">Topics Covered:</strong> ${s.topic || 'General curriculum coverage'}
+            </div>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 8px;">
+              ${s.zoom_link ? `
+                <a href="${sanitizeExternalUrl(s.zoom_link)}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(0, 113, 227, 0.1); color: var(--color-primary); border: 1px solid rgba(0, 113, 227, 0.25); padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; text-decoration: none;">
+                  🎥 Zoom Meeting
+                </a>
+              ` : ''}
+              ${s.pdf_link ? `
+                <a href="${sanitizeExternalUrl(s.pdf_link)}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(239, 68, 68, 0.1); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.25); padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; text-decoration: none;">
+                  📄 ${s.pdf_title || 'PDF Sheet'}
+                </a>
+              ` : ''}
+            </div>
           </div>
-          <div class="teacher-item-meta" style="margin-top: 6px;">
-            <strong style="color: var(--text-primary);">Topics Covered:</strong> ${s.topic || 'General curriculum coverage'}
-          </div>
-          <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 8px;">
-            ${s.zoom_link ? `
-              <a href="${sanitizeExternalUrl(s.zoom_link)}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(0, 113, 227, 0.1); color: var(--color-primary); border: 1px solid rgba(0, 113, 227, 0.25); padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; text-decoration: none;">
-                🎥 Zoom Meeting
-              </a>
-            ` : ''}
-            ${s.pdf_link ? `
-              <a href="${sanitizeExternalUrl(s.pdf_link)}" target="_blank" rel="noopener noreferrer" style="display: inline-flex; align-items: center; gap: 0.4rem; background: rgba(239, 68, 68, 0.1); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.25); padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; text-decoration: none;">
-                📄 ${s.pdf_title || 'PDF Sheet'}
-              </a>
-            ` : ''}
-          </div>
+          <button type="button" class="action-btn-sm delete" onclick="deleteClassSessionItem(${s.id})" title="Delete session" style="padding: 6px 12px; border-radius: 8px; cursor: pointer;">
+            🗑️ Delete
+          </button>
         </div>
-        <button type="button" class="action-btn-sm delete" onclick="deleteClassSessionItem(${s.id})" title="Delete session" style="padding: 6px 12px; border-radius: 8px; cursor: pointer;">
-          🗑️ Delete
-        </button>
-      </div>
-    `).join('');
+      `;
+    }).join('');
   } catch (err) {
     console.error('Failed to render teacher sessions:', err);
     container.innerHTML = '<div style="color: #ef4444; padding: 1rem;">Failed to load sessions.</div>';
@@ -6585,6 +7344,9 @@ function setupEventListeners() {
       const zoomVal = document.getElementById('sessZoomLinkInput')?.value;
       const pdfVal = document.getElementById('sessPdfLinkInput')?.value;
       const pdfTitleVal = document.getElementById('sessPdfTitleInput')?.value;
+      const audVal = document.getElementById('sessTargetAudienceSelect')?.value || 'all';
+      const targetGroupVal = document.getElementById('sessTargetGroupSelect')?.value || null;
+      const targetStudentVal = document.getElementById('sessTargetStudentSelect')?.value ? Number(document.getElementById('sessTargetStudentSelect')?.value) : null;
 
       const res = await DB.saveClassSession({
         session_date: dateVal,
@@ -6592,7 +7354,10 @@ function setupEventListeners() {
         topic: topicVal,
         zoom_link: zoomVal,
         pdf_link: pdfVal,
-        pdf_title: pdfTitleVal
+        pdf_title: pdfTitleVal,
+        target_audience: audVal,
+        target_group_id: audVal === 'group' ? targetGroupVal : null,
+        target_student_id: audVal === 'student' ? targetStudentVal : null
       });
 
       if (res && res.success) {
