@@ -1772,6 +1772,16 @@ const DB = {
       } catch (e) {}
       AppState.currentUser = currentU;
       this.syncLocalStudentUpdate({ student_id: currentU.id, payment_status: 'pending' });
+
+      if (window.ActivityLogger) {
+        ActivityLogger.log(
+          currentU,
+          'PAYMENT_SUBMIT',
+          'Submitted Monthly Tuition Receipt',
+          `Amount: ${newP.amount ? newP.amount + ' EGP' : 'Verified'} via ${newP.payment_method}`,
+          { paymentId: newP.id, method: newP.payment_method }
+        );
+      }
     }
 
     // Non-blocking background sync to CloudDB with 2.5s timeout
@@ -3629,7 +3639,8 @@ window.switchTeacherTab = function(tabName) {
     homework: document.getElementById('teacherPanelHomework'),
     books: document.getElementById('teacherPanelBooks'),
     planner: document.getElementById('teacherPanelPlanner'),
-    curriculum: document.getElementById('teacherPanelCurriculum')
+    curriculum: document.getElementById('teacherPanelCurriculum'),
+    timeline: document.getElementById('teacherPanelTimeline')
   };
 
   Object.keys(panels).forEach(k => {
@@ -3652,7 +3663,445 @@ window.switchTeacherTab = function(tabName) {
     renderPlannerView();
   } else if (tabName === 'curriculum') {
     renderCurriculumAccessManager();
+  } else if (tabName === 'timeline') {
+    renderTeacherActivityTimeline();
   }
+};
+
+// =============================================================================
+// Daily Student Activity Audit & Timeline Controller (100% English UI)
+// =============================================================================
+
+if (!AppState.timelineFilter) {
+  AppState.timelineFilter = {
+    dateMode: 'today',
+    customDate: null,
+    studentId: 'all',
+    type: 'all'
+  };
+}
+
+window.setTimelineDateFilter = function(mode) {
+  AppState.timelineFilter.dateMode = mode;
+  AppState.timelineFilter.customDate = null;
+  const customInput = document.getElementById('timelineDateInput');
+  if (customInput) customInput.value = '';
+
+  document.querySelectorAll('#timelineDateQuickGroup .planner-filter-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.date === mode);
+  });
+
+  renderTeacherActivityTimeline();
+};
+
+window.handleTimelineCustomDate = function(dateVal) {
+  if (!dateVal) return;
+  AppState.timelineFilter.dateMode = 'custom';
+  AppState.timelineFilter.customDate = dateVal;
+
+  document.querySelectorAll('#timelineDateQuickGroup .planner-filter-tab').forEach(btn => {
+    btn.classList.remove('active');
+  });
+
+  renderTeacherActivityTimeline();
+};
+
+window.handleTimelineStudentChange = function(studentId) {
+  AppState.timelineFilter.studentId = studentId;
+  renderTeacherActivityTimeline();
+};
+
+window.filterTimelineType = function(type) {
+  AppState.timelineFilter.type = type;
+  document.querySelectorAll('#timelineTypePills .action-btn-sm').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.type === type);
+  });
+  renderTeacherActivityTimeline();
+};
+
+window.renderTeacherActivityTimeline = async function() {
+  if (!window.ActivityLogger) return;
+
+  const container = document.getElementById('teacherTimelineFeed');
+  const studentSelect = document.getElementById('timelineStudentSelect');
+  const dateBadge = document.getElementById('timelineDateBadge');
+  const focusBanner = document.getElementById('timelineStudentFocusBanner');
+
+  if (!container) return;
+
+  // 1. Populate student dropdown
+  let students = AppState.currentTeacherRoster || [];
+  if (!students.length) {
+    try {
+      const overview = await DB.getTeacherOverview();
+      if (overview && overview.students) students = overview.students;
+    } catch (e) {}
+  }
+  if (!students.length) {
+    students = (await DB.getDemoStudents()).filter(s => s.role !== 'teacher');
+  }
+
+  if (studentSelect && studentSelect.options.length <= 1) {
+    const currentVal = AppState.timelineFilter.studentId || 'all';
+    studentSelect.innerHTML = `
+      <option value="all" ${currentVal === 'all' ? 'selected' : ''}>👥 All Students (Class Summary)</option>
+      ${students.map(s => `
+        <option value="${s.id}" ${String(s.id) === String(currentVal) ? 'selected' : ''}>
+          ${s.avatar || '🦊'} ${s.full_name || s.username} (${s.grade_level || 'Year 4'})
+        </option>
+      `).join('')}
+    `;
+  }
+
+  // 2. Resolve query date
+  let queryDate = null;
+  let displayDateTitle = 'Today';
+  const today = new Date();
+  const todayStr = ActivityLogger.formatDate(today);
+
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = ActivityLogger.formatDate(yesterday);
+
+  if (AppState.timelineFilter.dateMode === 'today') {
+    queryDate = todayStr;
+    displayDateTitle = 'Today (' + new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ')';
+  } else if (AppState.timelineFilter.dateMode === 'yesterday') {
+    queryDate = yesterdayStr;
+    displayDateTitle = 'Yesterday (' + yesterday.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) + ')';
+  } else if (AppState.timelineFilter.dateMode === 'custom' && AppState.timelineFilter.customDate) {
+    queryDate = AppState.timelineFilter.customDate;
+    displayDateTitle = 'Date: ' + new Date(queryDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  } else {
+    queryDate = null;
+    displayDateTitle = 'All Time History';
+  }
+
+  if (dateBadge) dateBadge.textContent = displayDateTitle;
+
+  // 3. Compute KPI stats for the selected date
+  const statsDate = queryDate || todayStr;
+  const dayStats = ActivityLogger.getDailyStats(statsDate);
+
+  const kpiStudents = document.getElementById('tActActiveStudents');
+  const kpiPractice = document.getElementById('tActPracticeCount');
+  const kpiZoom = document.getElementById('tActZoomAttendees');
+  const kpiHw = document.getElementById('tActHomeworkDone');
+  const liveBadge = document.getElementById('tTodayActivityBadge');
+
+  if (kpiStudents) kpiStudents.textContent = dayStats.activeStudentsCount;
+  if (kpiPractice) kpiPractice.textContent = dayStats.practices;
+  if (kpiZoom) kpiZoom.textContent = dayStats.zooms;
+  if (kpiHw) kpiHw.textContent = dayStats.homeworks;
+  if (liveBadge) liveBadge.textContent = `${dayStats.totalEvents} Events`;
+
+  // 4. Query logs
+  const logs = ActivityLogger.queryLogs({
+    date: queryDate,
+    studentId: AppState.timelineFilter.studentId,
+    type: AppState.timelineFilter.type
+  });
+
+  // 5. Focus Banner for Single Student
+  const selectedStudentId = AppState.timelineFilter.studentId;
+  if (selectedStudentId && selectedStudentId !== 'all') {
+    const student = students.find(s => String(s.id) === String(selectedStudentId)) || DB.findStudentById(selectedStudentId);
+    if (student && focusBanner) {
+      const studentLogs = logs.filter(l => String(l.student_id) === String(selectedStudentId));
+      focusBanner.style.display = 'flex';
+      focusBanner.className = 'flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4';
+      focusBanner.innerHTML = `
+        <div class="flex items-center gap-3">
+          <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(0, 229, 255, 0.15); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; border: 1px solid rgba(0, 229, 255, 0.3);">
+            ${student.avatar || '🦊'}
+          </div>
+          <div>
+            <div style="font-weight: 800; font-size: 1.05rem; color: #fff; display: flex; align-items: center; gap: 0.5rem;">
+              <span>${student.full_name || student.username}</span>
+              <span style="font-size: 0.75rem; background: rgba(99, 102, 241, 0.2); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.3); padding: 2px 8px; border-radius: 9999px;">${student.grade_level || 'Year 4'}</span>
+            </div>
+            <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 2px;">
+              ⏱️ <strong>${studentLogs.length} activity actions</strong> recorded on ${displayDateTitle}
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" class="whatsapp-btn" onclick="sendStudentDailyTimelineWhatsApp('${student.id}')" style="padding: 0.55rem 1rem; font-size: 0.82rem; font-weight: 700;">
+            <span>💬</span> <span>Send Timeline via WhatsApp</span>
+          </button>
+        </div>
+      `;
+    }
+  } else {
+    if (focusBanner) focusBanner.style.display = 'none';
+  }
+
+  // 6. Render Logs List
+  if (!logs.length) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 3rem 1.5rem; background: rgba(15, 23, 42, 0.4); border-radius: 16px; border: 1px dashed rgba(255, 255, 255, 0.1);">
+        <div style="font-size: 2.8rem; margin-bottom: 0.5rem;">⏱️</div>
+        <h4 style="font-weight: 700; color: #fff; font-size: 1.05rem;">No Activity Recorded for Selected Filter</h4>
+        <p style="color: #94a3b8; font-size: 0.85rem; max-width: 420px; margin: 0.35rem auto 0;">
+          Student logins, practice runs, Zoom meeting attendance, and homework submissions will automatically populate here in real-time.
+        </p>
+      </div>
+    `;
+    return;
+  }
+
+  const typeIcons = {
+    LOGIN: '🔑',
+    PRACTICE: '📐',
+    ZOOM_JOIN: '🎥',
+    HOMEWORK_SUBMIT: '📝',
+    VOCAB_GAME: '🔤',
+    PAYMENT_SUBMIT: '💳',
+    BLOG_POST: '📄',
+    CERTIFICATE_EARNED: '🎓'
+  };
+
+  const typeLabels = {
+    LOGIN: 'Login',
+    PRACTICE: 'Practice',
+    ZOOM_JOIN: 'Zoom Live',
+    HOMEWORK_SUBMIT: 'Homework',
+    VOCAB_GAME: 'Vocab Game',
+    PAYMENT_SUBMIT: 'Tuition Receipt',
+    BLOG_POST: 'Blog Post',
+    CERTIFICATE_EARNED: 'Certificate'
+  };
+
+  container.innerHTML = logs.map(l => {
+    const icon = typeIcons[l.type] || '⚡';
+    const label = typeLabels[l.type] || l.type;
+
+    return `
+      <div class="timeline-log-row type-${l.type}">
+        <div class="timeline-time-pill">
+          <span>⏱️</span>
+          <span>${l.time || 'Recent'}</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 flex-wrap mb-1">
+            <span class="timeline-type-pill type-${l.type}">${icon} ${label}</span>
+            <span class="timeline-student-pill">
+              <span>${l.avatar || '🦊'}</span>
+              <span>${l.student_name}</span>
+              <span style="opacity: 0.7;">(${l.grade || 'Year 4'})</span>
+            </span>
+            ${!queryDate ? `<span style="font-size: 0.72rem; color: #64748b; font-weight: 600;">📅 ${l.date}</span>` : ''}
+          </div>
+          <div style="font-weight: 700; font-size: 0.92rem; color: #f8fafc; margin-bottom: 2px;">
+            ${l.title}
+          </div>
+          <div style="font-size: 0.82rem; color: #94a3b8; line-height: 1.5;">
+            ${l.details}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+};
+
+window.refreshCurrentTimelineView = function() {
+  const timelinePanel = document.getElementById('teacherPanelTimeline');
+  if (timelinePanel && timelinePanel.style.display !== 'none') {
+    renderTeacherActivityTimeline();
+  }
+};
+
+window.sendDailyTimelineWhatsApp = async function() {
+  if (!window.ActivityLogger) return;
+
+  const selectedStudentId = AppState.timelineFilter.studentId;
+  if (selectedStudentId && selectedStudentId !== 'all') {
+    sendStudentDailyTimelineWhatsApp(selectedStudentId);
+    return;
+  }
+
+  // Class Summary Dispatch
+  const today = new Date();
+  const todayStr = ActivityLogger.formatDate(today);
+  const logs = ActivityLogger.queryLogs({ date: todayStr });
+  const stats = ActivityLogger.getDailyStats(todayStr);
+  const dateFormatted = today.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+  let msg = `📅 *Daily Classroom Activity Audit — Miss Rania*\n`;
+  msg += `_${dateFormatted}_\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+  msg += `👥 *Active Students:* ${stats.activeStudentsCount}\n`;
+  msg += `🔑 *Logins:* ${stats.logins} | 📐 *Practices:* ${stats.practices}\n`;
+  msg += `🎥 *Zoom Attendees:* ${stats.zooms} | 📝 *HW Done:* ${stats.homeworks}\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+  if (!logs.length) {
+    msg += `No activity logged today yet.\n`;
+  } else {
+    // Group logs by student
+    const studentGroup = new Map();
+    logs.forEach(l => {
+      if (!studentGroup.has(l.student_name)) studentGroup.set(l.student_name, []);
+      studentGroup.get(l.student_name).push(l);
+    });
+
+    studentGroup.forEach((items, name) => {
+      msg += `👤 *${name}* (${items[0].grade || 'Year 4'}):\n`;
+      items.forEach(item => {
+        msg += `  • [${item.time}] ${item.title}\n`;
+      });
+      msg += `\n`;
+    });
+  }
+
+  msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+  msg += `🌐 *Portal:* https://mbechr.github.io/rcroom/\n`;
+  msg += `Best regards, Miss Rania 🌸`;
+
+  if (navigator.clipboard) {
+    try {
+      await navigator.clipboard.writeText(msg);
+      showToast('Daily audit summary copied! 📋');
+    } catch (e) {}
+  }
+
+  window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+};
+
+window.sendStudentDailyTimelineWhatsApp = function(studentId) {
+  if (!window.ActivityLogger) return;
+
+  const students = AppState.currentTeacherRoster || [];
+  const student = students.find(s => String(s.id) === String(studentId)) || DB.findStudentById(studentId);
+  if (!student) {
+    showToast('Student not found', '⚠️');
+    return;
+  }
+
+  const today = new Date();
+  const todayStr = ActivityLogger.formatDate(today);
+  const queryDate = (AppState.timelineFilter.dateMode === 'yesterday') ? ActivityLogger.formatDate(new Date(Date.now() - 86400000)) :
+                    ((AppState.timelineFilter.dateMode === 'custom' && AppState.timelineFilter.customDate) ? AppState.timelineFilter.customDate : todayStr);
+
+  const logs = ActivityLogger.queryLogs({ date: queryDate, studentId: student.id });
+  const dateFormatted = new Date(queryDate).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+  const parentPhone = student.parent_phone || student.student_phone;
+  const cleanPhone = parentPhone ? cleanWhatsAppNumber(parentPhone) : '';
+
+  let msg = `🌟 *Daily Activity & Progress Timeline* 🌟\n`;
+  msg += `👤 *Student:* ${student.full_name || student.username}\n`;
+  msg += `📚 *Grade:* ${student.grade_level || 'Year 4'}\n`;
+  msg += `📅 *Date:* ${dateFormatted}\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━\n`;
+  msg += `⏱️ *Chronological Activity Log:*\n\n`;
+
+  if (!logs.length) {
+    msg += `No activity recorded on this date.\n`;
+  } else {
+    // Sort chronological (oldest to newest for reading)
+    const chronological = [...logs].reverse();
+    chronological.forEach(l => {
+      msg += `• *[${l.time}]* ${l.title}\n`;
+      if (l.details && !l.details.includes('Authenticated from private')) {
+        msg += `   _${l.details}_\n`;
+      }
+    });
+  }
+
+  msg += `\n━━━━━━━━━━━━━━━━━━━━\n`;
+  msg += `🌟 Keep up the fantastic effort!\n`;
+  msg += `Best regards, Miss Rania 🌸 RC Classroom Portal`;
+
+  const url = cleanPhone ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}` : `https://wa.me/?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+  showToast('Opening WhatsApp to send student daily timeline 📤');
+};
+
+window.printDailyTimelineReport = function() {
+  if (!window.ActivityLogger) return;
+
+  const today = new Date();
+  const todayStr = ActivityLogger.formatDate(today);
+  const queryDate = (AppState.timelineFilter.dateMode === 'yesterday') ? ActivityLogger.formatDate(new Date(Date.now() - 86400000)) :
+                    ((AppState.timelineFilter.dateMode === 'custom' && AppState.timelineFilter.customDate) ? AppState.timelineFilter.customDate :
+                    (AppState.timelineFilter.dateMode === 'all' ? null : todayStr));
+
+  const logs = ActivityLogger.queryLogs({
+    date: queryDate,
+    studentId: AppState.timelineFilter.studentId,
+    type: AppState.timelineFilter.type
+  });
+
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    showToast('Please allow popups to print report', '⚠️');
+    return;
+  }
+
+  const dateLabel = queryDate ? new Date(queryDate).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : 'All Time History';
+
+  const rowsHtml = logs.map((l) => `
+    <tr>
+      <td style="padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-family: monospace; font-size: 12px; font-weight: bold; color: #0284c7;">${l.time}</td>
+      <td style="padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 12px; font-weight: bold; color: #0f172a;">${l.student_name} (${l.grade})</td>
+      <td style="padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 11px; text-transform: uppercase; font-weight: bold; color: #64748b;">${l.type}</td>
+      <td style="padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 12px; font-weight: 600; color: #1e293b;">${l.title}</td>
+      <td style="padding: 8px 12px; border-bottom: 1px solid #e2e8f0; font-size: 11px; color: #64748b;">${l.details}</td>
+    </tr>
+  `).join('');
+
+  printWindow.document.open();
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+      <meta charset="utf-8">
+      <title>Daily Student Activity Audit Report — Miss Rania</title>
+      <style>
+        @page { size: A4 landscape; margin: 12mm; }
+        body { font-family: system-ui, -apple-system, sans-serif; color: #0f172a; margin: 0; padding: 16px; }
+        .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #0284c7; padding-bottom: 12px; margin-bottom: 16px; }
+        h1 { margin: 0 0 4px; font-size: 20px; color: #0369a1; }
+        .sub { margin: 0; font-size: 12px; color: #64748b; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { padding: 8px 12px; background: #f0f9ff; border-bottom: 2px solid #bae6fd; font-size: 11px; text-transform: uppercase; color: #0369a1; font-weight: 700; }
+        @media print { .no-print { display: none !important; } }
+      </style>
+    </head>
+    <body>
+      <div class="no-print" style="text-align: right; margin-bottom: 12px;">
+        <button onclick="window.print()" style="background: #0284c7; color: #fff; border: none; padding: 8px 18px; border-radius: 6px; font-weight: bold; cursor: pointer;">🖨️ Print Report</button>
+      </div>
+      <div class="header">
+        <div>
+          <h1>🏫 Daily Student Activity Audit &amp; Timeline Report</h1>
+          <p class="sub">Instructor: Miss Rania • RC Classroom Portal • <strong>${dateLabel}</strong></p>
+        </div>
+        <div style="text-align: right; font-size: 12px; color: #64748b;">
+          Total Logged Actions: <strong>${logs.length}</strong><br>
+          Generated: ${new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 90px;">Time</th>
+            <th style="width: 160px;">Student</th>
+            <th style="width: 110px;">Event Type</th>
+            <th>Activity Title</th>
+            <th>Details &amp; Metrics</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rowsHtml || '<tr><td colspan="5" style="text-align:center; padding: 24px; color: #94a3b8;">No activity logged for this date.</td></tr>'}
+        </tbody>
+      </table>
+      <script>window.onload = () => { setTimeout(() => window.print(), 350); };</script>
+    </body>
+    </html>
+  `);
+  printWindow.document.close();
 };
 
 // =============================================================================
@@ -5454,7 +5903,7 @@ async function renderStudentSessions() {
         </div>
         <div class="space-y-2 pt-2 border-t border-border-subtle">
           ${s.zoom_link ? `
-            <a href="${sanitizeExternalUrl(s.zoom_link)}" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold flex items-center justify-center gap-2 shadow-sm transition-all text-sm no-underline">
+            <a href="${sanitizeExternalUrl(s.zoom_link)}" target="_blank" rel="noopener noreferrer" onclick="handleStudentZoomJoin('${(s.title || 'Live Class').replace(/'/g, "\\'")}')" class="w-full py-2.5 px-4 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold flex items-center justify-center gap-2 shadow-sm transition-all text-sm no-underline">
               <span>🎥</span>
               <span>Join Zoom Pro Meeting</span>
             </a>
@@ -5475,6 +5924,21 @@ async function renderStudentSessions() {
     console.error('Failed to render student sessions:', err);
   }
 }
+
+window.handleStudentZoomJoin = function(sessionTitle) {
+  if (window.ActivityLogger && AppState.currentUser) {
+    const isTeacher = AppState.currentUser.role === 'teacher' || AppState.currentUser.username === 'admin' || AppState.currentUser.username === 'rania';
+    if (!isTeacher) {
+      ActivityLogger.log(
+        AppState.currentUser,
+        'ZOOM_JOIN',
+        'Joined Live Zoom Session',
+        `Attended: "${sessionTitle || 'Live Class'}"`,
+        { session: sessionTitle }
+      );
+    }
+  }
+};
 
 function renderStudentPaymentStatus() {
   const card = document.getElementById('dashPaymentProofCard');
@@ -5858,6 +6322,30 @@ function closePracticeModal() {
         renderDashboardAssignments();
         renderTeacherAssignments();
       });
+    }
+
+    if (window.ActivityLogger && AppState.currentUser) {
+      const isTeacher = AppState.currentUser.role === 'teacher' || AppState.currentUser.username === 'admin' || AppState.currentUser.username === 'rania';
+      if (!isTeacher) {
+        const accPct = Math.round((AppState.practice.correctCount / Math.max(1, AppState.practice.answeredCount)) * 100);
+        if (assignmentId) {
+          ActivityLogger.log(
+            AppState.currentUser,
+            'HOMEWORK_SUBMIT',
+            `Completed Assigned Homework: ${s.name}`,
+            `Solved ${AppState.practice.answeredCount} questions • SmartScore ${AppState.practice.score}% • Accuracy ${accPct}%`,
+            { skill: s.code || s.permacode, score: AppState.practice.score }
+          );
+        } else {
+          ActivityLogger.log(
+            AppState.currentUser,
+            'PRACTICE',
+            `Practiced Skill: ${s.name} (${s.code || s.permacode})`,
+            `Solved ${AppState.practice.answeredCount} questions • SmartScore ${AppState.practice.score}% • Accuracy ${accPct}%`,
+            { skill: s.code || s.permacode, score: AppState.practice.score }
+          );
+        }
+      }
     }
   }
 
@@ -6634,6 +7122,14 @@ function setCurrentStudent(student) {
   if (isTeacher) {
     switchView('teacher');
   } else {
+    if (window.ActivityLogger) {
+      ActivityLogger.log(
+        student,
+        'LOGIN',
+        'Logged in to Student Portal',
+        'Authenticated session successfully'
+      );
+    }
     if (AppState.currentView === 'teacher') switchView('dashboard');
     else if (AppState.currentView === 'dashboard') renderDashboard();
     else if (AppState.currentView === 'reports') renderStudentReportView();

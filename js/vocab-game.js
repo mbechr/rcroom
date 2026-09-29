@@ -438,6 +438,19 @@ const VocabEngine = {
       if (typeof DB !== 'undefined' && DB.updateStudentStats) {
         DB.updateStudentStats(AppState.currentUser.id, { xp: AppState.currentUser.xp });
       }
+
+      if (window.ActivityLogger) {
+        const isTeacher = AppState.currentUser.role === 'teacher' || AppState.currentUser.username === 'admin' || AppState.currentUser.username === 'rania';
+        if (!isTeacher) {
+          ActivityLogger.log(
+            AppState.currentUser,
+            'VOCAB_GAME',
+            `Completed Vocabulary Arena (${this.currentMode || 'Spelling'})`,
+            `Scored ${this.score} Points • +${this.score} XP Earned`,
+            { mode: this.currentMode, score: this.score }
+          );
+        }
+      }
     }
 
     container.innerHTML = `

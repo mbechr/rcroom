@@ -97,6 +97,17 @@ const StudentBlog = {
 
     this.articles.unshift(newArt);
     this.persist();
+
+    if (window.ActivityLogger && user) {
+      ActivityLogger.log(
+        user,
+        'BLOG_POST',
+        `Published Student Essay: "${newArt.title}"`,
+        `Category: ${newArt.category} • Read by class community`,
+        { articleId: newArt.id }
+      );
+    }
+
     return newArt;
   },
 

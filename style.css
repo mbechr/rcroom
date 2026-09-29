@@ -6409,6 +6409,128 @@ html[dir="rtl"] #mainContentWrapper {
   box-shadow: 0 4px 16px rgba(245, 158, 11, 0.45);
 }
 
+/* =============================================================================
+   DAILY STUDENT ACTIVITY AUDIT & TIMELINE STREAM STYLES
+   ============================================================================= */
+.timeline-log-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.1rem 1.3rem;
+  border-radius: 14px;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 4px solid #00e5ff;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.timeline-log-row:hover {
+  background: rgba(30, 41, 59, 0.75);
+  border-color: rgba(0, 229, 255, 0.35);
+  transform: translateX(4px);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
+}
+
+.timeline-log-row.type-LOGIN {
+  border-left-color: #38bdf8;
+}
+.timeline-log-row.type-PRACTICE {
+  border-left-color: #00e5ff;
+}
+.timeline-log-row.type-ZOOM_JOIN {
+  border-left-color: #a855f7;
+}
+.timeline-log-row.type-HOMEWORK_SUBMIT {
+  border-left-color: #f59e0b;
+}
+.timeline-log-row.type-VOCAB_GAME {
+  border-left-color: #10b981;
+}
+.timeline-log-row.type-PAYMENT_SUBMIT {
+  border-left-color: #22c55e;
+}
+.timeline-log-row.type-BLOG_POST {
+  border-left-color: #6366f1;
+}
+
+.timeline-time-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #38bdf8;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.timeline-type-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.timeline-type-pill.type-LOGIN {
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+}
+.timeline-type-pill.type-PRACTICE {
+  background: rgba(0, 229, 255, 0.15);
+  color: #00e5ff;
+  border: 1px solid rgba(0, 229, 255, 0.3);
+}
+.timeline-type-pill.type-ZOOM_JOIN {
+  background: rgba(168, 85, 247, 0.15);
+  color: #c084fc;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+}
+.timeline-type-pill.type-HOMEWORK_SUBMIT {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+.timeline-type-pill.type-VOCAB_GAME {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+.timeline-type-pill.type-PAYMENT_SUBMIT {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+.timeline-type-pill.type-BLOG_POST {
+  background: rgba(99, 102, 241, 0.15);
+  color: #818cf8;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.timeline-student-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.2rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+
 
 
 
