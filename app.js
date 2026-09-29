@@ -3347,38 +3347,42 @@ window.filterCurriculumSkillsTree = function() {
 
   let html = '';
   for (const [catKey, group] of groups) {
-    const allChecked = group.skills.length > 0 && group.skills.every(s => AppState.teacherSelectedStudentUnlocked.has(s.code));
+    const unlockedCount = group.skills.filter(s => AppState.teacherSelectedStudentUnlocked.has(s.code)).length;
+    const allChecked = group.skills.length > 0 && unlockedCount === group.skills.length;
+    const subjClass = (group.subject || '').toLowerCase().includes('math') ? 'maths' : 
+                      ((group.subject || '').toLowerCase().includes('eng') ? 'english' : 
+                      ((group.subject || '').toLowerCase().includes('sci') ? 'science' : 'general'));
 
     html += `
       <div class="curriculum-cat-box" data-cat="${encodeURIComponent(catKey)}">
         <div class="curriculum-cat-header">
           <div class="flex items-center gap-3">
-            <input type="checkbox" class="cat-master-checkbox w-4 h-4 rounded text-cyan-500 cursor-pointer" 
+            <input type="checkbox" class="cat-master-checkbox w-4 h-4 rounded text-primary cursor-pointer" 
               ${allChecked ? 'checked' : ''} 
               onchange="toggleCategoryCurriculumSkills('${encodeURIComponent(catKey)}', this.checked)">
-            <div>
-              <span class="text-xs font-bold uppercase tracking-wider text-cyan-400 mr-2">${group.subject}</span>
-              <span class="font-bold text-sm text-slate-200">${group.code}. ${group.name}</span>
-              <span class="text-xs text-slate-400 ml-2">(${group.skills.filter(s => AppState.teacherSelectedStudentUnlocked.has(s.code)).length}/${group.skills.length} unlocked)</span>
+            <div class="flex items-center gap-2.5 flex-wrap">
+              <span class="curriculum-subject-badge ${subjClass}">${group.subject}</span>
+              <span class="curriculum-cat-title">${group.code}. ${group.name}</span>
+              <span class="curriculum-cat-count">(${unlockedCount}/${group.skills.length} unlocked)</span>
             </div>
           </div>
-          <button type="button" class="text-xs text-slate-400 hover:text-white px-2 py-1" onclick="this.closest('.curriculum-cat-box').querySelector('.curriculum-skills-sublist').classList.toggle('hidden')">
-            Toggle ▾
+          <button type="button" class="curriculum-toggle-btn" onclick="this.closest('.curriculum-cat-box').querySelector('.curriculum-skills-sublist').classList.toggle('hidden')">
+            <span>Toggle ▾</span>
           </button>
         </div>
-        <div class="curriculum-skills-sublist p-2 space-y-1 bg-slate-950/40">
+        <div class="curriculum-skills-sublist">
           ${group.skills.map(s => {
             const isUnlocked = AppState.teacherSelectedStudentUnlocked.has(s.code);
             return `
-              <div class="curriculum-skill-item">
-                <label class="flex items-center gap-3 cursor-pointer flex-1 py-1">
-                  <input type="checkbox" class="skill-checkbox w-4 h-4 rounded text-cyan-500 cursor-pointer" 
+              <div class="curriculum-skill-item ${isUnlocked ? 'is-unlocked' : 'is-locked'}">
+                <label class="curriculum-skill-label">
+                  <input type="checkbox" class="skill-checkbox w-4 h-4 rounded text-primary cursor-pointer" 
                     data-skill-code="${s.code}" 
                     data-cat="${encodeURIComponent(catKey)}"
                     ${isUnlocked ? 'checked' : ''} 
                     onchange="handleSkillCheckboxChange('${s.code}', this.checked, '${encodeURIComponent(catKey)}')">
-                  <span class="text-xs font-bold px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-mono">${s.code}</span>
-                  <span class="text-sm font-medium text-slate-200">${s.name}</span>
+                  <span class="curriculum-skill-code">${s.code}</span>
+                  <span class="curriculum-skill-name">${s.name}</span>
                 </label>
                 <div class="flex items-center gap-2">
                   <span class="skill-status-tag ${isUnlocked ? 'unlocked' : 'locked'}">
