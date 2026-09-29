@@ -1583,6 +1583,45 @@
             </div>
           </div>
           <div class="form-error-msg mb-4 text-xs font-bold text-rose-400 bg-rose-500/10 p-2.5 rounded-lg border border-rose-500/20" id="loginErrorMsg" style="display: none;"></div>
+
+          <!-- 1-Click Quick Demo Sign In -->
+          <div class="mb-4">
+            <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center justify-between">
+              <span>⚡ 1-Click Quick Sign In:</span>
+              <span class="text-cyan-400 text-[10px]">Instant Access</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <button type="button" class="flex items-center gap-2 p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-left transition-all cursor-pointer" onclick="quickSignInAs('admin', 'admin123')">
+                <span class="text-xl">👩‍🏫</span>
+                <div class="min-w-0 flex-1">
+                  <div class="text-xs font-bold text-white truncate">Miss Rania</div>
+                  <div class="text-[10px] text-cyan-400">Teacher / Admin</div>
+                </div>
+              </button>
+              <button type="button" class="flex items-center gap-2 p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-left transition-all cursor-pointer" onclick="quickSignInAs('beshr', '123456')">
+                <span class="text-xl">🦊</span>
+                <div class="min-w-0 flex-1">
+                  <div class="text-xs font-bold text-white truncate">Beshr</div>
+                  <div class="text-[10px] text-emerald-400">Student • Year 4</div>
+                </div>
+              </button>
+              <button type="button" class="flex items-center gap-2 p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-left transition-all cursor-pointer" onclick="quickSignInAs('alex', 'password123')">
+                <span class="text-xl">🚀</span>
+                <div class="min-w-0 flex-1">
+                  <div class="text-xs font-bold text-white truncate">Alex</div>
+                  <div class="text-[10px] text-indigo-400">Student • Year 4</div>
+                </div>
+              </button>
+              <button type="button" class="flex items-center gap-2 p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 text-left transition-all cursor-pointer" onclick="quickSignInAs('sophia', 'password123')">
+                <span class="text-xl">🦄</span>
+                <div class="min-w-0 flex-1">
+                  <div class="text-xs font-bold text-white truncate">Sophia</div>
+                  <div class="text-[10px] text-amber-400">Student • Year 4</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
           <button type="submit" class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-cyan-400 via-sky-500 to-indigo-500 text-slate-950 font-extrabold text-sm shadow-[0_0_20px_rgba(0,229,255,0.4)] hover:shadow-[0_0_30px_rgba(0,229,255,0.6)] hover:scale-[1.01] active:scale-[0.99] transition-all cursor-pointer" id="submitLoginBtn">
             Sign In to Academy &rarr;
           </button>
