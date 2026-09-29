@@ -2515,6 +2515,20 @@ body.auth-locked #authModal {
   display: flex !important;
 }
 
+/* Universal scrollbar elimination inside Login Portal Stage */
+#authModal,
+#authModal * {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+#authModal::-webkit-scrollbar,
+#authModal *::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
 /* 3-Column Portal Stage */
 .auth-portal-stage {
   display: flex;
@@ -2592,8 +2606,17 @@ body.auth-locked #authModal {
   gap: 0.5rem;
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden !important;
   max-height: 380px;
   padding-right: 2px;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.showcase-list::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
 }
 
 /* Student Gainer List Item (Clean 2-line layout) */
@@ -2783,13 +2806,31 @@ body.auth-locked #authModal {
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
   box-shadow: 0 30px 80px -15px rgba(0, 0, 0, 0.85), 0 0 30px rgba(0, 229, 255, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.08);
-  overflow: hidden;
+  overflow: hidden !important;
+  overflow-x: hidden !important;
   display: flex;
   flex-direction: column;
   position: relative;
   z-index: 2110;
   animation: modalPopUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   flex-shrink: 0;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.auth-modal-window::-webkit-scrollbar,
+.auth-tab-content::-webkit-scrollbar,
+.auth-form::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.auth-tab-content,
+.auth-form {
+  overflow-x: hidden !important;
+  box-sizing: border-box !important;
+  max-width: 100% !important;
 }
 
 /* WhatsApp 1-Click Button */
