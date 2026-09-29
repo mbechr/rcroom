@@ -2506,26 +2506,34 @@ body.auth-locked #loginCosmosCanvas {
   font-size: 0.76rem;
 }
 
+body.auth-locked #authModal {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  display: flex !important;
+}
+
 /* 3-Column Portal Stage */
 .auth-portal-stage {
   display: flex;
   align-items: stretch;
   justify-content: center;
-  gap: 1.5rem;
+  gap: 1.15rem;
   width: 100%;
-  max-width: 1180px;
+  max-width: 1240px;
 }
 
 /* Side Showcase Panels (Top Gainers & Mastered Topics) */
 .auth-showcase-panel {
-  width: 320px;
-  flex-shrink: 0;
-  background: rgba(15, 23, 42, 0.78);
+  flex: 1;
+  max-width: 350px;
+  min-width: 285px;
+  background: rgba(15, 23, 42, 0.8);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 24px;
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  padding: 1.35rem 1.25rem;
+  padding: 1.25rem 1.1rem;
   display: flex;
   flex-direction: column;
   box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05);
@@ -2543,21 +2551,22 @@ body.auth-locked #loginCosmosCanvas {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding-bottom: 0.9rem;
+  padding-bottom: 0.85rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  margin-bottom: 0.9rem;
+  margin-bottom: 0.85rem;
 }
 
 .showcase-icon {
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   border-radius: 12px;
   background: rgba(0, 229, 255, 0.1);
   border: 1px solid rgba(0, 229, 255, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
+  font-size: 1.15rem;
+  flex-shrink: 0;
 }
 
 .showcase-title {
@@ -2577,19 +2586,19 @@ body.auth-locked #loginCosmosCanvas {
 .showcase-list {
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: 0.55rem;
   flex: 1;
   overflow-y: auto;
 }
 
-/* Student Gainer List Item */
+/* Student Gainer List Item (Clean 2-line layout) */
 .gainer-card {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.65rem 0.85rem;
-  background: rgba(30, 41, 59, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  gap: 0.65rem;
+  padding: 0.55rem 0.75rem;
+  background: rgba(30, 41, 59, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px;
   transition: all 0.2s ease;
 }
@@ -2602,7 +2611,7 @@ body.auth-locked #loginCosmosCanvas {
 
 .gainer-rank {
   font-size: 1.1rem;
-  width: 24px;
+  width: 20px;
   text-align: center;
   flex-shrink: 0;
 }
@@ -2612,6 +2621,7 @@ body.auth-locked #loginCosmosCanvas {
   height: 32px;
   border-radius: 50%;
   background: rgba(0, 229, 255, 0.15);
+  border: 1px solid rgba(0, 229, 255, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2622,42 +2632,65 @@ body.auth-locked #loginCosmosCanvas {
 .gainer-info {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gainer-top-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
 }
 
 .gainer-name {
   font-weight: 700;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   color: #f8fafc;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.gainer-meta {
-  font-size: 0.7rem;
+.gainer-xp-pill {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.14);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  padding: 1px 6px;
+  border-radius: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.gainer-sub-line {
+  font-size: 0.68rem;
   color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   display: flex;
   align-items: center;
   gap: 4px;
-  margin-top: 1px;
 }
 
-.gainer-xp-pill {
-  font-family: var(--font-mono);
-  font-size: 0.74rem;
-  font-weight: 700;
-  color: #38bdf8;
-  background: rgba(56, 189, 248, 0.12);
-  padding: 2px 7px;
-  border-radius: 6px;
+.gainer-topic-tag {
+  color: #fbbf24;
+  font-size: 0.68rem;
+  font-weight: 600;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Mastered Topic List Item */
 .topic-card {
-  padding: 0.75rem 0.85rem;
-  background: rgba(30, 41, 59, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 0.6rem 0.8rem;
+  background: rgba(30, 41, 59, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px;
   transition: all 0.2s ease;
 }
@@ -2672,30 +2705,33 @@ body.auth-locked #loginCosmosCanvas {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
-  margin-bottom: 0.35rem;
+  gap: 0.4rem;
+  margin-bottom: 0.3rem;
 }
 
 .topic-title {
   font-weight: 700;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   color: #f8fafc;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
+  min-width: 0;
 }
 
 .topic-badge {
   font-size: 0.68rem;
   font-weight: 700;
   color: #10b981;
-  background: rgba(16, 185, 129, 0.12);
+  background: rgba(16, 185, 129, 0.14);
+  border: 1px solid rgba(16, 185, 129, 0.25);
   padding: 1px 6px;
   border-radius: 4px;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .topic-progress-bar {
@@ -2704,7 +2740,7 @@ body.auth-locked #loginCosmosCanvas {
   background: rgba(255, 255, 255, 0.08);
   border-radius: 9999px;
   overflow: hidden;
-  margin-top: 0.4rem;
+  margin-top: 0.35rem;
 }
 
 .topic-progress-fill {
@@ -2716,25 +2752,25 @@ body.auth-locked #loginCosmosCanvas {
 .topic-stats {
   display: flex;
   justify-content: space-between;
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   color: #94a3b8;
-  margin-top: 0.3rem;
+  margin-top: 0.25rem;
 }
 
-/* Responsive Hide for Side Panels on Smaller Displays */
-@media (max-width: 1120px) {
+/* Responsive Hide for Side Panels on Tablet & Mobile Displays */
+@media (max-width: 1024px) {
   .auth-showcase-panel {
     display: none;
   }
   .login-ticker-banner {
-    max-width: 440px;
+    max-width: 420px;
   }
 }
 
 /* The Main Center Login Modal Window */
 .auth-modal-window {
   width: 100%;
-  max-width: 440px;
+  max-width: 420px;
   max-height: calc(100vh - 3rem);
   background: rgba(15, 23, 42, 0.88);
   border: 1px solid rgba(0, 229, 255, 0.3);
@@ -2748,6 +2784,7 @@ body.auth-locked #loginCosmosCanvas {
   position: relative;
   z-index: 2110;
   animation: modalPopUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  flex-shrink: 0;
 }
 
 /* WhatsApp 1-Click Button */

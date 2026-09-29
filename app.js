@@ -410,10 +410,10 @@ function renderLoginShowcase() {
   }
 
   const topTopics = [
-    { icon: '📐', title: 'Cambridge Primary Maths (Stage 4)', count: '128 Solved', rate: '98% Mastery', pct: 98 },
-    { icon: '⚡', title: 'Mental Arithmetic & Times Tables', count: '94 Sprints', rate: '96% Accuracy', pct: 96 },
-    { icon: '🔬', title: 'Primary Science: Forces & Materials', count: '86 Solved', rate: '95% Accuracy', pct: 95 },
-    { icon: '🎯', title: 'Decimals, Percentages & Angles', count: '74 Solved', rate: '92% Accuracy', pct: 92 }
+    { icon: '📐', title: 'Stage 4 Mathematics', sub: '128 Solved • Fractions & Decimals', rate: '98% Mastery', pct: 98 },
+    { icon: '⚡', title: 'Speed Arithmetic Sprints', sub: '94 Sprints • Times Tables', rate: '96% Accuracy', pct: 96 },
+    { icon: '🔬', title: 'Primary Stage 4 Science', sub: '86 Solved • Forces & Light', rate: '95% Accuracy', pct: 95 },
+    { icon: '🎯', title: 'Geometry & Angles', sub: '74 Solved • Polygons & Shapes', rate: '92% Accuracy', pct: 92 }
   ];
 
   // Render Ticker
@@ -431,7 +431,7 @@ function renderLoginShowcase() {
         <div class="ticker-item">
           <span>${t.icon}</span>
           <strong>${t.title}</strong>
-          <span class="ticker-xp" style="color:#10b981; background:rgba(16,185,129,0.12);">${t.rate}</span>
+          <span class="ticker-xp" style="color:#10b981; background:rgba(16,185,129,0.14);">${t.rate}</span>
         </div>
       `)
     ];
@@ -447,14 +447,16 @@ function renderLoginShowcase() {
         <div class="gainer-rank">${g.rank}</div>
         <div class="gainer-avatar">${g.avatar}</div>
         <div class="gainer-info">
-          <div class="gainer-name">${g.name}</div>
-          <div class="gainer-meta">
+          <div class="gainer-top-line">
+            <span class="gainer-name" title="${g.name}">${g.name}</span>
+            <span class="gainer-xp-pill">${g.xp.toLocaleString()} XP</span>
+          </div>
+          <div class="gainer-sub-line">
             <span>${g.grade}</span>
             <span>&bull;</span>
-            <span style="color:#fbbf24; font-size:0.68rem;">🎯 ${g.skill}</span>
+            <span class="gainer-topic-tag">🎯 ${g.skill} (${g.count})</span>
           </div>
         </div>
-        <div class="gainer-xp-pill">${g.xp.toLocaleString()} XP</div>
       </div>
     `).join('');
   }
@@ -474,7 +476,7 @@ function renderLoginShowcase() {
           <div class="topic-progress-fill" style="width: ${t.pct}%;"></div>
         </div>
         <div class="topic-stats">
-          <span>${t.count}</span>
+          <span>${t.sub}</span>
           <span>Cambridge Verified</span>
         </div>
       </div>
@@ -7785,6 +7787,7 @@ function setupEventListeners() {
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
       document.querySelectorAll('.auth-modal-backdrop.open, .practice-modal-backdrop.open').forEach(m => {
+        if (m.id === 'authModal' && !AppState.currentUser) return; // STRICT: Do not dismiss login when unauthenticated!
         m.classList.remove('open');
       });
     }
@@ -7793,6 +7796,14 @@ function setupEventListeners() {
   document.querySelectorAll('.auth-modal-backdrop').forEach(backdrop => {
     backdrop.addEventListener('click', (e) => {
       if (e.target === backdrop) {
+        if (backdrop.id === 'authModal') {
+          if (AppState.currentUser) {
+            backdrop.classList.remove('open');
+          } else {
+            showToast('Please sign in to access the classroom portal 🔒');
+          }
+          return;
+        }
         backdrop.classList.remove('open');
       }
     });
