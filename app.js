@@ -8143,5 +8143,9 @@ window.closeCloudSyncModal = closeCloudSyncModal;
 window.handleSaveCloudConfig = handleSaveCloudConfig;
 window.handleSyncAllToCloud = handleSyncAllToCloud;
 
-// Kickoff
-window.addEventListener('DOMContentLoaded', initPortal);
+// Kickoff: Support both synchronous execution and DOM ready
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', initPortal);
+} else {
+  initPortal();
+}
