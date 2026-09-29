@@ -2469,7 +2469,7 @@ async function loadAndRenderPortal() {
     buildFlatSkillsIndex();
     renderGradesSidebar();
     if (isTeacher) {
-      renderTeacherConsole();
+      renderTeacherConsoleView();
     } else {
       await DB.loadStudentCurriculumAccess();
       renderDashboard();
@@ -4228,15 +4228,6 @@ window.saveCurriculumAccess = async function() {
       localStorage.setItem(`rc_unlocked_${studentId}`, JSON.stringify(skillCodes));
       showToast(`Saved ${skillCodes.length} permissions locally! 💾`, '✅');
     }
-  }
-  filterCurriculumSkillsTree();
-};
-
-  if (res && res.success) {
-    showToast(`Saved ${skillCodes.length} unlocked permissions successfully! 💾`, '✅');
-  } else {
-    localStorage.setItem(`rc_unlocked_${studentId}`, JSON.stringify(skillCodes));
-    showToast(`Saved ${skillCodes.length} permissions locally! 💾`, '✅');
   }
   filterCurriculumSkillsTree();
 };
