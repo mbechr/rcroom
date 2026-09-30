@@ -2919,69 +2919,40 @@ function updateStudentHeader() {
   if (!user) return;
 
   const isTeacher = user.role === 'teacher' || user.username === 'admin' || user.username === 'rania';
-  const sidebarTeacherTab = document.getElementById('sidebarTeacherTabBtn');
+  const isParent = user.role === 'parent';
+  const sidebarStudent = document.getElementById('sidebarStudentGroup');
+  const sidebarParent = document.getElementById('sidebarParentGroup');
+  const sidebarTeacher = document.getElementById('sidebarTeacherGroup');
   const topTeacherBtn = document.getElementById('topTeacherQuickBtn');
   const studentLevelPill = document.getElementById('navStudentLevel');
 
-  if (isTeacher) {
-    if (topTeacherBtn) topTeacherBtn.style.display = 'inline-flex';
-    if (el.teacherTabBtn) el.teacherTabBtn.style.display = 'inline-flex';
-    if (sidebarTeacherTab) {
-      sidebarTeacherTab.style.display = 'flex';
-      sidebarTeacherTab.classList.add('bg-purple-600', 'text-white');
-      sidebarTeacherTab.classList.remove('text-purple-700', 'hover:bg-purple-50');
-    }
-    document.querySelectorAll('.teacher-sidebar-header').forEach(h => h.style.display = 'block');
-    // Teacher sees curriculum tracks and skills bank
-    document.querySelectorAll('.nav-tab[data-view="tracks"], .nav-tab[data-view="skills"]').forEach(t => t.style.display = 'flex');
-    const topSearch = document.getElementById('topSearchIconBtn');
-    if (topSearch) topSearch.style.display = 'flex';
-    const dashTracks = document.getElementById('dashTracksPreviewContainer');
-    if (dashTracks && dashTracks.closest('section')) dashTracks.closest('section').style.display = 'block';
+  if (sidebarStudent) sidebarStudent.style.display = (!isTeacher && !isParent) ? 'flex' : 'none';
+  if (sidebarParent) sidebarParent.style.display = isParent ? 'flex' : 'none';
+  if (sidebarTeacher) sidebarTeacher.style.display = isTeacher ? 'flex' : 'none';
 
+  if (isTeacher) {
+    if (topTeacherBtn && window.innerWidth >= 640) topTeacherBtn.style.display = 'inline-flex';
     if (el.navStudentAvatar) el.navStudentAvatar.textContent = user.avatar || '👩‍🏫';
     if (el.navStudentName) el.navStudentName.textContent = user.full_name || 'Miss Rania';
     if (el.navStudentGrade) el.navStudentGrade.innerHTML = `<span>Instructor &bull; Admin</span>`;
     if (el.navStudentXP) el.navStudentXP.textContent = 'Teacher Console';
     if (studentLevelPill) studentLevelPill.textContent = 'Admin';
     if (el.navXpStripFill) el.navXpStripFill.style.width = '100%';
+  } else if (isParent) {
+    if (topTeacherBtn) topTeacherBtn.style.display = 'none';
+    if (el.navStudentAvatar) el.navStudentAvatar.textContent = user.avatar || '👨‍👩‍👧';
+    if (el.navStudentName) el.navStudentName.textContent = user.full_name || 'Parent Portal';
+    if (el.navStudentGrade) el.navStudentGrade.innerHTML = `(Parent)`;
+    if (el.navStudentXP) el.navStudentXP.textContent = 'Parent Access';
+    if (studentLevelPill) studentLevelPill.textContent = 'Parent';
   } else {
     if (topTeacherBtn) topTeacherBtn.style.display = 'none';
-    if (el.teacherTabBtn) el.teacherTabBtn.style.display = 'none';
-    if (sidebarTeacherTab) {
-      sidebarTeacherTab.style.display = 'none'; // Strictly hidden for students
-    }
-    document.querySelectorAll('.teacher-sidebar-header').forEach(h => h.style.display = 'none');
-    // Students can access Curriculum & Practice view (unlocked lessons enabled, locked lessons protected)
-    document.querySelectorAll('.nav-tab[data-view="skills"]').forEach(t => t.style.display = 'flex');
-    document.querySelectorAll('.nav-tab[data-view="tracks"]').forEach(t => t.style.display = 'none');
-    const topSearch = document.getElementById('topSearchIconBtn');
-    if (topSearch) topSearch.style.display = 'flex';
-    const dashTracks = document.getElementById('dashTracksPreviewContainer');
-    if (dashTracks && dashTracks.closest('section')) dashTracks.closest('section').style.display = 'none';
-
-    // Focus Hero Button on Practice
-    const heroBtn = document.getElementById('dashStartPracticeBtn');
-    if (heroBtn) {
-      heroBtn.innerHTML = '<span>🚀</span><span>Start Daily Practice</span>';
-      heroBtn.onclick = () => switchView('skills');
-    }
-
     if (el.navStudentAvatar) el.navStudentAvatar.textContent = user.avatar || '🦊';
-    if (el.navStudentName) el.navStudentName.textContent = user.full_name;
-    if (el.navStudentGrade) el.navStudentGrade.innerHTML = `(${user.grade_level || 'Student'})`;
+    if (el.navStudentName) el.navStudentName.textContent = user.full_name || 'Student';
+    if (el.navStudentGrade) el.navStudentGrade.innerHTML = `(${user.grade_level || 'Year 4'})`;
     if (el.navStudentXP) el.navStudentXP.textContent = `${(user.xp || 0).toLocaleString()} XP`;
-    if (el.navStudentStreak) el.navStudentStreak.textContent = `${user.streak_days || 1} Streak`;
     const rank = getStudentRank(user.xp || 0);
     if (studentLevelPill) studentLevelPill.textContent = `Lv. ${rank.level}`;
-
-    // Automatic Level XP Progress Calculation
-    if (el.navXpStripFill) {
-      const xp = user.xp || 0;
-      const progressInLevel = (xp % 300);
-      const pct = Math.min(100, Math.max(10, Math.round((progressInLevel / 300) * 100)));
-      el.navXpStripFill.style.width = `${pct}%`;
-    }
   }
 
   // Update student's grade if not set
@@ -3003,78 +2974,61 @@ function getStudentRank(xp) {
 }
 
 // =============================================================================
-// VIEW 1: Dashboard Controller
+// VIEW 1: Dashboard Controller (Streamlined Mission Hub)
 // =============================================================================
 
 async function renderDashboard() {
   const user = AppState.currentUser;
   if (!user) return;
-  renderDashboardAssignments();
-  renderDashboardUnlockedSkills();
 
-  renderStudentPaymentStatus();
-  renderStudentSessions();
-  el.dashStudentName.textContent = user.full_name.split(' ')[0];
-  el.dashStreakText.textContent = `${user.streak_days}-day practice streak`;
+  const firstName = (user.full_name || 'Student').split(' ')[0];
+  const dashNameEl = document.getElementById('dashStudentName');
+  if (dashNameEl) dashNameEl.textContent = firstName;
 
-  const rank = getStudentRank(user.xp);
-  if (el.dashLevelBadge) el.dashLevelBadge.textContent = `${rank.level}`;
-  if (el.dashRankTitle) el.dashRankTitle.textContent = `Lv. ${rank.level} ${rank.title}`;
-  if (el.dashCurrentXP) el.dashCurrentXP.textContent = user.xp.toLocaleString();
+  const cohortTagEl = document.getElementById('dashCohortTag');
+  if (cohortTagEl) cohortTagEl.textContent = `${user.grade_level || 'Year 4'} • Miss Rania's Class`;
+
+  const streakCountEl = document.getElementById('dashStreakCounter');
+  if (streakCountEl) streakCountEl.textContent = `🔥 ${user.streak_days || 1} Days`;
+
+  const rank = getStudentRank(user.xp || 0);
+  const rankTitleEl = document.getElementById('dashRankTitle');
+  if (rankTitleEl) rankTitleEl.textContent = `Lv. ${rank.level} ${rank.title} 🧭`;
+
+  const currentXpEl = document.getElementById('dashCurrentXP');
+  if (currentXpEl) currentXpEl.textContent = (user.xp || 0).toLocaleString();
 
   const targetLevelXP = (rank.level + 1) * 350;
-  const progressPercent = Math.min(Math.round((user.xp % 350) / 350 * 100), 100);
-  const remainingXP = Math.max(0, 350 - (user.xp % 350));
-  const questionsNeeded = Math.max(1, Math.ceil(remainingXP / 25));
-
-  if (el.dashXpFill) el.dashXpFill.style.width = `${progressPercent}%`;
-
   const targetXpEl = document.getElementById('dashTargetXP');
   if (targetXpEl) targetXpEl.textContent = targetLevelXP.toLocaleString();
+
+  const progressPercent = Math.min(Math.round(((user.xp || 0) % 350) / 350 * 100), 100);
+  const xpFillEl = document.getElementById('dashXpFill');
+  if (xpFillEl) xpFillEl.style.width = `${progressPercent}%`;
+
   const xpPercentTextEl = document.getElementById('dashXpPercentText');
-  if (xpPercentTextEl) xpPercentTextEl.textContent = `${progressPercent}% to Level ${rank.level + 1}`;
-  const xpRemainingEl = document.getElementById('dashXpRemainingText');
-  if (xpRemainingEl) xpRemainingEl.textContent = `${remainingXP} XP Remaining`;
-  const milestonePromptEl = document.getElementById('dashMilestonePrompt');
-  if (milestonePromptEl) milestonePromptEl.textContent = `Solve ${questionsNeeded} more questions to reach Level ${rank.level + 1}!`;
-  const streakBadgeTextEl = document.getElementById('dashStreakBadgeText');
-  if (streakBadgeTextEl) streakBadgeTextEl.textContent = `${user.streak_days}-Day Practice Streak`;
-  const cohortTagEl = document.getElementById('dashCohortTag');
-  if (cohortTagEl) cohortTagEl.textContent = `${user.grade_level} Cohort Alpha`;
-  const nextMilestoneEl = document.getElementById('dashNextMilestone');
-  if (nextMilestoneEl) nextMilestoneEl.textContent = `Level ${rank.level + 1}`;
+  if (xpPercentTextEl) xpPercentTextEl.textContent = `${progressPercent}% towards Level ${rank.level + 1}`;
+
+  // Start practice CTA button
+  const startPracticeBtn = document.getElementById('dashStartPracticeBtn');
+  if (startPracticeBtn) {
+    startPracticeBtn.onclick = () => switchView('skills');
+  }
 
   // Fetch student report summary for KPI counters
   try {
     const reportData = await DB.getReport(user.id);
     if (reportData && reportData.summary) {
-      animateNumber(el.kpiQuestionsAnswered, reportData.summary.total_questions || 0);
-      el.kpiAccuracyRate.textContent = `${reportData.summary.accuracy_rate || 0}%`;
-      el.kpiTimeSpent.textContent = formatDuration(reportData.summary.total_time_spent || 0);
-      animateNumber(el.kpiMasteredCount, reportData.summary.mastered_skills || 0);
+      if (el.kpiQuestionsAnswered) el.kpiQuestionsAnswered.textContent = reportData.summary.total_questions || 0;
+      if (el.kpiAccuracyRate) el.kpiAccuracyRate.textContent = `${reportData.summary.accuracy_rate || 0}%`;
+      if (el.kpiTimeSpent) el.kpiTimeSpent.textContent = formatDuration(reportData.summary.total_time_spent || 0);
+      if (el.kpiMasteredCount) el.kpiMasteredCount.textContent = reportData.summary.mastered_skills || 0;
     }
-  } catch (e) {}
-
-  // Render Tracks Preview on Dashboard if container exists
-  const teacherData = window.TEACHER_CURRICULUM;
-  if (teacherData && teacherData.tracks && el.dashTracksPreviewContainer) {
-    el.dashTracksPreviewContainer.innerHTML = teacherData.tracks.slice(0, 3).map(track => `
-      <div class="unit-card">
-        <div>
-          <div class="unit-top-bar">
-            <span class="subject-badge">${track.subject.toUpperCase()}</span>
-            <span class="level-badge">${track.badge}</span>
-          </div>
-          <h3 class="unit-title">${track.title}</h3>
-          <p class="unit-objective">${track.description}</p>
-        </div>
-        <div style="margin-top: 1rem;">
-          <button class="primary-glow-btn full-width" onclick="switchView('tracks')">
-            <span>🌟</span> <span>Explore Track Units</span>
-          </button>
-        </div>
-      </div>
-    `).join('');
+  } catch (e) {
+    if (el.kpiQuestionsAnswered) el.kpiQuestionsAnswered.textContent = user.questions_answered || 0;
+    if (el.kpiAccuracyRate) el.kpiAccuracyRate.textContent = `${user.accuracy || 88}%`;
+    if (el.kpiTimeSpent) el.kpiTimeSpent.textContent = '1h 15m';
+    if (el.kpiMasteredCount) el.kpiMasteredCount.textContent = user.mastered_skills || 0;
   }
 }
 

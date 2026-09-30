@@ -267,8 +267,8 @@
             <img src="assets/rc-logo.png?v=3.3.0" alt="RC" class="w-full h-full object-contain">
           </div>
           <div class="flex flex-col">
-            <span class="font-bold text-base tracking-tight text-primary leading-none">RANIA CLASSROOM</span>
-            <span class="text-[10px] text-on-surface-variant uppercase tracking-wider mt-0.5 hidden lg:block">RC Academy Portal</span>
+            <span class="font-extrabold text-base tracking-tight text-primary leading-none">RC ACADEMY</span>
+            <span class="text-[10px] text-on-surface-variant uppercase tracking-wider mt-0.5 hidden lg:block">Rania Classroom &bull; Learn &bull; Practice &bull; Master</span>
           </div>
         </div>
 
@@ -284,12 +284,12 @@
         <!-- Quick Teacher Dashboard Button (Only visible when logged in as teacher) -->
         <button type="button" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs transition-all shadow-sm cursor-pointer" id="topTeacherQuickBtn" onclick="switchView('teacher')" style="display: none;" title="All Students Management Dashboard">
           <span class="material-symbols-outlined text-[17px]">group</span>
-          <span>Students Dashboard 👥</span>
+          <span>Teacher Center 👥</span>
         </button>
 
         <!-- User Profile Pill & Explicit Logout Button -->
         <div class="flex items-center gap-2 pl-2" id="profileMenuWrapper">
-          <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-low transition-all" id="studentProfilePill">
+          <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-low transition-all cursor-pointer" id="studentProfilePill" onclick="switchView('reports')">
             <div class="w-7 h-7 rounded-full bg-streak-amber/20 flex items-center justify-center font-label-sm text-label-sm leading-none" id="navStudentAvatar">👩‍🏫</div>
             <div class="hidden md:flex flex-col text-left">
               <div class="flex items-center gap-1.5">
@@ -314,64 +314,91 @@
        PERSISTENT LEFT NAVIGATION SIDEBAR (Stitch Sidebar)
        ==================================================================== -->
   <aside class="fixed left-0 top-20 bottom-0 w-64 bg-surface-container-lowest z-40 flex flex-col justify-between py-5 border-r border-border-subtle shadow-[0_1px_8px_rgba(0,0,0,0.04)] overflow-y-auto overflow-x-hidden" id="portalSidebar">
-    <div class="flex flex-col gap-5 px-3">
+    <div class="flex flex-col gap-4 px-3">
       
       <nav class="flex flex-col gap-1.5" id="sidebarNavTabs">
-        <!-- Student Section: Learning Hub -->
-        <div class="px-3 pt-1 pb-0.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Learning Hub</div>
-        <button class="nav-tab student-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all bg-primary-container text-on-primary font-bold shadow-sm active text-left w-full cursor-pointer" data-view="dashboard" title="Dashboard & Homework">
-          <span class="material-symbols-outlined text-[20px] shrink-0">home</span>
-          <span class="sidebar-text truncate">Home Dashboard</span>
-        </button>
-        <button class="nav-tab student-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="skills" title="Interactive Practice & Unlocked Lessons">
-          <span class="material-symbols-outlined text-[20px] shrink-0">psychology</span>
-          <span class="sidebar-text truncate">Practice &amp; Skills 🎯</span>
-        </button>
-        <button class="nav-tab student-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="vocab" title="Vocabulary Game: Spellings, Meanings & Sentences">
-          <span class="material-symbols-outlined text-[20px] shrink-0">spellcheck</span>
-          <span class="sidebar-text truncate">Vocabulary Game 🔤</span>
-        </button>
-        <button class="nav-tab student-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="sat" title="Digital SAT Prep & Diagnostics">
-          <span class="material-symbols-outlined text-[20px] shrink-0">school</span>
-          <span class="sidebar-text truncate">SAT Prep 🎯</span>
-        </button>
-        <button class="nav-tab student-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="blog" title="Student Knowledge & Creative Blog">
-          <span class="material-symbols-outlined text-[20px] shrink-0">article</span>
-          <span class="sidebar-text truncate">Student Blog ✍️</span>
-        </button>
-        <button class="nav-tab student-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="sessions" title="Zoom & Class Logs">
-          <span class="material-symbols-outlined text-[20px] shrink-0">videocam</span>
-          <span class="sidebar-text truncate">Live Classes 🎥</span>
-        </button>
-        <button class="nav-tab student-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="curriculum-books" title="Curriculum Books & Full PDFs">
-          <span class="material-symbols-outlined text-[20px] shrink-0">menu_book</span>
-          <span class="sidebar-text truncate">PDF Textbooks 📚</span>
-        </button>
+        <!-- 1. STUDENT NAVIGATION PORTAL (Default) -->
+        <div id="sidebarStudentGroup" class="flex flex-col gap-1.5">
+          <div class="px-3 pt-1 pb-0.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Student Hub</div>
+          <button class="nav-tab active flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all bg-primary-container text-on-primary font-bold shadow-sm text-left w-full cursor-pointer" data-view="dashboard" title="Daily Mission & Learning Overview">
+            <span class="material-symbols-outlined text-[20px] shrink-0">home</span>
+            <span class="sidebar-text truncate">Dashboard</span>
+          </button>
+          <button class="nav-tab flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="skills" title="Interactive Practice & Unlocked Lessons">
+            <span class="material-symbols-outlined text-[20px] shrink-0">psychology</span>
+            <span class="sidebar-text truncate">Practice &amp; Skills 🎯</span>
+          </button>
+          <button class="nav-tab flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="curriculum-books" title="Curriculum Books & Full PDFs">
+            <span class="material-symbols-outlined text-[20px] shrink-0">menu_book</span>
+            <span class="sidebar-text truncate">My Lessons &amp; Books 📚</span>
+          </button>
+          <button class="nav-tab flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="sessions" title="Zoom & Class Logs">
+            <span class="material-symbols-outlined text-[20px] shrink-0">videocam</span>
+            <span class="sidebar-text truncate">Live Classes 🎥</span>
+          </button>
+          <button class="nav-tab flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="reports" title="My Progress & Report Card">
+            <span class="material-symbols-outlined text-[20px] shrink-0">analytics</span>
+            <span class="sidebar-text truncate">My Progress 📊</span>
+          </button>
+        </div>
 
-        <!-- Student Section: Account & Scores -->
-        <div class="px-3 pt-3 pb-0.5 text-[10px] font-bold text-slate-400 uppercase tracking-wider">Account &amp; Scores</div>
-        <button class="nav-tab student-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="reports" title="My Progress">
-          <span class="material-symbols-outlined text-[20px] shrink-0">analytics</span>
-          <span class="sidebar-text truncate">My Report Card 📊</span>
-        </button>
-        <button class="nav-tab student-nav-item flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="payments" title="Subscription & Payment">
-          <span class="material-symbols-outlined text-[20px] shrink-0">credit_card</span>
-          <span class="sidebar-text truncate">Tuition &amp; Receipts 💳</span>
-        </button>
+        <!-- 2. PARENT NAVIGATION PORTAL -->
+        <div id="sidebarParentGroup" class="flex flex-col gap-1.5" style="display: none;">
+          <div class="px-3 pt-3 pb-0.5 text-[10px] font-bold text-amber-500 uppercase tracking-wider">Parent Portal 👨‍👩‍👧</div>
+          <button class="nav-tab flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="reports" title="Child Progress & Scorecard">
+            <span class="material-symbols-outlined text-[20px] shrink-0 text-amber-500">family_restroom</span>
+            <span class="sidebar-text truncate">Child Progress 📈</span>
+          </button>
+          <button class="nav-tab flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="payments" title="Tuition & Receipts">
+            <span class="material-symbols-outlined text-[20px] shrink-0 text-emerald-500">credit_card</span>
+            <span class="sidebar-text truncate">Tuition &amp; Receipts 💳</span>
+          </button>
+          <button class="nav-tab flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="sessions" title="Zoom Schedule & Live Classes">
+            <span class="material-symbols-outlined text-[20px] shrink-0 text-cyan-500">calendar_month</span>
+            <span class="sidebar-text truncate">Class Schedule 📅</span>
+          </button>
+          <a href="https://wa.me/201016499281" target="_blank" class="nav-tab flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-emerald-600 hover:bg-emerald-50 transition-all text-left w-full cursor-pointer border border-emerald-500/20" title="Contact Miss Rania via WhatsApp">
+            <span class="material-symbols-outlined text-[20px] shrink-0 text-emerald-500">chat</span>
+            <span class="sidebar-text truncate">Contact Miss Rania 💬</span>
+          </a>
+        </div>
 
-        <!-- Teacher Console Access (Only visible when logged in as Teacher) -->
-        <div class="px-3 pt-3 pb-0.5 text-[10px] font-bold text-cyan-400 uppercase tracking-wider teacher-sidebar-header" style="display: none;">Teacher Console</div>
-        <button class="nav-tab teacher-nav-tab flex items-center justify-between px-3 py-2.5 rounded-xl font-label-md text-label-md text-cyan-400 hover:bg-cyan-500/10 transition-all text-left w-full cursor-pointer border border-cyan-500/30" data-view="teacher" id="sidebarTeacherTabBtn" style="display: none;" title="Teacher Command Center">
-          <div class="flex items-center gap-3 min-w-0">
-            <span class="material-symbols-outlined text-[20px] shrink-0 text-cyan-400">admin_panel_settings</span>
-            <span class="sidebar-text truncate font-bold">Teacher Center 👥</span>
-          </div>
-          <span class="font-label-sm text-xs font-bold text-black bg-cyan-400 px-2 py-0.5 rounded-full sidebar-badge shrink-0" id="sidebarTeacherBadge">Admin</span>
-        </button>
+        <!-- 3. TEACHER CONSOLE NAVIGATION -->
+        <div id="sidebarTeacherGroup" class="flex flex-col gap-1.5" style="display: none;">
+          <div class="px-3 pt-3 pb-0.5 text-[10px] font-bold text-purple-400 uppercase tracking-wider teacher-sidebar-header">Teacher Suite 👩‍🏫</div>
+          <button class="nav-tab teacher-nav-tab flex items-center justify-between px-3 py-2.5 rounded-xl font-label-md text-label-md text-purple-400 hover:bg-purple-500/10 transition-all text-left w-full cursor-pointer border border-purple-500/30 active" data-view="teacher" id="sidebarTeacherTabBtn" title="Student Directory & Parent CRM">
+            <div class="flex items-center gap-3 min-w-0">
+              <span class="material-symbols-outlined text-[20px] shrink-0 text-purple-400">group</span>
+              <span class="sidebar-text truncate font-bold">Students CRM 👥</span>
+            </div>
+            <span class="font-label-sm text-xs font-bold text-white bg-purple-600 px-2 py-0.5 rounded-full sidebar-badge shrink-0" id="sidebarTeacherBadge">Admin</span>
+          </button>
+          <button class="nav-tab flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="skills" title="Curriculum & Lessons Bank">
+            <span class="material-symbols-outlined text-[20px] shrink-0">psychology</span>
+            <span class="sidebar-text truncate">Curriculum Bank 📚</span>
+          </button>
+          <button class="nav-tab flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="sessions" title="Zoom Pro Lecture Scheduling">
+            <span class="material-symbols-outlined text-[20px] shrink-0">videocam</span>
+            <span class="sidebar-text truncate">Live Zoom Classes 🎥</span>
+          </button>
+          <button class="nav-tab flex items-center gap-3 px-3 py-2.5 rounded-xl font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface transition-all text-left w-full cursor-pointer" data-view="reports" title="Class Performance Reports">
+            <span class="material-symbols-outlined text-[20px] shrink-0">analytics</span>
+            <span class="sidebar-text truncate">Class Reports 📊</span>
+          </button>
+        </div>
       </nav>
     </div>
 
-    </aside>
+    <!-- Sidebar Bottom Action / Brand Indicator -->
+    <div class="px-4 pt-3 border-t border-border-subtle sidebar-bottom-box">
+      <div class="flex items-center justify-between text-xs text-on-surface-variant font-medium">
+        <span>RC Academy</span>
+        <span class="text-emerald-500 font-bold flex items-center gap-1">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Live
+        </span>
+      </div>
+    </div>
+  </aside>
 
   <!-- Mobile Sidebar Backdrop Overlay -->
   <div id="sidebarBackdrop" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-30 opacity-0 pointer-events-none transition-opacity duration-300"></div>
@@ -384,234 +411,162 @@
       <div class="flex flex-col w-full px-6 py-8 space-y-8 max-w-[1400px] mx-auto">
 
         <!-- ====================================================================
-             VIEW 1: STUDENT DASHBOARD (Exact Stitch Aesthetic & Functional Hub)
+             VIEW 1: STUDENT DASHBOARD (Streamlined Mission-Driven Hub)
              ==================================================================== -->
-        <section id="view-dashboard" class="portal-view active space-y-8">
+        <section id="view-dashboard" class="portal-view active space-y-6">
           
-
-          <!-- Welcome Banner & Quick Profile Card -->
-          <div class="relative overflow-hidden rounded-3xl bg-surface-card shadow-sm p-6 sm:p-8 lg:p-10 border border-slate-100/80">
-            <div class="absolute -right-20 -top-20 w-96 h-96 rounded-full bg-primary/5 pointer-events-none blur-3xl"></div>
-            <div class="absolute right-1/3 -bottom-24 w-80 h-80 rounded-full bg-streak-amber/5 pointer-events-none blur-3xl"></div>
-
-            <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-              <!-- Left Column: Greeting, Grade Badge & Quick Actions -->
-              <div class="flex-1 space-y-4 max-w-2xl">
+          <!-- Top Greeting & Identity Card -->
+          <div class="relative overflow-hidden rounded-3xl bg-surface-card shadow-sm p-6 sm:p-8 border border-slate-100">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div class="space-y-2">
                 <div class="flex items-center gap-3">
-                  <span class="px-3.5 py-1 rounded-full bg-primary/10 text-primary font-bold text-xs tracking-wide uppercase border border-primary/20" id="dashCohortTag">
+                  <span class="px-3.5 py-1 rounded-full bg-primary/10 text-primary font-bold text-xs uppercase tracking-wide border border-primary/20" id="dashCohortTag">
                     Year 4 • Miss Rania's Class
                   </span>
-                  <span class="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 font-bold text-xs flex items-center gap-1.5 border border-emerald-500/20">
+                  <span class="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 font-bold text-xs flex items-center gap-1.5 border border-emerald-500/20" id="dashActiveBadge">
                     <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                     Active Student
                   </span>
                 </div>
-                
-                <div class="space-y-2">
-                  <h1 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-on-surface tracking-tight">
-                    Welcome back, <span id="dashStudentName" class="text-primary">Alex</span>! 👋
-                  </h1>
-                  <p class="text-sm sm:text-base text-on-surface-variant leading-relaxed">
-                    Here is your study agenda for this week. Complete your assigned homework, attend live Zoom Pro classes, and verify your tuition status.
-                  </p>
-                </div>
-
-                <div class="flex flex-wrap items-center gap-3 pt-2">
-                  <button type="button" class="flex items-center gap-2.5 px-6 py-3 rounded-xl bg-primary-container text-on-primary font-bold text-sm shadow-md hover:bg-primary transition-all active:translate-y-0.5 cursor-pointer" id="dashStartPracticeBtn">
-                    <span>🚀</span>
-                    <span>Start Daily Practice</span>
-                  </button>
-                  <button type="button" class="flex items-center gap-2 px-4 py-3 rounded-xl bg-surface-container-high text-on-surface font-semibold text-sm hover:bg-surface-container hover:text-primary transition-all cursor-pointer" onclick="switchView('curriculum-books')">
-                    <span>📚</span>
-                    <span>Curriculum Books</span>
-                  </button>
-                  <button type="button" class="flex items-center gap-2 px-4 py-3 rounded-xl bg-surface-container-high text-on-surface font-semibold text-sm hover:bg-surface-container hover:text-primary transition-all cursor-pointer" onclick="switchView('sessions')">
-                    <span>🎥</span>
-                    <span>Zoom Classes</span>
-                  </button>
-                  <button type="button" class="flex items-center gap-2 px-4 py-3 rounded-xl bg-surface-container-high text-on-surface font-semibold text-sm hover:bg-surface-container hover:text-primary transition-all cursor-pointer" id="dashViewReportBtn">
-                    <span>📊</span>
-                    <span>My Report</span>
-                  </button>
-                </div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-on-surface tracking-tight">
+                  Good day, <span id="dashStudentName" class="text-primary">Alex</span>! 👋
+                </h1>
+                <p class="text-xs sm:text-sm text-on-surface-variant">
+                  Welcome to your RC Academy learning hub. Complete today's focus mission and maintain your practice streak.
+                </p>
               </div>
 
-              <!-- Right Column: Sleek Student Level & Progress Pill -->
-              <div class="w-full lg:w-80 shrink-0 bg-surface-container-low/70 rounded-2xl p-5 sm:p-6 border border-slate-100 flex flex-col gap-4">
-                <div class="flex items-center justify-between">
-                  <div>
-                    <span class="text-xs uppercase font-extrabold text-primary tracking-wider">Academic Rank</span>
-                    <h3 class="text-base font-bold text-on-surface mt-0.5 flex items-center gap-1.5">
-                      <span id="dashRankTitle">Lv. 5 Maths Explorer</span>
-                      <span>🧭</span>
-                    </h3>
-                  </div>
-                  <div class="w-11 h-11 rounded-xl bg-primary text-white flex items-center justify-center font-bold text-lg shadow-sm" id="dashLevelBadge">
-                    5
-                  </div>
+              <!-- Level & Streak Pill -->
+              <div class="flex items-center gap-4 p-4 rounded-2xl bg-surface-container-low border border-slate-100 shrink-0">
+                <div class="text-center">
+                  <div class="text-[10px] font-bold text-primary uppercase">Academic Rank</div>
+                  <div class="text-base font-extrabold text-on-surface mt-0.5" id="dashRankTitle">Lv. 5 Explorer 🧭</div>
                 </div>
-
-                <div class="space-y-2">
-                  <div class="flex items-center justify-between text-xs font-semibold">
-                    <span class="text-on-surface-variant">XP Progress</span>
-                    <span class="text-on-surface font-bold"><span id="dashCurrentXP">1,420</span> / <span id="dashTargetXP">2,000</span> XP</span>
-                  </div>
-                  <div class="w-full h-2.5 rounded-full bg-surface-container-high overflow-hidden">
-                    <div class="h-full rounded-full bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-500 transition-all duration-700" id="dashXpFill" style="width: 71%;"></div>
-                  </div>
-                  <div class="flex items-center justify-between text-[11px] text-on-surface-variant font-medium">
-                    <span id="dashXpPercentText">71% to Next Level</span>
-                    <span id="dashXpRemainingText" class="font-semibold text-primary">580 XP Remaining</span>
-                  </div>
-                </div>
-
-                <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-surface-card border border-border-subtle text-xs text-on-surface-variant">
-                  <span class="material-symbols-outlined text-streak-amber text-[18px] shrink-0">military_tech</span>
-                  <span class="font-medium truncate" id="dashMilestonePrompt">Keep practicing to achieve mastery!</span>
+                <div class="h-8 w-[1px] bg-slate-200"></div>
+                <div class="text-center">
+                  <div class="text-[10px] font-bold text-amber-500 uppercase">Daily Streak</div>
+                  <div class="text-base font-extrabold text-amber-600 mt-0.5" id="dashStreakCounter">🔥 5 Days</div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Quick Metrics: 4 Dedicated KPI Cards -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            <div class="bg-surface-card rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-all">
-              <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center text-2xl shrink-0">
+          <!-- Today's Mission & Level Progress Grid -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left 2 Cols: Today's Mission Focus Card -->
+            <div class="lg:col-span-2 rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 p-6 sm:p-8 text-white shadow-md flex flex-col justify-between relative overflow-hidden">
+              <div class="space-y-4 relative z-10">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 font-bold text-xs border border-cyan-500/30">
+                  <span>🎯</span> <span>TODAY'S MISSION</span>
+                </div>
+                <h2 class="text-xl sm:text-2xl font-bold tracking-tight">
+                  Maths &bull; Place Value Models &amp; Core Operations
+                </h2>
+                <p class="text-slate-300 text-xs sm:text-sm leading-relaxed max-w-xl">
+                  Complete 10 focused curriculum questions to maintain your mastery SmartScore of 80+.
+                </p>
+
+                <div class="flex flex-wrap items-center gap-4 pt-2 text-xs">
+                  <div class="flex items-center gap-1.5 text-cyan-300 font-semibold">
+                    <span class="material-symbols-outlined text-[18px]">assignment</span>
+                    <span>10 Questions Goal</span>
+                  </div>
+                  <div class="flex items-center gap-1.5 text-emerald-300 font-semibold">
+                    <span class="material-symbols-outlined text-[18px]">videocam</span>
+                    <span>Next Live Class: 5:00 PM</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="pt-6 relative z-10 flex flex-wrap items-center gap-3">
+                <button type="button" class="px-6 py-3.5 rounded-xl bg-gradient-to-r from-cyan-400 via-sky-500 to-indigo-500 text-slate-950 font-extrabold text-sm shadow-[0_0_20px_rgba(0,229,255,0.4)] hover:brightness-110 active:scale-95 transition-all cursor-pointer" id="dashStartPracticeBtn">
+                  🚀 Continue Learning &rarr;
+                </button>
+                <button type="button" class="px-4 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm transition-all cursor-pointer border border-white/10" onclick="switchView('skills')">
+                  Browse All Skills 🎯
+                </button>
+              </div>
+            </div>
+
+            <!-- Right Col: Level Progress Card -->
+            <div class="rounded-3xl bg-surface-card p-6 sm:p-7 shadow-sm border border-slate-100 flex flex-col justify-between gap-5">
+              <div>
+                <div class="flex items-center justify-between">
+                  <span class="text-xs font-bold uppercase tracking-wider text-primary">XP Progress</span>
+                  <span class="text-xs font-extrabold text-on-surface"><span id="dashCurrentXP">1,420</span> / <span id="dashTargetXP">2,000</span> XP</span>
+                </div>
+                <div class="w-full h-3 rounded-full bg-surface-container-high overflow-hidden mt-2.5">
+                  <div class="h-full rounded-full bg-gradient-to-r from-cyan-400 to-indigo-500 transition-all duration-700" id="dashXpFill" style="width: 71%;"></div>
+                </div>
+                <p class="text-xs text-on-surface-variant mt-2" id="dashXpPercentText">
+                  71% towards Level 6 Junior Scholar
+                </p>
+              </div>
+
+              <!-- 4 Compact KPI Mini Cards -->
+              <div class="grid grid-cols-2 gap-3 pt-2">
+                <div class="p-3 rounded-xl bg-surface-container-low border border-slate-100 text-center">
+                  <div class="text-lg font-extrabold text-on-surface" id="kpiQuestionsAnswered">142</div>
+                  <div class="text-[10px] text-on-surface-variant font-semibold">Questions Solved</div>
+                </div>
+                <div class="p-3 rounded-xl bg-surface-container-low border border-slate-100 text-center">
+                  <div class="text-lg font-extrabold text-emerald-600" id="kpiAccuracyRate">88.5%</div>
+                  <div class="text-[10px] text-on-surface-variant font-semibold">Accuracy</div>
+                </div>
+                <div class="p-3 rounded-xl bg-surface-container-low border border-slate-100 text-center">
+                  <div class="text-lg font-extrabold text-amber-600" id="kpiTimeSpent">1h 45m</div>
+                  <div class="text-[10px] text-on-surface-variant font-semibold">Practice Time</div>
+                </div>
+                <div class="p-3 rounded-xl bg-surface-container-low border border-slate-100 text-center">
+                  <div class="text-lg font-extrabold text-purple-600" id="kpiMasteredCount">8</div>
+                  <div class="text-[10px] text-on-surface-variant font-semibold">Skills Mastered</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4 Core Navigation Hub Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
+            <div class="p-5 rounded-2xl bg-surface-card border border-slate-100 shadow-sm hover:shadow-md hover:border-primary/40 transition-all cursor-pointer flex items-center gap-4 group" onclick="switchView('curriculum-books')">
+              <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shrink-0">
                 📚
               </div>
-              <div class="flex flex-col">
-                <span class="text-2xl font-extrabold text-on-surface tracking-tight" id="kpiQuestionsAnswered">142</span>
-                <span class="text-xs text-on-surface-variant font-semibold">Questions Solved</span>
+              <div>
+                <h3 class="font-bold text-sm text-on-surface">My Lessons</h3>
+                <p class="text-xs text-on-surface-variant mt-0.5">PDF Books &amp; Units</p>
               </div>
             </div>
 
-            <div class="bg-surface-card rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-all">
-              <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center text-2xl shrink-0">
-                🎯
+            <div class="p-5 rounded-2xl bg-surface-card border border-slate-100 shadow-sm hover:shadow-md hover:border-primary/40 transition-all cursor-pointer flex items-center gap-4 group" onclick="switchView('skills')">
+              <div class="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shrink-0">
+                ✏️
               </div>
-              <div class="flex flex-col">
-                <span class="text-2xl font-extrabold text-on-surface tracking-tight" id="kpiAccuracyRate">88.5%</span>
-                <span class="text-xs text-on-surface-variant font-semibold">Accuracy Rate</span>
-              </div>
-            </div>
-
-            <div class="bg-surface-card rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-all">
-              <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center text-2xl shrink-0">
-                ⏱️
-              </div>
-              <div class="flex flex-col">
-                <span class="text-2xl font-extrabold text-on-surface tracking-tight" id="kpiTimeSpent">1h 45m</span>
-                <span class="text-xs text-on-surface-variant font-semibold">Practice Time</span>
+              <div>
+                <h3 class="font-bold text-sm text-on-surface">Practice &amp; Skills</h3>
+                <p class="text-xs text-on-surface-variant mt-0.5">8,264+ Topics</p>
               </div>
             </div>
 
-            <div class="bg-surface-card rounded-2xl p-5 sm:p-6 shadow-sm border border-slate-100 flex items-center gap-4 hover:shadow-md transition-all">
-              <div class="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-600 flex items-center justify-center text-2xl shrink-0">
-                🏆
+            <div class="p-5 rounded-2xl bg-surface-card border border-slate-100 shadow-sm hover:shadow-md hover:border-primary/40 transition-all cursor-pointer flex items-center gap-4 group" onclick="switchView('sessions')">
+              <div class="w-12 h-12 rounded-xl bg-cyan-500/10 text-cyan-600 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shrink-0">
+                🎥
               </div>
-              <div class="flex flex-col">
-                <span class="text-2xl font-extrabold text-on-surface tracking-tight" id="kpiMasteredCount">8</span>
-                <span class="text-xs text-on-surface-variant font-semibold">Skills Mastered</span>
+              <div>
+                <h3 class="font-bold text-sm text-on-surface">Live Classes</h3>
+                <p class="text-xs text-on-surface-variant mt-0.5">Zoom Schedule</p>
+              </div>
+            </div>
+
+            <div class="p-5 rounded-2xl bg-surface-card border border-slate-100 shadow-sm hover:shadow-md hover:border-primary/40 transition-all cursor-pointer flex items-center gap-4 group" onclick="switchView('reports')">
+              <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shrink-0">
+                📊
+              </div>
+              <div>
+                <h3 class="font-bold text-sm text-on-surface">My Progress</h3>
+                <p class="text-xs text-on-surface-variant mt-0.5">Report Card &amp; XP</p>
               </div>
             </div>
           </div>
-
-          <!-- Section 1: Teacher Assigned Homework & Tasks -->
-          <section class="space-y-5" id="dashAssignmentsSection">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
-              <div class="flex items-center gap-3">
-                <div class="w-11 h-11 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                  <span class="material-symbols-outlined text-[24px]">assignment</span>
-                </div>
-                <div>
-                  <div class="flex items-center gap-2.5">
-                    <h2 class="text-xl font-bold text-on-surface">Homework &amp; Assignments</h2>
-                    <span class="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary font-bold text-xs" id="dashAssignmentBadge">Active Tasks</span>
-                  </div>
-                  <p class="text-xs sm:text-sm text-on-surface-variant mt-0.5">Problem sets and curriculum exercises assigned by Miss Rania.</p>
-                </div>
-              </div>
-              <button type="button" class="text-xs sm:text-sm text-primary hover:underline font-bold flex items-center gap-1.5 cursor-pointer self-start sm:self-auto" onclick="switchView('tracks')">
-                <span>View Full Curriculum</span>
-                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-              </button>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="dashAssignmentsGrid">
-              <!-- Dynamically populated by renderDashboardAssignments() -->
-              <div class="col-span-full py-10 px-6 rounded-2xl bg-surface-card border border-slate-100 text-center text-on-surface-variant font-medium">
-                Loading assigned homework...
-              </div>
-            </div>
-          </section>
-
-          <!-- Section 1.5: Unlocked Curriculum Lessons & Practice Topics -->
-          <section class="space-y-5" id="dashUnlockedSkillsSection">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
-              <div class="flex items-center gap-3">
-                <div class="w-11 h-11 rounded-2xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
-                  <span class="material-symbols-outlined text-[24px]">psychology</span>
-                </div>
-                <div>
-                  <div class="flex items-center gap-2.5">
-                    <h2 class="text-xl font-bold text-on-surface">Unlocked Practice Lessons</h2>
-                    <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 font-bold text-xs" id="dashUnlockedCountBadge">0 Lessons</span>
-                  </div>
-                  <p class="text-xs sm:text-sm text-on-surface-variant mt-0.5">Curriculum topics specifically unlocked for your self-paced practice by Miss Rania.</p>
-                </div>
-              </div>
-              <button type="button" class="text-xs sm:text-sm text-primary hover:underline font-bold flex items-center gap-1.5 cursor-pointer self-start sm:self-auto" onclick="switchView('skills')">
-                <span>Browse All Curriculum</span>
-                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-              </button>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="dashUnlockedSkillsGrid">
-              <!-- Dynamically populated by renderDashboardUnlockedSkills() -->
-            </div>
-          </section>
-
-          <!-- Section 2: Live Zoom Pro Classes & Materials -->
-          <section class="space-y-5" id="dashSessionsSection">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
-              <div class="flex items-center gap-3">
-                <div class="w-11 h-11 rounded-2xl bg-cyan-500/10 text-cyan-600 flex items-center justify-center shrink-0">
-                  <span class="material-symbols-outlined text-[24px]">videocam</span>
-                </div>
-                <div>
-                  <h2 class="text-xl font-bold text-on-surface">Live Zoom Pro Classes &amp; Materials</h2>
-                  <p class="text-xs sm:text-sm text-on-surface-variant mt-0.5">Scheduled live lectures, syllabus review, and downloadable PDF study guides.</p>
-                </div>
-              </div>
-              <button type="button" class="text-xs sm:text-sm text-cyan-600 hover:underline font-bold flex items-center gap-1.5 cursor-pointer self-start sm:self-auto" onclick="switchView('sessions')">
-                <span>View All Sessions</span>
-                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
-              </button>
-            </div>
-
-            <div id="dashSessionsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <!-- Dynamically populated by renderStudentSessions() -->
-            </div>
-          </section>
-
-          <!-- Section 3: Student Monthly Tuition & Payment Standing -->
-          <section id="dashPaymentSection" class="space-y-5">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-1">
-              <div class="flex items-center gap-3">
-                <div class="w-11 h-11 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
-                  <span class="material-symbols-outlined text-[24px]">receipt_long</span>
-                </div>
-                <div>
-                  <h2 class="text-xl font-bold text-on-surface">Monthly Tuition &amp; Payment Standing</h2>
-                  <p class="text-xs sm:text-sm text-on-surface-variant mt-0.5">Review your monthly subscription status and upload payment proof receipts.</p>
-                </div>
-              </div>
-            </div>
-
-            <div id="dashPaymentProofCard" class="bg-surface-card rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <!-- Dynamically populated by renderStudentPaymentStatus() -->
-            </div>
-          </section>
         </section>
 
     <!-- ====================================================================
@@ -733,18 +688,18 @@
     </section>
 
     <!-- ====================================================================
-         VIEW: SAT PREPARATION & DIGITAL TESTING
+         VIEW: SAT PREPARATION & DIAGNOSTIC PRACTICE
          ==================================================================== -->
     <section id="view-sat" class="portal-view">
       <div class="view-header-row">
         <div>
-          <div class="view-kicker">// DIGITAL SAT PREPARATION &amp; DIAGNOSTICS</div>
-          <h1 class="view-main-title">Digital SAT Testing Portal 🎯</h1>
-          <p class="view-lead-text">Official Digital SAT diagnostic modules, adaptive practice bank, and problem-solving clinics under preparation by Miss Rania.</p>
+          <div class="view-kicker">// STANDARDIZED TESTING PREP</div>
+          <h1 class="view-main-title">Digital SAT-Style Practice &amp; Diagnostic Prep 🎯</h1>
+          <p class="view-lead-text">Curated SAT-aligned diagnostic drills and rigorous problem-solving clinics designed to build academic mastery for secondary students.</p>
         </div>
         <div class="view-actions-col">
           <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-bold">
-            <span>✨ SAT Digital 2026-2027</span>
+            <span>✨ SAT-Style Practice Bank</span>
           </span>
         </div>
       </div>
@@ -753,42 +708,49 @@
       <div class="sat-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin-top: 1rem;">
         <div class="sat-card" style="background: var(--bg-surface-solid); border: 1px solid var(--border-card); border-radius: 20px; padding: 1.5rem; display: flex; flex-direction: column; box-shadow: var(--shadow-sm);">
           <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">📐</div>
-          <div style="font-size: 0.72rem; font-weight: 800; color: #00e5ff; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Section 1</div>
-          <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.5rem;">SAT Math (Digital)</h3>
+          <div style="font-size: 0.72rem; font-weight: 800; color: #00e5ff; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Module 1</div>
+          <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.5rem;">SAT-Style Math</h3>
           <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; flex: 1; margin-bottom: 1.25rem;">
-            Algebra, Advanced Math, Problem Solving &amp; Data Analysis, Geometry &amp; Trigonometry with Desmos graphing integration.
+            Targeted practice across Algebra, Advanced Math, Problem Solving &amp; Data Analysis, Geometry and Trigonometry.
           </p>
           <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 0.75rem;">
-            <span style="font-size: 0.75rem; color: #fbbf24; font-weight: 700;">Under Preparation</span>
-            <button type="button" class="secondary-glass-btn" style="font-size: 0.78rem; padding: 4px 10px;" onclick="showToast('SAT Math modules under active preparation by Miss Rania 🎯')">Preview Syllabus</button>
+            <span style="font-size: 0.75rem; color: #fbbf24; font-weight: 700;">Curriculum Practice</span>
+            <button type="button" class="secondary-glass-btn" style="font-size: 0.78rem; padding: 4px 10px;" onclick="showToast('SAT Math practice modules prepared by Miss Rania 🎯')">Explore Topics</button>
           </div>
         </div>
 
         <div class="sat-card" style="background: var(--bg-surface-solid); border: 1px solid var(--border-card); border-radius: 20px; padding: 1.5rem; display: flex; flex-direction: column; box-shadow: var(--shadow-sm);">
           <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">📚</div>
-          <div style="font-size: 0.72rem; font-weight: 800; color: #a855f7; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Section 2</div>
-          <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.5rem;">SAT Reading &amp; Writing</h3>
+          <div style="font-size: 0.72rem; font-weight: 800; color: #a855f7; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Module 2</div>
+          <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.5rem;">SAT-Style Reading &amp; Writing</h3>
           <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; flex: 1; margin-bottom: 1.25rem;">
-            Craft &amp; Structure, Information &amp; Ideas, Standard English Conventions, and Expression of Ideas with passage analysis.
+            Passage comprehension, Craft &amp; Structure, Information &amp; Ideas, and Standard English Conventions analysis.
           </p>
           <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 0.75rem;">
-            <span style="font-size: 0.75rem; color: #fbbf24; font-weight: 700;">Under Preparation</span>
-            <button type="button" class="secondary-glass-btn" style="font-size: 0.78rem; padding: 4px 10px;" onclick="showToast('SAT Reading modules under active preparation by Miss Rania 📚')">Preview Syllabus</button>
+            <span style="font-size: 0.75rem; color: #fbbf24; font-weight: 700;">Curriculum Practice</span>
+            <button type="button" class="secondary-glass-btn" style="font-size: 0.78rem; padding: 4px 10px;" onclick="showToast('SAT Reading practice modules prepared by Miss Rania 📚')">Explore Topics</button>
           </div>
         </div>
 
         <div class="sat-card" style="background: var(--bg-surface-solid); border: 1px solid var(--border-card); border-radius: 20px; padding: 1.5rem; display: flex; flex-direction: column; box-shadow: var(--shadow-sm);">
           <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">⏱️</div>
-          <div style="font-size: 0.72rem; font-weight: 800; color: #10b981; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Testing Simulator</div>
-          <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.5rem;">Timed Full Diagnostics</h3>
+          <div style="font-size: 0.72rem; font-weight: 800; color: #10b981; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.25rem;">Diagnostic Drills</div>
+          <h3 style="font-size: 1.2rem; font-weight: 800; color: var(--text-main); margin-bottom: 0.5rem;">Timed Diagnostic Modules</h3>
           <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; flex: 1; margin-bottom: 1.25rem;">
-            Adaptive full-length 2-module digital test simulator mimicking official Bluebook timing and question formats.
+            Practice drills with pacing clocks to help students master time management and question stamina.
           </p>
           <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 0.75rem;">
             <span style="font-size: 0.75rem; color: #10b981; font-weight: 700;">Diagnostic Suite</span>
-            <button type="button" class="secondary-glass-btn" style="font-size: 0.78rem; padding: 4px 10px;" onclick="showToast('Diagnostic testing simulator launching soon! ⏱️')">View Specs</button>
+            <button type="button" class="secondary-glass-btn" style="font-size: 0.78rem; padding: 4px 10px;" onclick="showToast('Diagnostic testing drills available for enrolled students ⏱️')">View Specs</button>
           </div>
         </div>
+      </div>
+
+      <!-- Legal Compliance Disclaimer -->
+      <div class="mt-8 p-4 rounded-2xl bg-surface-card border border-slate-200/60 text-center">
+        <p class="text-[11px] text-slate-400 leading-relaxed max-w-2xl mx-auto">
+          ⚖️ <strong>Educational Disclaimer:</strong> SAT® is a registered trademark of the College Board, which is not affiliated with, and does not endorse, this independent educational preparation platform.
+        </p>
       </div>
     </section>
 
@@ -2606,58 +2568,34 @@
     <div class="auth-modal-window" style="max-width: 560px;">
       <div class="auth-modal-header">
         <div>
-          <h2 class="auth-title">☁️ Google Cloud Sync Live Synchronization</h2>
-          <p class="auth-subtitle">Real-time multi-device sync for student roster and live practice logs</p>
+          <h2 class="auth-title">☁️ Cloud Infrastructure &amp; Sync Status</h2>
+          <p class="auth-subtitle">Real-time multi-device cloud synchronization powered by Google Cloud</p>
         </div>
         <button class="modal-close-btn" id="closeCloudSyncModalBtn" onclick="closeCloudSyncModal()">✕</button>
       </div>
 
-      <div style="padding: 1.5rem;">
-        <div style="background: rgba(99, 102, 241, 0.08); border: 1px solid rgba(99, 102, 241, 0.2); border-radius: 10px; padding: 0.9rem 1rem; margin-bottom: 1.25rem; font-size: 0.85rem; line-height: 1.5;">
-          <div style="font-weight: 700; color: #4338ca; margin-bottom: 0.35rem;">⚡ Real-Time Google Cloud Firebase Synchronization</div>
-          <div>Any student added, modified, or practicing will synchronize instantaneously between devices, student portals, and teacher consoles without manual upload.</div>
+      <div style="padding: 1.5rem;" class="space-y-4">
+        <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/25 flex items-center gap-3.5">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-xl shrink-0 font-bold">
+            ✓
+          </div>
+          <div>
+            <div class="font-bold text-emerald-500 text-sm">Google Cloud Live Sync: Active 🟢</div>
+            <div class="text-xs text-slate-400 mt-0.5">Project: <code class="text-cyan-400">rania-classroom</code> &bull; Firestore Database Connected</div>
+          </div>
         </div>
 
-        <form id="cloudSyncForm" onsubmit="handleSaveCloudConfig(event)">
-          <div class="form-group">
-            <label for="firebaseApiKey">Firebase API Key</label>
-            <input type="text" id="firebaseApiKey" placeholder="AIzaSy..." required>
-          </div>
-          <div class="form-group">
-            <label for="firebaseProjectId">Firebase Project ID</label>
-            <input type="text" id="firebaseProjectId" placeholder="e.g. rania-classroom-123" required>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="firebaseAuthDomain">Auth Domain (Optional)</label>
-              <input type="text" id="firebaseAuthDomain" placeholder="project-id.firebaseapp.com">
-            </div>
-            <div class="form-group">
-              <label for="firebaseAppId">App ID (Optional)</label>
-              <input type="text" id="firebaseAppId" placeholder="1:123456789:web:abcdef">
-            </div>
-          </div>
+        <div class="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-slate-300 leading-relaxed">
+          ⚡ <strong>Automatic Synchronization:</strong> Student enrollments, live practice attempts, homework submissions, and tuition logs synchronize instantaneously across all devices and teacher consoles.
+        </div>
 
-          <div style="display: flex; gap: 0.75rem; margin-top: 1rem; flex-wrap: wrap;">
-            <button type="submit" class="primary-glow-btn flex-1" style="font-weight: 700; padding: 0.75rem;">
-              💾 Save & Activate Cloud Sync
-            </button>
-            <button type="button" class="secondary-glass-btn" onclick="handleSyncAllToCloud()" title="Sync all local students to Google Cloud Firebase">
-              ☁️ Sync All Students to Cloud Now
-            </button>
-          </div>
-        </form>
-
-        <div style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border-card); font-size: 0.8rem; color: var(--text-muted);">
-          <details>
-            <summary style="cursor: pointer; font-weight: 600; color: var(--text-main);">📖 How to get free Firebase credentials in 1 minute?</summary>
-            <ol style="margin-top: 0.5rem; padding-left: 1.2rem; line-height: 1.6;">
-            <li>Open <a href="https://console.firebase.google.com/" target="_blank" style="color: #2563eb; text-decoration: underline;">Google Firebase Console</a> and sign in with your Google account.</li>
-            <li>Click <strong>Add project</strong> and name it e.g. <code>rania-classroom</code>.</li>
-            <li>From the left navigation, select <strong>Firestore Database</strong> and click <strong>Create Database</strong>.</li>
-            <li>Under <strong>Project settings</strong>, copy your <strong>API Key</strong> and <strong>Project ID</strong> and paste them above.</li>
-            </ol>
-          </details>
+        <div class="flex gap-3 pt-2">
+          <button type="button" class="primary-glow-btn flex-1" onclick="handleSyncAllToCloud()" style="font-weight: 700; padding: 0.75rem;">
+            🔄 Force Cloud Sync Now
+          </button>
+          <button type="button" class="secondary-glass-btn" onclick="closeCloudSyncModal()" style="padding: 0.75rem 1.2rem;">
+            Close
+          </button>
         </div>
       </div>
     </div>
