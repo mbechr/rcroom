@@ -2931,17 +2931,46 @@ body.auth-locked #authModal {
     width: 100% !important;
     max-width: 100% !important;
   }
-  .cert-student-name {
-    font-size: 1.3rem !important;
+  /* Header & Navbar Mobile Optimization */
+  #topTeacherQuickBtn {
+    display: none !important;
   }
-  .cert-footer-row {
-    flex-direction: column !important;
-    gap: 0.85rem !important;
-    align-items: center !important;
+  #portalNavbar .h-20 {
+    height: 4.25rem !important;
+    padding-left: 0.65rem !important;
+    padding-right: 0.65rem !important;
   }
-  .cert-actions-bar {
-    flex-direction: column !important;
-    gap: 0.5rem !important;
+  #brandHomeBtn .text-base {
+    font-size: 0.88rem !important;
+  }
+  #brandHomeBtn .w-9 {
+    width: 2.1rem !important;
+    height: 2.1rem !important;
+  }
+  #sidebarToggleBtn {
+    width: 2.1rem !important;
+    height: 2.1rem !important;
+  }
+  #topSearchIconBtn {
+    width: 2.1rem !important;
+    height: 2.1rem !important;
+  }
+  #studentProfilePill {
+    padding: 0.25rem 0.5rem !important;
+  }
+  #studentProfilePill #navStudentAvatar {
+    width: 1.6rem !important;
+    height: 1.6rem !important;
+    font-size: 0.8rem !important;
+  }
+  #studentProfilePill #navStudentLevel {
+    font-size: 0.65rem !important;
+    padding: 0.15rem 0.45rem !important;
+  }
+  .portal-main-content > div {
+    padding-left: 0.65rem !important;
+    padding-right: 0.65rem !important;
+    padding-top: 1rem !important;
   }
 }
 
@@ -4961,54 +4990,45 @@ html[dir="rtl"] #mainContentWrapper {
   box-shadow: var(--shadow-sm);
 }
 
-/* Roster Table Design - Fixed Compact Layout without Scrollbar */
+/* Roster Table Design - Clean Responsive Layout with Horizontal Scrolling */
 .table-responsive-wrap {
-  overflow-x: hidden !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch;
   width: 100%;
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
   background: var(--bg-surface-solid);
+  position: relative;
 }
 
 .report-history-table {
   width: 100%;
-  table-layout: fixed;
+  min-width: 820px;
+  table-layout: auto;
   border-collapse: collapse;
   text-align: left;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
 }
 
 .report-history-table th {
-  padding: 0.55rem 0.5rem;
+  padding: 0.8rem 0.9rem;
   background: var(--bg-hover);
   font-family: var(--font-mono);
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   color: var(--text-secondary);
   border-bottom: 1px solid var(--border-card);
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .report-history-table td {
-  padding: 0.55rem 0.5rem;
+  padding: 0.8rem 0.9rem;
   border-bottom: 1px solid var(--border-subtle);
   color: var(--text-primary);
   vertical-align: middle;
-  font-size: 0.8rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  font-size: 0.84rem;
+  white-space: nowrap;
 }
-
-.report-history-table th:nth-child(1), .report-history-table td:nth-child(1) { width: 22%; }
-.report-history-table th:nth-child(2), .report-history-table td:nth-child(2) { width: 13%; }
-.report-history-table th:nth-child(3), .report-history-table td:nth-child(3) { width: 11%; }
-.report-history-table th:nth-child(4), .report-history-table td:nth-child(4) { width: 13%; }
-.report-history-table th:nth-child(5), .report-history-table td:nth-child(5) { width: 10%; text-align: center; }
-.report-history-table th:nth-child(6), .report-history-table td:nth-child(6) { width: 10%; }
-.report-history-table th:nth-child(7), .report-history-table td:nth-child(7) { width: 9%; }
-.report-history-table th:nth-child(8), .report-history-table td:nth-child(8) { width: 12%; text-align: right; }
 
 .report-history-table tr:last-child td {
   border-bottom: none;
