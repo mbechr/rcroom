@@ -6711,3 +6711,152 @@ html[dir="rtl"] #mainContentWrapper {
 
 
 
+
+/* ========================================================================
+   RC ACADEMY GLOBAL PRODUCT POLISH — English-first, student-friendly shell
+   ======================================================================== */
+:root {
+  --rc-sidebar-width: 250px;
+  --rc-header-height: 72px;
+  --rc-radius-lg: 20px;
+  --rc-radius-md: 14px;
+  --rc-shadow-soft: 0 10px 30px rgba(15, 23, 42, .06);
+  --rc-shadow-card: 0 4px 18px rgba(15, 23, 42, .055);
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  letter-spacing: -0.01em;
+}
+button, input, select, textarea { font: inherit; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 3px solid rgba(37, 99, 235, .28);
+  outline-offset: 2px;
+}
+
+#portalNavbar {
+  height: var(--rc-header-height) !important;
+  min-height: var(--rc-header-height);
+}
+#portalNavbar > div { height: var(--rc-header-height) !important; }
+#portalSidebar { width: var(--rc-sidebar-width) !important; top: var(--rc-header-height) !important; }
+
+/* Cleaner navigation hierarchy */
+#portalSidebar .nav-tab {
+  min-height: 42px;
+  font-size: .86rem;
+  letter-spacing: -.005em;
+}
+#portalSidebar .nav-tab .material-symbols-outlined { font-size: 19px; }
+#portalSidebar .sidebar-section-label,
+#portalSidebar > div > nav > div > div:first-child {
+  margin-top: 6px;
+  color: #94a3b8;
+  font-size: .66rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+}
+#portalSidebar::-webkit-scrollbar { width: 7px; }
+#portalSidebar::-webkit-scrollbar-thumb { background: #dbe3f0; border-radius: 99px; }
+
+/* Main content: stronger reading rhythm */
+main#portalMain,
+#portalMain {
+  margin-left: var(--rc-sidebar-width) !important;
+  padding-top: calc(var(--rc-header-height) + 24px) !important;
+  padding-right: clamp(16px, 2.5vw, 34px);
+  padding-bottom: 40px;
+}
+.portal-view { max-width: 1480px; margin: 0 auto; }
+.view-header-row { margin-bottom: 22px; }
+.view-kicker {
+  font-size: .67rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.view-main-title {
+  font-family: "Plus Jakarta Sans", Inter, sans-serif;
+  font-size: clamp(1.45rem, 2.4vw, 2.15rem);
+  line-height: 1.15;
+  letter-spacing: -.035em;
+}
+.view-lead-text {
+  max-width: 780px;
+  color: #64748b;
+  font-size: .92rem;
+  line-height: 1.65;
+  margin-top: 8px;
+}
+
+/* Cards feel like a coherent product, not separate widgets */
+.portal-view .bg-surface-card,
+.portal-view .bg-white {
+  border-radius: var(--rc-radius-lg);
+  box-shadow: var(--rc-shadow-card);
+}
+.portal-view .card-title { letter-spacing: -.02em; }
+
+/* Student dashboard: keep the first screen focused */
+#view-dashboard .grid { min-width: 0; }
+#view-dashboard .dashboard-hero,
+#view-dashboard .hero-card { border-radius: 24px; }
+#view-dashboard .grid > [onclick] { min-height: 92px; }
+
+/* Inputs and filters */
+input, select, textarea {
+  border-radius: 12px;
+  transition: border-color .16s ease, box-shadow .16s ease, background .16s ease;
+}
+input:focus, select:focus, textarea:focus {
+  border-color: rgba(37, 99, 235, .45) !important;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, .08) !important;
+}
+
+/* Tables stay usable on smaller screens */
+.table-responsive, .roster-table-wrap, .report-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { min-width: 620px; }
+
+/* Reduce visual noise from emoji-heavy controls while preserving meaning */
+.segmented-btn, .roster-filter-btn, .book-subject-filter {
+  border-radius: 999px !important;
+  white-space: nowrap;
+}
+
+/* Mobile: sidebar becomes an intentional drawer */
+@media (max-width: 1023px) {
+  :root { --rc-sidebar-width: 0px; }
+  #portalSidebar {
+    width: min(300px, 88vw) !important;
+    transform: translateX(-105%);
+    transition: transform .22s ease, box-shadow .22s ease;
+    box-shadow: 20px 0 50px rgba(15, 23, 42, .18);
+  }
+  body.sidebar-mobile-open #portalSidebar { transform: translateX(0); }
+  main#portalMain, #portalMain {
+    margin-left: 0 !important;
+    padding-left: 16px;
+  }
+  #portalNavbar .hidden.md\\:flex { display: none !important; }
+}
+
+@media (max-width: 640px) {
+  #portalNavbar { height: 64px !important; min-height: 64px; }
+  #portalNavbar > div { height: 64px !important; padding-left: 12px; padding-right: 12px; }
+  #portalSidebar { top: 64px !important; }
+  main#portalMain, #portalMain { padding-top: 78px !important; padding-left: 12px; padding-right: 12px; }
+  .view-main-title { font-size: 1.35rem; }
+  .view-lead-text { font-size: .84rem; }
+  #brandHomeBtn > div:last-child { display: none; }
+  #topTeacherQuickBtn { display: none !important; }
+  #studentProfilePill { padding-left: 6px; padding-right: 6px; }
+  .portal-view .p-6 { padding: 1rem; }
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}

@@ -1143,7 +1143,7 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
 
             conn.commit()
             conn.close()
-            return self.send_json({'success': True, 'group_id': group_id, 'updated_students': updated_count})
+            return self.send_json({'success': True, 'group_id': group_id, 'updated_students': updated_count, 'students_updated': updated_count})
 
         # ---------------------------------------------------------------------
         # Teacher: Curriculum Access & Lesson Assigner

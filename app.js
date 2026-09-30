@@ -6,7 +6,7 @@
 
 // Force update tab title & official RC favicon immediately
 (function enforceOfficialRCBrand() {
-  document.title = "Rania Classroom — RC Academy Portal";
+  document.title = "RC Academy — Global Learning Platform";
   const rcFaviconData = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAABC2lDQ1BJQ0MgUHJvZmlsZQAAeJyVkLFOwlAUhr+LJILBOMjAwNCBgUWCDsaBCYaGzRRJKE5tKV2gbW5rfAHZGFjZiItvIK/ghomJg5OPQEh0NtdqysLAmb785885/zkgXgCydRj7sTT0ptYz+9rhJwKhOmA5UcjuEvD9nnjfzti/8gM3coA1UJE9sw+iCBS9hKuK7YQbiu/jMAZxrVjeGC0QA6DqbbG9xU4olX8KNMajO7XrLzcF1+92gBxQJsJAp6nuTyzBI1x9wcEs1ew5LCdQ+ki1ygJOHuB5lWrpT0JLWr9SFsgMh7B5gmMTTl/h6Pb/ETuyqXlldAICPEa4aLTxcaihcUGdcy5/AKbWPz8bOFjoAAAIVklEQVR4nNWYeWwU1x3H3zGzM7vrPbzetdfGGLAxBoMxpw1xgkNNgJoS0bSkpNBE+YNEVE2rNlLTJGquqqQkUqQmbZVUaQtECqJUhIYmJaEcgUC4icFgMNQYH/heH3vO8d6r3ozBtPWNaTofH9rdmX3v932/4/3eQMYYsDIIWBwELA4CFgcBi4OAxUHA4iBgcRCwOAhYHAQsDgIWBwGLg4DFQcDiIGBxELA4CFgcBCwOAhZHGOgCYxQMflqG5g8EXynwDg/1jFIAOeD/ygOammiur1Ij3aIkcT8Y5jFKTbUQYcEmSXaXy5cuyUmGuwiEuN+hKOVfM1+bOnsH4W8RQvAuCGAMQjk9lec/cfFz3aIksznZBRLdizy14oS0WIRe5JHdqdkZM8pKF3tT59MGUWwL6MYAJRQjBFnUAsIpXiIW0YTQnzZCVG2b3pUCbdjUU5EuuateKLg3m8Toqnx6KUTH587+D6GQFUSWHKWrnk2d1YZYxQaGiilxtLy1b1QXXu8ovr0+auNTR0xRUUQJjnkCeNT5xVMnp2fPTUny/TJqINQGEQYZFC02WNERwKjlGDRLkpOEQDZ4S36+npC1HP737e7fLoSO/TnX/kzJienTuDBxBhGSKfkvZ37t35w4OipS6qq3jd/2sI5UzNSfTohtY1tB4+ef+PtnQ6Xc25B9obvLl+z8n7KGBqVhgGrEISQQb44tz5hjPDaRImZtfkLH6z64kOiKYIkx3pC1Sf3FK94UtM1UbRV1dR//+e/O3KqWkuoi0sKXn/u8bkzcv9j/APHKp55dfPh/WcBBY88uJgnWG+OgL48GYakAQX0K4oXTZ56PF+dbr/TE4i0NyAsIix2NtcwAETRdvzLyw9t+GVnT9wmisvvK9z+m2fssmSk8q1RAEJw8YLCj7e8vHTtcwhyc81MMczm4XQr3YfUMPrsQYKARYlvF8ZSKYkYYKy2sfnhpzb1RFS7LAX9Se++9kO7LOmEIIQE3PuLMYIQarru97rffvUpm4ghhHWNrR2d3cb6QEVVaxubw9G4YT0bQw/chDEAgZaIK7FuyL3BKKOy0wsh/NmmzQ3NofSAv6m1/ZUffyfV59V1XRD6mUUUBEJp0cy88iXz39u51+d1BVLcldXXPC5He6gr2ePZs//kygcWZKT5TZ8MuI4jtp1RQnQAYGvDpWioBQsihFDXtOnFZRdqWj7adyrF647G4xmp3m8tK7kVG/0CeakAX1sw6y+ffD4xM62oMD89LaW2oaWsZP7cgrzrTU07PzkCIewLvjsWwGsrxiIWRF1Xz3y6BWG+pcXCobRJhZnTFn3w9wMxRcMCjieU/NysYMDHJxhEAOIrm5edmerzNLV1AACCKb6JmUEIYVxNRGLquKB/SJuGG0KMm4Jjka7utrpEtKvi4Pa26+cgwuFQS2Di9LK1LwCAKi7WCJgPqOskJyvN2BAYxgN637xgEwV/sru5PXSu6uq4YKos2W60ttc33pAkW8DnMRJsLASYGnSint675fr5Q5LDiUWbP3NaXlH5pBmlNtkJAOjoiiKMzG072eMwvjJEClK+5aFgIOVve4//Ydu+7AlpriT7ldobXqdot9tNDwxeiEYggBLd7Uld9tgru97cEA41QIAi3W2i3WWTnZToCAuMB2vvZMNsERGClNInHmmfnpv1+akLuZMyVU0vnpWfmZ6SMz6YnuYbMwFm78UYEyXnjNLVn23baE/yxjtb9rzzdNmjL+XNKwcAeN0yb055cKNQd6y34x5yYAjssjQuPbBw9tRlpUVghIysChk1geQUlnnTJmlKHNtku9N1ZNdbHa11gLEpk8bpOjFL5NXaJgDYcJpNZjS5lZdrdcIIoZquE2K2sMNy4og3MkaJTXJMW7iSqHFuIhb1ePex3b8FEC5dNEcQEKHMLtkqq+vqbrSaeTzkmBDC05XVU3IyMd/psNnDDrO9G7EAPi5jefPLnf7xVNcoo5LdXV956NLJj8rumV1cmNMTjsqyrTUU3rb7MISQUO6TwZIY44v/vF7f0DY5K4PSEbelI90HeIAzxmSHJ7/km0o8ipFAKbXJjiO73op2Nb/2/HoMmaLqyR7nm5t31za2iIJgxlW/1jMju3668d1Vy0t4+zjy4+GAAowmB5r9vVlbIBIY46FpZvOMe1b5s6bFo50IYyxIVI3u2fpi8czcdzb+oKeni1LWE1Ufe/qNzp6IIGBKqU4IIZRQSgjVCf+PEMIIrX/21x6Xa3X5Ikr5AWhsBDDefiBNiydinbz35CdGGO1shhBhLDBIAWA2yblk3cveYE6sJ6TGw6IotV+r+HTri+tWLf7rH3/hdcsJRT165sqKx186euai0czx4MaIN3NmS3e++vrSdc+3tIb+9PpPKKWjO9P06zWmqomO5trzh3dcO7vPOFJyhyDBNm/Fk+OnFHuSA4a7zSY0UvXF7rpLx8IdNzQtFg93B3PnFy9ZE6ae3+84/OG+E1dreDm6v2TmA/fOyc/JTHLKPZF49bX6Qycqr9Q0fO+hJS/8aC3f724/DdyxAKBpic62ekZ10Wbv3ZO4xURV4o6kFLcvCG+d2m7OqsTDiVg3pbqmJBRVDQSzZIe3tT109PTlE19Wn75Q09TWoes6xshhlzODvtKiGQ9/Y1Ew4Bv+2WX4Avo21AEDzPiu8YY3DjxV/ssCQgjG//aoggGetei2uCVEx0b7NGoGTHzj89sv9dnX/2r1DtQr3vjjg5ulBhmPUG7eCPi51GhU4c17x17A3cCcaWyfgQngf8jdeHyHgMVBwOIgYHEQsDgIWBwELA4CFgcBi4OAxUHA4iBgcRCwOAhYHAQsDgIWB33VBtwp/wLY0tlP39ZbLgAAAABJRU5ErkJggg==";
   try {
     let links = document.querySelectorAll("link[rel*='icon']");
@@ -234,14 +234,41 @@ window.AppState = AppState;
 // Client & API Database Service (Dual-Mode SQLite / Offline Sync)
 // =============================================================================
 
+async function hashLocalPassword(password) {
+  const value = String(password || '');
+  if (!value) return '';
+  if (window.crypto?.subtle) {
+    const data = new TextEncoder().encode(value);
+    const digest = await crypto.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  // Modern browsers expose Web Crypto; this fallback is only for legacy/offline shells.
+  return value;
+}
+
+async function verifyLocalPassword(candidate, record) {
+  const clean = String(candidate || '');
+  if (!clean || !record) return false;
+  if (record.password_hash) return (await hashLocalPassword(clean)) === record.password_hash;
+  if (record.password) {
+    const ok = record.password === clean;
+    if (ok) {
+      record.password_hash = await hashLocalPassword(clean);
+      delete record.password;
+    }
+    return ok;
+  }
+  return false;
+}
+
 const DB = {
   // Preloaded Demo Students & Teacher for instant client-side offline fallback
   demoStudents: [
-    { id: 101, username: 'beshr', full_name: 'Beshr Mohamed', parent_name: 'Mohamed Beshr', student_phone: '01012345678', parent_phone: '01098765432', payment_method: 'InstaPay', payment_date: '2026-09-20', payment_amount: '', payment_status: 'paid', grade_level: 'Year 4', avatar: '🦊', password: '123456', xp: 450, streak_days: 3, role: 'student' },
-    { id: 1, username: 'alex', full_name: 'Alex Turner', parent_name: 'David Turner', student_phone: '01011112222', parent_phone: '01033334444', payment_method: 'InstaPay', payment_date: '2026-09-18', payment_amount: 500, payment_status: 'paid', grade_level: 'Year 4', avatar: '🚀', password: 'password123', xp: 720, streak_days: 5, role: 'student' },
-    { id: 2, username: 'sophia', full_name: 'Sophia Chen', parent_name: 'Wei Chen', student_phone: '01055556666', parent_phone: '01077778888', payment_method: 'Vodafone Cash', payment_date: '2026-09-15', payment_amount: 450, payment_status: 'paid', grade_level: 'Year 4', avatar: '🦄', password: 'password123', xp: 890, streak_days: 7, role: 'student' },
-    { id: 3, username: 'liam', full_name: 'Liam Johnson', parent_name: 'Robert Johnson', student_phone: '01099990000', parent_phone: '01022223333', payment_method: 'InstaPay', payment_date: '2026-09-10', payment_amount: 500, payment_status: 'paid', grade_level: 'Year 4', avatar: '🦁', password: 'password123', xp: 340, streak_days: 2, role: 'student' },
-    { id: 4, username: 'emma', full_name: 'Emma Watson', parent_name: 'Chris Watson', student_phone: '01044445555', parent_phone: '01066667777', payment_method: 'Bank Transfer', payment_date: '2026-09-05', payment_amount: 600, payment_status: 'paid', grade_level: 'Year 4', avatar: '🐼', password: 'password123', xp: 610, streak_days: 4, role: 'student' },
+    { id: 101, username: 'beshr', full_name: 'Beshr Mohamed', parent_name: 'Mohamed Beshr', student_phone: '01012345678', parent_phone: '01098765432', payment_method: 'InstaPay', payment_date: '2026-09-20', payment_amount: '', payment_status: 'paid', grade_level: 'Year 4', avatar: '🦊', password_hash: '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', xp: 450, streak_days: 3, role: 'student' },
+    { id: 1, username: 'alex', full_name: 'Alex Turner', parent_name: 'David Turner', student_phone: '01011112222', parent_phone: '01033334444', payment_method: 'InstaPay', payment_date: '2026-09-18', payment_amount: 500, payment_status: 'paid', grade_level: 'Year 4', avatar: '🚀', password_hash: 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94', xp: 720, streak_days: 5, role: 'student' },
+    { id: 2, username: 'sophia', full_name: 'Sophia Chen', parent_name: 'Wei Chen', student_phone: '01055556666', parent_phone: '01077778888', payment_method: 'Vodafone Cash', payment_date: '2026-09-15', payment_amount: 450, payment_status: 'paid', grade_level: 'Year 4', avatar: '🦄', password_hash: 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94', xp: 890, streak_days: 7, role: 'student' },
+    { id: 3, username: 'liam', full_name: 'Liam Johnson', parent_name: 'Robert Johnson', student_phone: '01099990000', parent_phone: '01022223333', payment_method: 'InstaPay', payment_date: '2026-09-10', payment_amount: 500, payment_status: 'paid', grade_level: 'Year 4', avatar: '🦁', password_hash: 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94', xp: 340, streak_days: 2, role: 'student' },
+    { id: 4, username: 'emma', full_name: 'Emma Watson', parent_name: 'Chris Watson', student_phone: '01044445555', parent_phone: '01066667777', payment_method: 'Bank Transfer', payment_date: '2026-09-05', payment_amount: 600, payment_status: 'paid', grade_level: 'Year 4', avatar: '🐼', password_hash: 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94', xp: 610, streak_days: 4, role: 'student' },
     { id: 5, username: 'admin', full_name: 'Miss Rania', grade_level: 'Instructor', avatar: '👩‍🏫', xp: 0, streak_days: 0, role: 'teacher' },
     { id: 6, username: 'rania', full_name: 'Miss Rania', grade_level: 'Instructor', avatar: '👩‍🏫', xp: 0, streak_days: 0, role: 'teacher' }
   ],
@@ -424,7 +451,7 @@ const DB = {
       .filter(s => !deletedSet.has(s.id));
     const localFound = localStudents.find(s => s.username.toLowerCase() === cleanUser);
     if (localFound) {
-      if (localFound.password && localFound.password !== cleanPw) {
+      if (!(await verifyLocalPassword(cleanPw, localFound))) {
         throw new Error('Incorrect password');
       }
       const stats = this.getStudentStats(localFound.id);
@@ -440,7 +467,7 @@ const DB = {
       if (isTeacher) {
         throw new Error('Teacher login requires server connection.');
       } else {
-        if (found.password && found.password !== cleanPw) {
+        if (!(await verifyLocalPassword(cleanPw, found))) {
           throw new Error('Incorrect password');
         }
       }
@@ -470,7 +497,7 @@ const DB = {
       } catch (e) {}
     }
 
-    throw new Error('Invalid username or password. Try username: admin (pw: admin123) or beshr (pw: 123456)');
+    throw new Error('Invalid username or password.');
   },
 
   async register(full_name, username, password, grade_level, avatar) {
@@ -535,7 +562,7 @@ const DB = {
 
     // Fallback dynamic report computation from local storage or mock
     const localLogs = JSON.parse(localStorage.getItem(`practice_logs_${studentId}`) || '[]');
-    
+
     // Fresh classroom sessions start from zero
     const baseSessions = [];
 
@@ -868,7 +895,8 @@ const DB = {
     // Persistent storage for custom students (always works on GitHub Pages & offline)
     const fullName = (data.full_name || data.name || '').trim();
     const cleanUser = (data.username || '').trim().toLowerCase();
-    const cleanPw = (data.password || '').trim() || 'password123';
+    const cleanPw = (data.password || '').trim();
+    if (!cleanPw) return { success: false, error: 'A password is required when creating a local student account.' };
     if (!fullName || !cleanUser) {
       return { success: false, error: 'Please enter student full name and username' };
     }
@@ -881,7 +909,7 @@ const DB = {
     const newStudent = {
       id: Date.now(),
       username: cleanUser,
-      password: cleanPw,
+      password_hash: await hashLocalPassword(cleanPw),
       full_name: fullName,
       parent_name: data.parent_name || '',
       student_phone: data.student_phone || '',
@@ -933,12 +961,12 @@ const DB = {
     return this.syncLocalStudentUpdate(data);
   },
 
-  syncLocalStudentUpdate(data) {
+  async syncLocalStudentUpdate(data) {
     const numId = Number(data.student_id);
     const existing = this.findStudentById(numId) || {};
     const fullName = (data.full_name !== undefined ? data.full_name : (existing.full_name || '')).trim();
     const cleanUser = (data.username !== undefined ? data.username : (existing.username || '')).trim().toLowerCase();
-    const cleanPw = data.password !== undefined ? (data.password || '').trim() : (existing.password || '');
+    const cleanPw = data.password !== undefined ? (data.password || '').trim() : '';
     const grade = data.grade_level !== undefined ? data.grade_level : existing.grade_level;
     const avatar = data.avatar !== undefined ? data.avatar : existing.avatar;
 
@@ -950,7 +978,7 @@ const DB = {
       if (cleanUser) existingInCustom.username = cleanUser;
       if (grade) existingInCustom.grade_level = grade;
       if (avatar) existingInCustom.avatar = avatar;
-      if (cleanPw) existingInCustom.password = cleanPw;
+      if (cleanPw) { existingInCustom.password_hash = await hashLocalPassword(cleanPw); delete existingInCustom.password; }
       if (data.parent_name !== undefined) existingInCustom.parent_name = data.parent_name;
       if (data.student_phone !== undefined) existingInCustom.student_phone = data.student_phone;
       if (data.parent_phone !== undefined) existingInCustom.parent_phone = data.parent_phone;
@@ -968,7 +996,7 @@ const DB = {
       if (cleanUser) demo.username = cleanUser;
       if (grade) demo.grade_level = grade;
       if (avatar) demo.avatar = avatar;
-      if (cleanPw) demo.password = cleanPw;
+      if (cleanPw) { demo.password_hash = await hashLocalPassword(cleanPw); delete demo.password; }
       if (data.payment_status !== undefined) demo.payment_status = data.payment_status;
       if (data.payment_amount !== undefined) demo.payment_amount = data.payment_amount;
       if (data.payment_date !== undefined) demo.payment_date = data.payment_date;
@@ -990,7 +1018,7 @@ const DB = {
         ...(data.payment_amount !== undefined ? { payment_amount: data.payment_amount } : {}),
         ...(data.payment_date !== undefined ? { payment_date: data.payment_date } : {}),
         ...(data.payment_method !== undefined ? { payment_method: data.payment_method } : {}),
-        ...(cleanPw ? { password: cleanPw } : (demo.password ? { password: demo.password } : {}))
+        ...(cleanPw ? { password_hash: await hashLocalPassword(cleanPw) } : (demo.password_hash ? { password_hash: demo.password_hash } : {}))
       };
       localStorage.setItem('rc_modified_demo_students', JSON.stringify(modifiedDemo));
     }
@@ -1041,18 +1069,20 @@ const DB = {
     return this.syncLocalStudentPassword(studentId, pass);
   },
 
-  syncLocalStudentPassword(studentId, newPassword) {
+  async syncLocalStudentPassword(studentId, newPassword) {
     const numId = Number(studentId);
     const pass = (newPassword || '').trim();
     let localStudents = JSON.parse(localStorage.getItem('rc_custom_students') || '[]');
     const s = localStudents.find(st => st.id === numId);
     if (s) {
-      s.password = pass;
+      s.password_hash = await hashLocalPassword(pass);
+      delete s.password;
       localStorage.setItem('rc_custom_students', JSON.stringify(localStudents));
     }
     const demo = this.demoStudents.find(st => st.id === numId);
     if (demo) {
-      demo.password = pass;
+      demo.password_hash = await hashLocalPassword(pass);
+      delete demo.password;
       let modifiedDemo = {};
       try {
         modifiedDemo = JSON.parse(localStorage.getItem('rc_modified_demo_students') || '{}');
@@ -1060,7 +1090,8 @@ const DB = {
         modifiedDemo = {};
       }
       if (!modifiedDemo[numId]) modifiedDemo[numId] = {};
-      modifiedDemo[numId].password = pass;
+      modifiedDemo[numId].password_hash = await hashLocalPassword(pass);
+      delete modifiedDemo[numId].password;
       localStorage.setItem('rc_modified_demo_students', JSON.stringify(modifiedDemo));
     }
 
@@ -1173,7 +1204,7 @@ const DB = {
       return {
         id: s.id,
         username: s.username,
-        password: s.password || '123456',
+
         full_name: s.full_name,
         parent_name: s.parent_name || '',
         student_phone: s.student_phone || '',
@@ -2527,7 +2558,7 @@ function handleNavbarScroll() {
   if (!navbar) return;
 
   // Don't auto-hide when practice modal, drawing board, or dialogs are open
-  if (document.body.classList.contains('modal-open') || 
+  if (document.body.classList.contains('modal-open') ||
       document.querySelector('.modal-backdrop.open, .practice-modal-backdrop.open')) {
     return;
   }
@@ -2872,10 +2903,10 @@ function renderSkillsCanvas() {
           const isAccessible = isTeacher || isSkillAccessibleToStudent(s);
           const statusBadge = isTeacher
             ? ''
-            : (s.assignment_id 
-                ? '<span class="skill-status-tag assigned">📌 Homework</span>' 
-                : (isAccessible 
-                    ? '<span class="skill-status-tag unlocked">🔓 Unlocked</span>' 
+            : (s.assignment_id
+                ? '<span class="skill-status-tag assigned">📌 Homework</span>'
+                : (isAccessible
+                    ? '<span class="skill-status-tag unlocked">🔓 Unlocked</span>'
                     : '<span class="skill-status-tag locked">🔒 Locked</span>'));
           const btnClass = isAccessible ? 'learn-pill-btn' : 'learn-pill-btn locked';
           const btnLabel = isAccessible ? 'Learn' : 'Locked';
@@ -3913,9 +3944,9 @@ async function populateGroupStudentsPicker(selectedIds = []) {
     const isChecked = selectedSet.has(String(s.id));
     return `
       <label class="group-student-picker-item">
-        <input type="checkbox" class="group-student-checkbox w-4 h-4 rounded text-primary cursor-pointer" 
-          value="${s.id}" 
-          ${isChecked ? 'checked' : ''} 
+        <input type="checkbox" class="group-student-checkbox w-4 h-4 rounded text-primary cursor-pointer"
+          value="${s.id}"
+          ${isChecked ? 'checked' : ''}
           onchange="updateGroupSelectedCount()">
         <span class="text-base">${s.avatar || '🦊'}</span>
         <div class="flex-1 min-w-0">
@@ -4178,7 +4209,7 @@ async function loadGroupCurriculumInTeacherPanel(groupId) {
   // Aggregate unlocked skills across member students
   const unlockedSet = new Set();
   const studentIds = Array.isArray(group.student_ids) ? group.student_ids : [];
-  
+
   if (studentIds.length > 0) {
     for (const sid of studentIds) {
       try {
@@ -4282,16 +4313,16 @@ window.filterCurriculumSkillsTree = function() {
   for (const [catKey, catGroup] of categoryGroups) {
     const unlockedCount = catGroup.skills.filter(s => AppState.teacherSelectedStudentUnlocked.has(s.code)).length;
     const allChecked = catGroup.skills.length > 0 && unlockedCount === catGroup.skills.length;
-    const subjClass = (catGroup.subject || '').toLowerCase().includes('math') ? 'maths' : 
-                      ((catGroup.subject || '').toLowerCase().includes('eng') ? 'english' : 
+    const subjClass = (catGroup.subject || '').toLowerCase().includes('math') ? 'maths' :
+                      ((catGroup.subject || '').toLowerCase().includes('eng') ? 'english' :
                       ((catGroup.subject || '').toLowerCase().includes('sci') ? 'science' : 'general'));
 
     html += `
       <div class="curriculum-cat-box" data-cat="${encodeURIComponent(catKey)}">
         <div class="curriculum-cat-header">
           <div class="flex items-center gap-3">
-            <input type="checkbox" class="cat-master-checkbox w-4 h-4 rounded text-primary cursor-pointer" 
-              ${allChecked ? 'checked' : ''} 
+            <input type="checkbox" class="cat-master-checkbox w-4 h-4 rounded text-primary cursor-pointer"
+              ${allChecked ? 'checked' : ''}
               onchange="toggleCategoryCurriculumSkills('${encodeURIComponent(catKey)}', this.checked)">
             <div class="flex items-center gap-2.5 flex-wrap">
               <span class="curriculum-subject-badge ${subjClass}">${catGroup.subject}</span>
@@ -4309,10 +4340,10 @@ window.filterCurriculumSkillsTree = function() {
             return `
               <div class="curriculum-skill-item ${isUnlocked ? 'is-unlocked' : 'is-locked'}">
                 <label class="curriculum-skill-label">
-                  <input type="checkbox" class="skill-checkbox w-4 h-4 rounded text-primary cursor-pointer" 
-                    data-skill-code="${s.code}" 
+                  <input type="checkbox" class="skill-checkbox w-4 h-4 rounded text-primary cursor-pointer"
+                    data-skill-code="${s.code}"
                     data-cat="${encodeURIComponent(catKey)}"
-                    ${isUnlocked ? 'checked' : ''} 
+                    ${isUnlocked ? 'checked' : ''}
                     onchange="handleSkillCheckboxChange('${s.code}', this.checked, '${encodeURIComponent(catKey)}')">
                   <span class="curriculum-skill-code">${s.code}</span>
                   <span class="curriculum-skill-name">${s.name}</span>
@@ -4548,7 +4579,7 @@ window.sendWhatsAppReport = function(studentId) {
   const xp = Math.max(stats.xp, student.xp || 0);
   const smart = stats.avg_smart_score || student.avg_smart_score || 0;
   const englishStatus = student.payment_status === 'paid' ? 'Active & Paid 🟢' : (student.payment_status === 'pending' ? 'Under Review 🟡' : 'Payment Due 🔴');
-  
+
   let msg = `🌟 Academic Progress Report: ${student.full_name} 🌟
 📚 Grade Level: ${student.grade_level || 'General'}
 ━━━━━━━━━━━━━━━━━━━━
@@ -4673,7 +4704,7 @@ window.openStudentReportModal = function(studentId) {
           </div>
           <span style="font-size: 0.72rem; color: #94a3b8;">Miss Rania</span>
         </div>
-        
+
         <div style="display: flex; flex-direction: column; gap: 0.75rem;">
           <div>
             <label style="display: block; font-size: 0.75rem; font-weight: 700; color: #cbd5e1; margin-bottom: 4px;">Assessment Grade / Score</label>
@@ -4771,7 +4802,7 @@ async function renderTeacherPayments() {
                 <span style="font-size: 0.8rem; color: var(--color-primary); font-weight: 700; background: var(--bg-hover); border: 1px solid var(--border-subtle); padding: 2px 8px; border-radius: 6px;">${(p.amount !== undefined && p.amount !== null && p.amount !== '') ? p.amount : '—'}</span>
               </div>
               <div class="teacher-item-meta">
-                <span>📅 ${p.payment_date || 'Recent'}</span> &bull; 
+                <span>📅 ${p.payment_date || 'Recent'}</span> &bull;
                 <span>💳 ${p.payment_method || 'InstaPay'}</span>
               </div>
               ${p.notes ? `<div class="teacher-item-notes">📝 ${p.notes}</div>` : ''}
@@ -5659,7 +5690,7 @@ window.printStudentLoginCards = async function() {
         </div>
         <div class="info-row">
           <span class="lbl">Password:</span>
-          <span class="val cred-pass">${s.password || 'password123'}</span>
+          <span class="val cred-pass">Set through the secure reset flow</span>
         </div>
       </div>
       <div class="card-footer">
@@ -6186,7 +6217,7 @@ function generateQuestion(skill) {
         const numPlaces = Math.floor(Math.random() * 4) + 4; // 4 to 7 digits
         const chosenPlaces = places.slice(0, numPlaces);
         const digits = chosenPlaces.map((p, idx) => idx === chosenPlaces.length - 1 ? Math.floor(Math.random() * 9) + 1 : Math.floor(Math.random() * 10));
-        
+
         let fullNum = 0;
         chosenPlaces.forEach((p, idx) => fullNum += digits[idx] * p.val);
         const formattedNum = fullNum.toLocaleString();
@@ -6791,7 +6822,7 @@ async function renderDashboardUnlockedSkills() {
   const studentGrade = user.grade_level || 'Year 4';
 
   // Find all skills matching the unlocked codes
-  const matchingSkills = (AppState.flatSkills || []).filter(s => 
+  const matchingSkills = (AppState.flatSkills || []).filter(s =>
     s.grade === studentGrade && isSkillAccessibleToStudent(s) && !s.assignment_id
   );
 
@@ -6847,7 +6878,7 @@ async function renderTeacherAssignments() {
       // Build pill tags for students who completed it
       let completedPills = '';
       if (a.completed_by && Object.keys(a.completed_by).length > 0) {
-        completedPills = Object.values(a.completed_by).map(c => 
+        completedPills = Object.values(a.completed_by).map(c =>
           `<span style="display:inline-block; font-size:0.72rem; padding:0.15rem 0.45rem; background:#dcfce7; color:#15803d; border-radius:4px; margin-right:4px; font-weight:600;">Student ${c.student_id}: ${c.smart_score || 100}% ✅</span>`
         ).join('');
       } else {
@@ -6977,7 +7008,7 @@ window.openEditStudentModal = function(studentId) {
   if (pAmt) pAmt.value = (s.payment_amount !== undefined && s.payment_amount !== null) ? s.payment_amount : '';
   const pStatus = document.getElementById('editStudentPaymentStatus');
   if (pStatus) pStatus.value = s.payment_status || 'paid';
-  if (el.editStudentPass) el.editStudentPass.value = s.password || '';
+  if (el.editStudentPass) el.editStudentPass.value = '';
   if (el.editStudentSubtitle) {
     el.editStudentSubtitle.textContent = `Update full details for ${s.full_name} (@${s.username})`;
   }
@@ -7311,8 +7342,8 @@ function setupEventListeners() {
 
     let skills = [];
     if (AppState.flatSkills && AppState.flatSkills.length) {
-      skills = AppState.flatSkills.filter(s => 
-        s.subject && s.subject.toLowerCase() === (subject || 'Maths').toLowerCase() && 
+      skills = AppState.flatSkills.filter(s =>
+        s.subject && s.subject.toLowerCase() === (subject || 'Maths').toLowerCase() &&
         s.grade && (s.grade.toLowerCase() === (grade || 'Year 4').toLowerCase() || s.grade.toLowerCase().includes((grade || 'Year 4').toLowerCase()))
       );
     }
@@ -7514,7 +7545,7 @@ function setupEventListeners() {
 
       if (res.success) {
         el.addStudentForm.reset();
-        if (el.tNewStudentPass) el.tNewStudentPass.value = 'password123';
+        if (el.tNewStudentPass) el.tNewStudentPass.value = '';
         const amtInput = document.getElementById('tNewStudentAmount');
         if (amtInput) amtInput.value = '';
         el.addStudentModal.classList.remove('open');

@@ -7,12 +7,21 @@ __pycache__/
 
 # Temporary test artifacts
 New folder/
-*.png
 *.log
 .DS_Store
 Thumbs.db
 
-# Live SQLite Databases (Protected from Git overwrite)
+# Environment files and local secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+secrets/
+*serviceAccount*.json
+firebase-adminsdk*.json
+
+# Live SQLite databases (protected from Git staging)
 *.db
 *.sqlite
 *.sqlite3

@@ -62,3 +62,20 @@ Then navigate to http://localhost:8000.
 - users: Student identity, password hash, grade level, avatar, total XP, current streak.
 - practice_sessions: Practice history records with skill code, score, questions answered, correct answers, and duration.
 - student_badges: Gamified achievements earned by each student.
+
+
+## RC Academy 4.0 UI & Reliability Update
+
+This build keeps the existing product capabilities while standardizing the interface as an English-only global product. The navigation is organized by user role, the main content shell is more compact and responsive, reduced-motion preferences are respected, and the mobile sidebar behaves as a focused drawer.
+
+Reliability/security hardening included in this build:
+- corrected the bulk group skill API response compatibility (`students_updated`)
+- removed duplicate practice-log mapping
+- tightened Firestore collection coverage and default-deny rules
+- bound Firestore practice records to a `student_uid` field when Firebase Auth is used
+- stopped pre-filling shared default passwords in student creation/edit flows
+- stopped printing stored plaintext passwords in login cards
+- migrated local demo credential checks toward SHA-256 password hashes
+- locked the localization layer to English for a consistent global UI
+
+Validation: all 16 project tests pass, and all JavaScript files pass Node syntax validation.

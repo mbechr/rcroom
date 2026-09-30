@@ -1,34 +1,89 @@
 @echo off
-title Upload RC Classroom to GitHub
+setlocal EnableExtensions
 chcp 65001 >nul
-set "PATH=%PATH%;C:\Users\mbechr\MinGit\cmd"
+title RC Academy - Publish to GitHub
+
+cd /d "%~dp0"
+
 echo ========================================================
-echo   Uploading RC Classroom to GitHub
-echo   Repository: https://github.com/mbechr/rcroom
+echo   RC Academy - Publish to GitHub
+echo   Repository: rcroom
 echo ========================================================
 echo.
-echo Staging code updates (HTML, CSS, JS)...
-echo [NOTE] Database files (*.db) and student practice data are protected and will NOT be overwritten.
-git add index.html app.js style.css js/ data/curriculum_data.js data/teacher_curriculum.js README.md .gitignore upload_to_github.bat run_dashboard.bat
-git commit -m "Update classroom application and UI (preserve student data)" >nul 2>&1
+
+where git >nul 2>&1
+if errorlevel 1 (
+    echo [ERROR] Git was not found in PATH.
+    echo Install Git for Windows, then run this file again.
+    echo.
+    pause
+    exit /b 1
+)
+
+if not exist ".git" (
+    echo [ERROR] This folder is not a Git repository.
+    echo Open this project from its existing Git clone and run the file again.
+    echo.
+    pause
+    exit /b 1
+)
+
+echo Checking repository status...
+git status --short
+if errorlevel 1 (
+    echo [ERROR] Unable to read the Git repository.
+    echo.
+    pause
+    exit /b 1
+)
 
 echo.
-echo Pushing updates to GitHub...
-git push origin main
-if %errorlevel% neq 0 (
+echo Staging project updates...
+rem Database files, local secrets, archives, and temporary files are excluded by .gitignore.
+git add -A
+if errorlevel 1 (
+    echo [ERROR] Git could not stage the project files.
     echo.
-    echo GitHub Token required. Please generate a token from:
-    echo https://github.com/settings/tokens/new?scopes=repo^&description=rcroom
+    pause
+    exit /b 1
+)
+
+for /f %%A in ('git diff --cached --name-only') do set "HAS_CHANGES=1"
+if not defined HAS_CHANGES (
+    echo [INFO] No new changes to commit.
+) else (
     echo.
-    set /p GH_TOKEN="Paste your new token (ghp_...) and press Enter: "
-    if not "%GH_TOKEN%"=="" (
-        git push https://mbechr:%GH_TOKEN%@github.com/mbechr/rcroom.git main
+    echo Creating commit...
+    git commit -m "Update RC Academy classroom application"
+    if errorlevel 1 (
+        echo [ERROR] Commit failed.
+        echo.
+        pause
+        exit /b 1
     )
 )
+
+echo.
+echo Publishing to GitHub...
+git push origin main
+if errorlevel 1 (
+    echo.
+    echo [ERROR] GitHub push failed.
+    echo.
+    echo If authentication is requested, sign in through Git Credential Manager
+    echo or configure your GitHub credentials, then run this file again.
+    echo.
+    echo This script never stores or embeds a GitHub token.
+    echo.
+    pause
+    exit /b 1
+)
+
 echo.
 echo ========================================================
-echo [SUCCESS] Upload completed successfully!
-echo تم رفع كود وتعديلات الموقع بنجاح.
-echo سجلات ودرجات الطلاب محفوظة بالكامل ولن تتأثر.
+echo [SUCCESS] RC Academy was published successfully.
+echo Student data and local database files remain protected.
 echo ========================================================
+echo.
 pause
+endlocal

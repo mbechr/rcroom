@@ -735,6 +735,7 @@
       try {
         const payload = {
           ...sessionData,
+          student_uid: String(sessionData.student_uid || sessionData.student_id || ''),
           completed_at: sessionData.completed_at || new Date().toISOString()
         };
         await this.firestore.collection('practice_logs').add(payload);
@@ -881,7 +882,7 @@
       }
 
       const localStudents = JSON.parse(localStorage.getItem('rc_custom_students') || '[]');
-      const defaultStudent = { id: 101, username: 'beshr', full_name: 'beshr', grade_level: 'Year 4', avatar: '🦊', password: '123456', xp: 0, role: 'student' };
+      const defaultStudent = { id: 101, username: 'beshr', full_name: 'beshr', grade_level: 'Year 4', avatar: '🦊', xp: 0, role: 'student' };
       const toSync = localStudents.length > 0 ? localStudents : [defaultStudent];
 
       const batch = this.firestore.batch();
