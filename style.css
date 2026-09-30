@@ -6550,6 +6550,703 @@ html[dir="rtl"] #mainContentWrapper {
   color: #f8fafc;
 }
 
+/* =============================================================================
+   FIGMA PIXEL-PERFECT RC ACADEMY DESIGN SYSTEM
+   ============================================================================= */
+
+/* Landing Backdrop */
+.auth-modal-backdrop {
+  background: #f8fafc !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  padding: 1.5rem 1rem 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+/* 1. Top Navbar */
+.figma-navbar {
+  width: 100%;
+  max-width: 1260px;
+  margin: 0 auto 1.5rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 9999px;
+  padding: 0.5rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03);
+  flex-shrink: 0;
+}
+
+.figma-nav-left {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.figma-lang-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.35rem 0.85rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #334155;
+  background: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.figma-lang-pill:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.figma-circle-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.figma-circle-btn:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.figma-nav-center {
+  display: flex;
+  align-items: center;
+  gap: 1.75rem;
+}
+
+.figma-nav-link {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #475569;
+  text-decoration: none;
+  padding: 0.35rem 0.2rem;
+  position: relative;
+  transition: color 0.2s;
+}
+
+.figma-nav-link:hover {
+  color: #3b5bf5;
+}
+
+.figma-nav-link.active {
+  color: #3b5bf5;
+  font-weight: 700;
+}
+
+.figma-nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  right: 0;
+  height: 2.5px;
+  background: #3b5bf5;
+  border-radius: 9999px;
+}
+
+.figma-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.figma-brand-text {
+  display: flex;
+  flex-direction: column;
+  text-align: right;
+}
+
+.figma-brand-name {
+  font-weight: 800;
+  font-size: 0.92rem;
+  color: #0f172a;
+  line-height: 1.1;
+}
+
+.figma-brand-sub {
+  font-size: 0.68rem;
+  color: #64748b;
+  margin-top: 1px;
+}
+
+.figma-rc-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #3b5bf5;
+  color: #ffffff;
+  font-weight: 900;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: -0.02em;
+  box-shadow: 0 3px 10px rgba(59, 91, 245, 0.3);
+}
+
+.figma-rc-badge-large {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: #3b5bf5;
+  color: #ffffff;
+  font-weight: 900;
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  letter-spacing: -0.02em;
+  box-shadow: 0 4px 14px rgba(59, 91, 245, 0.35);
+}
+
+/* 2. Hero 3-Column Stage */
+.figma-hero-stage {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 1.25rem;
+  width: 100%;
+  max-width: 1260px;
+}
+
+.figma-card {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 20px !important;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04) !important;
+  display: flex;
+  flex-direction: column;
+  padding: 1.15rem !important;
+}
+
+.figma-panel-header.blue-banner {
+  background: #3b5bf5;
+  color: #ffffff;
+  border-radius: 12px;
+  padding: 0.65rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.figma-panel-header.dark-banner {
+  background: #1e293b;
+  color: #ffffff;
+  border-radius: 12px;
+  padding: 0.65rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.figma-new-badge {
+  background: #3b5bf5;
+  color: #ffffff;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 7px;
+  border-radius: 6px;
+  letter-spacing: 0.04em;
+}
+
+.figma-card-footer {
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f1f5f9;
+}
+
+.figma-footer-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #3b5bf5;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 0.2s;
+  cursor: pointer;
+}
+
+.figma-footer-link:hover {
+  color: #1d4ed8;
+}
+
+/* Gainers List Items */
+.figma-gainer-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.5rem 0.4rem;
+  border-radius: 10px;
+  transition: background 0.15s;
+}
+
+.figma-gainer-item:hover {
+  background: #f8fafc;
+}
+
+.figma-rank-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.figma-rank-num.rank-1 {
+  background: #fbbf24;
+  color: #78350f;
+}
+
+.figma-rank-num.rank-2 {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.figma-rank-num.rank-3 {
+  background: #ffedd5;
+  color: #9a3412;
+}
+
+.figma-rank-num.rank-default {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.figma-student-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  border: 1px solid #e2e8f0;
+}
+
+.figma-gainer-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.figma-gainer-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.figma-gainer-sub {
+  font-size: 0.7rem;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 1px;
+}
+
+.figma-points-pill {
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  font-family: var(--font-mono, monospace);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.figma-points-pill.gold {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.figma-points-pill.blue {
+  background: #eff6ff;
+  color: #3b82f6;
+}
+
+/* Center Login Card */
+.figma-login-card {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  border-radius: 20px !important;
+  box-shadow: 0 15px 35px rgba(15, 23, 42, 0.05) !important;
+}
+
+.figma-auth-header {
+  text-align: center;
+  padding: 1.5rem 1.5rem 0.5rem;
+}
+
+.figma-auth-title {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0.5rem 0 2px;
+}
+
+.figma-auth-subtitle {
+  font-size: 0.78rem;
+  color: #64748b;
+  margin: 0;
+}
+
+.figma-card-divider {
+  height: 1px;
+  background: #f1f5f9;
+  margin: 1rem 1.5rem 1.25rem;
+}
+
+.figma-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.figma-input-icon {
+  position: absolute;
+  left: 0.85rem;
+  font-size: 18px !important;
+  color: #94a3b8;
+  pointer-events: none;
+}
+
+.figma-input {
+  width: 100%;
+  padding: 0.7rem 0.85rem 0.7rem 2.4rem !important;
+  border: 1px solid #cbd5e1 !important;
+  border-radius: 10px !important;
+  font-size: 0.875rem !important;
+  color: #0f172a !important;
+  background: #f8fafc !important;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.figma-input:focus {
+  border-color: #3b5bf5 !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 3px rgba(59, 91, 245, 0.15) !important;
+}
+
+.figma-btn-primary {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.8rem !important;
+  border-radius: 10px !important;
+  background: #3b5bf5 !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  font-size: 0.9rem !important;
+  border: none !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px rgba(59, 91, 245, 0.3) !important;
+}
+
+.figma-btn-primary:hover {
+  background: #2546e8 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(59, 91, 245, 0.4) !important;
+}
+
+/* Blog Essays List */
+.figma-essay-item {
+  padding: 0.55rem 0.4rem;
+  border-radius: 10px;
+  transition: background 0.15s;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.figma-essay-item:hover {
+  background: #f8fafc;
+}
+
+.figma-essay-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.figma-essay-author {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.figma-cat-tag {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 1px 6px;
+  border-radius: 4px;
+  letter-spacing: 0.04em;
+}
+
+.figma-cat-tag.science {
+  background: #eff6ff;
+  color: #3b82f6;
+}
+
+.figma-cat-tag.biology {
+  background: #ecfdf5;
+  color: #10b981;
+}
+
+.figma-cat-tag.maths {
+  background: #fff7ed;
+  color: #ea580c;
+}
+
+.figma-essay-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.35;
+  margin: 2px 0;
+}
+
+.figma-essay-excerpt {
+  font-size: 0.72rem;
+  color: #64748b;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.figma-essay-read {
+  color: #3b5bf5;
+  font-size: 0.72rem;
+  font-weight: 700;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* 3. Section: Curriculum Mastery Summary */
+.figma-curriculum-section {
+  width: 100%;
+  max-width: 1260px;
+  margin: 2.5rem auto 0;
+  padding: 0 0.5rem;
+}
+
+.figma-curriculum-header-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.figma-curriculum-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.25rem;
+}
+
+.figma-curriculum-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 1.15rem;
+  box-shadow: 0 4px 15px rgba(15, 23, 42, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  transition: all 0.2s ease;
+}
+
+.figma-curriculum-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.figma-curriculum-card-top {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.figma-prog-bar {
+  width: 100%;
+  height: 6px;
+  border-radius: 9999px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+
+.figma-prog-fill {
+  height: 100%;
+  border-radius: 9999px;
+}
+
+.figma-curriculum-card-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.figma-card-action {
+  font-weight: 700;
+  color: #3b5bf5;
+  text-decoration: none;
+}
+
+/* 4. Section: Institutional Deep Navy Footer */
+.figma-institutional-footer {
+  width: 100%;
+  margin-top: 3.5rem;
+  padding: 3.5rem 1.5rem 1.75rem;
+  background: #0f172a;
+  color: #94a3b8;
+  border-top: 1px solid #1e293b;
+}
+
+.figma-footer-content {
+  max-width: 1260px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1.5fr;
+  gap: 2.5rem;
+}
+
+.figma-footer-col-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin-bottom: 1rem;
+}
+
+.figma-footer-links, .figma-footer-contact {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  font-size: 0.8rem;
+}
+
+.figma-footer-links a, .figma-footer-contact a {
+  color: #94a3b8;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.figma-footer-links a:hover, .figma-footer-contact a:hover {
+  color: #38bdf8;
+}
+
+.figma-social-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #1e293b;
+  color: #94a3b8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.figma-social-btn:hover {
+  background: #3b5bf5;
+  color: #ffffff;
+}
+
+.figma-footer-bottom {
+  max-width: 1260px;
+  margin: 2.5rem auto 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid #1e293b;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: #64748b;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.figma-footer-bottom a {
+  color: #64748b;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.figma-footer-bottom a:hover {
+  color: #94a3b8;
+}
+
+@media (max-width: 1024px) {
+  .figma-navbar {
+    border-radius: 16px;
+  }
+  .figma-nav-center {
+    display: none;
+  }
+  .figma-footer-content {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .figma-footer-content {
+    grid-template-columns: 1fr;
+  }
+}
+
+
 
 
 

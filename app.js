@@ -404,14 +404,14 @@ const LoginCosmos = {
 function renderLoginShowcase() {
   const tickerTrack = document.getElementById('loginTickerTrack');
   const topGainersList = document.getElementById('topGainersList');
-  const topTopicsList = document.getElementById('topTopicsList');
+  const featuredBlogList = document.getElementById('featuredBlogList');
 
   const defaultTopGainers = [
-    { rank: '👑', name: 'Beshr Mohamed', avatar: '🦊', grade: 'Year 4', xp: 1540, skill: 'Fractions & Decimals', count: 48 },
-    { rank: '🥈', name: 'Sophia Chen', avatar: '🐼', grade: 'Year 4', xp: 1380, skill: 'Geometry & Angles', count: 42 },
-    { rank: '🥉', name: 'Alex Turner', avatar: '🦁', grade: 'Year 4', xp: 1250, skill: 'Multiplication Mastery', count: 39 },
-    { rank: '⭐', name: 'Liam Johnson', avatar: '🚀', grade: 'Year 4', xp: 1120, skill: 'Light & Shadows', count: 35 },
-    { rank: '⭐', name: 'Emma Watson', avatar: '🦄', grade: 'Year 4', xp: 990, skill: 'Data & Graphs', count: 31 }
+    { rankNum: 1, name: 'Birdie Mohamed', avatar: '👩‍🎓', grade: 'Year 5', subject: 'Mathematics & Maths', points: '1,398' },
+    { rankNum: 2, name: 'Sophia Chen', avatar: '👧', grade: 'Year 6', subject: 'Sciences', points: '1,285' },
+    { rankNum: 3, name: 'Alex Turner', avatar: '👦', grade: 'Year 4', subject: 'English', points: '1,204' },
+    { rankNum: 4, name: 'Liam Johnson', avatar: '🧑‍🎓', grade: 'Year 5', subject: 'Maths', points: '1,149' },
+    { rankNum: 5, name: 'Emma Watson', avatar: '👩', grade: 'Year 6', subject: 'Sciences', points: '1,088' }
   ];
 
   let displayGainers = defaultTopGainers;
@@ -420,16 +420,14 @@ function renderLoginShowcase() {
       const students = DB.getStudents().filter(s => s.role !== 'teacher' && s.username !== 'admin' && s.username !== 'rania');
       if (students && students.length >= 2) {
         const sorted = [...students].sort((a, b) => (b.xp || 0) - (a.xp || 0));
-        const medals = ['👑', '🥈', '🥉', '⭐', '⭐'];
-        const sampleSkills = ['Fractions & Decimals', 'Mental Speed Maths', 'Geometry & Angles', 'Light & Forces', 'Data & Probability'];
+        const sampleSubjects = ['Mathematics & Maths', 'Sciences', 'English', 'Maths', 'Sciences'];
         displayGainers = sorted.slice(0, 5).map((s, idx) => ({
-          rank: medals[idx] || '⭐',
+          rankNum: idx + 1,
           name: s.full_name || s.username,
-          avatar: s.avatar || '🦊',
-          grade: s.grade_level || 'Year 4',
-          xp: Math.max(s.xp || 0, 750 + (5 - idx) * 160),
-          skill: sampleSkills[idx % sampleSkills.length],
-          count: 25 + (5 - idx) * 5
+          avatar: s.avatar || '👩‍🎓',
+          grade: s.grade_level || 'Year ' + (4 + (idx % 3)),
+          subject: sampleSubjects[idx % sampleSubjects.length],
+          points: (s.xp ? s.xp.toLocaleString() : (1398 - idx * 80).toLocaleString())
         }));
       }
     }
@@ -437,117 +435,81 @@ function renderLoginShowcase() {
     console.warn('Could not read students for showcase, using defaults:', e);
   }
 
-  const topTopics = [
-    { icon: '📐', title: 'Stage 4 Mathematics', sub: '128 Solved • Fractions & Decimals', rate: '98% Mastery', pct: 98 },
-    { icon: '⚡', title: 'Speed Arithmetic Sprints', sub: '94 Sprints • Times Tables', rate: '96% Accuracy', pct: 96 },
-    { icon: '🔬', title: 'Primary Stage 4 Science', sub: '86 Solved • Forces & Light', rate: '95% Accuracy', pct: 95 },
-    { icon: '🎯', title: 'Geometry & Angles', sub: '74 Solved • Polygons & Shapes', rate: '92% Accuracy', pct: 92 }
-  ];
-
-  // Render Ticker
-  if (tickerTrack) {
-    const tickerItems = [
-      ...displayGainers.map(g => `
-        <div class="ticker-item">
-          <span>${g.rank}</span>
-          <strong>${g.name}</strong>
-          <span class="ticker-xp">${g.xp.toLocaleString()} XP</span>
-          <span class="ticker-skill">🎯 ${g.skill} (${g.count} Solved)</span>
-        </div>
-      `),
-      ...topTopics.map(t => `
-        <div class="ticker-item">
-          <span>${t.icon}</span>
-          <strong>${t.title}</strong>
-          <span class="ticker-xp" style="color:#10b981; background:rgba(16,185,129,0.14);">${t.rate}</span>
-        </div>
-      `)
-    ];
-
-    const combined = [...tickerItems, ...tickerItems].join('');
-    tickerTrack.innerHTML = combined;
-  }
-
-  // Render Left Showcase Panel (Top Gainers)
+  // Render Left Showcase Panel (Figma Top Gainers)
   if (topGainersList) {
     topGainersList.innerHTML = displayGainers.map(g => `
-      <div class="gainer-card">
-        <div class="gainer-rank">${g.rank}</div>
-        <div class="gainer-avatar">${g.avatar}</div>
-        <div class="gainer-info">
-          <div class="gainer-top-line">
-            <span class="gainer-name" title="${g.name}">${g.name}</span>
-            <span class="gainer-xp-pill">${g.xp.toLocaleString()} XP</span>
-          </div>
-          <div class="gainer-sub-line">
-            <span>${g.grade}</span>
-            <span>&bull;</span>
-            <span class="gainer-topic-tag">🎯 ${g.skill} (${g.count})</span>
-          </div>
+      <div class="figma-gainer-item">
+        <div class="figma-rank-num rank-${g.rankNum <= 3 ? g.rankNum : 'default'}">${g.rankNum}</div>
+        <div class="figma-student-avatar">${g.avatar}</div>
+        <div class="figma-gainer-info">
+          <div class="figma-gainer-name" title="${g.name}">${g.name}</div>
+          <div class="figma-gainer-sub">${g.grade} &bull; ${g.subject}</div>
         </div>
+        <div class="figma-points-pill ${g.rankNum === 1 ? 'gold' : 'blue'}">${g.points}</div>
       </div>
     `).join('');
   }
 
-  // Render Right Showcase Panel (Top Topics / Fallback)
-  if (topTopicsList) {
-    topTopicsList.innerHTML = topTopics.map(t => `
-      <div class="topic-card">
-        <div class="topic-header-line">
-          <div class="topic-title">
-            <span>${t.icon}</span>
-            <span>${t.title}</span>
-          </div>
-          <div class="topic-badge">${t.rate}</div>
-        </div>
-        <div class="topic-progress-bar">
-          <div class="topic-progress-fill" style="width: ${t.pct}%;"></div>
-        </div>
-        <div class="topic-stats">
-          <span>${t.sub}</span>
-          <span>Cambridge Verified</span>
-        </div>
-      </div>
-    `).join('');
-  }
-
-  // Render Featured Student Blogs on Landing Showcase
-  const featuredBlogList = document.getElementById('featuredBlogList');
-  if (featuredBlogList && window.StudentBlog) {
-    const featured = StudentBlog.getFeaturedArticles();
-    if (featured && featured.length > 0) {
-      featuredBlogList.innerHTML = featured.map(art => `
-        <div class="featured-blog-card" onclick="StudentBlog.openArticleReader(${art.id})">
-          <div class="featured-blog-header">
-            <span class="featured-blog-author">${art.avatar} ${art.author} (${art.grade})</span>
-            <span class="featured-blog-tag">${art.category}</span>
-          </div>
-          <h4 class="featured-blog-title">${art.title}</h4>
-          <p class="featured-blog-excerpt">${art.summary}</p>
-          <div class="featured-blog-footer">
-            <span>📅 ${art.date}</span>
-            <span class="read-btn">Read Essay 📖</span>
-          </div>
-        </div>
-      `).join('');
-    } else {
-      featuredBlogList.innerHTML = '<div style="padding: 1.5rem; text-align: center; color: #94a3b8; font-size: 0.85rem;">No featured student essays yet.</div>';
+  // Curated Featured Student Blog Articles (Exact Figma Content)
+  const figmaArticles = [
+    {
+      id: 1,
+      author: 'Sophia Chen',
+      grade: 'Year 6',
+      avatar: '👧',
+      category: 'SCIENCE',
+      title: 'Why Creatures & Decimals Rule the Solar System',
+      excerpt: 'Exploring how mathematical ratios govern orbital distances, ring spacing, and natural phenomena across the cosmos...',
+      date: '28 Sep 2026'
+    },
+    {
+      id: 2,
+      author: 'Birdie Mohamed',
+      grade: 'Year 5',
+      avatar: '👩‍🎓',
+      category: 'BIOLOGY',
+      title: 'The Geometry of Honeycombs: Nature\'s Perfect Hexagons',
+      excerpt: 'How bees use regular hexagons to maximize honey storage while minimising wax — a masterclass in efficient natural architecture...',
+      date: '27 Sep 2026'
+    },
+    {
+      id: 3,
+      author: 'Alex Turner',
+      grade: 'Year 4',
+      avatar: '👦',
+      category: 'MATHS',
+      title: 'Ancient Calculation Secrets: Mastering the Times Tables',
+      excerpt: 'Uncovering patterns, shortcuts and the distributive property to spot calculation shortcuts used by ancient mathematicians...',
+      date: '26 Sep 2026'
+    },
+    {
+      id: 4,
+      author: 'Emma Watson',
+      grade: 'Year 6',
+      avatar: '👩',
+      category: 'BIOLOGY',
+      title: 'Photosynthesis: How Plants Power Our Planet',
+      excerpt: 'A deep dive into chloroplasts, light absorption and the Calvin cycle — explaining the planet\'s most important chemical engine...',
+      date: '25 Sep 2026'
     }
-  }
+  ];
 
-  // Render Horizontal Curriculum Bar below login stage
-  const curriculumGrid = document.getElementById('loginCurriculumGrid');
-  if (curriculumGrid) {
-    curriculumGrid.innerHTML = topTopics.map(t => `
-      <div class="curriculum-bar-card">
-        <div class="curriculum-bar-header">
-          <div class="curriculum-bar-icon">${t.icon}</div>
-          <div class="curriculum-bar-badge">${t.rate}</div>
+  // Render Right Showcase Panel (Figma Student Blogs & Essays)
+  if (featuredBlogList) {
+    featuredBlogList.innerHTML = figmaArticles.map(art => `
+      <div class="figma-essay-item" onclick="if (window.StudentBlog) { StudentBlog.openArticleReader(${art.id}); } else { showToast('Opening: ' + '${art.title.replace(/'/g, "\\'")}'); }">
+        <div class="figma-essay-top">
+          <div class="figma-essay-author">
+            <span>${art.avatar}</span>
+            <span>${art.author} (${art.grade})</span>
+          </div>
+          <span class="figma-cat-tag ${art.category.toLowerCase()}">${art.category}</span>
         </div>
-        <div class="curriculum-bar-title">${t.title}</div>
-        <div class="curriculum-bar-sub">${t.sub}</div>
-        <div class="topic-progress-bar" style="margin-top: 6px;">
-          <div class="topic-progress-fill" style="width: ${t.pct}%;"></div>
+        <h4 class="figma-essay-title">${art.title}</h4>
+        <p class="figma-essay-excerpt">${art.excerpt}</p>
+        <div class="figma-essay-read">
+          <span>Read Essay</span>
+          <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
         </div>
       </div>
     `).join('');
@@ -8775,10 +8737,148 @@ async function handleSyncAllToCloud(isSilent = false) {
   }
 }
 
-window.openCloudSyncModal = openCloudSyncModal;
-window.closeCloudSyncModal = closeCloudSyncModal;
-window.handleSaveCloudConfig = handleSaveCloudConfig;
-window.handleSyncAllToCloud = handleSyncAllToCloud;
+// =============================================================================
+// Student Blog System (Figma Curated Essays & Reader)
+// =============================================================================
+const StudentBlog = {
+  articles: [
+    {
+      id: 1,
+      author: 'Sophia Chen',
+      grade: 'Year 6',
+      avatar: '👧',
+      category: 'SCIENCE',
+      title: 'Why Creatures & Decimals Rule the Solar System',
+      summary: 'Exploring how mathematical ratios govern orbital distances, ring spacing, and natural phenomena across the cosmos...',
+      date: '28 Sep 2026',
+      reads: 218,
+      content: `
+        <p>When we look at planetary orbits and astronomical physics, we often think of infinite space. However, planetary mechanics and gravitational orbits adhere to strict mathematical harmonic ratios.</p>
+        <p>From Kepler's laws to the Fibonacci patterns in planetary alignments and Saturn's rings, decimals and fractional geometry determine stability across our solar system. In Miss Rania's class, we proved that planetary distances scale with exponential precision!</p>
+      `
+    },
+    {
+      id: 2,
+      author: 'Birdie Mohamed',
+      grade: 'Year 5',
+      avatar: '👩‍🎓',
+      category: 'BIOLOGY',
+      title: 'The Geometry of Honeycombs: Nature\'s Perfect Hexagons',
+      summary: 'How bees use regular hexagons to maximize honey storage while minimising wax — a masterclass in efficient natural architecture...',
+      date: '27 Sep 2026',
+      reads: 194,
+      content: `
+        <p>The honeycomb is one of the greatest engineering feats in nature. While circles leave gaps and triangles require excessive perimeter material, regular hexagons tile a 2D plane with zero wasted space and minimal perimeter.</p>
+        <p>This allows honeybees to store maximum honey using the absolute minimum expenditure of metabolic wax. Geometry and biology unite in perfect harmony.</p>
+      `
+    },
+    {
+      id: 3,
+      author: 'Alex Turner',
+      grade: 'Year 4',
+      avatar: '👦',
+      category: 'MATHS',
+      title: 'Ancient Calculation Secrets: Mastering the Times Tables',
+      summary: 'Uncovering patterns, shortcuts and the distributive property to spot calculation shortcuts used by ancient mathematicians...',
+      date: '26 Sep 2026',
+      reads: 312,
+      content: `
+        <p>Ancient Egyptian and Babylonian mathematicians used doubling and halving techniques (Russian peasant multiplication) to calculate complex products without memorizing massive tables.</p>
+        <p>By understanding number bonds and the distributive property (e.g., 9 × 14 = 10 × 14 - 14), we can solve mental arithmetic sprints in seconds!</p>
+      `
+    },
+    {
+      id: 4,
+      author: 'Emma Watson',
+      grade: 'Year 6',
+      avatar: '👩',
+      category: 'BIOLOGY',
+      title: 'Photosynthesis: How Plants Power Our Planet',
+      summary: 'A deep dive into chloroplasts, light absorption and the Calvin cycle — explaining the planet\'s most important chemical engine...',
+      date: '25 Sep 2026',
+      reads: 185,
+      content: `
+        <p>Every breath we take is powered by chloroplasts capturing solar photons to split water molecules and fix carbon dioxide into glucose.</p>
+        <p>Understanding light wavelengths, chlorophyll absorption peaks, and the Calvin cycle reveals the delicate biochemical balance that sustains life on Earth.</p>
+      `
+    }
+  ],
+
+  getFeaturedArticles() {
+    return this.articles;
+  },
+
+  getAllArticles() {
+    return this.articles;
+  },
+
+  openArticleReader(id) {
+    const art = this.articles.find(a => a.id === Number(id)) || this.articles[0];
+    let readerModal = document.getElementById('blogReaderModal');
+    if (!readerModal) {
+      readerModal = document.createElement('div');
+      readerModal.id = 'blogReaderModal';
+      readerModal.className = 'auth-modal-backdrop';
+      readerModal.style.zIndex = '3500';
+      document.body.appendChild(readerModal);
+    }
+
+    readerModal.innerHTML = `
+      <div class="auth-modal-window figma-card" style="max-width: 620px; max-height: 85vh; overflow-y: auto; padding: 2rem !important;">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+          <div class="flex items-center gap-2">
+            <span class="figma-cat-tag ${art.category.toLowerCase()}">${art.category}</span>
+            <span class="text-xs text-slate-400">&bull; ${art.date}</span>
+          </div>
+          <button type="button" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center font-bold text-sm cursor-pointer" onclick="document.getElementById('blogReaderModal').classList.remove('open')">✕</button>
+        </div>
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-xl shrink-0">${art.avatar}</div>
+          <div>
+            <h4 class="font-bold text-slate-900 text-sm leading-tight">${art.author}</h4>
+            <span class="text-xs text-slate-500">${art.grade} &bull; RC Academy Author</span>
+          </div>
+        </div>
+        <h2 class="text-xl font-extrabold text-slate-900 tracking-tight leading-snug mb-3">${art.title}</h2>
+        <div class="text-sm text-slate-700 leading-relaxed space-y-3 font-medium">
+          ${art.content}
+        </div>
+        <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+          <span>Curated by Miss Rania</span>
+          <button type="button" class="px-4 py-2 rounded-lg bg-blue-600 text-white font-bold cursor-pointer" onclick="document.getElementById('blogReaderModal').classList.remove('open')">Done Reading</button>
+        </div>
+      </div>
+    `;
+
+    readerModal.classList.add('open');
+  },
+
+  renderBlogView() {
+    const blogContainer = document.getElementById('studentBlogGrid');
+    if (!blogContainer) return;
+    blogContainer.innerHTML = this.articles.map(art => `
+      <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all flex flex-col justify-between cursor-pointer" onclick="StudentBlog.openArticleReader(${art.id})">
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <span class="figma-cat-tag ${art.category.toLowerCase()}">${art.category}</span>
+            <span class="text-xs text-slate-400">${art.date}</span>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900 mb-2 leading-tight">${art.title}</h3>
+          <p class="text-sm text-slate-600 leading-relaxed mb-4">${art.summary}</p>
+        </div>
+        <div class="flex items-center justify-between pt-3 border-t border-slate-100 text-xs">
+          <div class="flex items-center gap-2">
+            <span>${art.avatar}</span>
+            <span class="font-bold text-slate-800">${art.author}</span>
+          </div>
+          <span class="text-blue-600 font-bold">Read Essay &rarr;</span>
+        </div>
+      </div>
+    `).join('');
+  }
+};
+
+window.StudentBlog = StudentBlog;
 
 // Kickoff: Support both synchronous execution and DOM ready
 if (document.readyState === 'loading') {
@@ -8786,3 +8886,4 @@ if (document.readyState === 'loading') {
 } else {
   initPortal();
 }
+

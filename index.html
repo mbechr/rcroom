@@ -1797,115 +1797,264 @@
        STUDENT AUTHENTICATION & LOGIN MODAL
        ==================================================================== -->
   <div class="auth-modal-backdrop" id="authModal">
-    <!-- Live Global Ticker: Top Gainers & Topics Solved -->
-    <div class="login-ticker-banner" id="loginTickerBanner">
-      <div class="ticker-badge">
-        <span class="ticker-dot"></span>
-        <span>🏆 TOP GAINERS &amp; MASTERY</span>
+    <!-- Figma Mockup Top Navbar -->
+    <header class="figma-navbar">
+      <div class="figma-nav-left">
+        <div class="figma-lang-pill">
+          <span>English</span>
+          <span class="material-symbols-outlined text-[16px]">expand_more</span>
+        </div>
+        <div class="figma-circle-btn" title="Notifications">
+          <span class="material-symbols-outlined text-[16px]">notifications</span>
+        </div>
+        <div class="figma-circle-btn" title="Theme">
+          <span class="material-symbols-outlined text-[16px]">dark_mode</span>
+        </div>
       </div>
-      <div class="ticker-track-wrap">
-        <div class="ticker-track" id="loginTickerTrack">
+      <nav class="figma-nav-center">
+        <a href="#contact" class="figma-nav-link" onclick="document.getElementById('figmaInstitutionalFooter')?.scrollIntoView({behavior: 'smooth'})">Contact Us</a>
+        <a href="#resources" class="figma-nav-link" onclick="document.getElementById('figmaCurriculumSection')?.scrollIntoView({behavior: 'smooth'})">Learning Resources</a>
+        <a href="#excellence" class="figma-nav-link" onclick="document.getElementById('topGainersPanel')?.scrollIntoView({behavior: 'smooth'})">Excellence Board</a>
+        <a href="#home" class="figma-nav-link active">Home</a>
+      </nav>
+      <div class="figma-nav-right">
+        <div class="figma-brand-text">
+          <span class="figma-brand-name">RC Academy</span>
+          <span class="figma-brand-sub">Rania's Educational Academy</span>
+        </div>
+        <div class="figma-rc-badge">RC</div>
+      </div>
+    </header>
+
+    <!-- 3-Column Hero Stage (Top Gainers | Sign In | Student Blogs) -->
+    <div class="auth-portal-stage figma-hero-stage">
+      <!-- Left Showcase Panel: Top Student Gainers (Figma Design) -->
+      <div class="auth-showcase-panel left-panel figma-card" id="topGainersPanel">
+        <div class="figma-panel-header blue-banner">
+          <div class="flex items-center gap-1.5 font-extrabold text-sm text-white">
+            <span class="material-symbols-outlined text-[18px]">emoji_events</span>
+            <span>Top Gainers</span>
+          </div>
+          <span class="text-xs font-semibold text-white/80">Points</span>
+        </div>
+        <div class="showcase-list figma-gainers-list" id="topGainersList">
           <!-- Populated via JS -->
         </div>
-      </div>
-    </div>
-
-    <div class="auth-portal-stage">
-      <!-- Left Showcase Panel: Top Student Gainers (Hall of Fame) -->
-      <div class="auth-showcase-panel left-panel" id="topGainersPanel">
-        <div class="showcase-panel-header">
-          <div class="showcase-icon">🏆</div>
-          <div>
-            <div class="showcase-title">TOP GAINERS</div>
-            <div class="showcase-subtitle">Weekly Leaderboard &amp; Points</div>
-          </div>
-        </div>
-        <div class="showcase-list" id="topGainersList">
-          <!-- Populated with top students -->
+        <div class="figma-card-footer">
+          <a href="#leaderboard" class="figma-footer-link" onclick="showToast('Displaying Top 5 Students')">
+            <span>View Full Leaderboard</span>
+            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+          </a>
         </div>
       </div>
 
-      <!-- Center: Main Login Modal Window -->
-      <div class="auth-modal-window" style="max-width: 440px;">
-        <div class="auth-modal-header" style="flex-direction: column; align-items: center; text-align: center; padding: 1.75rem 1.5rem 1.15rem; border-bottom: 1px solid rgba(255,255,255,0.08); background: radial-gradient(circle at 50% 0%, rgba(0, 229, 255, 0.15) 0%, transparent 70%);">
-          <div class="w-16 h-16 rounded-2xl bg-white p-1.5 shadow-[0_0_30px_rgba(0,229,255,0.4)] mb-2.5 flex items-center justify-center border border-white/30">
-            <img src="assets/rc-logo.png?v=3.3.0" alt="Rania Classroom RC Logo" class="w-full h-full object-contain rounded-xl">
-          </div>
-          <div class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-[11px] font-bold tracking-wider uppercase mb-1">
-            <span>🔒 Private Academy Portal</span>
-          </div>
-          <h2 class="auth-title text-2xl font-extrabold text-white tracking-tight" style="margin: 0; letter-spacing: -0.01em;">RANIA CLASSROOM</h2>
-          <p class="auth-subtitle text-slate-400 text-xs mt-0.5">Miss Rania &bull; Inspire, Thrive — Be Part of It!</p>
+      <!-- Center: Main Login Modal Window (Figma Design) -->
+      <div class="auth-modal-window figma-login-card" style="max-width: 440px;">
+        <div class="figma-auth-header">
+          <div class="figma-rc-badge-large">RC</div>
+          <h2 class="figma-auth-title">RC Academy</h2>
+          <p class="figma-auth-subtitle">Rania's Educational Academy &bull; Since 2018</p>
         </div>
 
-        <!-- UNIFIED SIGN IN (Students & Teacher) -->
-        <div class="auth-tab-content active" id="authTabLogin" style="padding: 1.75rem 2rem;">
+        <div class="figma-card-divider"></div>
+
+        <div class="auth-tab-content active" id="authTabLogin" style="padding: 0 1.75rem 1.75rem;">
+          <div class="text-center mb-5">
+            <h3 class="text-base font-extrabold text-slate-900">Sign In to Your Account</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Welcome back! Enter your credentials below.</p>
+          </div>
+
           <form id="loginForm" class="auth-form" onsubmit="return false;">
+            <div class="form-group mb-3.5">
+              <label for="loginUsername" class="text-xs font-bold text-slate-700">Username</label>
+              <div class="figma-input-wrap">
+                <span class="material-symbols-outlined figma-input-icon">person</span>
+                <input type="text" id="loginUsername" placeholder="e.g. john.doe, 45009" required autocomplete="username" class="figma-input">
+              </div>
+            </div>
             <div class="form-group mb-4">
-              <label for="loginUsername" class="text-xs font-bold uppercase tracking-wider text-slate-300">Username</label>
-              <div class="relative mt-1">
-                <input type="text" id="loginUsername" placeholder="e.g. beshr, alex, or admin" required autocomplete="username" class="w-full px-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700/80 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all text-sm font-medium">
+              <label for="loginPassword" class="text-xs font-bold text-slate-700">Password</label>
+              <div class="figma-input-wrap">
+                <span class="material-symbols-outlined figma-input-icon">lock</span>
+                <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password" class="figma-input">
               </div>
             </div>
-            <div class="form-group mb-5">
-              <label for="loginPassword" class="text-xs font-bold uppercase tracking-wider text-slate-300">Password</label>
-              <div class="relative mt-1">
-                <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password" class="w-full px-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700/80 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all text-sm font-medium">
-              </div>
-            </div>
-            <div class="form-error-msg mb-4 text-xs font-bold text-rose-400 bg-rose-500/10 p-2.5 rounded-lg border border-rose-500/20" id="loginErrorMsg" style="display: none;"></div>
+            <div class="form-error-msg mb-3 text-xs font-bold text-rose-500 bg-rose-50 p-2.5 rounded-lg border border-rose-200" id="loginErrorMsg" style="display: none;"></div>
 
-            <button type="submit" class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-cyan-400 via-sky-500 to-indigo-500 text-slate-950 font-extrabold text-sm shadow-[0_0_20px_rgba(0,229,255,0.4)] hover:shadow-[0_0_30px_rgba(0,229,255,0.6)] hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer box-border" id="submitLoginBtn">
-              Sign In to Academy &rarr;
+            <button type="submit" class="figma-btn-primary" id="submitLoginBtn">
+              <span>Sign in to Academy</span>
+              <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
             </button>
-            <div class="mt-4 p-3 rounded-xl bg-slate-900/50 border border-slate-800 text-[11px] text-slate-400 text-center leading-relaxed">
-              🔐 <strong>Miss Rania's Private Cohort:</strong> Students and parents receive credentials directly from Miss Rania.
+
+            <div class="flex items-center justify-between text-xs mt-3.5 pt-1">
+              <a href="javascript:void(0)" onclick="showToast('Please contact Miss Rania on WhatsApp to reset your password.')" class="text-blue-600 font-semibold hover:underline">Forgot password?</a>
+              <span class="text-slate-500">New student? <a href="javascript:void(0)" onclick="showToast('Registration is managed directly by Miss Rania.')" class="text-slate-700 font-bold hover:underline">Register</a></span>
+            </div>
+
+            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-center gap-1.5 text-[11px] text-slate-400">
+              <span class="material-symbols-outlined text-[14px] text-emerald-500">verified_user</span>
+              <span>Secured by RC Academy &bull; 256-bit SSL Encryption</span>
             </div>
           </form>
         </div>
       </div>
 
-      <!-- Right Showcase Panel: Student Blogs & Creative Essays Curated by Miss Rania -->
-      <div class="auth-showcase-panel right-panel" id="featuredBlogPanel">
-        <div class="showcase-panel-header">
-          <div class="showcase-icon">✍️</div>
-          <div>
-            <div class="showcase-title">STUDENT BLOGS &amp; ESSAYS</div>
-            <div class="showcase-subtitle">Featured Works Selected by Miss Rania</div>
+      <!-- Right Showcase Panel: Student Blogs & Essays (Figma Design) -->
+      <div class="auth-showcase-panel right-panel figma-card" id="featuredBlogPanel">
+        <div class="figma-panel-header dark-banner">
+          <div class="flex items-center gap-1.5 font-extrabold text-sm text-white">
+            <span class="material-symbols-outlined text-[18px]">menu_book</span>
+            <span>Student Blogs &amp; Essays</span>
+          </div>
+          <span class="figma-new-badge">NEW</span>
+        </div>
+        <div class="showcase-list figma-blogs-list" id="featuredBlogList">
+          <!-- Populated via JS -->
+        </div>
+        <div class="figma-card-footer">
+          <a href="#blogs" class="figma-footer-link" onclick="showToast('Student Essays Curated by Miss Rania')">
+            <span>View All Essays</span>
+            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Figma Section: Curriculum Mastery Summary -->
+    <section class="figma-curriculum-section" id="figmaCurriculumSection">
+      <div class="figma-curriculum-header-row">
+        <div>
+          <div class="flex items-center gap-1.5 text-blue-600 text-[11px] font-extrabold uppercase tracking-wider mb-1">
+            <span class="material-symbols-outlined text-[16px]">verified</span>
+            <span>VERIFIED CAMBRIDGE CURRICULUM</span>
+          </div>
+          <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">Curriculum Mastery Summary</h2>
+          <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Track your progress across all Cambridge-aligned subjects</p>
+        </div>
+        <div class="text-right shrink-0">
+          <span class="text-xs text-slate-500 font-semibold block">Overall Mastery:</span>
+          <span class="text-xl sm:text-2xl font-black text-blue-600">78%</span>
+        </div>
+      </div>
+
+      <div class="figma-curriculum-grid" id="loginCurriculumGrid">
+        <!-- 3 Cards populated via HTML/JS -->
+        <div class="figma-curriculum-card">
+          <div class="figma-curriculum-card-top">
+            <div class="w-9 h-9 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-base shrink-0">Σ</div>
+            <div class="flex-1 min-w-0">
+              <h4 class="font-bold text-sm text-slate-900 truncate">Stage 6 Mathematics</h4>
+              <p class="text-xs text-slate-500 truncate">52 Syllabus &bull; Fractions &amp; Decimals</p>
+            </div>
+            <span class="px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 font-extrabold text-xs shrink-0">64% Mastery</span>
+          </div>
+          <div class="figma-prog-bar">
+            <div class="figma-prog-fill" style="width: 64%; background: linear-gradient(90deg, #4f46e5, #6366f1);"></div>
+          </div>
+          <div class="figma-curriculum-card-bottom">
+            <span>43 / 50 topics complete</span>
+            <a href="#maths" class="figma-card-action">Continue &rarr;</a>
           </div>
         </div>
-        <div class="showcase-list" id="featuredBlogList">
-          <!-- Populated with curated student blogs & essays -->
+
+        <div class="figma-curriculum-card">
+          <div class="figma-curriculum-card-top">
+            <div class="w-9 h-9 rounded-lg bg-amber-500 text-white flex items-center justify-center font-bold text-base shrink-0">⚡</div>
+            <div class="flex-1 min-w-0">
+              <h4 class="font-bold text-sm text-slate-900 truncate">Speed Arithmetic Sprints</h4>
+              <p class="text-xs text-slate-500 truncate">34 Sprints &bull; Times Tables</p>
+            </div>
+            <span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 font-extrabold text-xs shrink-0">91% Mastery</span>
+          </div>
+          <div class="figma-prog-bar">
+            <div class="figma-prog-fill" style="width: 91%; background: linear-gradient(90deg, #f59e0b, #d97706);"></div>
+          </div>
+          <div class="figma-curriculum-card-bottom">
+            <span>31 / 34 sprints complete</span>
+            <a href="#sprints" class="figma-card-action text-amber-600">Continue &rarr;</a>
+          </div>
+        </div>
+
+        <div class="figma-curriculum-card">
+          <div class="figma-curriculum-card-top">
+            <div class="w-9 h-9 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-base shrink-0">🔬</div>
+            <div class="flex-1 min-w-0">
+              <h4 class="font-bold text-sm text-slate-900 truncate">Primary Stage 4 Science</h4>
+              <p class="text-xs text-slate-500 truncate">28 Modules &bull; Focused Light</p>
+            </div>
+            <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 font-extrabold text-xs shrink-0">73% Mastery</span>
+          </div>
+          <div class="figma-prog-bar">
+            <div class="figma-prog-fill" style="width: 73%; background: linear-gradient(90deg, #10b981, #059669);"></div>
+          </div>
+          <div class="figma-curriculum-card-bottom">
+            <span>20 / 28 modules complete</span>
+            <a href="#science" class="figma-card-action text-emerald-600">Continue &rarr;</a>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- Bottom Horizontal Verified Cambridge Curriculum Bar -->
-    <div class="login-curriculum-bar" id="loginCurriculumBar">
-      <div class="curriculum-bar-header-row">
-        <span class="curriculum-bar-label">📚 VERIFIED CAMBRIDGE CURRICULUM</span>
-        <span class="text-xs text-slate-400">Core Modules &amp; Skills Mastered by Students</span>
-      </div>
-      <div class="curriculum-bar-grid" id="loginCurriculumGrid">
-        <!-- 4 horizontal modules injected dynamically -->
-      </div>
-    </div>
+    <!-- Figma Section: Institutional Deep Navy Footer -->
+    <footer class="figma-institutional-footer" id="figmaInstitutionalFooter">
+      <div class="figma-footer-content">
+        <div class="figma-footer-col">
+          <div class="flex items-center gap-2.5 mb-3">
+            <div class="figma-rc-badge">RC</div>
+            <div>
+              <span class="font-bold text-white text-base block leading-tight">RC Academy</span>
+              <span class="text-slate-400 text-xs block">Rania's Educational Academy</span>
+            </div>
+          </div>
+          <p class="text-xs text-slate-400 leading-relaxed mb-4">
+            Empowering young learners across Cambridge and beyond since 2018.
+          </p>
+          <div class="flex items-center gap-2">
+            <a href="https://facebook.com" target="_blank" class="figma-social-btn" title="Facebook">f</a>
+            <a href="https://twitter.com" target="_blank" class="figma-social-btn" title="X / Twitter">𝕏</a>
+            <a href="https://linkedin.com" target="_blank" class="figma-social-btn" title="LinkedIn">in</a>
+          </div>
+        </div>
 
-    <!-- Bottom Footer Contact Bar -->
-    <div class="login-contact-footer" id="loginContactFooter">
-      <div class="contact-pill">
-        <span>✉️</span>
-        <a href="mailto:rania.mado@gmail.com">rania.mado@gmail.com</a>
+        <div class="figma-footer-col">
+          <h5 class="figma-footer-col-title">Quick Links</h5>
+          <ul class="figma-footer-links">
+            <li><a href="#home">Home</a></li>
+            <li><a href="#excellence">Excellence Board</a></li>
+            <li><a href="#resources">Learning Resources</a></li>
+            <li><a href="#blogs">Student Blogs</a></li>
+          </ul>
+        </div>
+
+        <div class="figma-footer-col">
+          <h5 class="figma-footer-col-title">Subjects</h5>
+          <ul class="figma-footer-links">
+            <li><a href="#maths">Mathematics</a></li>
+            <li><a href="#english">English Language</a></li>
+            <li><a href="#sciences">Sciences</a></li>
+            <li><a href="#arabic">Arabic Studies</a></li>
+          </ul>
+        </div>
+
+        <div class="figma-footer-col">
+          <h5 class="figma-footer-col-title">Contact</h5>
+          <ul class="figma-footer-contact">
+            <li><a href="mailto:rania.mado@gmail.com">rania.mado@gmail.com</a></li>
+            <li><a href="https://wa.me/201016499281" target="_blank">+20 101 649 9281 (WhatsApp)</a></li>
+            <li><span>Mon-Fri &bull; 8am &ndash; 6pm</span></li>
+          </ul>
+        </div>
       </div>
-      <div class="contact-pill whatsapp">
-        <span>💬</span>
-        <a href="https://wa.me/201016499281" target="_blank">01016499281 (WhatsApp)</a>
+
+      <div class="figma-footer-bottom">
+        <span>&copy; 2026 RC Academy &bull; All rights reserved &bull; Rania's Educational Academy</span>
+        <div class="flex items-center gap-4">
+          <a href="javascript:void(0)">Privacy Policy</a>
+          <a href="javascript:void(0)">Terms of Use</a>
+          <a href="javascript:void(0)">Cookie Policy</a>
+        </div>
       </div>
-      <div class="contact-pill">
-        <span>🌸</span>
-        <span>Miss Rania's Private Academy</span>
-      </div>
-    </div>
+    </footer>
   </div>
 
   <!-- ====================================================================
