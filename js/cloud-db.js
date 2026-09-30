@@ -117,7 +117,6 @@
             cloudStudents.push({
               id: data.id || Number(doc.id) || Date.now(),
               username: data.username,
-              password: data.password || '123456',
               full_name: data.full_name || data.username,
               grade_level: data.grade_level || 'Year 4',
               avatar: data.avatar || '🦊',
@@ -380,7 +379,6 @@
           id: Number(studentData.id),
           username: (studentData.username || '').toLowerCase().trim(),
           full_name: (studentData.full_name || '').trim(),
-          password: studentData.password || '123456',
           grade_level: studentData.grade_level || 'Year 4',
           avatar: studentData.avatar || '🦊',
           xp: studentData.xp || 0,

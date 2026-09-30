@@ -1,0 +1,85 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && (request.auth.uid == userId || request.auth.token.email == userId);
+    }
+    
+    function isTeacher() {
+      return isAuthenticated() && (
+        request.auth.token.role == 'teacher' || 
+        request.auth.token.role == 'admin' ||
+        request.auth.token.admin == true
+      );
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && (
+        request.auth.token.role == 'admin' || 
+        request.auth.token.admin == true
+      );
+    }
+
+    // Students Collection:
+    // Teachers & Admins can read/write any student.
+    // Students can only read/update their own document.
+    match /students/{studentId} {
+      allow read: if isTeacher() || isOwner(studentId);
+      allow create: if isTeacher();
+      allow update: if isTeacher() || (isOwner(studentId) && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'is_admin']));
+      allow delete: if isAdmin();
+    }
+
+    // Practice Logs Collection:
+    // Students can create their own logs.
+    // Teachers and Admins can view all practice logs.
+    match /practice_logs/{logId} {
+      allow read: if isTeacher() || (isAuthenticated() && resource.data.student_id == request.auth.uid);
+      allow create: if isAuthenticated() && request.resource.data.student_id == request.auth.uid;
+      allow update, delete: if isTeacher();
+    }
+
+    // Homework Assignments & Submissions:
+    match /homework/{hwId} {
+      allow read: if isAuthenticated();
+      allow create, update, delete: if isTeacher();
+    }
+
+    match /homework_submissions/{subId} {
+      allow read: if isTeacher() || (isAuthenticated() && resource.data.student_id == request.auth.uid);
+      allow create: if isAuthenticated() && request.resource.data.student_id == request.auth.uid;
+      allow update: if isTeacher() || (isAuthenticated() && resource.data.student_id == request.auth.uid);
+      allow delete: if isTeacher();
+    }
+
+    // Payments:
+    // Only student owner and Admins can view.
+    // Only Admins can modify/approve.
+    match /payments/{paymentId} {
+      allow read: if isAdmin() || (isAuthenticated() && resource.data.student_id == request.auth.uid);
+      allow create: if isAuthenticated() && request.resource.data.student_id == request.auth.uid;
+      allow update, delete: if isAdmin();
+    }
+
+    // Live Classes & Zoom Sessions:
+    // Authenticated users can view schedules.
+    // Only teachers can create/edit sessions.
+    match /zoom_sessions/{sessionId} {
+      allow read: if isAuthenticated();
+      allow write: if isTeacher();
+    }
+
+    // Curriculum & Skills:
+    // Public read for learning tracks, only teacher/admin write.
+    match /curriculum/{docId} {
+      allow read: if true;
+      allow write: if isTeacher();
+    }
+  }
+}
