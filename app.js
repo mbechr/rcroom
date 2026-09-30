@@ -6991,7 +6991,7 @@ window.openResetPasswordModal = function(studentId, studentName) {
   const s = roster.find(st => st.id === numId) || DB.findStudentById(numId);
   el.resetStudentId.value = studentId;
   el.resetStudentSubtitle.textContent = `Set a new password for ${studentName}.`;
-  el.newResetPassword.value = (s && s.password) ? s.password : 'StudentPass123!';
+  el.newResetPassword.value = 'RC@' + Math.floor(1000 + Math.random() * 9000);
   el.resetPasswordModal.classList.add('open');
 };
 
