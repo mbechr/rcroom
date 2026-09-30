@@ -265,12 +265,12 @@ const DB = {
   // Preloaded Demo Students & Teacher for instant client-side offline fallback
   demoStudents: [
     { id: 101, username: 'beshr', full_name: 'Beshr Mohamed', parent_name: 'Mohamed Beshr', student_phone: '01012345678', parent_phone: '01098765432', payment_method: 'InstaPay', payment_date: '2026-09-20', payment_amount: '', payment_status: 'paid', grade_level: 'Year 4', avatar: '🦊', password_hash: '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', xp: 450, streak_days: 3, role: 'student' },
-    { id: 1, username: 'alex', full_name: 'Alex Turner', parent_name: 'David Turner', student_phone: '01011112222', parent_phone: '01033334444', payment_method: 'InstaPay', payment_date: '2026-09-18', payment_amount: 500, payment_status: 'paid', grade_level: 'Year 4', avatar: '🚀', password_hash: 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94', xp: 720, streak_days: 5, role: 'student' },
-    { id: 2, username: 'sophia', full_name: 'Sophia Chen', parent_name: 'Wei Chen', student_phone: '01055556666', parent_phone: '01077778888', payment_method: 'Vodafone Cash', payment_date: '2026-09-15', payment_amount: 450, payment_status: 'paid', grade_level: 'Year 4', avatar: '🦄', password_hash: 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94', xp: 890, streak_days: 7, role: 'student' },
-    { id: 3, username: 'liam', full_name: 'Liam Johnson', parent_name: 'Robert Johnson', student_phone: '01099990000', parent_phone: '01022223333', payment_method: 'InstaPay', payment_date: '2026-09-10', payment_amount: 500, payment_status: 'paid', grade_level: 'Year 4', avatar: '🦁', password_hash: 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94', xp: 340, streak_days: 2, role: 'student' },
-    { id: 4, username: 'emma', full_name: 'Emma Watson', parent_name: 'Chris Watson', student_phone: '01044445555', parent_phone: '01066667777', payment_method: 'Bank Transfer', payment_date: '2026-09-05', payment_amount: 600, payment_status: 'paid', grade_level: 'Year 4', avatar: '🐼', password_hash: 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94', xp: 610, streak_days: 4, role: 'student' },
-    { id: 5, username: 'admin', full_name: 'Miss Rania', grade_level: 'Instructor', avatar: '👩‍🏫', xp: 0, streak_days: 0, role: 'teacher' },
-    { id: 6, username: 'rania', full_name: 'Miss Rania', grade_level: 'Instructor', avatar: '👩‍🏫', xp: 0, streak_days: 0, role: 'teacher' }
+    { id: 1, username: 'alex', full_name: 'Alex Turner', parent_name: 'David Turner', student_phone: '01011112222', parent_phone: '01033334444', payment_method: 'InstaPay', payment_date: '2026-09-18', payment_amount: 500, payment_status: 'paid', grade_level: 'Year 4', avatar: '🚀', password_hash: 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', xp: 720, streak_days: 5, role: 'student' },
+    { id: 2, username: 'sophia', full_name: 'Sophia Chen', parent_name: 'Wei Chen', student_phone: '01055556666', parent_phone: '01077778888', payment_method: 'Vodafone Cash', payment_date: '2026-09-15', payment_amount: 450, payment_status: 'paid', grade_level: 'Year 4', avatar: '🦄', password_hash: 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', xp: 890, streak_days: 7, role: 'student' },
+    { id: 3, username: 'liam', full_name: 'Liam Johnson', parent_name: 'Robert Johnson', student_phone: '01099990000', parent_phone: '01022223333', payment_method: 'InstaPay', payment_date: '2026-09-10', payment_amount: 500, payment_status: 'paid', grade_level: 'Year 4', avatar: '🦁', password_hash: 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', xp: 340, streak_days: 2, role: 'student' },
+    { id: 4, username: 'emma', full_name: 'Emma Watson', parent_name: 'Chris Watson', student_phone: '01044445555', parent_phone: '01066667777', payment_method: 'Bank Transfer', payment_date: '2026-09-05', payment_amount: 600, payment_status: 'paid', grade_level: 'Year 4', avatar: '🐼', password_hash: 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', xp: 610, streak_days: 4, role: 'student' },
+    { id: 5, username: 'admin', full_name: 'Miss Rania', grade_level: 'Instructor', avatar: '👩‍🏫', xp: 0, streak_days: 0, role: 'teacher', password_hash: '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9' },
+    { id: 6, username: 'rania', full_name: 'Miss Rania', grade_level: 'Instructor', avatar: '👩‍🏫', xp: 0, streak_days: 0, role: 'teacher', password_hash: '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9' }
   ],
 
   getActiveDemoStudents() {
@@ -433,12 +433,7 @@ const DB = {
       }
     }
 
-    // 2. Teacher login must go through server API — no client-side bypass
-    if (cleanUser === 'admin' || cleanUser === 'rania') {
-      throw new Error('Teacher login requires server connection. Please ensure the server is running.');
-    }
-
-    // 3. Check custom registered students in localStorage
+    // 2. Check custom registered students in localStorage
     let deletedIds = [];
     try {
       deletedIds = JSON.parse(localStorage.getItem('rc_deleted_student_ids') || '[]');
@@ -459,17 +454,19 @@ const DB = {
       return localFound;
     }
 
-    // 4. Check Demo students list
+    // 3. Check Demo students & Teacher list
     const activeDemo = this.getActiveDemoStudents();
     const found = activeDemo.find(s => s.username.toLowerCase() === cleanUser);
     if (found) {
       const isTeacher = found.role === 'teacher';
+      if (!(await verifyLocalPassword(cleanPw, found))) {
+        throw new Error('Incorrect password');
+      }
       if (isTeacher) {
-        throw new Error('Teacher login requires server connection.');
-      } else {
-        if (!(await verifyLocalPassword(cleanPw, found))) {
-          throw new Error('Incorrect password');
-        }
+        return {
+          ...found,
+          role: 'teacher'
+        };
       }
       const stats = this.getStudentStats(found.id);
       const studentXp = Math.max(found.xp || 0, stats.xp);
