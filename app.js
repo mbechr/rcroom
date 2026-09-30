@@ -183,13 +183,7 @@ const ConfettiFX = {
 // =============================================================================
 // Velvet Obsidian Cosmos Canvas & Login Showcase (Delegated to js/cosmos.js)
 // =============================================================================
-const LoginCosmos = window.LoginCosmos || {
-  init() {},
-  resume() {},
-  pause() {},
-  start() {}
-};
-const renderLoginShowcase = window.renderLoginShowcase || function() {};
+// Handled by window.LoginCosmos and window.renderLoginShowcase from js/cosmos.js
 
 const AppState = {
   data: null,
@@ -2299,7 +2293,7 @@ async function initPortal() {
   setupEventListeners();
 
   // Initialize Animated Velvet Obsidian Cosmos Background
-  LoginCosmos.init();
+  if (window.LoginCosmos) window.LoginCosmos.init();
 
   // Initialize Real-time Google Cloud Database Sync (Firebase)
   if (window.CloudDB) {
@@ -2309,11 +2303,11 @@ async function initPortal() {
   // Strict Authentication Gate Check
   if (!AppState.currentUser) {
     document.body.classList.add('auth-locked');
-    LoginCosmos.resume();
+    if (window.LoginCosmos) window.LoginCosmos.resume();
     openAuthModal(true);
     return; // STOP: Never render curriculum or student views until authenticated!
   } else {
-    LoginCosmos.pause();
+    if (window.LoginCosmos) window.LoginCosmos.pause();
   }
 
   // Synchronize current user XP with real accumulated practice stats
@@ -6705,8 +6699,8 @@ window.logoutUser = function() {
 };
 
 async function openAuthModal(isMandatory = false) {
-  LoginCosmos.resume();
-  renderLoginShowcase();
+  if (window.LoginCosmos) window.LoginCosmos.resume();
+  if (typeof window.renderLoginShowcase === 'function') window.renderLoginShowcase();
   if (!el.authModal) return;
   el.authModal.classList.add('open');
   if (el.loginErrorMsg) el.loginErrorMsg.style.display = 'none';
@@ -6728,7 +6722,7 @@ async function openAuthModal(isMandatory = false) {
 }
 
 function setCurrentStudent(student) {
-  LoginCosmos.pause();
+  if (window.LoginCosmos) window.LoginCosmos.pause();
   AppState.currentUser = student;
   AppState.viewingReportStudentId = null;
   localStorage.setItem('current_student', JSON.stringify(student));
