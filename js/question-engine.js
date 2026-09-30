@@ -88,7 +88,13 @@
   const MathStageGenerators = {
     // 1.1 EARLY YEARS (Reception)
     early(name, tier) {
-      const mode = randomChoice(['count_items', 'more_less', 'shape_rec', 'number_match']);
+      let mode = 'count_items';
+      const n = (name || '').toLowerCase();
+      if (n.includes('shape') || n.includes('geometry') || n.includes('circle') || n.includes('square')) mode = 'shape_rec';
+      else if (n.includes('more') || n.includes('fewer') || n.includes('less') || n.includes('compare')) mode = 'more_less';
+      else if (n.includes('word') || n.includes('numeral') || n.includes('read') || n.includes('match')) mode = 'number_match';
+      else if (n.includes('count') || n.includes('how many')) mode = 'count_items';
+      else mode = randomChoice(['count_items', 'more_less', 'shape_rec', 'number_match']);
       const icons = ['🍎', '⭐', '🎈', '🚗', '🐱', '🌸', '🍪', '⚽'];
       const icon = randomChoice(icons);
 
@@ -158,7 +164,14 @@
 
     // 1.2 KEY STAGE 1 (Year 1 & Year 2)
     ks1(name, tier) {
-      const mode = randomChoice(['add_sub_20', 'skip_count', 'place_tens_ones', 'clock_half', 'coins']);
+      let mode = 'add_sub_20';
+      const n = (name || '').toLowerCase();
+      if (n.includes('skip') || n.includes('twos') || n.includes('fives') || n.includes('tens') || n.includes('sequence') || n.includes('pattern')) mode = 'skip_count';
+      else if (n.includes('place') || n.includes('tens') || n.includes('ones') || n.includes('digit') || n.includes('partition')) mode = 'place_tens_ones';
+      else if (n.includes('clock') || n.includes('time') || n.includes('hour') || n.includes('half')) mode = 'clock_half';
+      else if (n.includes('money') || n.includes('coin') || n.includes('pence') || n.includes('pound') || n.includes('cost')) mode = 'coins';
+      else if (n.includes('add') || n.includes('sub') || n.includes('minus') || n.includes('plus') || n.includes('sum')) mode = 'add_sub_20';
+      else mode = randomChoice(['add_sub_20', 'skip_count', 'place_tens_ones', 'clock_half', 'coins']);
 
       if (mode === 'add_sub_20') {
         const isSub = Math.random() > 0.5;
@@ -261,7 +274,14 @@
 
     // 1.3 LOWER KEY STAGE 2 (Year 3 & Year 4)
     lower_ks2(name, tier) {
-      const mode = randomChoice(['times_tables', 'place_thousands', 'roman_numerals', 'perimeter_grid', 'fractions_like']);
+      let mode = 'times_tables';
+      const n = (name || '').toLowerCase();
+      if (n.includes('table') || n.includes('multipl') || n.includes('times') || n.includes('divid') || n.includes('factor')) mode = 'times_tables';
+      else if (n.includes('place') || n.includes('thousand') || n.includes('hundred') || n.includes('value') || n.includes('round')) mode = 'place_thousands';
+      else if (n.includes('roman') || n.includes('numeral')) mode = 'roman_numerals';
+      else if (n.includes('perim') || n.includes('area') || n.includes('rectang') || n.includes('grid') || n.includes('length')) mode = 'perimeter_grid';
+      else if (n.includes('frac') || n.includes('half') || n.includes('third') || n.includes('quarter') || n.includes('denominator')) mode = 'fractions_like';
+      else mode = randomChoice(['times_tables', 'place_thousands', 'roman_numerals', 'perimeter_grid', 'fractions_like']);
 
       if (mode === 'times_tables') {
         const a = randomInt(3, 12);
@@ -355,7 +375,14 @@
 
     // 1.4 UPPER KEY STAGE 2 (Year 5 & Year 6)
     upper_ks2(name, tier) {
-      const mode = randomChoice(['unlike_fractions', 'percent_amount', 'negative_math', 'angles_straight', 'stats_mean']);
+      let mode = 'unlike_fractions';
+      const n = (name || '').toLowerCase();
+      if (n.includes('percent') || n.includes('%') || n.includes('discount')) mode = 'percent_amount';
+      else if (n.includes('negat') || n.includes('below zero') || n.includes('minus') || n.includes('temperature')) mode = 'negative_math';
+      else if (n.includes('angle') || n.includes('degree') || n.includes('straight') || n.includes('triangle') || n.includes('protractor')) mode = 'angles_straight';
+      else if (n.includes('mean') || n.includes('average') || n.includes('median') || n.includes('range') || n.includes('stat')) mode = 'stats_mean';
+      else if (n.includes('frac') || n.includes('mixed') || n.includes('improper') || n.includes('unlike')) mode = 'unlike_fractions';
+      else mode = randomChoice(['unlike_fractions', 'percent_amount', 'negative_math', 'angles_straight', 'stats_mean']);
 
       if (mode === 'unlike_fractions') {
         const pairs = [
@@ -631,7 +658,14 @@
 
     // 1.7 KEY STAGE 5 / A-LEVELS (Year 12 & Year 13)
     alevel(name, tier) {
-      const mode = randomChoice(['differentiation', 'integration', 'logarithms', 'radians', 'binomial']);
+      let mode = 'differentiation';
+      const n = (name || '').toLowerCase();
+      if (n.includes('integrat') || n.includes('area under') || n.includes('calculus')) mode = 'integration';
+      else if (n.includes('log') || n.includes('ln') || n.includes('exponential') || n.includes('e^x')) mode = 'logarithms';
+      else if (n.includes('radian') || n.includes('angle') || n.includes('arc') || n.includes('sector')) mode = 'radians';
+      else if (n.includes('binomial') || n.includes('expansion') || n.includes('pascal') || n.includes('coefficient')) mode = 'binomial';
+      else if (n.includes('differ') || n.includes('deriv') || n.includes('gradient') || n.includes('rate of change')) mode = 'differentiation';
+      else mode = randomChoice(['differentiation', 'integration', 'logarithms', 'radians', 'binomial']);
 
       if (mode === 'differentiation') {
         const n = randomInt(2, 5);

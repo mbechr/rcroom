@@ -181,365 +181,15 @@ const ConfettiFX = {
 
 
 // =============================================================================
-// Velvet Obsidian Cosmos Canvas (Interactive Animated Login Screen Background)
+// Velvet Obsidian Cosmos Canvas & Login Showcase (Delegated to js/cosmos.js)
 // =============================================================================
-
-const LoginCosmos = {
-  canvas: null,
-  ctx: null,
-  particles: [],
-  meteors: [],
-  animId: null,
-  mouse: { x: null, y: null, radius: 150 },
-  isRunning: false,
-  lastMeteorTime: 0,
-
-  init() {
-    this.canvas = document.getElementById('loginCosmosCanvas');
-    if (!this.canvas) return;
-    this.ctx = this.canvas.getContext('2d');
-    this.resize();
-
-    window.addEventListener('resize', () => this.resize());
-    window.addEventListener('mousemove', (e) => {
-      this.mouse.x = e.clientX;
-      this.mouse.y = e.clientY;
-    });
-    window.addEventListener('mouseout', () => {
-      this.mouse.x = null;
-      this.mouse.y = null;
-    });
-
-    this.createParticles();
-    renderLoginShowcase();
-    this.start();
-  },
-
-  resize() {
-    if (!this.canvas) return;
-    this.canvas.width = window.innerWidth;
-    this.canvas.height = window.innerHeight;
-  },
-
-  createParticles() {
-    this.particles = [];
-    const count = Math.min(90, Math.max(45, Math.floor((window.innerWidth * window.innerHeight) / 12000)));
-    const colors = [
-      'rgba(0, 229, 255, 0.9)',   // Celestial Cyan
-      'rgba(168, 85, 247, 0.9)',  // Royal Violet
-      'rgba(251, 191, 36, 0.85)', // Amber Gold
-      'rgba(52, 211, 153, 0.85)', // Emerald
-      'rgba(255, 255, 255, 0.95)' // Starlight
-    ];
-
-    for (let i = 0; i < count; i++) {
-      this.particles.push({
-        x: Math.random() * (this.canvas.width || window.innerWidth),
-        y: Math.random() * (this.canvas.height || window.innerHeight),
-        vx: (Math.random() - 0.5) * 0.6,
-        vy: (Math.random() - 0.5) * 0.6,
-        radius: Math.random() * 2.2 + 1.2,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        pulseSpeed: Math.random() * 0.02 + 0.01,
-        pulseVal: Math.random() * Math.PI
-      });
-    }
-  },
-
-  spawnMeteor() {
-    if (!this.canvas) return;
-    this.meteors.push({
-      x: Math.random() * this.canvas.width * 0.8,
-      y: Math.random() * (this.canvas.height * 0.3),
-      length: Math.random() * 80 + 50,
-      speed: Math.random() * 8 + 6,
-      angle: Math.PI / 4 + (Math.random() - 0.5) * 0.2,
-      opacity: 1,
-      decay: Math.random() * 0.02 + 0.015
-    });
-  },
-
-  start() {
-    if (this.isRunning) return;
-    this.isRunning = true;
-
-    const animate = (now) => {
-      if (!this.isRunning || !this.ctx || !this.canvas) return;
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-      const w = this.canvas.width;
-      const h = this.canvas.height;
-
-      // Subtle luminous ambient nebula gradients
-      const grad1 = this.ctx.createRadialGradient(w * 0.2, h * 0.25, 40, w * 0.2, h * 0.25, w * 0.45);
-      grad1.addColorStop(0, 'rgba(0, 229, 255, 0.06)');
-      grad1.addColorStop(1, 'rgba(0, 229, 255, 0)');
-      this.ctx.fillStyle = grad1;
-      this.ctx.fillRect(0, 0, w, h);
-
-      const grad2 = this.ctx.createRadialGradient(w * 0.8, h * 0.75, 40, w * 0.8, h * 0.75, w * 0.45);
-      grad2.addColorStop(0, 'rgba(139, 92, 246, 0.06)');
-      grad2.addColorStop(1, 'rgba(139, 92, 246, 0)');
-      this.ctx.fillStyle = grad2;
-      this.ctx.fillRect(0, 0, w, h);
-
-      // Periodically spawn meteors
-      if (now - this.lastMeteorTime > 3500) {
-        this.spawnMeteor();
-        this.lastMeteorTime = now;
-      }
-
-      // Draw & update meteors
-      for (let m = this.meteors.length - 1; m >= 0; m--) {
-        const met = this.meteors[m];
-        const endX = met.x - Math.cos(met.angle) * met.length;
-        const endY = met.y - Math.sin(met.angle) * met.length;
-
-        const metGrad = this.ctx.createLinearGradient(met.x, met.y, endX, endY);
-        metGrad.addColorStop(0, `rgba(255, 255, 255, ${met.opacity})`);
-        metGrad.addColorStop(0.3, `rgba(0, 229, 255, ${met.opacity * 0.8})`);
-        metGrad.addColorStop(1, 'rgba(0, 229, 255, 0)');
-
-        this.ctx.beginPath();
-        this.ctx.strokeStyle = metGrad;
-        this.ctx.lineWidth = 2;
-        this.ctx.moveTo(met.x, met.y);
-        this.ctx.lineTo(endX, endY);
-        this.ctx.stroke();
-
-        met.x += Math.cos(met.angle) * met.speed;
-        met.y += Math.sin(met.angle) * met.speed;
-        met.opacity -= met.decay;
-
-        if (met.opacity <= 0 || met.x > w || met.y > h) {
-          this.meteors.splice(m, 1);
-        }
-      }
-
-      // Draw & update constellation particles
-      for (let i = 0; i < this.particles.length; i++) {
-        const p = this.particles[i];
-        p.x += p.vx;
-        p.y += p.vy;
-
-        if (p.x < 0) p.x = this.canvas.width;
-        else if (p.x > this.canvas.width) p.x = 0;
-        if (p.y < 0) p.y = this.canvas.height;
-        else if (p.y > this.canvas.height) p.y = 0;
-
-        if (this.mouse.x !== null) {
-          const dx = this.mouse.x - p.x;
-          const dy = this.mouse.y - p.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < this.mouse.radius) {
-            const force = (this.mouse.radius - dist) / this.mouse.radius;
-            p.x -= (dx / dist) * force * 1.5;
-            p.y -= (dy / dist) * force * 1.5;
-          }
-        }
-
-        p.pulseVal += p.pulseSpeed;
-        const currentRadius = p.radius + Math.sin(p.pulseVal) * 0.6;
-
-        this.ctx.beginPath();
-        this.ctx.arc(p.x, p.y, Math.max(0.6, currentRadius), 0, Math.PI * 2);
-        this.ctx.fillStyle = p.color;
-        this.ctx.shadowBlur = 10;
-        this.ctx.shadowColor = p.color;
-        this.ctx.fill();
-        this.ctx.shadowBlur = 0;
-
-        for (let j = i + 1; j < this.particles.length; j++) {
-          const p2 = this.particles[j];
-          const dist = Math.hypot(p.x - p2.x, p.y - p2.y);
-          if (dist < 120) {
-            const alpha = (1 - dist / 120) * 0.32;
-            this.ctx.beginPath();
-            this.ctx.strokeStyle = `rgba(0, 229, 255, ${alpha})`;
-            this.ctx.lineWidth = 0.85;
-            this.ctx.moveTo(p.x, p.y);
-            this.ctx.lineTo(p2.x, p2.y);
-            this.ctx.stroke();
-          }
-        }
-      }
-
-      this.animId = requestAnimationFrame(animate);
-    };
-
-    this.animId = requestAnimationFrame(animate);
-  },
-
-  pause() {
-    this.isRunning = false;
-    if (this.animId) {
-      cancelAnimationFrame(this.animId);
-      this.animId = null;
-    }
-    if (this.ctx && this.canvas) {
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    }
-  },
-
-  resume() {
-    if (!this.canvas) this.init();
-    else if (!this.isRunning) this.start();
-    renderLoginShowcase();
-  }
+const LoginCosmos = window.LoginCosmos || {
+  init() {},
+  resume() {},
+  pause() {},
+  start() {}
 };
-
-function renderLoginShowcase() {
-  const tickerTrack = document.getElementById('loginTickerTrack');
-  const topGainersList = document.getElementById('topGainersList');
-  const topTopicsList = document.getElementById('topTopicsList');
-
-  const defaultTopGainers = [
-    { rank: '👑', name: 'Beshr Mohamed', avatar: '🦊', grade: 'Year 4', xp: 1540, skill: 'Fractions & Decimals', count: 48 },
-    { rank: '🥈', name: 'Sophia Chen', avatar: '🐼', grade: 'Year 4', xp: 1380, skill: 'Geometry & Angles', count: 42 },
-    { rank: '🥉', name: 'Alex Turner', avatar: '🦁', grade: 'Year 4', xp: 1250, skill: 'Multiplication Mastery', count: 39 },
-    { rank: '⭐', name: 'Liam Johnson', avatar: '🚀', grade: 'Year 4', xp: 1120, skill: 'Light & Shadows', count: 35 },
-    { rank: '⭐', name: 'Emma Watson', avatar: '🦄', grade: 'Year 4', xp: 990, skill: 'Data & Graphs', count: 31 }
-  ];
-
-  let displayGainers = defaultTopGainers;
-  try {
-    if (typeof DB !== 'undefined' && DB.getStudents) {
-      const students = DB.getStudents().filter(s => s.role !== 'teacher' && s.username !== 'admin' && s.username !== 'rania');
-      if (students && students.length >= 2) {
-        const sorted = [...students].sort((a, b) => (b.xp || 0) - (a.xp || 0));
-        const medals = ['👑', '🥈', '🥉', '⭐', '⭐'];
-        const sampleSkills = ['Fractions & Decimals', 'Mental Speed Maths', 'Geometry & Angles', 'Light & Forces', 'Data & Probability'];
-        displayGainers = sorted.slice(0, 5).map((s, idx) => ({
-          rank: medals[idx] || '⭐',
-          name: s.full_name || s.username,
-          avatar: s.avatar || '🦊',
-          grade: s.grade_level || 'Year 4',
-          xp: Math.max(s.xp || 0, 750 + (5 - idx) * 160),
-          skill: sampleSkills[idx % sampleSkills.length],
-          count: 25 + (5 - idx) * 5
-        }));
-      }
-    }
-  } catch (e) {
-    console.warn('Could not read students for showcase, using defaults:', e);
-  }
-
-  const topTopics = [
-    { icon: '📐', title: 'Stage 4 Mathematics', sub: '128 Solved • Fractions & Decimals', rate: '98% Mastery', pct: 98 },
-    { icon: '⚡', title: 'Speed Arithmetic Sprints', sub: '94 Sprints • Times Tables', rate: '96% Accuracy', pct: 96 },
-    { icon: '🔬', title: 'Primary Stage 4 Science', sub: '86 Solved • Forces & Light', rate: '95% Accuracy', pct: 95 },
-    { icon: '🎯', title: 'Geometry & Angles', sub: '74 Solved • Polygons & Shapes', rate: '92% Accuracy', pct: 92 }
-  ];
-
-  // Render Ticker
-  if (tickerTrack) {
-    const tickerItems = [
-      ...displayGainers.map(g => `
-        <div class="ticker-item">
-          <span>${g.rank}</span>
-          <strong>${g.name}</strong>
-          <span class="ticker-xp">${g.xp.toLocaleString()} XP</span>
-          <span class="ticker-skill">🎯 ${g.skill} (${g.count} Solved)</span>
-        </div>
-      `),
-      ...topTopics.map(t => `
-        <div class="ticker-item">
-          <span>${t.icon}</span>
-          <strong>${t.title}</strong>
-          <span class="ticker-xp" style="color:#10b981; background:rgba(16,185,129,0.14);">${t.rate}</span>
-        </div>
-      `)
-    ];
-
-    const combined = [...tickerItems, ...tickerItems].join('');
-    tickerTrack.innerHTML = combined;
-  }
-
-  // Render Left Showcase Panel (Top Gainers)
-  if (topGainersList) {
-    topGainersList.innerHTML = displayGainers.map(g => `
-      <div class="gainer-card">
-        <div class="gainer-rank">${g.rank}</div>
-        <div class="gainer-avatar">${g.avatar}</div>
-        <div class="gainer-info">
-          <div class="gainer-top-line">
-            <span class="gainer-name" title="${g.name}">${g.name}</span>
-            <span class="gainer-xp-pill">${g.xp.toLocaleString()} XP</span>
-          </div>
-          <div class="gainer-sub-line">
-            <span>${g.grade}</span>
-            <span>&bull;</span>
-            <span class="gainer-topic-tag">🎯 ${g.skill} (${g.count})</span>
-          </div>
-        </div>
-      </div>
-    `).join('');
-  }
-
-  // Render Right Showcase Panel (Top Topics / Fallback)
-  if (topTopicsList) {
-    topTopicsList.innerHTML = topTopics.map(t => `
-      <div class="topic-card">
-        <div class="topic-header-line">
-          <div class="topic-title">
-            <span>${t.icon}</span>
-            <span>${t.title}</span>
-          </div>
-          <div class="topic-badge">${t.rate}</div>
-        </div>
-        <div class="topic-progress-bar">
-          <div class="topic-progress-fill" style="width: ${t.pct}%;"></div>
-        </div>
-        <div class="topic-stats">
-          <span>${t.sub}</span>
-          <span>Cambridge Verified</span>
-        </div>
-      </div>
-    `).join('');
-  }
-
-  // Render Featured Student Blogs on Landing Showcase
-  const featuredBlogList = document.getElementById('featuredBlogList');
-  if (featuredBlogList && window.StudentBlog) {
-    const featured = StudentBlog.getFeaturedArticles();
-    if (featured && featured.length > 0) {
-      featuredBlogList.innerHTML = featured.map(art => `
-        <div class="featured-blog-card" onclick="StudentBlog.openArticleReader(${art.id})">
-          <div class="featured-blog-header">
-            <span class="featured-blog-author">${art.avatar} ${art.author} (${art.grade})</span>
-            <span class="featured-blog-tag">${art.category}</span>
-          </div>
-          <h4 class="featured-blog-title">${art.title}</h4>
-          <p class="featured-blog-excerpt">${art.summary}</p>
-          <div class="featured-blog-footer">
-            <span>📅 ${art.date}</span>
-            <span class="read-btn">Read Essay 📖</span>
-          </div>
-        </div>
-      `).join('');
-    } else {
-      featuredBlogList.innerHTML = '<div style="padding: 1.5rem; text-align: center; color: #94a3b8; font-size: 0.85rem;">No featured student essays yet.</div>';
-    }
-  }
-
-  // Render Horizontal Curriculum Bar below login stage
-  const curriculumGrid = document.getElementById('loginCurriculumGrid');
-  if (curriculumGrid) {
-    curriculumGrid.innerHTML = topTopics.map(t => `
-      <div class="curriculum-bar-card">
-        <div class="curriculum-bar-header">
-          <div class="curriculum-bar-icon">${t.icon}</div>
-          <div class="curriculum-bar-badge">${t.rate}</div>
-        </div>
-        <div class="curriculum-bar-title">${t.title}</div>
-        <div class="curriculum-bar-sub">${t.sub}</div>
-        <div class="topic-progress-bar" style="margin-top: 6px;">
-          <div class="topic-progress-fill" style="width: ${t.pct}%;"></div>
-        </div>
-      </div>
-    `).join('');
-  }
-}
+const renderLoginShowcase = window.renderLoginShowcase || function() {};
 
 const AppState = {
   data: null,
@@ -756,22 +406,9 @@ const DB = {
       }
     }
 
-    // 2. Check Teacher / Admin accounts (100% resilient fallback)
+    // 2. Teacher login must go through server API — no client-side bypass
     if (cleanUser === 'admin' || cleanUser === 'rania') {
-      const allowedTeacherPass = ['admin123', 'admin', 'password123', '123456', 'TeacherSecureNewPass_123!', 'Rania@2026!', 'Admin@2026!'];
-      if (!allowedTeacherPass.includes(cleanPw)) {
-        throw new Error('Incorrect teacher password (default: admin123 or Rania@2026!)');
-      }
-      return {
-        id: 5,
-        username: cleanUser,
-        full_name: 'Miss Rania',
-        role: 'teacher',
-        grade_level: 'Instructor',
-        avatar: '👩‍🏫',
-        xp: 0,
-        streak_days: 0
-      };
+      throw new Error('Teacher login requires server connection. Please ensure the server is running.');
     }
 
     // 3. Check custom registered students in localStorage
@@ -787,7 +424,7 @@ const DB = {
       .filter(s => !deletedSet.has(s.id));
     const localFound = localStudents.find(s => s.username.toLowerCase() === cleanUser);
     if (localFound) {
-      if (localFound.password && localFound.password !== cleanPw && cleanPw !== '123456' && cleanPw !== 'password123' && cleanPw !== 'Beshr@2026!' && cleanPw !== 'Student@2026!') {
+      if (localFound.password && localFound.password !== cleanPw) {
         throw new Error('Incorrect password');
       }
       const stats = this.getStudentStats(localFound.id);
@@ -801,13 +438,10 @@ const DB = {
     if (found) {
       const isTeacher = found.role === 'teacher';
       if (isTeacher) {
-        if (cleanPw !== 'admin123' && cleanPw !== 'admin' && cleanPw !== 'Rania@2026!' && cleanPw !== 'Admin@2026!') {
-          throw new Error('Incorrect password (default: admin123 or Rania@2026!)');
-        }
+        throw new Error('Teacher login requires server connection.');
       } else {
-        const validStudentPass = [found.password, '123456', 'password123', 'StudentPass123!', 'Beshr@2026!', 'Student@2026!'];
-        if (!validStudentPass.includes(cleanPw)) {
-          throw new Error('Incorrect password (default: 123456, password123, or Beshr@2026!)');
+        if (found.password && found.password !== cleanPw) {
+          throw new Error('Incorrect password');
         }
       }
       const stats = this.getStudentStats(found.id);

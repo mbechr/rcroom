@@ -350,9 +350,13 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
         if ext not in allowed:
             return ""
             
-        # 4) Block sensitive paths
+        # 4) Block sensitive paths (allow .js in data/ but block databases)
         rel = os.path.relpath(real, root).replace("\\", "/").lower()
-        if rel.startswith(("data/", "tests/", "tools/", ".github/", "__pycache__/", ".git/", "scratch/")):
+        sensitive_dirs = ("tests/", "tools/", ".github/", "__pycache__/", ".git/", "scratch/")
+        if rel.startswith(sensitive_dirs):
+            return ""
+        # Block database and raw data files in data/ but allow .js
+        if rel.startswith("data/") and ext in {".db", ".sqlite", ".sqlite3", ".csv"}:
             return ""
             
         return real
@@ -433,14 +437,19 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
             cursor.execute('SELECT password_hash FROM users WHERE id = ?', (auth_user['id'],))
             user_row = cursor.fetchone()
 
-            if current_pw:
-                is_valid, _ = verify_pw(current_pw, user_row['password_hash'])
-                if not is_valid:
-                    conn.close()
-                    return self.send_json({'success': False, 'error': 'Current password is incorrect.'}, status=401)
+            if not current_pw:
+                return self.send_json({'success': False, 'error': 'Current password is required.'}, status=400)
+
+            is_valid, _ = verify_pw(current_pw, user_row['password_hash'])
+            if not is_valid:
+                conn.close()
+                return self.send_json({'success': False, 'error': 'Current password is incorrect.'}, status=401)
 
             new_salted_hash = hash_pw(new_pw)
             cursor.execute('UPDATE users SET password_hash = ?, must_reset_password = 0 WHERE id = ?', (new_salted_hash, auth_user['id']))
+            # Invalidate all other active sessions across devices
+            current_token = auth_user.get('session_token') or ''
+            cursor.execute('DELETE FROM user_sessions WHERE user_id = ? AND token != ?', (auth_user['id'], current_token))
             conn.commit()
             conn.close()
             return self.send_json({'success': True, 'message': 'Password changed successfully.'})
@@ -834,6 +843,7 @@ class StudentPortalHandler(http.server.SimpleHTTPRequestHandler):
             conn = get_db()
             cursor = conn.cursor()
             cursor.execute('UPDATE users SET password_hash = ?, must_reset_password = 0 WHERE id = ? AND role != \'teacher\'', (hash_pw(new_password), student_id))
+            cursor.execute('DELETE FROM user_sessions WHERE user_id = ?', (student_id,))
             conn.commit()
             conn.close()
             return self.send_json({'success': True})

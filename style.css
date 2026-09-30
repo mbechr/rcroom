@@ -178,6 +178,18 @@ body {
   100% { transform: translate(60px, -50px) scale(0.95); }
 }
 
+/* Respect user motion preferences & reduce GPU load */
+@media (prefers-reduced-motion: reduce) {
+  .glow-orb,
+  .orb-primary,
+  .orb-secondary,
+  .orb-accent {
+    animation: none !important;
+    opacity: 0.15;
+    filter: blur(60px);
+  }
+}
+
 /* ==========================================================================
    Navigation Header (Modern Floating Glass Island)
    ========================================================================== */
@@ -1213,27 +1225,6 @@ body {
   font-weight: 700;
 }
 
-.learn-pill-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.48rem 1.05rem;
-  border-radius: var(--radius-pill);
-  background: var(--color-primary);
-  color: #ffffff;
-  font-size: 0.82rem;
-  font-weight: 700;
-  border: none;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: var(--transition-smooth);
-  box-shadow: 0 4px 12px var(--color-primary-glow);
-}
-
-.learn-pill-btn:hover {
-  background: var(--color-primary-hover);
-  transform: translateY(-2px) scale(1.03);
-}
 
 /* ==========================================================================
    VIEW 3: Skills Bank Explorer (24,792 Skills)
@@ -1476,9 +1467,6 @@ body {
   flex-shrink: 0;
 }
 
-.permacode-pill {
-  display: none !important;
-}
 
 .action-icon-btn {
   background: transparent;
@@ -2314,6 +2302,17 @@ body.auth-locked .login-aurora-bg {
   0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
   50% { transform: translate(-40%, -60%) scale(1.15) rotate(45deg); }
   100% { transform: translate(-60%, -40%) scale(0.85) rotate(-30deg); }
+}
+
+/* Respect user motion preferences for login aurora */
+@media (prefers-reduced-motion: reduce) {
+  .aurora-orb,
+  .aurora-orb-1,
+  .aurora-orb-2,
+  .aurora-orb-3 {
+    animation: none !important;
+    opacity: 0.2;
+  }
 }
 
 /* Perspective Cyber Grid Overlay */

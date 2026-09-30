@@ -27,6 +27,9 @@
     unsubscribeStudents: null,
     unsubscribeLogs: null,
     unsubscribeAssignments: null,
+    unsubscribePayments: null,
+    unsubscribeClassSessions: null,
+    unsubscribePermissions: null,
     unsubscribeGroups: null,
 
     init() {
@@ -237,7 +240,8 @@
 
       // 4. Realtime Payment Proofs / Receipts Listener
       try {
-        this.firestore.collection('payments')
+        if (this.unsubscribePayments) this.unsubscribePayments();
+        this.unsubscribePayments = this.firestore.collection('payments')
           .orderBy('submitted_at', 'desc')
           .limit(50)
           .onSnapshot(snapshot => {
@@ -274,7 +278,8 @@
 
       // 5. Realtime Class Sessions (Zoom & Curriculum Log) Listener
       try {
-        this.firestore.collection('class_sessions')
+        if (this.unsubscribeClassSessions) this.unsubscribeClassSessions();
+        this.unsubscribeClassSessions = this.firestore.collection('class_sessions')
           .orderBy('date', 'desc')
           .limit(50)
           .onSnapshot(snapshot => {
@@ -307,7 +312,8 @@
 
       // 6. Realtime Curriculum Permissions Listener
       try {
-        this.firestore.collection('curriculum_permissions').onSnapshot(snapshot => {
+        if (this.unsubscribePermissions) this.unsubscribePermissions();
+        this.unsubscribePermissions = this.firestore.collection('curriculum_permissions').onSnapshot(snapshot => {
           snapshot.forEach(doc => {
             const data = doc.data();
             const sId = Number(doc.id) || Number(data.student_id);
@@ -361,6 +367,25 @@
             console.warn('Student groups realtime listener error:', err.message);
           });
       } catch (e) {}
+    },
+
+    detachRealtimeListeners() {
+      const handles = [
+        'unsubscribeStudents',
+        'unsubscribeLogs',
+        'unsubscribeAssignments',
+        'unsubscribePayments',
+        'unsubscribeClassSessions',
+        'unsubscribePermissions',
+        'unsubscribeGroups'
+      ];
+      handles.forEach(h => {
+        if (typeof this[h] === 'function') {
+          try { this[h](); } catch (e) {}
+          this[h] = null;
+        }
+      });
+      console.log('🔌 CloudDB: Realtime listeners successfully detached.');
     },
 
     // -------------------------------------------------------------------------
@@ -866,7 +891,7 @@
           id: Number(st.id),
           username: st.username.toLowerCase(),
           full_name: st.full_name,
-          password: st.password || '123456',
+          // NOTE: password intentionally excluded — never store plaintext passwords in cloud
           grade_level: st.grade_level || 'Year 4',
           avatar: st.avatar || '🦊',
           xp: st.xp || 0,

@@ -2,7 +2,8 @@
  * Rania Classroom — Freeze-Safe Speech Synthesis Audio Manager
  * Fixes:
  * 1. Web Speech API freezing / stalling in Chrome due to GC or uncancelled state
- * 2. Arabic & English voice auto-selection according to current language
+ * 2. Arabic & English voice auto-selection according to current language & Unicode text
+ * 3. Safe extraction of choices text (strings or option objects)
  */
 
 const SpeechAudio = {
@@ -11,7 +12,7 @@ const SpeechAudio = {
 
   speak(text, onEnd) {
     if (!('speechSynthesis' in window)) {
-      if (window.showToast) showToast('Text-to-speech is not supported in this browser.');
+      if (window.showToast) window.showToast('Text-to-speech is not supported in this browser.');
       return;
     }
 
@@ -28,8 +29,21 @@ const SpeechAudio = {
       .trim();
 
     const utter = new SpeechSynthesisUtterance(cleanText);
-    utter.lang = 'en-US';
+
+    // Auto-detect Arabic vs English
+    const isArabic = /[\u0600-\u06FF]/.test(cleanText) || (window.I18N && window.I18N.currentLang === 'ar');
+    utter.lang = isArabic ? 'ar-SA' : 'en-GB';
     utter.rate = 0.95; // Measured pace for student comprehension
+
+    // Pick best matching voice if available
+    try {
+      const voices = window.speechSynthesis.getVoices();
+      if (voices && voices.length) {
+        const langPrefix = isArabic ? 'ar' : 'en';
+        const match = voices.find(v => v.lang && v.lang.startsWith(langPrefix));
+        if (match) utter.voice = match;
+      }
+    } catch (e) {}
 
     // Retain global reference to avoid Chromium Garbage Collector freeze
     window._currentSpeechUtterance = utter;
@@ -105,7 +119,13 @@ const SpeechAudio = {
       if (q && q.prompt) {
         let fullSpeech = q.prompt;
         if (q.options && q.options.length) {
-          fullSpeech += '. Choices: ' + q.options.join(', ');
+          const optsText = q.options
+            .map(opt => (typeof opt === 'string' ? opt : (opt.label || opt.text || opt.val || '')))
+            .filter(Boolean)
+            .join(', ');
+          if (optsText) {
+            fullSpeech += '. Choices: ' + optsText;
+          }
         }
         this.speak(fullSpeech);
       }

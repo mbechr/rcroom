@@ -3,6 +3,17 @@
 // =============================================================================
 
 const StudentBlog = {
+  // HTML sanitizer to prevent Stored XSS from user-submitted content
+  _escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  },
+
   articles: [
     {
       id: 1,
@@ -152,28 +163,36 @@ const StudentBlog = {
       </div>
 
       <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.25rem;">
-        ${this.articles.map(art => `
+        ${this.articles.map(art => {
+          const safeTitle = this._escapeHtml(art.title);
+          const safeAuthor = this._escapeHtml(art.author);
+          const safeSummary = this._escapeHtml(art.summary);
+          const safeCategory = this._escapeHtml(art.category);
+          const safeGrade = this._escapeHtml(art.grade);
+          const safeDate = this._escapeHtml(art.date);
+          const safeAvatar = this._escapeHtml(art.avatar);
+          return `
           <div class="blog-post-card ${art.featured ? 'is-featured' : ''}" style="background: var(--bg-surface-solid); border: 1px solid ${art.featured ? 'rgba(0,229,255,0.4)' : 'var(--border-card)'}; border-radius: 18px; padding: 1.35rem; display: flex; flex-direction: column; box-shadow: var(--shadow-sm); position: relative;">
             ${art.featured ? `<div style="position: absolute; top: 12px; right: 12px; background: rgba(0,229,255,0.12); color: #00e5ff; border: 1px solid rgba(0,229,255,0.3); font-size: 0.68rem; font-weight: 800; padding: 2px 8px; border-radius: 9999px;">⭐ Featured by Miss Rania</div>` : ''}
             
             <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.75rem;">
-              <div style="font-size: 1.4rem; width: 36px; height: 36px; border-radius: 50%; background: var(--bg-hover); display: flex; align-items: center; justify-content: center;">${art.avatar}</div>
+              <div style="font-size: 1.4rem; width: 36px; height: 36px; border-radius: 50%; background: var(--bg-hover); display: flex; align-items: center; justify-content: center;">${safeAvatar}</div>
               <div>
-                <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-main);">${art.author}</div>
-                <div style="font-size: 0.72rem; color: var(--text-muted);">${art.grade} &bull; ${art.date}</div>
+                <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-main);">${safeAuthor}</div>
+                <div style="font-size: 0.72rem; color: var(--text-muted);">${safeGrade} &bull; ${safeDate}</div>
               </div>
             </div>
 
             <div style="font-size: 0.72rem; font-weight: 700; text-transform: uppercase; color: var(--color-primary); letter-spacing: 0.05em; margin-bottom: 0.35rem;">
-              ${art.category}
+              ${safeCategory}
             </div>
 
             <h3 style="font-size: 1.05rem; font-weight: 800; color: var(--text-main); line-height: 1.4; margin-bottom: 0.5rem;">
-              ${art.title}
+              ${safeTitle}
             </h3>
 
             <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.6; flex: 1; margin-bottom: 1rem;">
-              ${art.summary}
+              ${safeSummary}
             </p>
 
             <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-subtle); padding-top: 0.75rem; margin-top: auto;">
@@ -188,7 +207,7 @@ const StudentBlog = {
               ` : ''}
             </div>
           </div>
-        `).join('')}
+        `}).join('')}
       </div>
     `;
   },
@@ -210,7 +229,7 @@ const StudentBlog = {
 
     document.getElementById('blogReaderTitle').textContent = art.title;
     document.getElementById('blogReaderMeta').textContent = `By ${art.author} (${art.grade}) • Published ${art.date} • ${art.category}`;
-    document.getElementById('blogReaderContent').innerHTML = art.content.split('\n\n').map(p => `<p style="margin-bottom: 1rem; line-height: 1.75; font-size: 0.95rem; color: #e2e8f0;">${p}</p>`).join('');
+    document.getElementById('blogReaderContent').innerHTML = this._escapeHtml(art.content).split('\n\n').map(p => `<p style="margin-bottom: 1rem; line-height: 1.75; font-size: 0.95rem; color: #e2e8f0;">${p}</p>`).join('');
 
     modal.classList.add('open');
   },
