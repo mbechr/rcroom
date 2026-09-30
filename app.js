@@ -7556,53 +7556,81 @@ function setupEventListeners() {
     });
   }
 
-  // Login Form (Unified Authentication for Students and Teacher/Admin)
-  if (el.loginForm) {
-    el.loginForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const u = el.loginUsername.value.trim();
-      const p = el.loginPassword.value;
-      try {
-        const student = await DB.login(u, p);
-        document.body.classList.remove('auth-locked');
-        setCurrentStudent(student);
-        el.authModal.classList.remove('open');
-        await loadAndRenderPortal();
-        const isTeacher = student.role === 'teacher' || student.username === 'admin' || student.username === 'rania';
-        if (isTeacher) {
-          showToast('Welcome Teacher (Admin Console) 👩‍🏫');
-        } else {
-          showToast(`Welcome back, ${student.full_name}! 👋`);
-        }
-      } catch (err) {
-        el.loginErrorMsg.textContent = err.message || 'Invalid username or password';
-        el.loginErrorMsg.style.display = 'block';
-      }
-    });
-  }
+  // Global & Bulletproof Unified Login Handler
+  window.handleLoginSubmit = async function(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    const uInput = document.getElementById('loginUsername');
+    const pInput = document.getElementById('loginPassword');
+    const errEl = document.getElementById('loginErrorMsg');
+    const submitBtn = document.getElementById('submitLoginBtn');
 
-  window.quickSignInAs = async function(username, password) {
-    if (el.loginUsername) el.loginUsername.value = username;
-    if (el.loginPassword) el.loginPassword.value = password;
-    if (el.loginErrorMsg) el.loginErrorMsg.style.display = 'none';
+    const u = (uInput?.value || '').trim();
+    const p = (pInput?.value || '').trim();
+
+    if (!u) {
+      if (errEl) {
+        errEl.textContent = 'Please enter your username';
+        errEl.style.display = 'block';
+      }
+      if (uInput) uInput.focus();
+      return false;
+    }
+    if (!p) {
+      if (errEl) {
+        errEl.textContent = 'Please enter your password';
+        errEl.style.display = 'block';
+      }
+      if (pInput) pInput.focus();
+      return false;
+    }
+
+    if (errEl) errEl.style.display = 'none';
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = '0.7';
+    }
+
     try {
-      const student = await DB.login(username, password);
+      const student = await DB.login(u, p);
       document.body.classList.remove('auth-locked');
       setCurrentStudent(student);
-      if (el.authModal) el.authModal.classList.remove('open');
+      const authModal = document.getElementById('authModal');
+      if (authModal) authModal.classList.remove('open');
       await loadAndRenderPortal();
       const isTeacher = student.role === 'teacher' || student.username === 'admin' || student.username === 'rania';
       if (isTeacher) {
         showToast('Welcome Teacher (Admin Console) 👩‍🏫');
       } else {
-        showToast(`Welcome back, ${student.full_name}! 👋`);
+        showToast(`Welcome back, ${student.full_name || student.username}! 👋`);
       }
     } catch (err) {
-      if (el.loginErrorMsg) {
-        el.loginErrorMsg.textContent = err.message || 'Invalid username or password';
-        el.loginErrorMsg.style.display = 'block';
+      if (errEl) {
+        errEl.textContent = err.message || 'Invalid username or password';
+        errEl.style.display = 'block';
+      }
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.style.opacity = '1';
       }
     }
+    return false;
+  };
+
+  // Login Form submit listener
+  const lForm = document.getElementById('loginForm');
+  if (lForm) {
+    lForm.addEventListener('submit', window.handleLoginSubmit);
+  }
+
+  window.quickSignInAs = async function(username, password) {
+    const uInput = document.getElementById('loginUsername');
+    const pInput = document.getElementById('loginPassword');
+    const errEl = document.getElementById('loginErrorMsg');
+    if (uInput) uInput.value = username;
+    if (pInput) pInput.value = password;
+    if (errEl) errEl.style.display = 'none';
+    return window.handleLoginSubmit();
   };
 
   // Backdrop click on AuthModal (Prevent closing when unauthenticated)
