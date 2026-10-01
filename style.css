@@ -1107,7 +1107,7 @@ body {
 .portal-main-content {
   max-width: 1440px;
   margin: 0 auto;
-  padding: 2rem 1.5rem 5rem;
+  padding: 0.5rem 1.25rem 4rem;
   position: relative;
   z-index: 2;
 }
@@ -7481,7 +7481,7 @@ html[dir="rtl"] #mainContentWrapper {
    ======================================================================== */
 :root {
   --rc-sidebar-width: 250px;
-  --rc-header-height: 72px;
+  --rc-header-height: 68px;
   --rc-radius-lg: 20px;
   --rc-radius-md: 14px;
   --rc-shadow-soft: 0 10px 30px rgba(15, 23, 42, .06);
@@ -7524,7 +7524,7 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 #portalSidebar::-webkit-scrollbar { width: 7px; }
 #portalSidebar::-webkit-scrollbar-thumb { background: #dbe3f0; border-radius: 99px; }
 
-/* Main content: joyful full-width layout */
+/* Main content: joyful full-width layout with tight, modern breathing room */
 aside#portalSidebar {
   display: none !important;
 }
@@ -7533,12 +7533,12 @@ main#portalMain,
 #mainContentWrapper {
   margin-left: 0 !important;
   padding-left: 0 !important;
-  padding-top: calc(var(--rc-header-height) + 24px) !important;
-  padding-right: clamp(16px, 2.5vw, 34px);
+  padding-top: 8px !important;
+  padding-right: clamp(14px, 2.5vw, 32px);
   padding-bottom: 40px;
 }
 .portal-view { max-width: 1480px; margin: 0 auto; }
-.view-header-row { margin-bottom: 22px; }
+.view-header-row { margin-bottom: 16px; }
 .view-kicker {
   font-size: .67rem;
   font-weight: 800;
@@ -7616,13 +7616,37 @@ table { min-width: 620px; }
   #portalNavbar { height: 64px !important; min-height: 64px; }
   #portalNavbar > div { height: 64px !important; padding-left: 12px; padding-right: 12px; }
   #portalSidebar { top: 64px !important; }
-  main#portalMain, #portalMain { padding-top: 78px !important; padding-left: 12px; padding-right: 12px; }
+  main#portalMain, #portalMain { padding-top: 10px !important; padding-left: 12px; padding-right: 12px; }
   .view-main-title { font-size: 1.35rem; }
   .view-lead-text { font-size: .84rem; }
   #brandHomeBtn > div:last-child { display: none; }
   #topTeacherQuickBtn { display: none !important; }
   #studentProfilePill { padding-left: 6px; padding-right: 6px; }
   .portal-view .p-6 { padding: 1rem; }
+}
+
+@media (max-width: 1360px) {
+  .nav-capsule .btn {
+    padding: 8px 12px;
+    font-size: 0.82rem;
+    gap: 6px;
+  }
+  .nav-capsule .btn .icon {
+    font-size: 17px;
+  }
+}
+
+#navLogoutBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+#navLogoutBtn svg {
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+#navLogoutBtn:hover svg {
+  transform: scale(1.15) translateX(-2px);
 }
 
 /* Respect reduced-motion preferences */
