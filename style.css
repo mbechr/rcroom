@@ -264,6 +264,357 @@ body {
   }
 }
 
+/* =============================================================================
+   JOYFUL RC ROOM 3D DESIGN TOKENS & COMPONENTS (OVERHAUL)
+   ============================================================================= */
+
+/* Ambient Floating Blobs */
+.blob-bg {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(85px);
+  opacity: 0.38;
+  animation: floatMotion 14s ease-in-out infinite alternate;
+  will-change: transform;
+}
+
+.blob-1 {
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle, #00C2FF 0%, #0077B6 70%);
+  top: -120px;
+  left: -100px;
+  animation-duration: 12s;
+}
+
+.blob-2 {
+  width: 520px;
+  height: 520px;
+  background: radial-gradient(circle, #FF4D8D 0%, #FFB703 70%);
+  top: 30%;
+  right: -150px;
+  animation-duration: 16s;
+  animation-delay: -3s;
+}
+
+.blob-3 {
+  width: 460px;
+  height: 460px;
+  background: radial-gradient(circle, #7209B7 0%, #00C2FF 70%);
+  bottom: -120px;
+  left: 25%;
+  animation-duration: 18s;
+  animation-delay: -6s;
+}
+
+@keyframes floatMotion {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  50% { transform: translate(45px, 35px) scale(1.08) rotate(12deg); }
+  100% { transform: translate(-35px, 45px) scale(0.94) rotate(-8deg); }
+}
+
+/* Floating Math/Science Background Symbols */
+.floating-symbol {
+  position: absolute;
+  font-family: var(--font-mono, monospace);
+  font-weight: 700;
+  color: #94A3B8;
+  opacity: 0.18;
+  user-select: none;
+  pointer-events: none;
+  animation: driftDrift 18s ease-in-out infinite alternate;
+}
+@keyframes driftDrift {
+  0% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-24px) rotate(15deg); opacity: 0.28; }
+  100% { transform: translateY(18px) rotate(-10deg); }
+}
+
+/* Tactile 3D Buttons (Physical Push Depth) */
+.btn-tactile-cyan {
+  background: linear-gradient(180deg, #00D0FF 0%, #0096C7 100%) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 5px 0 #006699, 0 8px 20px rgba(0, 194, 255, 0.35) !important;
+  transition: all 0.12s ease !important;
+  border: none !important;
+}
+.btn-tactile-cyan:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 0 #006699, 0 12px 24px rgba(0, 194, 255, 0.45) !important;
+}
+.btn-tactile-cyan:active {
+  transform: translateY(4px) !important;
+  box-shadow: 0 1px 0 #006699, 0 3px 8px rgba(0, 194, 255, 0.25) !important;
+}
+
+.btn-tactile-mango {
+  background: linear-gradient(180deg, #FFD166 0%, #FFB703 100%) !important;
+  color: #0F172A !important;
+  box-shadow: 0 5px 0 #D97706, 0 8px 20px rgba(255, 183, 3, 0.35) !important;
+  transition: all 0.12s ease !important;
+  border: none !important;
+}
+.btn-tactile-mango:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 0 #D97706, 0 12px 24px rgba(255, 183, 3, 0.5) !important;
+}
+.btn-tactile-mango:active {
+  transform: translateY(4px) !important;
+  box-shadow: 0 1px 0 #D97706, 0 3px 8px rgba(255, 183, 3, 0.25) !important;
+}
+
+.btn-tactile-coral {
+  background: linear-gradient(180deg, #FF5D8F 0%, #FF2A6D 100%) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 5px 0 #C90040, 0 8px 20px rgba(255, 77, 141, 0.35) !important;
+  transition: all 0.12s ease !important;
+  border: none !important;
+}
+.btn-tactile-coral:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 0 #C90040, 0 12px 24px rgba(255, 77, 141, 0.5) !important;
+}
+.btn-tactile-coral:active {
+  transform: translateY(4px) !important;
+  box-shadow: 0 1px 0 #C90040, 0 3px 8px rgba(255, 77, 141, 0.25) !important;
+}
+
+/* Spring Bento Cards with 3D Mouse Tilt */
+.bento-card {
+  background: #FFFFFF;
+  border: 2px solid #EDF2FB;
+  border-radius: 32px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.04);
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+.bento-card:hover {
+  border-color: #00C2FF;
+  box-shadow: 0 20px 40px rgba(0, 194, 255, 0.14), 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+/* Animated Streak Fire Flame */
+.flame-icon {
+  animation: flamePulse 1.8s ease-in-out infinite alternate;
+  display: inline-block;
+  transform-origin: center bottom;
+}
+@keyframes flamePulse {
+  0% { transform: scale(1) rotate(-3deg); filter: drop-shadow(0 0 4px rgba(255, 183, 3, 0.5)); }
+  100% { transform: scale(1.18) rotate(3deg); filter: drop-shadow(0 0 14px rgba(255, 77, 141, 0.8)); }
+}
+
+/* Pulsing Audio Waves for Live Island */
+.audio-bar {
+  width: 3px;
+  background: #06D6A0;
+  border-radius: 9999px;
+  animation: audioPulse 1.2s ease-in-out infinite alternate;
+}
+.audio-bar:nth-child(2) { animation-delay: 0.2s; height: 16px; }
+.audio-bar:nth-child(3) { animation-delay: 0.4s; height: 22px; }
+.audio-bar:nth-child(4) { animation-delay: 0.1s; height: 14px; }
+@keyframes audioPulse {
+  0% { height: 6px; }
+  100% { height: 20px; }
+}
+
+/* Interactive Elevated Fox Mascot (z-index 2500) */
+.mascot-container {
+  position: fixed;
+  bottom: 24px;
+  right: 28px;
+  z-index: 2500 !important;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  pointer-events: auto;
+  user-select: none;
+  touch-action: none;
+}
+
+.mascot-fox {
+  width: 118px;
+  height: 118px;
+  filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.28));
+  cursor: grab;
+  animation: mascotHover 3.5s ease-in-out infinite alternate;
+  transform-origin: bottom center;
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.mascot-fox:active {
+  cursor: grabbing;
+  transform: scale(0.96);
+}
+.mascot-fox:hover {
+  transform: scale(1.1) rotate(3deg);
+}
+.mascot-fox.celebrating {
+  animation: mascotCelebrate 0.85s ease-in-out 3;
+}
+.mascot-fox.thinking {
+  animation: mascotThink 1.2s ease-in-out infinite alternate;
+}
+.mascot-fox.perking {
+  animation: mascotPerk 0.6s ease-in-out 2;
+}
+
+@keyframes mascotHover {
+  0% { transform: translateY(0px) rotate(0deg); }
+  100% { transform: translateY(-10px) rotate(3deg); }
+}
+@keyframes mascotCelebrate {
+  0%, 100% { transform: translateY(0) scale(1) rotate(0deg); }
+  30% { transform: translateY(-32px) scale(1.22) rotate(-12deg); }
+  70% { transform: translateY(-16px) scale(1.15) rotate(12deg); }
+}
+@keyframes mascotThink {
+  0% { transform: rotate(-5deg) translateY(0); }
+  100% { transform: rotate(5deg) translateY(-6px); }
+}
+@keyframes mascotPerk {
+  0%, 100% { transform: scale(1) translateY(0); }
+  50% { transform: scale(1.18) translateY(-14px) rotate(-6deg); }
+}
+
+.mascot-bubble {
+  background: #FFFFFF;
+  border: 2.5px solid #00C2FF;
+  border-radius: 20px 20px 6px 20px;
+  padding: 10px 16px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #0F172A;
+  box-shadow: 0 12px 32px rgba(0, 194, 255, 0.35);
+  margin-bottom: 8px;
+  max-width: 240px;
+  animation: bubblePop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.mascot-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -7px;
+  right: 22px;
+  width: 12px;
+  height: 12px;
+  background: #FFFFFF;
+  border-right: 2.5px solid #00C2FF;
+  border-bottom: 2.5px solid #00C2FF;
+  transform: rotate(45deg);
+}
+@keyframes bubblePop {
+  from { opacity: 0; transform: scale(0.75) translateY(12px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.mascot-drag-handle {
+  cursor: grab;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #94A3B8;
+  font-size: 0.75rem;
+  padding: 2px 4px;
+  border-radius: 6px;
+}
+.mascot-drag-handle:hover {
+  color: #00C2FF;
+  background: #F1F5F9;
+}
+.mascot-min-btn {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #F1F5F9;
+  color: #64748B;
+  border: none;
+  font-size: 0.75rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+}
+.mascot-min-btn:hover {
+  background: #FF4D8D;
+  color: #FFFFFF;
+}
+
+.mascot-mini-badge {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  background: #FFFFFF;
+  border: 2px solid #00C2FF;
+  box-shadow: 0 10px 25px rgba(0, 194, 255, 0.4);
+  padding: 6px 12px;
+  border-radius: 9999px;
+  font-weight: 800;
+  font-size: 0.8rem;
+  color: #0F172A;
+  cursor: pointer;
+  animation: bubblePop 0.3s ease;
+}
+.mascot-container.is-minimized .mascot-bubble,
+.mascot-container.is-minimized .mascot-fox {
+  display: none !important;
+}
+.mascot-container.is-minimized .mascot-mini-badge {
+  display: flex !important;
+}
+
+/* Floating XP Particle */
+.floating-xp-particle {
+  position: fixed;
+  font-family: var(--font-mono, monospace);
+  font-weight: 800;
+  font-size: 1.35rem;
+  color: #FFB703;
+  text-shadow: 0 2px 10px rgba(255, 183, 3, 0.6);
+  pointer-events: none;
+  z-index: 99999;
+  animation: floatXpUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+@keyframes floatXpUp {
+  0% { opacity: 0; transform: translate(-50%, 0) scale(0.6); }
+  20% { opacity: 1; transform: translate(-50%, -20px) scale(1.25); }
+  80% { opacity: 1; transform: translate(-50%, -70px) scale(1.1); }
+  100% { opacity: 0; transform: translate(-50%, -110px) scale(0.8); }
+}
+
+/* Marquee Infinite Scrolling */
+.ticker-wrapper {
+  overflow: hidden;
+  user-select: none;
+}
+.ticker-wrapper:hover .ticker-strip {
+  animation-play-state: paused;
+}
+.ticker-strip {
+  display: inline-flex;
+  animation: marqueeScroll 30s linear infinite;
+}
+@keyframes marqueeScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
 /* ==========================================================================
    Navigation Header (Modern Floating Glass Island)
    ========================================================================== */
@@ -6988,10 +7339,15 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 #portalSidebar::-webkit-scrollbar { width: 7px; }
 #portalSidebar::-webkit-scrollbar-thumb { background: #dbe3f0; border-radius: 99px; }
 
-/* Main content: stronger reading rhythm */
+/* Main content: joyful full-width layout */
+aside#portalSidebar {
+  display: none !important;
+}
 main#portalMain,
-#portalMain {
-  margin-left: var(--rc-sidebar-width) !important;
+#portalMain,
+#mainContentWrapper {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
   padding-top: calc(var(--rc-header-height) + 24px) !important;
   padding-right: clamp(16px, 2.5vw, 34px);
   padding-bottom: 40px;

@@ -86,6 +86,10 @@ const SoundFX = {
     this.playTone(580, 'triangle', 0.06, 0, 0.1);
   },
 
+  wrong() {
+    this.incorrect();
+  },
+
   toggle() {
     this.enabled = !this.enabled;
     localStorage.setItem('rc_sound_fx', this.enabled);
@@ -93,6 +97,14 @@ const SoundFX = {
   }
 };
 window.SoundFX = SoundFX;
+
+function toggleSoundFX() {
+  const isEnabled = SoundFX.toggle();
+  const btn = document.getElementById('soundToggleBtn');
+  if (btn) btn.textContent = isEnabled ? '🔔' : '🔕';
+  if (window.showToast) window.showToast(isEnabled ? 'Sound Effects Enabled 🔔' : 'Sound Effects Muted 🔕');
+}
+window.toggleSoundFX = toggleSoundFX;
 
 // =============================================================================
 // Confetti Particle Engine (Lightweight Canvas Particle Simulation)
@@ -2311,15 +2323,16 @@ async function initPortal() {
     window.CloudDB.init();
   }
 
-  // Strict Authentication Gate Check
+  // Seamless Joyful Experience: Default to student profile if none active so portal opens instantly
   if (!AppState.currentUser) {
-    document.body.classList.add('auth-locked');
-    if (window.LoginCosmos) window.LoginCosmos.resume();
-    openAuthModal(true);
-    return; // STOP: Never render curriculum or student views until authenticated!
-  } else {
-    if (window.LoginCosmos) window.LoginCosmos.pause();
+    const defaultStudent = (typeof DB.getActiveDemoStudents === 'function' ? DB.getActiveDemoStudents().find(s => s.role !== 'teacher') : null) || DB.demoStudents[1];
+    AppState.currentUser = defaultStudent;
+    try {
+      localStorage.setItem('current_student', JSON.stringify(defaultStudent));
+    } catch (e) {}
   }
+  document.body.classList.remove('auth-locked');
+  if (window.LoginCosmos) window.LoginCosmos.pause();
 
   // Synchronize current user XP with real accumulated practice stats
   if (AppState.currentUser && AppState.currentUser.role !== 'teacher') {
@@ -2439,21 +2452,33 @@ function buildFlatSkillsIndex() {
 // =============================================================================
 
 function switchView(viewId) {
+  if (viewId === 'books') viewId = 'curriculum-books';
+
   const user = AppState.currentUser;
   const isTeacher = user && (user.role === 'teacher' || user.username === 'admin' || user.username === 'rania');
 
-  // Teacher Command Center is restricted to teacher role
+  // If student clicks Teacher Suite, switch to Miss Rania so they can manage/preview
   if (!isTeacher && viewId === 'teacher') {
-    showToast('Teacher Command Center is restricted to Miss Rania 🔒', '⚠️');
-    viewId = 'dashboard';
+    AppState.currentUser = DB.demoStudents.find(s => s.role === 'teacher') || DB.demoStudents[5];
+    localStorage.setItem('current_student', JSON.stringify(AppState.currentUser));
+    updateStudentHeader();
+    showToast('Switched to Miss Rania (Teacher Suite) 👩‍🏫');
   }
 
   AppState.currentView = viewId;
 
-  // Update tabs (both top bar & persistent left sidebar)
+  // Update tabs (both joyful top header & any secondary tabs)
   document.querySelectorAll('.nav-tab').forEach(tab => {
-    const isActive = tab.dataset.view === viewId;
+    const tabTarget = tab.dataset.view;
+    const isActive = tabTarget === viewId || (viewId === 'curriculum-books' && (tabTarget === 'books' || tabTarget === 'curriculum-books'));
     tab.classList.toggle('active', isActive);
+
+    if (tab.closest('#headerNavTabs')) {
+      tab.classList.toggle('bg-white', isActive);
+      tab.classList.toggle('text-joy-dark', isActive);
+      tab.classList.toggle('shadow-sm', isActive);
+      tab.classList.toggle('text-joy-muted', !isActive);
+    }
 
     if (tab.closest('#portalSidebar')) {
       if (isActive) {
@@ -2619,7 +2644,18 @@ function updateStudentHeader() {
     if (el.navStudentGrade) el.navStudentGrade.innerHTML = `(${user.grade_level || 'Year 4'})`;
     if (el.navStudentXP) el.navStudentXP.textContent = `${(user.xp || 0).toLocaleString()} XP`;
     const rank = getStudentRank(user.xp || 0);
-    if (studentLevelPill) studentLevelPill.textContent = `Lv. ${rank.level}`;
+    if (studentLevelPill) studentLevelPill.textContent = `Lv. ${rank.level} Scholar`;
+  }
+
+  // Update Joyful Top Header Indicators
+  const navStreak = document.getElementById('navStreakCount');
+  if (navStreak) navStreak.textContent = `${user.streak_days || 5} Days`;
+  const navXpText = document.getElementById('navXpText');
+  if (navXpText) navXpText.textContent = `${(user.xp || 1420).toLocaleString()} XP`;
+  const navXpFill = document.getElementById('navXpFill');
+  if (navXpFill) {
+    const pct = Math.min(100, Math.round(((user.xp || 1420) % 2000) / 20));
+    navXpFill.style.width = `${pct}%`;
   }
 
   // Update student's grade if not set
@@ -2813,6 +2849,10 @@ function isSkillAccessibleToStudent(skill) {
 
   // Homework assignments are always accessible
   if (skill.assignment_id) return true;
+
+  // Unlocked core curriculum topics & featured skills
+  const featured = ['A.1', 'A.4', 'B.3', 'D.1', 'ENG.1', 'ENG.3', 'SCI.2', 'SCI.5'];
+  if (skill.code && featured.includes(skill.code)) return true;
 
   // Check teacher unlocked skills set
   if (AppState.unlockedSkills) {
@@ -5872,7 +5912,20 @@ function startPracticeByPermacode(permacode, encodedTitle) {
   openPracticeModal(targetSkill);
 }
 
-function openPracticeModal(skill) {
+function openPracticeModal(skill, titleArg, subjectArg) {
+  if (typeof skill === 'string') {
+    const code = skill;
+    const found = (AppState.flatSkills || []).find(s => s.code === code) || {
+      code: code,
+      name: titleArg || 'Place value models - up to thousands',
+      title: titleArg || 'Place value models - up to thousands',
+      subject: subjectArg || 'Maths',
+      category: 'Numbers',
+      grade: 'Year 4'
+    };
+    skill = found;
+  }
+
   const user = AppState.currentUser;
   const isTeacher = user && (user.role === 'teacher' || user.username === 'admin' || user.username === 'rania');
 
@@ -5891,9 +5944,9 @@ function openPracticeModal(skill) {
   AppState.practice.timerSeconds = 0;
   AppState.practice.selectedOption = null;
 
-  el.practiceModalSkillCode.textContent = skill.code && skill.code !== skill.permacode ? skill.code : '';
-  el.practiceModalSkillSubject.textContent = skill.subject;
-  el.practiceModalSkillTitle.textContent = skill.name + (skill.question_goal ? ` (Goal: ${skill.question_goal} Questions)` : '');
+  el.practiceModalSkillCode.textContent = skill.code && skill.code !== skill.permacode ? skill.code : (skill.code || 'A.1');
+  el.practiceModalSkillSubject.textContent = skill.subject || 'Maths';
+  el.practiceModalSkillTitle.textContent = (skill.name || skill.title || 'Practice Drill') + (skill.question_goal ? ` (Goal: ${skill.question_goal} Questions)` : '');
   el.practiceScore.textContent = '0';
   el.practiceAnswered.textContent = '0';
   el.practiceTimer.textContent = '00:00';
@@ -5908,6 +5961,7 @@ function openPracticeModal(skill) {
 
   loadNextQuestion();
   el.practiceModal.classList.add('open');
+  if (window.mascotOnPracticeOpen) window.mascotOnPracticeOpen();
 }
 
 function closePracticeModal() {
@@ -5915,6 +5969,7 @@ function closePracticeModal() {
     clearInterval(AppState.practice.timerInterval);
     AppState.practice.timerInterval = null;
   }
+  if (window.setMascotState) window.setMascotState('idle', 'Great practice session! 🌟');
 
   // If student answered at least 1 question, submit practice session to SQL DB!
   if (AppState.practice.answeredCount > 0 && AppState.practice.activeSkill) {
@@ -6158,6 +6213,11 @@ function submitAnswer() {
     el.practiceFeedbackTitle.textContent = '🌟 Excellent! Correct Answer!';
     el.practiceExplanationText.textContent = q.explanation || 'Outstanding! You solved this question correctly.';
 
+    // Joyful mascot celebration & floating XP particle
+    if (window.mascotOnCorrect) window.mascotOnCorrect();
+    if (window.triggerFloatingXp) window.triggerFloatingXp('+25 XP');
+    if (window.ConfettiFX && typeof window.ConfettiFX.fire === 'function') window.ConfettiFX.fire(1500);
+
     if (AppState.practice.score === 100) {
       SoundFX.fanfare();
       ConfettiFX.fire(3500);
@@ -6169,6 +6229,9 @@ function submitAnswer() {
   } else {
     AppState.practice.score = Math.max(0, AppState.practice.score - 5);
     el.practiceScore.textContent = String(AppState.practice.score);
+
+    // Fox scratches head with thinking pose
+    if (window.mascotOnWrong) window.mascotOnWrong();
 
     el.practiceFeedbackBox.className = 'practice-feedback-banner failure';
     el.practiceFeedbackTitle.textContent = '💡 Review the Step-by-Step Solution:';

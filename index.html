@@ -6,13 +6,12 @@
   <meta name="description" content="RC ROOM — Learn, Connect & Grow. A focused global learning platform for practice, curriculum, live classes, progress, and classroom management.">
   <title>RC ROOM — Learn, Connect & Grow</title>
 
-  <!-- Google Fonts: Inter, Plus Jakarta Sans, Space Mono & Material Symbols Outlined -->
+  <!-- Google Fonts: Fredoka, Plus Jakarta Sans, Space Mono & Material Symbols Outlined -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Mono:wght@400;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
-  <!-- Duplicate Material Symbols removed — already loaded above -->
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Space+Mono:wght@400;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet">
 
-  <!-- Tailwind CSS & Kinetic Academy Tokens -->
+  <!-- Tailwind CSS & Joyful Academy Tokens -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script id="tailwind-config">
     tailwind.config = {
@@ -20,6 +19,21 @@
       theme: {
         extend: {
           colors: {
+            "joy-cyan": "#00C2FF",
+            "joy-cyan-dark": "#0096C7",
+            "joy-blue": "#0077B6",
+            "joy-coral": "#FF4D8D",
+            "joy-pink": "#FF2A6D",
+            "joy-mango": "#FFB703",
+            "joy-yellow": "#FFD166",
+            "joy-emerald": "#06D6A0",
+            "joy-purple": "#7209B7",
+            "joy-violet": "#8338EC",
+            "joy-bg": "#F5F8FE",
+            "joy-card": "#FFFFFF",
+            "joy-border": "#E4ECF7",
+            "joy-dark": "#0F172A",
+            "joy-muted": "#64748B",
             "primary": "#00b4d8",
             "primary-hover": "#0096c7",
             "primary-container": "#0077b6",
@@ -41,10 +55,14 @@
             "danger-rose": "#ff5d8f"
           },
           borderRadius: {
-            "3xl": "28px",
-            "4xl": "36px"
+            "3xl": "24px",
+            "4xl": "32px",
+            "5xl": "40px"
           },
           fontFamily: {
+            display: ["'Fredoka'", "'Plus Jakarta Sans'", "sans-serif"],
+            sans: ["'Plus Jakarta Sans'", "Inter", "sans-serif"],
+            mono: ["'Space Mono'", "monospace"],
             "headline-lg": ["Plus Jakarta Sans", "Inter", "sans-serif"],
             "body-md": ["Inter", "sans-serif"],
             "display-hero": ["Plus Jakarta Sans", "sans-serif"],
@@ -78,11 +96,11 @@
   <!-- Cache headers removed — rely on versioned URLs (?v=4.0.0) for cache busting -->
 
   <!-- Core Project Styles -->
-  <link rel="stylesheet" href="style.css?v=4.1.1">
+  <link rel="stylesheet" href="style.css?v=4.2.0">
   <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAIAAAAlC+aJAAABC2lDQ1BJQ0MgUHJvZmlsZQAAeJyVkLFOwlAUhr+LJILBOMjAwNCBgUWCDsaBCYaGzRRJKE5tKV2gbW5rfAHZGFjZiItvIK/ghomJg5OPQEh0NtdqysLAmb785885/zkgXgCydRj7sTT0ptYz+9rhJwKhOmA5UcjuEvD9nnjfzti/8gM3coA1UJE9sw+iCBS9hKuK7YQbiu/jMAZxrVjeGC0QA6DqbbG9xU4olX8KNMajO7XrLzcF1+92gBxQJsJAp6nuTyzBI1x9wcEs1ew5LCdQ+ki1ygJOHuB5lWrpT0JLWr9SFsgMh7B5gmMTTl/h6Pb/ETuyqXlldAICPEa4aLTxcaihcUGdcy5/AKbWPz8bOFjoAAAIVklEQVR4nNWYeWwU1x3H3zGzM7vrPbzetdfGGLAxBoMxpw1xgkNNgJoS0bSkpNBE+YNEVE2rNlLTJGquqqQkUqQmbZVUaQtECqJUhIYmJaEcgUC4icFgMNQYH/heH3vO8d6r3ozBtPWNaTofH9rdmX3v932/4/3eQMYYsDIIWBwELA4CFgcBi4OAxUHA4iBgcRCwOAhYHAQsDgIWBwGLg4DFQcDiIGBxELA4CFgcBCwOAhZHGOgCYxQMflqG5g8EXynwDg/1jFIAOeD/ygOammiur1Ij3aIkcT8Y5jFKTbUQYcEmSXaXy5cuyUmGuwiEuN+hKOVfM1+bOnsH4W8RQvAuCGAMQjk9lec/cfFz3aIksznZBRLdizy14oS0WIRe5JHdqdkZM8pKF3tT59MGUWwL6MYAJRQjBFnUAsIpXiIW0YTQnzZCVG2b3pUCbdjUU5EuuateKLg3m8Toqnx6KUTH587+D6GQFUSWHKWrnk2d1YZYxQaGiilxtLy1b1QXXu8ovr0+auNTR0xRUUQJjnkCeNT5xVMnp2fPTUny/TJqINQGEQYZFC02WNERwKjlGDRLkpOEQDZ4S36+npC1HP737e7fLoSO/TnX/kzJienTuDBxBhGSKfkvZ37t35w4OipS6qq3jd/2sI5UzNSfTohtY1tB4+ef+PtnQ6Xc25B9obvLl+z8n7KGBqVhgGrEISQQb44tz5hjPDaRImZtfkLH6z64kOiKYIkx3pC1Sf3FK94UtM1UbRV1dR//+e/O3KqWkuoi0sKXn/u8bkzcv9j/APHKp55dfPh/WcBBY88uJgnWG+OgL48GYakAQX0K4oXTZ56PF+dbr/TE4i0NyAsIix2NtcwAETRdvzLyw9t+GVnT9wmisvvK9z+m2fssmSk8q1RAEJw8YLCj7e8vHTtcwhyc81MMczm4XQr3YfUMPrsQYKARYlvF8ZSKYkYYKy2sfnhpzb1RFS7LAX9Se++9kO7LOmEIIQE3PuLMYIQarru97rffvUpm4ghhHWNrR2d3cb6QEVVaxubw9G4YT0bQw/chDEAgZaIK7FuyL3BKKOy0wsh/NmmzQ3NofSAv6m1/ZUffyfV59V1XRD6mUUUBEJp0cy88iXz39u51+d1BVLcldXXPC5He6gr2ePZs//kygcWZKT5TZ8MuI4jtp1RQnQAYGvDpWioBQsihFDXtOnFZRdqWj7adyrF647G4xmp3m8tK7kVG/0CeakAX1sw6y+ffD4xM62oMD89LaW2oaWsZP7cgrzrTU07PzkCIewLvjsWwGsrxiIWRF1Xz3y6BWG+pcXCobRJhZnTFn3w9wMxRcMCjieU/NysYMDHJxhEAOIrm5edmerzNLV1AACCKb6JmUEIYVxNRGLquKB/SJuGG0KMm4Jjka7utrpEtKvi4Pa26+cgwuFQS2Di9LK1LwCAKi7WCJgPqOskJyvN2BAYxgN637xgEwV/sru5PXSu6uq4YKos2W60ttc33pAkW8DnMRJsLASYGnSint675fr5Q5LDiUWbP3NaXlH5pBmlNtkJAOjoiiKMzG072eMwvjJEClK+5aFgIOVve4//Ydu+7AlpriT7ldobXqdot9tNDwxeiEYggBLd7Uld9tgru97cEA41QIAi3W2i3WWTnZToCAuMB2vvZMNsERGClNInHmmfnpv1+akLuZMyVU0vnpWfmZ6SMz6YnuYbMwFm78UYEyXnjNLVn23baE/yxjtb9rzzdNmjL+XNKwcAeN0yb055cKNQd6y34x5yYAjssjQuPbBw9tRlpUVghIysChk1geQUlnnTJmlKHNtku9N1ZNdbHa11gLEpk8bpOjFL5NXaJgDYcJpNZjS5lZdrdcIIoZquE2K2sMNy4og3MkaJTXJMW7iSqHFuIhb1ePex3b8FEC5dNEcQEKHMLtkqq+vqbrSaeTzkmBDC05XVU3IyMd/psNnDDrO9G7EAPi5jefPLnf7xVNcoo5LdXV956NLJj8rumV1cmNMTjsqyrTUU3rb7MISQUO6TwZIY44v/vF7f0DY5K4PSEbelI90HeIAzxmSHJ7/km0o8ipFAKbXJjiO73op2Nb/2/HoMmaLqyR7nm5t31za2iIJgxlW/1jMju3668d1Vy0t4+zjy4+GAAowmB5r9vVlbIBIY46FZvOMe1b5s6bFo50IYyxIVI3u2fpi8czcdzb+oKeni1LWE1Ufe/qNzp6IIGBKqU4IIZRQSgjVCf+PEMIIrX/21x6Xa3X5Ikr5AWhsBDDefiBNiydinbz35CdGGO1shhBhLDBIAWA2yblk3cveYE6sJ6TGw6IotV+r+HTri+tWLf7rH3/hdcsJRT165sqKx186euai0czx4MaIN3NmS3e++vrSdc+3tIb+9PpPKKWjO9P06zWmqomO5trzh3dcO7vPOFJyhyDBNm/Fk+OnFHuSA4a7zSY0UvXF7rpLx8IdNzQtFg93B3PnFy9ZE6ae3+84/OG+E1dreDm6v2TmA/fOyc/JTHLKPZF49bX6Qycqr9Q0fO+hJS/8aC3f724/DdyxAKBpic62ekZ10Wbv3ZO4xURV4o6kFLcvCG+d2m7OqsTDiVg3pbqmJBRVDQSzZIe3tT109PTlE19Wn75Q09TWoes6xshhlzODvtKiGQ9/Y1Ew4Bv+2WX4Avo21AEDzPiu8YY3DjxV/ssCQgjG//aoggGetei2uCVEx0b7NGoGTHzj89sv9dnX/2r1DtQr3vjjg5ulBhmPUG7eCPi51GhU4c17x17A3cCcaWyfgQngf8jdeHyHgMVBwOIgYHEQsDgIWBwELA4CFgcBi4OAxUHA4iBgcRCwOAhYHAQsDgIWB33VBtwp/wLY0tlP39ZbLgAAAABJRU5ErkJggg==">
-  <link rel="icon" type="image/png" sizes="32x32" href="assets/rc-logo.png?v=4.1.0">
-  <link rel="shortcut icon" href="favicon.ico?v=4.1.0">
-  <link rel="apple-touch-icon" href="assets/rc-logo.png?v=4.1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/rc-logo.png?v=4.2.0">
+  <link rel="shortcut icon" href="favicon.ico?v=4.2.0">
+  <link rel="apple-touch-icon" href="assets/rc-logo.png?v=4.2.0">
 
   <style>
     /* Clean layout resets & Stitch view toggling */
@@ -110,17 +128,7 @@
 
     /* Desktop Viewports (>= 1024px) */
     @media (min-width: 1024px) {
-      aside#portalSidebar {
-        left: 0;
-        right: auto;
-        width: 16rem;
-        transform: none !important;
-        visibility: visible !important;
-      }
-      #mainContentWrapper {
-        padding-left: 16rem !important;
-        padding-right: 0 !important;
-      }
+      aside#portalSidebar { display: none !important; } #mainContentWrapper { padding-left: 0 !important; padding-right: 0 !important; }
 
       /* Collapsed Icon-Rail State */
       body.sidebar-collapsed aside#portalSidebar {
@@ -206,72 +214,130 @@
     }
   </style>
 </head>
-<body class="bg-surface-canvas font-body-md text-body-md text-on-surface antialiased min-h-screen auth-locked">
+<body class="bg-joy-bg font-sans text-joy-dark antialiased min-h-screen selection:bg-joy-cyan selection:text-white relative">
+
+  <!-- Ambient Floating Blobs & Math Symbols -->
+  <div class="blob-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+    <span class="floating-symbol" style="top:12%; left:8%; font-size:2.5rem;">∑</span>
+    <span class="floating-symbol" style="top:25%; right:14%; font-size:2rem;">π</span>
+    <span class="floating-symbol" style="top:60%; left:5%; font-size:2.2rem;">√x</span>
+    <span class="floating-symbol" style="top:75%; right:8%; font-size:1.8rem;">Δ</span>
+    <span class="floating-symbol" style="top:85%; left:45%; font-size:2rem;">∞</span>
+    <span class="floating-symbol" style="top:40%; right:4%; font-size:1.9rem;">÷</span>
+  </div>
+
+  <!-- Confetti Canvas Overlay -->
+  <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-50 w-full h-full"></canvas>
+
+  <!-- Marquee Ticker -->
+  <div class="ticker-wrapper bg-gradient-to-r from-joy-purple via-joy-blue to-joy-cyan text-white text-xs font-bold py-1.5 px-4 overflow-hidden border-b border-white/20 select-none shadow-sm relative z-50">
+    <div class="ticker-strip whitespace-nowrap flex items-center gap-10">
+      <div class="flex items-center gap-10">
+        <span class="inline-flex items-center gap-2">⭐ <span><strong>Alex Turner</strong> achieved SmartScore 100 on Place Value!</span></span>
+        <span class="inline-flex items-center gap-2">🔥 <span><strong>Beshr Mohamed</strong> unlocked a 5-Day Practice Streak!</span></span>
+        <span class="inline-flex items-center gap-2">🏆 <span><strong>Sophia Chen</strong> mastered Cambridge English Stage 4!</span></span>
+        <span class="inline-flex items-center gap-2">🚀 <span><strong>Liam Johnson</strong> earned +250 XP in Science Lab!</span></span>
+        <span class="inline-flex items-center gap-2">🎓 <span><strong>Emma Watson</strong> completed Homework Unit 3!</span></span>
+      </div>
+      <!-- Duplicate for infinite seamless scroll -->
+      <div class="flex items-center gap-10">
+        <span class="inline-flex items-center gap-2">⭐ <span><strong>Alex Turner</strong> achieved SmartScore 100 on Place Value!</span></span>
+        <span class="inline-flex items-center gap-2">🔥 <span><strong>Beshr Mohamed</strong> unlocked a 5-Day Practice Streak!</span></span>
+        <span class="inline-flex items-center gap-2">🏆 <span><strong>Sophia Chen</strong> mastered Cambridge English Stage 4!</span></span>
+        <span class="inline-flex items-center gap-2">🚀 <span><strong>Liam Johnson</strong> earned +250 XP in Science Lab!</span></span>
+        <span class="inline-flex items-center gap-2">🎓 <span><strong>Emma Watson</strong> completed Homework Unit 3!</span></span>
+      </div>
+    </div>
+  </div>
+
 
   <!-- ====================================================================
        TOP NAVIGATION BAR (Fixed h-20 with Kinetic Brand & Student Capsule)
        ==================================================================== -->
-  <header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest/90 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-b border-border-subtle" id="portalNavbar">
-    <div class="h-20 w-full px-4 sm:px-6 flex items-center justify-between gap-2 sm:gap-4">
-      <div class="flex items-center gap-3 sm:gap-4 shrink-0">
-        <!-- Sidebar Toggle Button (Dynamic Menu) -->
-        <button id="sidebarToggleBtn" class="w-9 h-9 rounded-xl flex items-center justify-center bg-surface-container-low hover:bg-surface-container text-on-surface transition-all cursor-pointer shrink-0" title="Toggle Navigation Track" aria-label="Toggle Sidebar Menu">
-          <span class="material-symbols-outlined text-[20px]" id="sidebarToggleIcon">menu</span>
-        </button>
-
-        <!-- Brand Logo (Official RC Emblem) -->
-        <div class="flex items-center gap-2.5 cursor-pointer group shrink-0" id="brandHomeBtn" title="Back to Dashboard">
-          <div class="w-9 h-9 rounded-xl bg-white p-1 border border-slate-200 shadow-sm flex items-center justify-center shrink-0">
-            <img src="assets/rc-logo.png?v=4.0.0" alt="RC" class="w-full h-full object-contain">
-          </div>
-          <div class="flex flex-col">
-            <span class="font-extrabold text-base tracking-tight text-primary leading-none">RC ACADEMY</span>
-            <span class="text-[10px] text-on-surface-variant uppercase tracking-wider mt-0.5 hidden lg:block">Rania Classroom &bull; Learn &bull; Practice &bull; Master</span>
-          </div>
+    <!-- ====================================================================
+       TOP NAVIGATION BAR (Joyful Sticky Navigation)
+       ==================================================================== -->
+  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b-2 border-joy-border shadow-sm" id="portalNavbar">
+    <div class="max-w-7xl mx-auto h-20 px-4 sm:px-8 flex items-center justify-between gap-4">
+      
+      <!-- Brand Logo Badge -->
+      <div class="flex items-center gap-3 cursor-pointer group" id="brandHomeBtn" onclick="switchView('dashboard')">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-joy-mango via-joy-coral to-joy-cyan flex items-center justify-center font-display font-black text-2xl text-white shadow-lg shadow-joy-coral/25 group-hover:rotate-6 transition-transform">
+          RC
         </div>
-
+        <div class="flex flex-col">
+          <div class="flex items-center gap-1 font-display font-black text-2xl tracking-tight leading-none text-joy-dark">
+            <span class="text-joy-coral">RC</span>
+            <span class="text-joy-mango">ROOM</span>
+          </div>
+          <span class="text-[10px] font-extrabold tracking-wider text-joy-muted uppercase mt-0.5">Learn &bull; Connect &bull; Grow</span>
+        </div>
       </div>
 
-      <!-- Right Actions: Search, Streak, Lang, Theme, Profile -->
-      <div class="flex items-center gap-3 shrink-0">
-        <!-- Quick Search Icon Button (Compact) -->
-        <button class="w-9 h-9 rounded-lg flex items-center justify-center bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer" id="topSearchIconBtn" title="Search Skills Bank (⌘K / Ctrl+K)" aria-label="Search Skills">
-          <span class="material-symbols-outlined text-[19px]">search</span>
+      <!-- Navigation Links -->
+      <nav class="hidden md:flex items-center gap-1.5 bg-slate-100/90 p-1.5 rounded-full border border-slate-200" id="headerNavTabs">
+        <button class="nav-tab px-4 py-2 rounded-full font-bold text-xs sm:text-sm text-joy-dark bg-white shadow-sm transition-all cursor-pointer" data-view="dashboard" onclick="switchView('dashboard')">
+          🏠 Dashboard
+        </button>
+        <button class="nav-tab px-4 py-2 rounded-full font-bold text-xs sm:text-sm text-joy-muted hover:text-joy-dark transition-all cursor-pointer" data-view="skills" onclick="switchView('skills')">
+          🎯 Skills Bank
+        </button>
+        <button class="nav-tab px-4 py-2 rounded-full font-bold text-xs sm:text-sm text-joy-muted hover:text-joy-dark transition-all cursor-pointer" data-view="curriculum-books" onclick="switchView('curriculum-books')">
+          📚 PDF Books
+        </button>
+        <button class="nav-tab px-4 py-2 rounded-full font-bold text-xs sm:text-sm text-joy-muted hover:text-joy-dark transition-all cursor-pointer" data-view="sessions" onclick="switchView('sessions')">
+          🎥 Live Classes
+        </button>
+        <button class="nav-tab px-4 py-2 rounded-full font-bold text-xs sm:text-sm text-joy-muted hover:text-joy-dark transition-all cursor-pointer" data-view="reports" onclick="switchView('reports')">
+          📊 Scorecard
+        </button>
+      </nav>
+
+      <!-- Right Header Actions (Streak, Sound FX, XP Bar & Teacher Center) -->
+      <div class="flex items-center gap-3">
+        <!-- Sound FX Toggle Button -->
+        <button id="soundToggleBtn" class="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 flex items-center justify-center font-bold transition-all text-base cursor-pointer" title="Toggle Sound Effects" onclick="toggleSoundFX()">
+          🔔
         </button>
 
-        <!-- Quick Teacher Dashboard Button (Only visible when logged in as teacher) -->
-        <button type="button" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs transition-all shadow-sm cursor-pointer" id="topTeacherQuickBtn" onclick="switchView('teacher')" style="display: none;" title="All Students Management Dashboard">
-          <span class="material-symbols-outlined text-[17px]">group</span>
-          <span>Teacher Center 👥</span>
-        </button>
+        <!-- Daily Streak Badge -->
+        <div class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-50 border-2 border-amber-200 text-amber-600 font-extrabold text-xs shadow-sm">
+          <span class="flame-icon">🔥</span>
+          <span id="navStreakCount">5 Days</span>
+        </div>
 
-        <!-- User Profile Pill & Explicit Logout Button -->
-        <div class="flex items-center gap-2 pl-2" id="profileMenuWrapper">
-          <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surface-container-low transition-all cursor-pointer" id="studentProfilePill" onclick="switchView('reports')">
-            <div class="w-7 h-7 rounded-full bg-streak-amber/20 flex items-center justify-center font-label-sm text-label-sm leading-none" id="navStudentAvatar">👩‍🏫</div>
-            <div class="hidden md:flex flex-col text-left">
-              <div class="flex items-center gap-1.5">
-                <span class="font-label-md text-label-md text-on-surface font-bold leading-none" id="navStudentName">Miss Rania</span>
-                <span class="font-label-sm text-label-sm text-on-surface-variant leading-none" id="navStudentGrade">(Instructor)</span>
-              </div>
-              <span class="font-label-sm text-label-sm text-primary font-semibold leading-none mt-1" id="navStudentXP">Teacher Console</span>
+        <!-- Student XP Capsule -->
+        <div class="hidden lg:flex flex-col text-right pl-1" id="navStudentCapsule">
+          <span class="text-[10px] font-extrabold text-joy-muted uppercase" id="navStudentLevel">Level 5 Scholar</span>
+          <div class="flex items-center gap-2">
+            <div class="w-24 h-2.5 bg-slate-200 rounded-full overflow-hidden">
+              <div id="navXpFill" class="h-full bg-gradient-to-r from-joy-mango via-joy-coral to-joy-cyan rounded-full transition-all duration-500" style="width: 71%;"></div>
             </div>
-            <span class="px-2 py-0.5 rounded-full bg-primary-fixed text-primary font-label-sm text-label-sm font-bold" id="navStudentLevel">Admin</span>
+            <span id="navXpText" class="font-mono text-xs font-bold text-joy-cyan">1,420 XP</span>
           </div>
-
-          <button type="button" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-500/10 hover:bg-red-500/20 text-red-600 font-bold text-xs transition-colors cursor-pointer border border-red-500/20 shadow-sm" onclick="logoutUser()" title="Sign Out">
-            <span class="material-symbols-outlined text-[17px]">logout</span>
-            <span class="hidden sm:inline">Sign Out</span>
-          </button>
         </div>
+
+        <!-- Teacher Center Mode Switcher -->
+        <button class="flex items-center gap-1.5 px-4 py-2 rounded-full bg-purple-100 hover:bg-purple-200 text-joy-purple font-extrabold text-xs border border-purple-300 transition-all cursor-pointer" id="topTeacherQuickBtn" onclick="switchView('teacher')">
+          <span>👩‍🏫</span> <span>Teacher Suite</span>
+        </button>
+
+        <!-- Sign Out Button -->
+        <button type="button" class="w-10 h-10 rounded-2xl bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 flex items-center justify-center font-bold transition-all cursor-pointer text-sm" onclick="logoutUser()" title="Sign Out">
+          🚪
+        </button>
       </div>
+
     </div>
   </header>
 
   <!-- ====================================================================
        PERSISTENT LEFT NAVIGATION SIDEBAR (Stitch Sidebar)
        ==================================================================== -->
-  <aside class="fixed left-0 top-20 bottom-0 w-64 bg-surface-container-lowest z-40 flex flex-col justify-between py-5 border-r border-border-subtle shadow-[0_1px_8px_rgba(0,0,0,0.04)] overflow-y-auto overflow-x-hidden" id="portalSidebar">
+  <aside class="fixed left-0 top-20 bottom-0 w-64 bg-surface-container-lowest z-40 hidden flex flex-col justify-between py-5 border-r border-border-subtle shadow-[0_1px_8px_rgba(0,0,0,0.04)] overflow-y-auto overflow-x-hidden" id="portalSidebar">
     <div class="flex flex-col gap-4 px-3">
       
       <nav class="flex flex-col gap-1.5" id="sidebarNavTabs">
@@ -364,173 +430,262 @@
   <!-- ====================================================================
        MAIN CONTENT WRAPPER (Offset pl-64 with bg-surface-canvas)
        ==================================================================== -->
-  <div class="pl-64 min-h-screen bg-surface-canvas transition-all duration-300" id="mainContentWrapper">
+  <div class="min-h-screen bg-joy-bg transition-all duration-300" id="mainContentWrapper">
     <main class="relative pt-20 w-full min-h-screen bg-surface-canvas portal-main-content">
       <div class="flex flex-col w-full px-6 py-8 space-y-8 max-w-[1400px] mx-auto">
 
         <!-- ====================================================================
              VIEW 1: STUDENT DASHBOARD (Streamlined Mission-Driven Hub)
              ==================================================================== -->
-        <section id="view-dashboard" class="portal-view active space-y-6">
+                <!-- ====================================================================
+             VIEW 1: JOYFUL DASHBOARD
+             ==================================================================== -->
+        <section id="view-dashboard" class="portal-view active space-y-8">
           
-          <!-- Top Greeting & Identity Card -->
-          <div class="relative overflow-hidden rounded-3xl bg-surface-card shadow-sm p-6 sm:p-8 border border-slate-100">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              <div class="space-y-2">
-                <div class="flex items-center gap-3">
-                  <span class="px-3.5 py-1 rounded-full bg-primary/10 text-primary font-bold text-xs uppercase tracking-wide border border-primary/20" id="dashCohortTag">
-                    Year 4 • Miss Rania's Class
-                  </span>
-                  <span class="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 font-bold text-xs flex items-center gap-1.5 border border-emerald-500/20" id="dashActiveBadge">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    Active Student
-                  </span>
-                </div>
-                <h1 class="text-2xl sm:text-3xl font-extrabold text-on-surface tracking-tight">
-                  Good day, <span id="dashStudentName" class="text-primary">Alex</span>! 👋
-                </h1>
-                <p class="text-xs sm:text-sm text-on-surface-variant">
-                  Welcome to your RC Academy learning hub. Complete today's focus mission and maintain your practice streak.
-                </p>
-              </div>
+          <!-- HERO SECTION: Vibrant Gradient Banner -->
+          <div class="relative overflow-hidden rounded-5xl bg-gradient-to-r from-joy-blue via-joy-cyan to-joy-purple p-8 sm:p-12 text-white shadow-2xl flex flex-col lg:flex-row items-center justify-between gap-8">
+            
+            <!-- Background Decorative Stars & Glow -->
+            <div class="absolute -right-8 -bottom-8 w-80 h-80 rounded-full bg-white/10 blur-3xl pointer-events-none"></div>
+            <div class="absolute top-6 right-10 text-6xl opacity-20 select-none animate-bounce pointer-events-none">🚀</div>
 
-              <!-- Level & Streak Pill -->
-              <div class="flex items-center gap-4 p-4 rounded-2xl bg-surface-container-low border border-slate-100 shrink-0">
-                <div class="text-center">
-                  <div class="text-[10px] font-bold text-primary uppercase">Academic Rank</div>
-                  <div class="text-base font-extrabold text-on-surface mt-0.5" id="dashRankTitle">Lv. 5 Explorer 🧭</div>
-                </div>
-                <div class="h-8 w-[1px] bg-slate-200"></div>
-                <div class="text-center">
-                  <div class="text-[10px] font-bold text-amber-500 uppercase">Daily Streak</div>
-                  <div class="text-base font-extrabold text-amber-600 mt-0.5" id="dashStreakCounter">🔥 5 Days</div>
-                </div>
+            <div class="space-y-4 max-w-2xl relative z-10">
+              <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-joy-mango text-slate-950 font-black text-xs shadow-md tracking-wider uppercase">
+                <span>✨</span> <span id="dashCohortTag">TODAY'S MISSION &bull; STAGE 4</span>
               </div>
-            </div>
-          </div>
-
-          <!-- Today's Mission & Level Progress Grid -->
-          <!-- Today's Mission & Level Progress Grid (Joyful & Dynamic) -->
-          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Left 2 Cols: Vibrant Playful Hero Card -->
-            <div class="lg:col-span-2 rounded-3xl bg-gradient-to-r from-cyan-500 via-sky-500 to-indigo-600 p-6 sm:p-8 text-white shadow-xl flex flex-col justify-between relative overflow-hidden bento-card-tactile">
-              <!-- Floating Decorative Background Elements -->
-              <div class="absolute -right-8 -bottom-8 w-56 h-56 rounded-full bg-white/10 blur-2xl pointer-events-none"></div>
-              <div class="absolute top-4 right-8 text-6xl opacity-30 select-none animate-bounce pointer-events-none">⭐</div>
               
-              <div class="space-y-4 relative z-10">
-                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-yellow-400 text-slate-950 font-black text-xs shadow-md">
-                  <span>⭐</span> <span>TODAY'S MISSION</span>
-                </div>
-                <h2 class="text-2xl sm:text-3xl font-black tracking-tight leading-tight drop-shadow-sm">
-                  Master Place Value &amp; Core Operations!
-                </h2>
-                <p class="text-sky-100 text-sm sm:text-base leading-relaxed max-w-xl font-medium">
-                  Jump into today's interactive drill, unlock your new badges, and keep your practice streak alive!
-                </p>
+              <h1 class="font-display font-black text-3xl sm:text-5xl tracking-tight leading-tight">
+                Master Place Value &amp; Decimal Operations!
+              </h1>
+              
+              <p class="text-sky-100 text-sm sm:text-lg font-medium leading-relaxed">
+                Good day, <span id="dashStudentName" class="font-bold underline decoration-yellow-300">Alex</span>! Jump into today's interactive drill carefully crafted by Miss Rania. Collect badges, climb the scholarship rank, and keep your practice streak flaming hot!
+              </p>
 
-                <div class="flex flex-wrap items-center gap-4 pt-2 text-xs sm:text-sm font-bold">
-                  <div class="flex items-center gap-2 bg-white/20 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20">
-                    <span>🎯</span>
-                    <span>10 Question Challenge</span>
-                  </div>
-                  <div class="flex items-center gap-2 bg-white/20 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20">
-                    <span>🎥</span>
-                    <span>Next Live Class: 5:00 PM</span>
-                  </div>
+              <div class="flex flex-wrap items-center gap-3 pt-2">
+                <div class="flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/20 text-xs sm:text-sm font-bold">
+                  <span>🎯</span> <span>10-Question Drill Goal</span>
+                </div>
+                <div class="flex items-center gap-2 bg-white/20 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/20 text-xs sm:text-sm font-bold">
+                  <span>🎥</span> <span>Live Class: Today 5:00 PM</span>
                 </div>
               </div>
 
-              <div class="pt-6 relative z-10 flex flex-wrap items-center gap-3">
-                <button type="button" class="px-7 py-4 rounded-full bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black text-sm shadow-[0_4px_0_#d48b00] active:translate-y-1 active:shadow-none transition-all cursor-pointer flex items-center gap-2" id="dashStartPracticeBtn">
+              <div class="pt-4 flex flex-wrap items-center gap-4">
+                <button class="btn-tactile-mango px-8 py-4 rounded-full font-black text-base flex items-center gap-2 cursor-pointer" id="dashStartPracticeBtn" onclick="openPracticeModal('A.1', 'Place value models - up to thousands', 'Maths')">
                   <span>🎮 Start Learning Now</span>
                   <span>&rarr;</span>
                 </button>
-                <button type="button" class="px-6 py-4 rounded-full bg-white/20 hover:bg-white/30 text-white font-bold text-sm backdrop-blur-md border border-white/30 transition-all cursor-pointer active:scale-95" onclick="switchView('skills')">
-                  Explore Skills Bank 🎯
+                <button class="px-6 py-4 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md font-bold text-sm text-white border border-white/30 transition-all cursor-pointer" onclick="switchView('skills')">
+                  Browse 8,264+ Skills 🎯
                 </button>
               </div>
             </div>
 
-            <!-- Right Col: Level & Dopamine Progress Card -->
-            <div class="rounded-3xl bg-white p-7 shadow-lg border-2 border-slate-100 flex flex-col justify-between gap-5 bento-card-tactile">
+            <!-- Right Bento Level Capsule -->
+            <div class="w-full lg:w-80 bg-white/95 backdrop-blur-xl p-6 rounded-4xl text-joy-dark shadow-2xl border-2 border-white/40 flex flex-col justify-between space-y-5 relative z-10 shrink-0">
               <div>
-                <div class="flex items-center justify-between">
-                  <span class="text-xs font-black uppercase tracking-wider text-primary">Mastery XP Progress</span>
-                  <span class="text-xs font-black text-slate-800"><span id="dashCurrentXP">1,420</span> / <span id="dashTargetXP">2,000</span> XP</span>
+                <div class="flex items-center justify-between text-xs font-black uppercase text-joy-muted tracking-wider">
+                  <span>Scholar Progress</span>
+                  <span class="text-joy-cyan" id="dashRankTitle">Level 5 Explorer</span>
                 </div>
-                <div class="w-full h-4 rounded-full bg-slate-100 overflow-hidden mt-3 p-0.5 border border-slate-200">
-                  <div class="h-full rounded-full bg-gradient-to-r from-yellow-400 via-pink-500 to-cyan-500 transition-all duration-700 shadow-sm" id="dashXpFill" style="width: 71%;"></div>
+                <div class="w-full h-4 bg-slate-100 rounded-full mt-3 overflow-hidden p-0.5 border border-slate-200">
+                  <div class="h-full rounded-full bg-gradient-to-r from-joy-mango via-joy-coral to-joy-cyan transition-all duration-700" id="dashXpFill" style="width: 71%;"></div>
                 </div>
-                <p class="text-xs text-slate-500 mt-2.5 font-bold" id="dashXpPercentText">
-                  71% towards Level 6 Junior Scholar 🏆
-                </p>
+                <div class="flex items-center justify-between text-xs font-bold text-slate-500 mt-2">
+                  <span id="dashXpPercentText">71% towards Level 6 Science Wizard 🧙‍♂️</span>
+                  <span class="font-mono text-joy-cyan"><span id="dashCurrentXP">1,420</span> / <span id="dashTargetXP">2,000</span> XP</span>
+                </div>
               </div>
 
-              <!-- 4 Playful Dopamine KPI Mini Cards -->
+              <!-- 3D Badges Grid -->
               <div class="grid grid-cols-2 gap-3 pt-2">
-                <div class="p-3.5 rounded-2xl bg-cyan-50 border border-cyan-100 text-center hover:scale-105 transition-transform">
-                  <div class="text-xl font-black text-cyan-600" id="kpiQuestionsAnswered">142</div>
-                  <div class="text-[11px] text-cyan-800 font-bold mt-0.5">Questions</div>
+                <div class="p-3 bg-amber-50 rounded-2xl border border-amber-100 text-center flex flex-col items-center">
+                  <span class="text-3xl">🏆</span>
+                  <span class="font-extrabold text-xs text-amber-700 mt-1">Skill Master</span>
+                  <span class="text-[10px] text-amber-600 font-semibold" id="dashStreakCounter">5-Day Streak 🔥</span>
                 </div>
-                <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-100 text-center hover:scale-105 transition-transform">
-                  <div class="text-xl font-black text-emerald-600" id="kpiAccuracyRate">88.5%</div>
-                  <div class="text-[11px] text-emerald-800 font-bold mt-0.5">Accuracy</div>
-                </div>
-                <div class="p-3.5 rounded-2xl bg-amber-50 border border-amber-100 text-center hover:scale-105 transition-transform">
-                  <div class="text-xl font-black text-amber-600" id="kpiTimeSpent">1h 45m</div>
-                  <div class="text-[11px] text-amber-800 font-bold mt-0.5">Time Spent</div>
-                </div>
-                <div class="p-3.5 rounded-2xl bg-purple-50 border border-purple-100 text-center hover:scale-105 transition-transform">
-                  <div class="text-xl font-black text-purple-600" id="kpiMasteredCount">8</div>
-                  <div class="text-[11px] text-purple-800 font-bold mt-0.5">Mastered</div>
+                <div class="p-3 bg-cyan-50 rounded-2xl border border-cyan-100 text-center flex flex-col items-center">
+                  <span class="text-3xl">🎯</span>
+                  <span class="font-extrabold text-xs text-cyan-700 mt-1">Accuracy Star</span>
+                  <span class="text-[10px] text-cyan-600 font-semibold">88.5% Rate</span>
                 </div>
               </div>
             </div>
+
           </div>
 
-          <!-- 4 Core Navigation Hub Cards -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
-            <div class="p-5 rounded-2xl bg-surface-card border border-slate-100 shadow-sm hover:shadow-md hover:border-primary/40 transition-all cursor-pointer flex items-center gap-4 group" onclick="switchView('curriculum-books')">
-              <div class="w-12 h-12 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shrink-0">
-                📚
-              </div>
-              <div>
-                <h3 class="font-bold text-sm text-on-surface">My Lessons</h3>
-                <p class="text-xs text-on-surface-variant mt-0.5">PDF Books &amp; Units</p>
-              </div>
-            </div>
-
-            <div class="p-5 rounded-2xl bg-surface-card border border-slate-100 shadow-sm hover:shadow-md hover:border-primary/40 transition-all cursor-pointer flex items-center gap-4 group" onclick="switchView('skills')">
-              <div class="w-12 h-12 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shrink-0">
-                ✏️
-              </div>
-              <div>
-                <h3 class="font-bold text-sm text-on-surface">Practice &amp; Skills</h3>
-                <p class="text-xs text-on-surface-variant mt-0.5">8,264+ Topics</p>
-              </div>
-            </div>
-
-            <div class="p-5 rounded-2xl bg-surface-card border border-slate-100 shadow-sm hover:shadow-md hover:border-primary/40 transition-all cursor-pointer flex items-center gap-4 group" onclick="switchView('sessions')">
-              <div class="w-12 h-12 rounded-xl bg-cyan-500/10 text-cyan-600 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shrink-0">
+          <!-- Live Portal Island -->
+          <div class="bento-card p-6 bg-gradient-to-r from-emerald-500/10 via-cyan-500/10 to-purple-500/10 border-2 border-joy-emerald/40 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="flex items-center gap-4">
+              <div class="w-14 h-14 rounded-3xl bg-joy-emerald text-white flex items-center justify-center text-3xl shadow-lg shadow-joy-emerald/30 shrink-0">
                 🎥
               </div>
               <div>
-                <h3 class="font-bold text-sm text-on-surface">Live Classes</h3>
-                <p class="text-xs text-on-surface-variant mt-0.5">Zoom Schedule</p>
+                <div class="flex items-center gap-2">
+                  <span class="px-2.5 py-0.5 rounded-full bg-joy-emerald text-white text-[10px] font-black tracking-wider uppercase">Live Portal</span>
+                  <div class="flex items-center gap-1">
+                    <span class="audio-bar"></span>
+                    <span class="audio-bar"></span>
+                    <span class="audio-bar"></span>
+                    <span class="audio-bar"></span>
+                  </div>
+                  <span class="text-xs font-bold text-emerald-700">Zoom with Miss Rania in 14:30 mins!</span>
+                </div>
+                <h3 class="font-display font-bold text-xl text-joy-dark mt-1">Primary Stage 4: Fractions &amp; Improper Mixed Numbers</h3>
               </div>
             </div>
 
-            <div class="p-5 rounded-2xl bg-surface-card border border-slate-100 shadow-sm hover:shadow-md hover:border-primary/40 transition-all cursor-pointer flex items-center gap-4 group" onclick="switchView('reports')">
-              <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shrink-0">
-                📊
-              </div>
-              <div>
-                <h3 class="font-bold text-sm text-on-surface">My Progress</h3>
-                <p class="text-xs text-on-surface-variant mt-0.5">Report Card &amp; XP</p>
-              </div>
+            <div class="flex items-center gap-3 shrink-0">
+              <a href="https://zoom.us" target="_blank" class="btn-tactile-cyan px-6 py-3 rounded-full font-black text-sm flex items-center gap-2" onclick="if(window.SoundFX) SoundFX.correct(); if(window.setMascotState) setMascotState('celebrating', 'See you in class on time! 🎓');">
+                <span>Join Class Link</span>
+                <span>&rarr;</span>
+              </a>
+              <button class="px-4 py-3 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-joy-dark font-bold text-xs shadow-sm transition-all cursor-pointer" onclick="showToast('Class material sheet downloaded! 📄')">
+                📄 Study Sheet
+              </button>
             </div>
           </div>
+
+          <!-- Core Interactive Tracks -->
+          <div>
+            <div class="flex items-center justify-between mb-6">
+              <div>
+                <h2 class="font-display font-black text-2xl sm:text-3xl text-joy-dark">Core Interactive Tracks 🚀</h2>
+                <p class="text-joy-muted text-sm mt-0.5">Explore curated Cambridge curriculum topics with instant scoring</p>
+              </div>
+              <button class="text-joy-cyan font-bold text-sm hover:underline cursor-pointer" onclick="switchView('skills')">View All Skills &rarr;</button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="subjectCardsRow">
+              
+              <!-- Card 1: Maths -->
+              <div class="bento-card p-7 flex flex-col justify-between space-y-6 tilt-card group" data-subject="Maths">
+                <div class="space-y-4">
+                  <div class="flex items-center justify-between">
+                    <div class="w-16 h-16 rounded-3xl bg-amber-100 text-amber-600 flex items-center justify-center text-3xl shadow-sm group-hover:scale-110 transition-transform">
+                      🔢
+                    </div>
+                    <span class="px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs font-black uppercase tracking-wider">Year 4 Maths</span>
+                  </div>
+                  <h3 class="font-display font-bold text-2xl text-joy-dark">Numbers &amp; Place Value</h3>
+                  <p class="text-joy-muted text-sm leading-relaxed">Place value models, expanded form, comparing large numbers, and rounding techniques.</p>
+                  <div class="flex items-center gap-2 text-xs font-bold text-slate-500">
+                    <span>⭐ 18 Competencies</span> &bull; <span>🏆 92% Class Average</span>
+                  </div>
+                </div>
+                <button class="btn-tactile-mango w-full py-3.5 rounded-full font-black text-sm cursor-pointer" onclick="openPracticeModal('A.1', 'Place value models - up to thousands', 'Maths')">
+                  Start Maths Practice 🚀
+                </button>
+              </div>
+
+              <!-- Card 2: English -->
+              <div class="bento-card p-7 flex flex-col justify-between space-y-6 tilt-card group" data-subject="English">
+                <div class="space-y-4">
+                  <div class="flex items-center justify-between">
+                    <div class="w-16 h-16 rounded-3xl bg-pink-100 text-pink-600 flex items-center justify-center text-3xl shadow-sm group-hover:scale-110 transition-transform">
+                      📖
+                    </div>
+                    <span class="px-3 py-1 rounded-full bg-pink-50 border border-pink-200 text-pink-700 text-xs font-black uppercase tracking-wider">Cambridge English</span>
+                  </div>
+                  <h3 class="font-display font-bold text-2xl text-joy-dark">Grammar &amp; Vocabulary</h3>
+                  <p class="text-joy-muted text-sm leading-relaxed">Identifying adverbs, adjectives, creative story comprehension, and punctuation rules.</p>
+                  <div class="flex items-center gap-2 text-xs font-bold text-slate-500">
+                    <span>⭐ 14 Competencies</span> &bull; <span>🏆 88% Class Average</span>
+                  </div>
+                </div>
+                <button class="btn-tactile-coral w-full py-3.5 rounded-full font-black text-sm cursor-pointer" onclick="openPracticeModal('ENG.1', 'Adverbs & Adjectives in Sentences', 'English')">
+                  Start English Practice 🚀
+                </button>
+              </div>
+
+              <!-- Card 3: Science -->
+              <div class="bento-card p-7 flex flex-col justify-between space-y-6 tilt-card group" data-subject="Science">
+                <div class="space-y-4">
+                  <div class="flex items-center justify-between">
+                    <div class="w-16 h-16 rounded-3xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-3xl shadow-sm group-hover:scale-110 transition-transform">
+                      🔬
+                    </div>
+                    <span class="px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-black uppercase tracking-wider">Science Lab</span>
+                  </div>
+                  <h3 class="font-display font-bold text-2xl text-joy-dark">Biology &amp; States of Matter</h3>
+                  <p class="text-joy-muted text-sm leading-relaxed">Photosynthesis mechanisms, human circulation, solids, liquids, and electrical circuits.</p>
+                  <div class="flex items-center gap-2 text-xs font-bold text-slate-500">
+                    <span>⭐ 12 Competencies</span> &bull; <span>🏆 90% Class Average</span>
+                  </div>
+                </div>
+                <button class="btn-tactile-cyan w-full py-3.5 rounded-full font-black text-sm cursor-pointer" onclick="openPracticeModal('SCI.2', 'Photosynthesis & Plant Biology', 'Science')">
+                  Start Science Practice 🚀
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Homework & Live Study Stats -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left: Homework Tasks List -->
+            <div class="lg:col-span-2 bento-card p-7 space-y-4">
+              <div class="flex items-center justify-between border-b pb-4 border-slate-100">
+                <div>
+                  <h3 class="font-display font-bold text-xl text-joy-dark">Today's Assigned Homework 📌</h3>
+                  <p class="text-joy-muted text-xs">Direct assignments dispatched by Miss Rania</p>
+                </div>
+                <span class="px-3 py-1 rounded-full bg-cyan-100 text-cyan-800 text-xs font-extrabold" id="dashAssignmentBadge">2 Active Tasks</span>
+              </div>
+
+              <div class="space-y-3" id="dashAssignmentsGrid">
+                <div class="p-4 rounded-2xl border-2 border-slate-100 hover:border-joy-cyan flex items-center justify-between gap-4 transition-all">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-lg">📐</div>
+                    <div>
+                      <h4 class="font-bold text-sm text-joy-dark">Place Value Models up to Thousands</h4>
+                      <span class="text-xs text-joy-muted">Goal: Solve 10 questions with SmartScore 80+</span>
+                    </div>
+                  </div>
+                  <button class="btn-tactile-cyan px-4 py-2 rounded-full font-bold text-xs cursor-pointer" onclick="openPracticeModal('A.1', 'Place value models - up to thousands', 'Maths')">Start ➜</button>
+                </div>
+
+                <div class="p-4 rounded-2xl border-2 border-slate-100 hover:border-joy-coral flex items-center justify-between gap-4 transition-all">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-pink-100 text-pink-700 flex items-center justify-center font-bold text-lg">📝</div>
+                    <div>
+                      <h4 class="font-bold text-sm text-joy-dark">Grammar: Adjectives vs Adverbs</h4>
+                      <span class="text-xs text-joy-muted">Goal: Solve 10 questions with SmartScore 80+</span>
+                    </div>
+                  </div>
+                  <button class="btn-tactile-coral px-4 py-2 rounded-full font-bold text-xs cursor-pointer" onclick="openPracticeModal('ENG.1', 'Adverbs & Adjectives in Sentences', 'English')">Start ➜</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: 4 High-Energy KPI Stats -->
+            <div class="bento-card p-7 flex flex-col justify-between space-y-4">
+              <h3 class="font-display font-bold text-lg text-joy-dark">Live Study Stats 📈</h3>
+              <div class="grid grid-cols-2 gap-3">
+                <div class="p-3.5 bg-cyan-50 rounded-2xl border border-cyan-100 text-center">
+                  <div class="font-mono font-black text-2xl text-joy-cyan" id="kpiQuestionsAnswered">142</div>
+                  <span class="text-[11px] font-bold text-slate-600 block mt-0.5">Questions Solved</span>
+                </div>
+                <div class="p-3.5 bg-emerald-50 rounded-2xl border border-emerald-100 text-center">
+                  <div class="font-mono font-black text-2xl text-joy-emerald" id="kpiAccuracyRate">88.5%</div>
+                  <span class="text-[11px] font-bold text-slate-600 block mt-0.5">Accuracy Rate</span>
+                </div>
+                <div class="p-3.5 bg-amber-50 rounded-2xl border border-amber-100 text-center">
+                  <div class="font-mono font-black text-2xl text-joy-mango" id="kpiTimeSpent">1h 45m</div>
+                  <span class="text-[11px] font-bold text-slate-600 block mt-0.5">Practice Time</span>
+                </div>
+                <div class="p-3.5 bg-purple-50 rounded-2xl border border-purple-100 text-center">
+                  <div class="font-mono font-black text-2xl text-joy-purple" id="kpiMasteredCount">8</div>
+                  <span class="text-[11px] font-bold text-slate-600 block mt-0.5">Skills Mastered</span>
+                </div>
+              </div>
+              <button class="secondary-glass-btn w-full py-2.5 rounded-full font-bold text-xs text-joy-muted hover:text-joy-dark border border-slate-200 cursor-pointer" onclick="switchView('reports')">
+                View Full Report Card 📊
+              </button>
+            </div>
+          </div>
+
         </section>
 
     <!-- ====================================================================
@@ -3061,23 +3216,88 @@
     <span class="toast-message" id="toastMessage">Notification</span>
   </div>
 
+  <!-- ====================================================================
+       INTERACTIVE FOX MASCOT (Always Floating in Front - z-index 2500)
+       ==================================================================== -->
+  <div class="mascot-container" id="mascotAssistant">
+    <!-- Collapsible Speech Bubble with Controls -->
+    <div class="mascot-bubble" id="mascotBubbleWrap">
+      <span class="mascot-drag-handle" title="Drag Fox Anywhere">⋮⋮</span>
+      <span id="mascotBubbleText" class="leading-tight">Hi Alex! Ready to practice? 🚀</span>
+      <button type="button" class="mascot-min-btn" title="Minimize Fox" onclick="toggleMascotMinimize(event)">−</button>
+    </div>
+
+    <!-- Minimized Floating Badge -->
+    <div class="mascot-mini-badge" id="mascotMiniBadge" onclick="toggleMascotMinimize(event)" title="Click to Restore Fox">
+      <span class="text-xl">🦊</span>
+      <span>Helper Fox</span>
+      <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+    </div>
+    
+    <!-- Animated SVG Fox Mascot with Graduation Cap and Glasses -->
+    <svg class="mascot-fox" id="mascotSvg" viewBox="0 0 160 160" onclick="handleMascotClick()" title="I am your study buddy! Click or drag me!">
+      <!-- Fox Body -->
+      <path d="M 40 140 C 40 110, 120 110, 120 140 C 120 155, 40 155, 40 140 Z" fill="#FF7A00" />
+      <path d="M 60 135 C 60 120, 100 120, 100 135 C 100 150, 60 150, 60 135 Z" fill="#FFF5EB" />
+
+      <!-- Fox Head -->
+      <path d="M 35 70 C 35 120, 125 120, 125 70 C 125 40, 35 40, 35 70 Z" fill="#FF7A00" />
+      
+      <!-- Fox Ears -->
+      <path d="M 35 60 L 25 15 L 60 45 Z" fill="#FF7A00" />
+      <path d="M 35 55 L 29 23 L 52 45 Z" fill="#4A1D05" />
+      <path d="M 125 60 L 135 15 L 100 45 Z" fill="#FF7A00" />
+      <path d="M 125 55 L 131 23 L 108 45 Z" fill="#4A1D05" />
+
+      <!-- White Cheeks -->
+      <path d="M 35 75 C 35 105, 75 110, 80 110 C 85 110, 125 105, 125 75 C 110 85, 95 85, 80 88 C 65 85, 50 85, 35 75 Z" fill="#FFFFFF" />
+
+      <!-- Snout & Nose -->
+      <ellipse cx="80" cy="92" rx="6" ry="4" fill="#2E1303" />
+
+      <!-- Cute Big Glasses -->
+      <circle cx="62" cy="72" r="13" fill="none" stroke="#2B2D42" stroke-width="3" />
+      <circle cx="98" cy="72" r="13" fill="none" stroke="#2B2D42" stroke-width="3" />
+      <line x1="75" y1="72" x2="85" y2="72" stroke="#2B2D42" stroke-width="3" />
+
+      <!-- Happy Eyes behind Glasses -->
+      <circle cx="62" cy="72" r="4" fill="#2E1303" />
+      <circle cx="64" cy="70" r="1.5" fill="#FFFFFF" />
+      <circle cx="98" cy="72" r="4" fill="#2E1303" />
+      <circle cx="100" cy="70" r="1.5" fill="#FFFFFF" />
+
+      <!-- Cute Smile -->
+      <path d="M 74 100 Q 80 106 86 100" fill="none" stroke="#2E1303" stroke-width="2.5" stroke-linecap="round" />
+
+      <!-- Graduation Cap (Academic Touch) -->
+      <polygon points="80,18 125,32 80,44 35,32" fill="#1E293B" />
+      <rect x="65" y="38" width="30" height="10" rx="3" fill="#0F172A" />
+      <!-- Golden Tassel -->
+      <line x1="80" y1="31" x2="115" y2="38" stroke="#FFB703" stroke-width="2" />
+      <circle cx="115" cy="40" r="2.5" fill="#FFB703" />
+      <line x1="115" y1="40" x2="115" y2="48" stroke="#FFB703" stroke-width="2" />
+    </svg>
+  </div>
+
+
   <!-- Core Application Scripts (v=4.1.0) -->
-  <script src="data/teacher_curriculum.js?v=4.1.0"></script>
-  <script src="js/i18n.js?v=4.1.0"></script>
-  <script src="js/scratchpad.js?v=4.1.0"></script>
-  <script src="js/audio.js?v=4.1.0"></script>
-  <script src="js/sync.js?v=4.1.0"></script>
-  <script src="js/question-engine.js?v=4.1.0"></script>
-  <script src="js/vocab-game.js?v=4.1.0"></script>
-  <script src="js/student-blog.js?v=4.1.0"></script>
-  <script src="js/activity-logger.js?v=4.1.0"></script>
-  <script src="js/classroom-tools.js?v=4.1.0"></script>
-  <script src="js/certificate.js?v=4.1.0"></script>
+  <script src="data/teacher_curriculum.js?v=4.2.0"></script>
+  <script src="js/i18n.js?v=4.2.0"></script>
+  <script src="js/scratchpad.js?v=4.2.0"></script>
+  <script src="js/audio.js?v=4.2.0"></script>
+  <script src="js/sync.js?v=4.2.0"></script>
+  <script src="js/question-engine.js?v=4.2.0"></script>
+  <script src="js/vocab-game.js?v=4.2.0"></script>
+  <script src="js/student-blog.js?v=4.2.0"></script>
+  <script src="js/activity-logger.js?v=4.2.0"></script>
+  <script src="js/classroom-tools.js?v=4.2.0"></script>
+  <script src="js/certificate.js?v=4.2.0"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-  <script src="js/cloud-db.js?v=4.1.0"></script>
-  <script src="js/cosmos.js?v=4.1.0"></script>
-  <script src="app.js?v=4.1.0"></script>
+  <script src="js/cloud-db.js?v=4.2.0"></script>
+  <script src="js/cosmos.js?v=4.2.0"></script>
+  <script src="js/mascot.js?v=4.2.0"></script>
+  <script src="app.js?v=4.2.0"></script>
 </body>
 </html>
 

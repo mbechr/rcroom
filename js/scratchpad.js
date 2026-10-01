@@ -188,3 +188,5 @@ const Scratchpad = {
 };
 
 window.Scratchpad = Scratchpad;
+window.toggleScratchpad = () => Scratchpad.toggle();
+window.clearScratchpad = () => Scratchpad.clear();
