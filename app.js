@@ -2474,10 +2474,7 @@ function switchView(viewId) {
     tab.classList.toggle('active', isActive);
 
     if (tab.closest('#headerNavTabs')) {
-      tab.classList.toggle('bg-white', isActive);
-      tab.classList.toggle('text-joy-dark', isActive);
-      tab.classList.toggle('shadow-sm', isActive);
-      tab.classList.toggle('text-joy-muted', !isActive);
+      // nav-capsule uses .btn-*.active styling with micro-spring physics
     }
 
     if (tab.closest('#portalSidebar')) {
