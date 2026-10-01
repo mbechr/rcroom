@@ -5543,86 +5543,155 @@ html[dir="rtl"] #mainContentWrapper {
 }
 
 .teacher-tab-group {
-  background: var(--bg-hover);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 0.65rem 0.85rem;
+  background: #ffffff;
+  border: 2px solid #e2e8f0;
+  border-radius: 28px;
+  padding: 1.15rem 1.35rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
-  box-shadow: var(--shadow-sm);
+  gap: 0.75rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+  transition: all 0.25s ease;
+}
+
+.teacher-tab-group:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.08);
 }
 
 .teacher-group-header {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
-  font-size: 0.72rem;
+  gap: 0.5rem;
+  font-size: 0.78rem;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--color-primary);
-  padding-left: 0.2rem;
+  letter-spacing: 0.08em;
+  color: #0284c7;
+  padding-left: 0.25rem;
+}
+
+.teacher-group-header.ops {
+  color: #7c3aed;
 }
 
 .teacher-group-buttons {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0.4rem;
-}
-
-.teacher-sub-nav {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
   gap: 0.5rem;
-  padding: 0.4rem;
-  background: var(--bg-hover);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  margin-bottom: 1.75rem;
 }
 
 .teacher-sub-tab {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.55rem 0.95rem;
-  border-radius: var(--radius-sm);
-  border: 1px solid transparent;
-  background: transparent;
-  color: var(--text-secondary);
-  font-size: 0.825rem;
-  font-weight: 600;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: none;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.84rem;
+  font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
-  transition: var(--transition-smooth);
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
   user-select: none;
   flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
 }
 
+.teacher-sub-tab .icon {
+  font-size: 19px;
+  line-height: 1;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: inline-block;
+}
+
+/* Micro-spring hover physics */
 .teacher-sub-tab:hover {
-  color: var(--text-primary);
-  background: var(--bg-surface);
+  transform: translateY(-3px);
 }
 
-.teacher-sub-tab.active {
-  background: var(--bg-card-solid);
-  color: var(--text-primary);
-  border-color: var(--border-card);
-  box-shadow: var(--shadow-sm);
-  font-weight: 700;
+.teacher-sub-tab:hover .icon {
+  transform: translateY(-2px) scale(1.35) rotate(-8deg);
 }
 
-.teacher-sub-tab .material-symbols-outlined {
-  font-size: 1.15rem;
-  color: var(--color-primary);
-  transition: transform 0.2s ease;
+/* 1. Homework (Amber / Mango) */
+.teacher-sub-tab.tbtn-homework:hover,
+.teacher-sub-tab.tbtn-homework.active {
+  background: #fef3c7 !important;
+  color: #b45309 !important;
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.3) !important;
 }
 
-.teacher-sub-tab:hover .material-symbols-outlined {
-  transform: scale(1.1);
+/* 2. Lesson Permissions (Sky / Cyan) */
+.teacher-sub-tab.tbtn-curriculum:hover,
+.teacher-sub-tab.tbtn-curriculum.active {
+  background: #e0f2fe !important;
+  color: #0284c7 !important;
+  box-shadow: 0 6px 20px rgba(14, 165, 233, 0.3) !important;
+}
+
+/* 3. Zoom & Syllabus (Rose / Coral) */
+.teacher-sub-tab.tbtn-sessions:hover,
+.teacher-sub-tab.tbtn-sessions.active {
+  background: #ffe4e6 !important;
+  color: #e11d48 !important;
+  box-shadow: 0 6px 20px rgba(225, 29, 72, 0.3) !important;
+}
+
+/* 4. PDF Textbooks (Emerald / Mint) */
+.teacher-sub-tab.tbtn-books:hover,
+.teacher-sub-tab.tbtn-books.active {
+  background: #d1fae5 !important;
+  color: #059669 !important;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3) !important;
+}
+
+/* 5. Students Roster (Purple / Violet) */
+.teacher-sub-tab.tbtn-students:hover,
+.teacher-sub-tab.tbtn-students.active {
+  background: #ede9fe !important;
+  color: #7c3aed !important;
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.3) !important;
+}
+
+/* 6. Student Groups (Teal / Mint) */
+.teacher-sub-tab.tbtn-groups:hover,
+.teacher-sub-tab.tbtn-groups.active {
+  background: #ccfbf1 !important;
+  color: #0f766e !important;
+  box-shadow: 0 6px 20px rgba(15, 118, 110, 0.3) !important;
+}
+
+/* 7. Payment Approvals (Green / Emerald) */
+.teacher-sub-tab.tbtn-payments:hover,
+.teacher-sub-tab.tbtn-payments.active {
+  background: #dcfce7 !important;
+  color: #15803d !important;
+  box-shadow: 0 6px 20px rgba(21, 128, 61, 0.3) !important;
+}
+
+/* 8. Daily Planner (Orange / Tangerine) */
+.teacher-sub-tab.tbtn-planner:hover,
+.teacher-sub-tab.tbtn-planner.active {
+  background: #ffedd5 !important;
+  color: #c2410c !important;
+  box-shadow: 0 6px 20px rgba(194, 65, 12, 0.3) !important;
+}
+
+/* 9. Daily Student Audit (Fuchsia / Berry) */
+.teacher-sub-tab.tbtn-timeline:hover,
+.teacher-sub-tab.tbtn-timeline.active {
+  background: #fce7f3 !important;
+  color: #be185d !important;
+  box-shadow: 0 6px 20px rgba(190, 24, 93, 0.3) !important;
+}
+
+/* Active icon subtle bounce */
+.teacher-sub-tab.active .icon {
+  transform: scale(1.15);
 }
 
 .teacher-tab-badge {
