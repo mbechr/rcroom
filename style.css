@@ -2303,23 +2303,9 @@ body.auth-locked .ambient-glow-background {
    WORLD-CLASS ANIMATED LOGIN AURORA, COSMOS & TOP GAINERS SHOWCASE
    ============================================================================= */
 
-.login-aurora-bg {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 2040;
-  pointer-events: none;
-  overflow: hidden;
-  background: radial-gradient(circle at 50% 50%, #0c1224 0%, #050811 100%);
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.6s ease;
-}
-
+.login-aurora-bg,
 body.auth-locked .login-aurora-bg {
-  opacity: 1;
-  visibility: visible;
+  display: none !important;
 }
 
 /* Glowing Fluid Aurora Orbs */
@@ -2436,39 +2422,26 @@ body.auth-locked .login-aurora-bg {
 }
 
 /* Animated Login Cosmos Canvas */
-#loginCosmosCanvas {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 2050;
-  pointer-events: none;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.5s ease;
-}
-
+#loginCosmosCanvas,
 body.auth-locked #loginCosmosCanvas {
-  opacity: 1;
-  visibility: visible;
+  display: none !important;
 }
 
-/* Auth Modal Backdrop & Stage */
-.auth-modal-backdrop {
+/* Auth Modal Backdrop & Stage - Joyful Dopamine Light Canvas */
+.auth-modal-backdrop,
+body.auth-locked #authModal {
   position: fixed;
   inset: 0;
   z-index: 2100;
-  background: rgba(6, 9, 19, 0.6);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  display: flex;
+  background: linear-gradient(180deg, #ffffff 0%, #f0fdfa 25%, #fff1f2 70%, #fefce8 100%) !important;
+  display: flex !important;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 1.75rem 1rem 3rem;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
+  padding: 0 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
   transition: opacity 0.3s ease, visibility 0.3s ease;
   overflow-y: auto;
   overflow-x: hidden;
@@ -2482,26 +2455,27 @@ body.auth-locked #loginCosmosCanvas {
 }
 
 /* Live Leaderboard Ticker Banner */
+/* Live Leaderboard Ticker Banner - Joyful Light Glass Style */
 .login-ticker-banner {
   width: 100%;
   max-width: 1240px;
-  margin: 0 auto 1.15rem;
+  margin: 0 auto 1.5rem;
   display: flex;
   align-items: center;
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid rgba(0, 229, 255, 0.28);
-  border-radius: 9999px;
-  padding: 0.4rem 0.6rem;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6), 0 0 20px rgba(0, 229, 255, 0.12);
+  background: rgba(255, 255, 255, 0.92) !important;
+  border: 1.5px solid rgba(0, 180, 216, 0.3) !important;
+  border-radius: 9999px !important;
+  padding: 0.4rem 0.6rem !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  box-shadow: 0 10px 30px rgba(0, 180, 216, 0.08) !important;
   overflow: hidden;
   animation: modalPopUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .ticker-badge {
-  background: linear-gradient(135deg, #00e5ff 0%, #6366f1 100%);
-  color: #030712;
+  background: linear-gradient(135deg, #00b4d8 0%, #7209b7 100%) !important;
+  color: #ffffff !important;
   font-family: var(--font-headline);
   font-weight: 800;
   font-size: 0.72rem;
@@ -2513,7 +2487,7 @@ body.auth-locked #loginCosmosCanvas {
   gap: 6px;
   white-space: nowrap;
   flex-shrink: 0;
-  box-shadow: 0 0 12px rgba(0, 229, 255, 0.4);
+  box-shadow: 0 4px 14px rgba(0, 180, 216, 0.25) !important;
 }
 
 .ticker-dot {
@@ -2559,25 +2533,25 @@ body.auth-locked #loginCosmosCanvas {
   align-items: center;
   gap: 0.5rem;
   font-size: 0.8rem;
-  color: #e2e8f0;
-  font-weight: 500;
+  color: #334155 !important;
+  font-weight: 600;
 }
 
 .ticker-item strong {
-  color: #ffffff;
+  color: #0f172a !important;
 }
 
 .ticker-item .ticker-xp {
-  color: #38bdf8;
+  color: #0284c7 !important;
   font-family: var(--font-mono);
   font-weight: 700;
-  background: rgba(56, 189, 248, 0.12);
+  background: rgba(2, 132, 199, 0.1) !important;
   padding: 1px 6px;
   border-radius: 4px;
 }
 
 .ticker-item .ticker-skill {
-  color: #fbbf24;
+  color: #b45309 !important;
   font-size: 0.76rem;
 }
 
@@ -2612,29 +2586,30 @@ body.auth-locked #authModal {
   max-width: 1240px;
 }
 
-/* Side Showcase Panels (Top Gainers & Mastered Topics) */
+/* Side Showcase Panels (Top Gainers & Mastered Topics) - Frosted Glass Light */
 .auth-showcase-panel {
   flex: 1;
   max-width: 360px;
   min-width: 280px;
-  background: rgba(15, 23, 42, 0.82);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 20px;
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  padding: 1.1rem 1rem;
+  background: rgba(255, 255, 255, 0.88) !important;
+  border: 2px solid rgba(255, 255, 255, 0.95) !important;
+  border-radius: 24px !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  padding: 1.25rem !important;
   display: flex;
   flex-direction: column;
-  max-height: 480px;
-  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  max-height: 490px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.06), 0 0 0 1px rgba(0, 0, 0, 0.03) !important;
+  color: #0f172a !important;
   animation: modalPopUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .auth-showcase-panel:hover {
-  border-color: rgba(0, 229, 255, 0.35);
+  border-color: rgba(0, 180, 216, 0.4) !important;
   transform: translateY(-2px);
-  box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.8), 0 0 25px rgba(0, 229, 255, 0.12);
+  box-shadow: 0 25px 50px rgba(0, 180, 216, 0.12) !important;
 }
 
 .showcase-panel-header {
@@ -2642,7 +2617,7 @@ body.auth-locked #authModal {
   align-items: center;
   gap: 0.75rem;
   padding-bottom: 0.75rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
   margin-bottom: 0.75rem;
 }
 
@@ -2650,8 +2625,8 @@ body.auth-locked #authModal {
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  background: rgba(0, 229, 255, 0.1);
-  border: 1px solid rgba(0, 229, 255, 0.25);
+  background: rgba(0, 180, 216, 0.1) !important;
+  border: 1px solid rgba(0, 180, 216, 0.25) !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2664,12 +2639,12 @@ body.auth-locked #authModal {
   font-weight: 800;
   font-size: 0.82rem;
   letter-spacing: 0.06em;
-  color: #ffffff;
+  color: #0f172a !important;
 }
 
 .showcase-subtitle {
   font-size: 0.7rem;
-  color: #94a3b8;
+  color: #64748b !important;
   margin-top: 1px;
 }
 
@@ -2692,44 +2667,51 @@ body.auth-locked #authModal {
   height: 0 !important;
 }
 
-/* Student Gainer List Item (Clean 2-line layout) */
+/* Student Gainer List Item (Light Joyful Style) */
+.login-card-item,
 .gainer-card {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
-  padding: 0.55rem 0.75rem;
-  background: rgba(30, 41, 59, 0.65);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  background: rgba(248, 250, 252, 0.95) !important;
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
+  border-radius: 16px;
   transition: all 0.2s ease;
+  margin-bottom: 0.5rem;
 }
 
+.login-card-item:hover,
 .gainer-card:hover {
-  background: rgba(30, 41, 59, 0.9);
-  border-color: rgba(0, 229, 255, 0.25);
-  transform: translateX(3px);
+  background: #ffffff !important;
+  border-color: rgba(0, 180, 216, 0.4) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 180, 216, 0.08) !important;
 }
 
+.login-card-rank,
 .gainer-rank {
-  font-size: 1.1rem;
-  width: 20px;
+  font-size: 1.15rem;
+  width: 22px;
   text-align: center;
   flex-shrink: 0;
 }
 
+.login-card-avatar,
 .gainer-avatar {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
-  background: rgba(0, 229, 255, 0.15);
-  border: 1px solid rgba(0, 229, 255, 0.3);
+  background: rgba(0, 180, 216, 0.12) !important;
+  border: 1.5px solid rgba(0, 180, 216, 0.25) !important;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1rem;
+  font-size: 1.15rem;
   flex-shrink: 0;
 }
 
+.login-card-info,
 .gainer-info {
   flex: 1;
   min-width: 0;
@@ -2738,29 +2720,53 @@ body.auth-locked #authModal {
   gap: 2px;
 }
 
-.gainer-top-line {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 6px;
-}
-
+.login-card-name,
 .gainer-name {
-  font-weight: 700;
-  font-size: 0.8rem;
-  color: #f8fafc;
+  font-weight: 800 !important;
+  font-size: 0.84rem;
+  color: #0f172a !important;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.login-card-sub,
+.gainer-sub {
+  font-size: 0.72rem;
+  color: #64748b !important;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.login-card-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.login-card-stat .stat-num {
+  font-family: var(--font-mono);
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: #0284c7 !important;
+}
+
+.login-card-stat .stat-label {
+  font-size: 0.65rem;
+  color: #94a3b8 !important;
+  font-weight: 700;
 }
 
 .gainer-xp-pill {
   font-family: var(--font-mono);
   font-size: 0.72rem;
   font-weight: 700;
-  color: #38bdf8;
-  background: rgba(56, 189, 248, 0.14);
-  border: 1px solid rgba(56, 189, 248, 0.25);
+  color: #0284c7 !important;
+  background: rgba(2, 132, 199, 0.1) !important;
+  border: 1px solid rgba(2, 132, 199, 0.2) !important;
   padding: 1px 6px;
   border-radius: 6px;
   white-space: nowrap;
@@ -3047,16 +3053,16 @@ body.auth-locked #authModal {
   }
 }
 
-/* The Main Center Login Modal Window */
+/* The Main Center Login Modal Window - Frosted Glass Light */
 .auth-modal-window {
   width: 100%;
   max-width: 440px;
-  background: rgba(15, 23, 42, 0.88);
-  border: 1px solid rgba(0, 229, 255, 0.3);
-  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.94) !important;
+  border: 2px solid rgba(255, 255, 255, 0.98) !important;
+  border-radius: 28px !important;
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
-  box-shadow: 0 30px 80px -15px rgba(0, 0, 0, 0.85), 0 0 30px rgba(0, 229, 255, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  box-shadow: 0 25px 60px rgba(0, 180, 216, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.04) !important;
   overflow: hidden !important;
   overflow-x: hidden !important;
   display: flex;
@@ -3067,6 +3073,25 @@ body.auth-locked #authModal {
   flex-shrink: 0;
   scrollbar-width: none !important;
   -ms-overflow-style: none !important;
+}
+
+.auth-form .form-group input {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  border-radius: 14px !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03) !important;
+}
+
+.auth-form .form-group input:focus {
+  background: #ffffff !important;
+  border-color: #00b4d8 !important;
+  box-shadow: 0 0 0 4px rgba(0, 180, 216, 0.15) !important;
+  color: #0f172a !important;
+}
+
+.auth-form .form-group input::placeholder {
+  color: #94a3b8 !important;
 }
 
 .auth-modal-window::-webkit-scrollbar,

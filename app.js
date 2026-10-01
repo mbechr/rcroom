@@ -6,7 +6,7 @@
 
 // Force update tab title & official RC favicon immediately
 (function enforceOfficialRCBrand() {
-  document.title = "RC Academy — Global Learning Platform";
+  document.title = "RC ROOM — Learn, Connect & Grow";
   const rcFaviconData = "data:image/png;base64,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";
   try {
     let links = document.querySelectorAll("link[rel*='icon']");
@@ -6726,10 +6726,15 @@ async function openAuthModal(isMandatory = false) {
   const loginTab = document.querySelector('[data-auth-tab="login"]');
   if (loginTab) loginTab.click();
 
-  setTimeout(() => {
-    const uInput = document.getElementById('loginUsername');
-    if (uInput) uInput.focus();
-  }, 200);
+  if (isMandatory) {
+    if (el.authModal) el.authModal.scrollTop = 0;
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  } else {
+    setTimeout(() => {
+      const uInput = document.getElementById('loginUsername');
+      if (uInput) uInput.focus();
+    }, 200);
+  }
 }
 
 function setCurrentStudent(student) {
