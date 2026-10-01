@@ -20,60 +20,29 @@
       theme: {
         extend: {
           colors: {
+            "primary": "#00b4d8",
+            "primary-hover": "#0096c7",
+            "primary-container": "#0077b6",
+            "dopamine-pink": "#ff5d8f",
+            "dopamine-yellow": "#ffb703",
+            "dopamine-purple": "#7209b7",
+            "dopamine-green": "#06d6a0",
+            "surface-canvas": "#F4F7FC",
+            "surface-card": "#FFFFFF",
+            "border-subtle": "#E2E8F0",
             "on-background": "#151b29",
-            "inverse-primary": "#b0c6ff",
-            "primary-fixed-dim": "#b0c6ff",
             "surface-container-low": "#f1f3ff",
-            "tertiary-container": "#007954",
             "surface-container": "#e9edff",
             "on-primary": "#ffffff",
-            "secondary-container": "#6552ff",
-            "on-tertiary-container": "#9affce",
-            "surface-canvas": "#F8FAFC",
-            "on-error": "#ffffff",
-            "surface-tint": "#EFF6FF",
-            "on-primary-container": "#e5eaff",
             "on-surface": "#151b29",
-            "outline": "#727786",
-            "tertiary-fixed-dim": "#68dba9",
-            "on-tertiary-fixed": "#002114",
-            "streak-amber": "#F59E0B",
-            "surface-bright": "#faf8ff",
             "on-surface-variant": "#424654",
-            "secondary": "#4b32e7",
-            "error-container": "#ffdad6",
-            "on-secondary-fixed-variant": "#3912d8",
-            "tertiary": "#005e40",
-            "error": "#ba1a1a",
-            "secondary-fixed": "#e4dfff",
-            "surface-variant": "#dde2f6",
-            "on-secondary": "#ffffff",
-            "surface-container-highest": "#dde2f6",
-            "mastery-emerald": "#10B981",
-            "surface": "#faf8ff",
-            "tertiary-fixed": "#85f8c4",
-            "on-primary-fixed-variant": "#00419c",
-            "primary-container": "#0062e3",
-            "on-tertiary-fixed-variant": "#005137",
-            "danger-rose": "#EF4444",
-            "inverse-surface": "#2a303f",
-            "secondary-fixed-dim": "#c5c0ff",
-            "surface-container-lowest": "#ffffff",
-            "on-secondary-container": "#f7f2ff",
-            "on-primary-fixed": "#001945",
-            "on-tertiary": "#ffffff",
-            "on-error-container": "#93000a",
-            "streak-glow": "#FEF3C7",
-            "surface-container-high": "#e2e8fc",
-            "outline-variant": "#c2c6d7",
-            "border-subtle": "#E2E8F0",
-            "on-secondary-fixed": "#140067",
-            "surface-dim": "#d4d9ed",
-            "primary": "#004bb2",
-            "background": "#faf8ff",
-            "inverse-on-surface": "#edf0ff",
-            "primary-fixed": "#d9e2ff",
-            "surface-card": "#FFFFFF"
+            "streak-amber": "#ffb703",
+            "mastery-emerald": "#06d6a0",
+            "danger-rose": "#ff5d8f"
+          },
+          borderRadius: {
+            "3xl": "28px",
+            "4xl": "36px"
           },
           fontFamily: {
             "headline-lg": ["Plus Jakarta Sans", "Inter", "sans-serif"],
@@ -441,74 +410,80 @@
           </div>
 
           <!-- Today's Mission & Level Progress Grid -->
+          <!-- Today's Mission & Level Progress Grid (Joyful & Dynamic) -->
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Left 2 Cols: Today's Mission Focus Card -->
-            <div class="lg:col-span-2 rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 p-6 sm:p-8 text-white shadow-md flex flex-col justify-between relative overflow-hidden">
+            <!-- Left 2 Cols: Vibrant Playful Hero Card -->
+            <div class="lg:col-span-2 rounded-3xl bg-gradient-to-r from-cyan-500 via-sky-500 to-indigo-600 p-6 sm:p-8 text-white shadow-xl flex flex-col justify-between relative overflow-hidden bento-card-tactile">
+              <!-- Floating Decorative Background Elements -->
+              <div class="absolute -right-8 -bottom-8 w-56 h-56 rounded-full bg-white/10 blur-2xl pointer-events-none"></div>
+              <div class="absolute top-4 right-8 text-6xl opacity-30 select-none animate-bounce pointer-events-none">⭐</div>
+              
               <div class="space-y-4 relative z-10">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 font-bold text-xs border border-cyan-500/30">
-                  <span>🎯</span> <span>TODAY'S MISSION</span>
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-yellow-400 text-slate-950 font-black text-xs shadow-md">
+                  <span>⭐</span> <span>TODAY'S MISSION</span>
                 </div>
-                <h2 class="text-xl sm:text-2xl font-bold tracking-tight">
-                  Maths &bull; Place Value Models &amp; Core Operations
+                <h2 class="text-2xl sm:text-3xl font-black tracking-tight leading-tight drop-shadow-sm">
+                  Master Place Value &amp; Core Operations!
                 </h2>
-                <p class="text-slate-300 text-xs sm:text-sm leading-relaxed max-w-xl">
-                  Complete 10 focused curriculum questions to maintain your mastery SmartScore of 80+.
+                <p class="text-sky-100 text-sm sm:text-base leading-relaxed max-w-xl font-medium">
+                  Jump into today's interactive drill, unlock your new badges, and keep your practice streak alive!
                 </p>
 
-                <div class="flex flex-wrap items-center gap-4 pt-2 text-xs">
-                  <div class="flex items-center gap-1.5 text-cyan-300 font-semibold">
-                    <span class="material-symbols-outlined text-[18px]">assignment</span>
-                    <span>10 Questions Goal</span>
+                <div class="flex flex-wrap items-center gap-4 pt-2 text-xs sm:text-sm font-bold">
+                  <div class="flex items-center gap-2 bg-white/20 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20">
+                    <span>🎯</span>
+                    <span>10 Question Challenge</span>
                   </div>
-                  <div class="flex items-center gap-1.5 text-emerald-300 font-semibold">
-                    <span class="material-symbols-outlined text-[18px]">videocam</span>
+                  <div class="flex items-center gap-2 bg-white/20 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/20">
+                    <span>🎥</span>
                     <span>Next Live Class: 5:00 PM</span>
                   </div>
                 </div>
               </div>
 
               <div class="pt-6 relative z-10 flex flex-wrap items-center gap-3">
-                <button type="button" class="px-6 py-3.5 rounded-xl bg-gradient-to-r from-cyan-400 via-sky-500 to-indigo-500 text-slate-950 font-extrabold text-sm shadow-[0_0_20px_rgba(0,229,255,0.4)] hover:brightness-110 active:scale-95 transition-all cursor-pointer" id="dashStartPracticeBtn">
-                  🚀 Continue Learning &rarr;
+                <button type="button" class="px-7 py-4 rounded-full bg-yellow-400 hover:bg-yellow-300 text-slate-950 font-black text-sm shadow-[0_4px_0_#d48b00] active:translate-y-1 active:shadow-none transition-all cursor-pointer flex items-center gap-2" id="dashStartPracticeBtn">
+                  <span>🎮 Start Learning Now</span>
+                  <span>&rarr;</span>
                 </button>
-                <button type="button" class="px-4 py-3.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-sm transition-all cursor-pointer border border-white/10" onclick="switchView('skills')">
-                  Browse All Skills 🎯
+                <button type="button" class="px-6 py-4 rounded-full bg-white/20 hover:bg-white/30 text-white font-bold text-sm backdrop-blur-md border border-white/30 transition-all cursor-pointer active:scale-95" onclick="switchView('skills')">
+                  Explore Skills Bank 🎯
                 </button>
               </div>
             </div>
 
-            <!-- Right Col: Level Progress Card -->
-            <div class="rounded-3xl bg-surface-card p-6 sm:p-7 shadow-sm border border-slate-100 flex flex-col justify-between gap-5">
+            <!-- Right Col: Level & Dopamine Progress Card -->
+            <div class="rounded-3xl bg-white p-7 shadow-lg border-2 border-slate-100 flex flex-col justify-between gap-5 bento-card-tactile">
               <div>
                 <div class="flex items-center justify-between">
-                  <span class="text-xs font-bold uppercase tracking-wider text-primary">XP Progress</span>
-                  <span class="text-xs font-extrabold text-on-surface"><span id="dashCurrentXP">1,420</span> / <span id="dashTargetXP">2,000</span> XP</span>
+                  <span class="text-xs font-black uppercase tracking-wider text-primary">Mastery XP Progress</span>
+                  <span class="text-xs font-black text-slate-800"><span id="dashCurrentXP">1,420</span> / <span id="dashTargetXP">2,000</span> XP</span>
                 </div>
-                <div class="w-full h-3 rounded-full bg-surface-container-high overflow-hidden mt-2.5">
-                  <div class="h-full rounded-full bg-gradient-to-r from-cyan-400 to-indigo-500 transition-all duration-700" id="dashXpFill" style="width: 71%;"></div>
+                <div class="w-full h-4 rounded-full bg-slate-100 overflow-hidden mt-3 p-0.5 border border-slate-200">
+                  <div class="h-full rounded-full bg-gradient-to-r from-yellow-400 via-pink-500 to-cyan-500 transition-all duration-700 shadow-sm" id="dashXpFill" style="width: 71%;"></div>
                 </div>
-                <p class="text-xs text-on-surface-variant mt-2" id="dashXpPercentText">
-                  71% towards Level 6 Junior Scholar
+                <p class="text-xs text-slate-500 mt-2.5 font-bold" id="dashXpPercentText">
+                  71% towards Level 6 Junior Scholar 🏆
                 </p>
               </div>
 
-              <!-- 4 Compact KPI Mini Cards -->
+              <!-- 4 Playful Dopamine KPI Mini Cards -->
               <div class="grid grid-cols-2 gap-3 pt-2">
-                <div class="p-3 rounded-xl bg-surface-container-low border border-slate-100 text-center">
-                  <div class="text-lg font-extrabold text-on-surface" id="kpiQuestionsAnswered">142</div>
-                  <div class="text-[10px] text-on-surface-variant font-semibold">Questions Solved</div>
+                <div class="p-3.5 rounded-2xl bg-cyan-50 border border-cyan-100 text-center hover:scale-105 transition-transform">
+                  <div class="text-xl font-black text-cyan-600" id="kpiQuestionsAnswered">142</div>
+                  <div class="text-[11px] text-cyan-800 font-bold mt-0.5">Questions</div>
                 </div>
-                <div class="p-3 rounded-xl bg-surface-container-low border border-slate-100 text-center">
-                  <div class="text-lg font-extrabold text-emerald-600" id="kpiAccuracyRate">88.5%</div>
-                  <div class="text-[10px] text-on-surface-variant font-semibold">Accuracy</div>
+                <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-100 text-center hover:scale-105 transition-transform">
+                  <div class="text-xl font-black text-emerald-600" id="kpiAccuracyRate">88.5%</div>
+                  <div class="text-[11px] text-emerald-800 font-bold mt-0.5">Accuracy</div>
                 </div>
-                <div class="p-3 rounded-xl bg-surface-container-low border border-slate-100 text-center">
-                  <div class="text-lg font-extrabold text-amber-600" id="kpiTimeSpent">1h 45m</div>
-                  <div class="text-[10px] text-on-surface-variant font-semibold">Practice Time</div>
+                <div class="p-3.5 rounded-2xl bg-amber-50 border border-amber-100 text-center hover:scale-105 transition-transform">
+                  <div class="text-xl font-black text-amber-600" id="kpiTimeSpent">1h 45m</div>
+                  <div class="text-[11px] text-amber-800 font-bold mt-0.5">Time Spent</div>
                 </div>
-                <div class="p-3 rounded-xl bg-surface-container-low border border-slate-100 text-center">
-                  <div class="text-lg font-extrabold text-purple-600" id="kpiMasteredCount">8</div>
-                  <div class="text-[10px] text-on-surface-variant font-semibold">Skills Mastered</div>
+                <div class="p-3.5 rounded-2xl bg-purple-50 border border-purple-100 text-center hover:scale-105 transition-transform">
+                  <div class="text-xl font-black text-purple-600" id="kpiMasteredCount">8</div>
+                  <div class="text-[11px] text-purple-800 font-bold mt-0.5">Mastered</div>
                 </div>
               </div>
             </div>
@@ -1746,118 +1721,356 @@
        STUDENT AUTHENTICATION & LOGIN MODAL
        ==================================================================== -->
   <div class="auth-modal-backdrop" id="authModal">
-    <!-- Live Global Ticker: Top Gainers & Topics Solved -->
-    <div class="login-ticker-banner" id="loginTickerBanner">
-      <div class="ticker-badge">
-        <span class="ticker-dot"></span>
-        <span>🏆 TOP GAINERS &amp; MASTERY</span>
-      </div>
-      <div class="ticker-track-wrap">
-        <div class="ticker-track" id="loginTickerTrack">
-          <!-- Populated via JS -->
-        </div>
-      </div>
-    </div>
+    <!-- Liquid Organic Background Blobs (From Design Mockup) -->
+    <div class="organic-blob-shape organic-blob-top-left"></div>
+    <div class="organic-blob-shape organic-blob-right"></div>
+    <div class="organic-blob-shape organic-blob-bottom-left"></div>
 
-    <div class="auth-portal-stage">
-      <!-- Left Showcase Panel: Top Student Gainers (Hall of Fame) -->
-      <div class="auth-showcase-panel left-panel" id="topGainersPanel">
-        <div class="showcase-panel-header">
-          <div class="showcase-icon">🏆</div>
-          <div>
-            <div class="showcase-title">TOP GAINERS</div>
-            <div class="showcase-subtitle">Weekly Leaderboard &amp; Points</div>
+    <!-- 1. LANDING TOP NAVIGATION BAR -->
+    <header class="w-full max-w-7xl mx-auto px-4 sm:px-8 py-5 flex items-center justify-between relative z-20">
+      <div class="flex items-center gap-3 cursor-pointer" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-yellow-400 via-pink-500 to-cyan-400 p-0.5 shadow-lg flex items-center justify-center transform hover:rotate-6 transition-transform">
+          <div class="w-full h-full bg-white rounded-[14px] flex items-center justify-center font-black text-xl text-slate-900 tracking-tighter">
+            <span class="text-amber-500">R</span><span class="text-cyan-500">C</span>
           </div>
         </div>
-        <div class="showcase-list" id="topGainersList">
-          <!-- Populated with top students -->
+        <div class="flex flex-col">
+          <span class="font-black text-2xl tracking-tight text-slate-900 leading-none">RC ROOM</span>
+          <span class="text-[10px] font-bold tracking-widest text-slate-400 uppercase mt-0.5">Learn &bull; Connect &bull; Grow</span>
         </div>
       </div>
 
-      <!-- Center: Main Login Modal Window -->
-      <div class="auth-modal-window">
-        <div class="auth-modal-header auth-login-header">
-          <div class="w-16 h-16 rounded-2xl bg-white p-1.5 shadow-[0_0_30px_rgba(0,229,255,0.4)] mb-2.5 flex items-center justify-center border border-white/30">
-            <img src="assets/rc-logo.png?v=4.0.0" alt="Rania Classroom RC Logo" class="w-full h-full object-contain rounded-xl">
-          </div>
-          <div class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-[11px] font-bold tracking-wider uppercase mb-1">
-            <span>🔒 Private Academy Portal</span>
-          </div>
-          <h2 class="auth-title text-2xl font-extrabold text-white tracking-tight" style="margin: 0; letter-spacing: -0.01em;">RANIA CLASSROOM</h2>
-          <p class="auth-subtitle text-slate-400 text-xs mt-0.5">Miss Rania &bull; Inspire, Thrive — Be Part of It!</p>
+      <!-- Navigation Links -->
+      <nav class="hidden md:flex items-center gap-8 font-bold text-sm text-slate-600">
+        <a href="#coursesSection" class="hover:text-cyan-600 transition-colors">Courses</a>
+        <a href="#popularShowcase" class="hover:text-cyan-600 transition-colors">Community</a>
+        <a href="#aboutSection" class="hover:text-cyan-600 transition-colors">Mentorship</a>
+        <a href="https://wa.me/201016499281" target="_blank" class="hover:text-cyan-600 transition-colors">About</a>
+      </nav>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-3">
+        <button type="button" onclick="document.getElementById('authSignInCard').scrollIntoView({behavior: 'smooth'})" class="px-5 py-2.5 rounded-full font-bold text-sm text-slate-700 hover:text-cyan-600 transition-all cursor-pointer">
+          Sign In
+        </button>
+        <button type="button" onclick="document.getElementById('authSignInCard').scrollIntoView({behavior: 'smooth'})" class="primary-glow-btn px-6 py-2.5 text-sm font-extrabold flex items-center gap-2 cursor-pointer shadow-md hover:scale-105 transition-transform">
+          <span>Start Learning</span>
+          <span>&rarr;</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- 2. HERO SECTION (Matching Design Picture) -->
+    <section class="w-full max-w-7xl mx-auto px-4 sm:px-8 pt-6 pb-16 relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+      <!-- Left Hero Text & Call-To-Action (7 Cols) -->
+      <div class="lg:col-span-7 space-y-6 text-left">
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-yellow-400/20 text-amber-700 border border-yellow-400/30 text-xs font-black tracking-wider uppercase shadow-sm">
+          <span>✨</span>
+          <span>Inspire, Thrive &mdash; Be Part of It!</span>
         </div>
 
-        <!-- UNIFIED SIGN IN (Students & Teacher) -->
-        <div class="auth-tab-content active" id="authTabLogin">
-          <form id="loginForm" class="auth-form" onsubmit="return false;">
-            <div class="form-group mb-4">
-              <label for="loginUsername" class="text-xs font-bold uppercase tracking-wider text-slate-300">Username</label>
-              <div class="relative mt-1">
-                <input type="text" id="loginUsername" placeholder="e.g. beshr, alex, or admin" required autocomplete="username" class="w-full px-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700/80 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all text-sm font-medium">
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.12]">
+          <span class="text-[#ff5d8f]">RC ROOM &mdash;</span><br>
+          LEARN, CONNECT<br>
+          <span class="bg-gradient-to-r from-cyan-500 to-indigo-600 bg-clip-text text-transparent">&amp; GROW.</span>
+        </h1>
+
+        <p class="text-slate-600 text-base sm:text-lg leading-relaxed max-w-xl font-medium">
+          A vibrant interactive learning universe curated by <strong class="text-slate-900">Miss Rania</strong>. Cambridge &amp; UK primary-to-secondary curriculum mastery, gamified diagnostic drills, and live personal mentorship.
+        </p>
+
+        <div class="flex flex-wrap items-center gap-4 pt-3">
+          <button type="button" onclick="document.getElementById('coursesSection').scrollIntoView({behavior: 'smooth'})" class="primary-glow-btn px-8 py-4 text-base font-black flex items-center gap-2 shadow-lg hover:scale-105 transition-transform cursor-pointer">
+            <span>Explore Courses</span>
+            <span>&rarr;</span>
+          </button>
+          <button type="button" onclick="document.getElementById('authSignInCard').scrollIntoView({behavior: 'smooth'})" class="coral-glow-btn px-8 py-4 text-base font-black flex items-center gap-2 shadow-lg hover:scale-105 transition-transform cursor-pointer">
+            <span>Student Portal Access</span>
+            <span>🔒</span>
+          </button>
+        </div>
+
+        <!-- Social Proof Stats Pill -->
+        <div class="flex flex-wrap items-center gap-6 pt-4 text-xs font-bold text-slate-500">
+          <div class="flex items-center gap-2">
+            <span class="text-lg">🎯</span>
+            <span>8,264+ Indexed Skills</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-lg">🏆</span>
+            <span>100% SmartScore Mastery</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-lg">🎥</span>
+            <span>Live Zoom Interactive Classrooms</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Hero 3D Graphic Showcase (5 Cols) -->
+      <div class="lg:col-span-5 relative flex items-center justify-center">
+        <!-- Floating 3D Graphic Canvas Container -->
+        <div class="relative w-full max-w-[420px] aspect-square flex items-center justify-center">
+          <!-- Background Organic Blob Behind Illustration -->
+          <div class="absolute inset-4 rounded-[40px] bg-gradient-to-tr from-cyan-400 via-pink-400 to-yellow-300 opacity-30 blur-2xl animate-pulse"></div>
+
+          <!-- Central Playful Hero Display Card -->
+          <div class="relative z-10 w-full rounded-3xl bg-white/70 backdrop-blur-xl border border-white/80 shadow-2xl p-7 flex flex-col items-center text-center space-y-4 bento-card-tactile">
+            <!-- 3D Avatar Icons & Floating Badges -->
+            <div class="relative w-32 h-32 flex items-center justify-center">
+              <div class="w-24 h-24 rounded-full bg-gradient-to-tr from-amber-400 to-pink-500 p-1 shadow-xl flex items-center justify-center text-5xl">
+                👩‍🏫
+              </div>
+              <!-- Floating Pill 1: Code Block -->
+              <div class="absolute -top-2 -right-4 px-3 py-1 rounded-full bg-slate-900 text-cyan-400 text-xs font-mono font-bold shadow-lg border border-slate-700 animate-bounce">
+                &lt;/&gt; code
+              </div>
+              <!-- Floating Pill 2: 100 XP -->
+              <div class="absolute -bottom-2 -left-4 px-3 py-1 rounded-full bg-yellow-400 text-slate-950 text-xs font-black shadow-lg">
+                ⭐ 100 XP
               </div>
             </div>
-            <div class="form-group mb-5">
-              <label for="loginPassword" class="text-xs font-bold uppercase tracking-wider text-slate-300">Password</label>
-              <div class="relative mt-1">
-                <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password" class="w-full px-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700/80 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all text-sm font-medium">
-              </div>
-            </div>
-            <div class="form-error-msg mb-4 text-xs font-bold text-rose-400 bg-rose-500/10 p-2.5 rounded-lg border border-rose-500/20" id="loginErrorMsg" style="display: none;"></div>
 
-            <button type="submit" class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-cyan-400 via-sky-500 to-indigo-500 text-slate-950 font-extrabold text-sm shadow-[0_0_20px_rgba(0,229,255,0.4)] hover:shadow-[0_0_30px_rgba(0,229,255,0.6)] hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer box-border" id="submitLoginBtn">
-              Sign In to Academy &rarr;
+            <div>
+              <h3 class="font-black text-xl text-slate-900">Miss Rania's Cohort</h3>
+              <p class="text-xs text-slate-500 font-semibold mt-0.5">Empowering curious young minds daily</p>
+            </div>
+
+            <!-- Student Avatars Circle -->
+            <div class="flex items-center justify-center -space-x-2 py-1">
+              <span class="w-8 h-8 rounded-full bg-blue-100 border-2 border-white flex items-center justify-center text-sm shadow">🦊</span>
+              <span class="w-8 h-8 rounded-full bg-pink-100 border-2 border-white flex items-center justify-center text-sm shadow">🐼</span>
+              <span class="w-8 h-8 rounded-full bg-amber-100 border-2 border-white flex items-center justify-center text-sm shadow">🦁</span>
+              <span class="w-8 h-8 rounded-full bg-purple-100 border-2 border-white flex items-center justify-center text-sm shadow">🦄</span>
+              <span class="w-8 h-8 rounded-full bg-cyan-100 border-2 border-white flex items-center justify-center text-xs font-black text-cyan-800 shadow">+48</span>
+            </div>
+
+            <button type="button" onclick="document.getElementById('authSignInCard').scrollIntoView({behavior: 'smooth'})" class="w-full py-3 rounded-2xl bg-gradient-to-r from-cyan-400 via-sky-500 to-indigo-500 text-slate-950 font-black text-xs shadow-md hover:brightness-105 active:scale-95 transition-all">
+              ⚡ Open Practice Room &rarr;
             </button>
-            <div class="mt-4 p-3 rounded-xl bg-slate-900/50 border border-slate-800 text-[11px] text-slate-400 text-center leading-relaxed">
-              🔐 <strong>Miss Rania's Private Cohort:</strong> Students and parents receive credentials directly from Miss Rania.
-            </div>
-          </form>
+          </div>
+
+          <!-- Floating Decorative 3D Cubes -->
+          <div class="floating-3d-cube cube-purple -top-4 -left-4 floating-3d-element"></div>
+          <div class="floating-3d-cube cube-coral bottom-2 -right-3 floating-3d-element" style="animation-delay: -2s;"></div>
+          <div class="floating-3d-cube cube-mango -bottom-6 left-12 floating-3d-element" style="animation-delay: -4s;"></div>
         </div>
       </div>
+    </section>
 
-      <!-- Right Showcase Panel: Student Blogs & Creative Essays Curated by Miss Rania -->
-      <div class="auth-showcase-panel right-panel" id="featuredBlogPanel">
-        <div class="showcase-panel-header">
-          <div class="showcase-icon">✍️</div>
+    <!-- 3. POPULAR COURSES SECTION (4 Glassmorphism Bento Cards from Screenshot) -->
+    <section class="w-full max-w-7xl mx-auto px-4 sm:px-8 py-12 relative z-10" id="coursesSection">
+      <div class="text-center space-y-2 mb-10">
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+          OUR MOST POPULAR COURSES
+        </h2>
+        <p class="text-slate-500 text-sm font-semibold max-w-lg mx-auto">
+          Explore structured interactive learning pathways designed to inspire brilliance at every stage.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="popularShowcase">
+        <!-- Card 1: Digital Creator Hub -->
+        <div class="glass-bento-card p-6 flex flex-col justify-between h-[360px] text-left">
           <div>
-            <div class="showcase-title">STUDENT BLOGS &amp; ESSAYS</div>
-            <div class="showcase-subtitle">Featured Works Selected by Miss Rania</div>
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-400 to-yellow-300 p-0.5 shadow-md flex items-center justify-center text-3xl mb-4">
+              📷
+            </div>
+            <h3 class="text-xl font-black text-slate-900 leading-tight">Digital Creator Hub</h3>
+            <p class="text-xs text-slate-600 font-medium leading-relaxed mt-2.5">
+              Visual storytelling, multimedia design, and creative content fundamentals for young innovators.
+            </p>
+          </div>
+
+          <div class="pt-4 border-t border-slate-100/80 space-y-3">
+            <div class="flex items-center justify-between text-[11px] font-bold text-slate-400">
+              <span>⏱️ 5 Weeks</span>
+              <span>📅 Starts Oct 10</span>
+            </div>
+            <button type="button" onclick="document.getElementById('authSignInCard').scrollIntoView({behavior: 'smooth'})" class="coral-glow-btn w-full py-2.5 text-xs font-black">
+              Enroll Now
+            </button>
           </div>
         </div>
-        <div class="showcase-list" id="featuredBlogList">
-          <!-- Populated with curated student blogs & essays -->
+
+        <!-- Card 2: Future Tech Explorer -->
+        <div class="glass-bento-card p-6 flex flex-col justify-between h-[360px] text-left">
+          <div>
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-cyan-400 to-blue-500 p-0.5 shadow-md flex items-center justify-center text-3xl text-white font-mono font-black mb-4">
+              &lt;/&gt;
+            </div>
+            <h3 class="text-xl font-black text-slate-900 leading-tight">Future Tech Explorer</h3>
+            <p class="text-xs text-slate-600 font-medium leading-relaxed mt-2.5">
+              Foundations of computational logic, algorithms, and hands-on coding challenges made fun.
+            </p>
+          </div>
+
+          <div class="pt-4 border-t border-slate-100/80 space-y-3">
+            <div class="flex items-center justify-between text-[11px] font-bold text-slate-400">
+              <span>⏱️ 5 Weeks</span>
+              <span>📅 Starts Oct 10</span>
+            </div>
+            <button type="button" onclick="document.getElementById('authSignInCard').scrollIntoView({behavior: 'smooth'})" class="primary-glow-btn w-full py-2.5 text-xs font-black">
+              Learn More
+            </button>
+          </div>
+        </div>
+
+        <!-- Card 3: Leadership Skills -->
+        <div class="glass-bento-card p-6 flex flex-col justify-between h-[360px] text-left">
+          <div>
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-pink-400 to-rose-500 p-0.5 shadow-md flex items-center justify-center text-3xl mb-4">
+              👥
+            </div>
+            <h3 class="text-xl font-black text-slate-900 leading-tight">Leadership Skills</h3>
+            <p class="text-xs text-slate-600 font-medium leading-relaxed mt-2.5">
+              Public speaking, debate clinics, problem solving, and effective team collaboration skills.
+            </p>
+          </div>
+
+          <div class="pt-4 border-t border-slate-100/80 space-y-3">
+            <div class="flex items-center justify-between text-[11px] font-bold text-slate-400">
+              <span>⏱️ 5 Weeks</span>
+              <span>📅 Starts Oct 10</span>
+            </div>
+            <button type="button" onclick="document.getElementById('authSignInCard').scrollIntoView({behavior: 'smooth'})" class="coral-glow-btn w-full py-2.5 text-xs font-black">
+              Enroll Now
+            </button>
+          </div>
+        </div>
+
+        <!-- Card 4: Global Communication -->
+        <div class="glass-bento-card p-6 flex flex-col justify-between h-[360px] text-left">
+          <div>
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-400 to-teal-500 p-0.5 shadow-md flex items-center justify-center text-3xl mb-4">
+              🌐
+            </div>
+            <h3 class="text-xl font-black text-slate-900 leading-tight">Global Communication</h3>
+            <p class="text-xs text-slate-600 font-medium leading-relaxed mt-2.5">
+              Cambridge English eloquence, vocabulary sprints, and cross-cultural communication fluency.
+            </p>
+          </div>
+
+          <div class="pt-4 border-t border-slate-100/80 space-y-3">
+            <div class="flex items-center justify-between text-[11px] font-bold text-slate-400">
+              <span>⏱️ 5 Weeks</span>
+              <span>📅 Starts Oct 10</span>
+            </div>
+            <button type="button" onclick="document.getElementById('authSignInCard').scrollIntoView({behavior: 'smooth'})" class="primary-glow-btn w-full py-2.5 text-xs font-black">
+              Learn More
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <!-- Bottom Horizontal Verified Cambridge Curriculum Bar -->
-    <div class="login-curriculum-bar" id="loginCurriculumBar">
-      <div class="curriculum-bar-header-row">
-        <span class="curriculum-bar-label">📚 VERIFIED CAMBRIDGE CURRICULUM</span>
-        <span class="text-xs text-slate-400">Core Modules &amp; Skills Mastered by Students</span>
+    <!-- 4. ACADEMY SIGN-IN & SHOWCASE PORTAL -->
+    <section class="w-full max-w-7xl mx-auto px-4 sm:px-8 py-10 relative z-10" id="authSignInCard">
+      <!-- Live Global Ticker: Top Gainers & Topics Solved -->
+      <div class="login-ticker-banner" id="loginTickerBanner">
+        <div class="ticker-badge">
+          <span class="ticker-dot"></span>
+          <span>🏆 TOP GAINERS &amp; MASTERY</span>
+        </div>
+        <div class="ticker-track-wrap">
+          <div class="ticker-track" id="loginTickerTrack">
+            <!-- Populated via JS -->
+          </div>
+        </div>
       </div>
-      <div class="curriculum-bar-grid" id="loginCurriculumGrid">
-        <!-- 4 horizontal modules injected dynamically -->
-      </div>
-    </div>
 
-    <!-- Bottom Footer Contact Bar -->
-    <div class="login-contact-footer" id="loginContactFooter">
-      <div class="contact-pill">
-        <span>✉️</span>
-        <a href="mailto:rania.mado@gmail.com">rania.mado@gmail.com</a>
+      <div class="auth-portal-stage">
+        <!-- Left Showcase Panel: Top Student Gainers (Hall of Fame) -->
+        <div class="auth-showcase-panel left-panel glass-bento-card" id="topGainersPanel">
+          <div class="showcase-panel-header">
+            <div class="showcase-icon">🏆</div>
+            <div>
+              <div class="showcase-title text-slate-900">TOP GAINERS</div>
+              <div class="showcase-subtitle text-slate-500">Weekly Leaderboard &amp; Points</div>
+            </div>
+          </div>
+          <div class="showcase-list" id="topGainersList">
+            <!-- Populated with top students -->
+          </div>
+        </div>
+
+        <!-- Center: Main Login Modal Window (Bright Glass Design) -->
+        <div class="auth-modal-window glass-bento-card" style="background: rgba(255, 255, 255, 0.88) !important; border: 2px solid rgba(255,255,255,0.9) !important;">
+          <div class="auth-modal-header auth-login-header">
+            <div class="w-16 h-16 rounded-2xl bg-white p-1.5 shadow-md mb-2.5 flex items-center justify-center border border-slate-100">
+              <img src="assets/rc-logo.png?v=3.4.0" alt="Rania Classroom RC Logo" class="w-full h-full object-contain rounded-xl">
+            </div>
+            <div class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-600 text-[11px] font-bold tracking-wider uppercase mb-1">
+              <span>🔒 Private Academy Portal</span>
+            </div>
+            <h2 class="auth-title text-2xl font-extrabold text-slate-900 tracking-tight" style="margin: 0; letter-spacing: -0.01em;">RANIA CLASSROOM</h2>
+            <p class="auth-subtitle text-slate-500 text-xs mt-0.5">Miss Rania &bull; Inspire, Thrive — Be Part of It!</p>
+          </div>
+
+          <!-- UNIFIED SIGN IN (Students & Teacher) -->
+          <div class="auth-tab-content active" id="authTabLogin">
+            <form id="loginForm" class="auth-form" onsubmit="return false;">
+              <div class="form-group mb-4">
+                <label for="loginUsername" class="text-xs font-bold uppercase tracking-wider text-slate-700">Username</label>
+                <div class="relative mt-1">
+                  <input type="text" id="loginUsername" placeholder="e.g. beshr, alex, or admin" required autocomplete="username" class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all text-sm font-medium shadow-sm">
+                </div>
+              </div>
+              <div class="form-group mb-5">
+                <label for="loginPassword" class="text-xs font-bold uppercase tracking-wider text-slate-700">Password</label>
+                <div class="relative mt-1">
+                  <input type="password" id="loginPassword" placeholder="••••••••" required autocomplete="current-password" class="w-full px-4 py-3 rounded-xl bg-white border border-slate-200 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-400/20 transition-all text-sm font-medium shadow-sm">
+                </div>
+              </div>
+              <div class="form-error-msg mb-4 text-xs font-bold text-rose-600 bg-rose-50 p-2.5 rounded-lg border border-rose-200" id="loginErrorMsg" style="display: none;"></div>
+
+              <button type="submit" class="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-cyan-400 via-sky-500 to-indigo-500 text-white font-extrabold text-sm shadow-[0_4px_0_#0077b6] hover:brightness-105 active:translate-y-1 active:shadow-none transition-all cursor-pointer box-border" id="submitLoginBtn">
+                Sign In to Academy &rarr;
+              </button>
+              <div class="mt-4 p-3 rounded-xl bg-slate-50 border border-slate-100 text-[11px] text-slate-500 text-center leading-relaxed">
+                🔐 <strong>Miss Rania's Private Cohort:</strong> Students and parents receive credentials directly from Miss Rania.
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Right Showcase Panel: Student Blogs & Creative Essays Curated by Miss Rania -->
+        <div class="auth-showcase-panel right-panel glass-bento-card" id="featuredBlogPanel">
+          <div class="showcase-panel-header">
+            <div class="showcase-icon">✍️</div>
+            <div>
+              <div class="showcase-title text-slate-900">STUDENT BLOGS &amp; ESSAYS</div>
+              <div class="showcase-subtitle text-slate-500">Featured Works Selected by Miss Rania</div>
+            </div>
+          </div>
+          <div class="showcase-list" id="featuredBlogList">
+            <!-- Populated with curated student blogs & essays -->
+          </div>
+        </div>
       </div>
-      <div class="contact-pill whatsapp">
-        <span>💬</span>
-        <a href="https://wa.me/201016499281" target="_blank">01016499281 (WhatsApp)</a>
+    </section>
+
+    <!-- 5. LANDING FOOTER (Matching Mockup) -->
+    <footer class="w-full bg-gradient-to-t from-amber-400/30 via-yellow-100/40 to-transparent pt-12 pb-8 mt-12 border-t border-yellow-200/50 relative z-10" id="aboutSection">
+      <div class="max-w-7xl mx-auto px-4 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+        <div class="text-left space-y-1">
+          <div class="font-black text-lg text-slate-900">RC ROOM &mdash; Empowering Minds</div>
+          <p class="text-xs text-slate-500 font-medium">Cambridge &amp; UK National Curriculum &bull; Personalized Tutoring</p>
+        </div>
+
+        <div class="flex items-center gap-6 text-xs font-bold text-slate-600">
+          <a href="#coursesSection" class="hover:text-cyan-600 transition-colors">About</a>
+          <a href="#coursesSection" class="hover:text-cyan-600 transition-colors">FAQs</a>
+          <a href="https://wa.me/201016499281" target="_blank" class="hover:text-emerald-600 transition-colors">Contact Miss Rania (WhatsApp)</a>
+        </div>
+
+        <div class="flex items-center gap-3 text-slate-400 text-xs">
+          <span>&copy; Copyright for RC Room</span>
+        </div>
       </div>
-      <div class="contact-pill">
-        <span>🌸</span>
-        <span>Miss Rania's Private Academy</span>
-      </div>
-    </div>
+    </footer>
   </div>
-
-  <!-- ====================================================================
+<!-- ====================================================================
        MODAL 1: CREATE CLASSROOM ASSIGNMENT MODAL
        ==================================================================== -->
   <div class="auth-modal-backdrop" id="createAssignmentModal">

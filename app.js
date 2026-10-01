@@ -78,12 +78,21 @@ const SoundFX = {
     });
   },
 
+  click() {
+    this.playTone(750, 'sine', 0.04, 0, 0.08);
+  },
+
+  pop() {
+    this.playTone(580, 'triangle', 0.06, 0, 0.1);
+  },
+
   toggle() {
     this.enabled = !this.enabled;
     localStorage.setItem('rc_sound_fx', this.enabled);
     return this.enabled;
   }
 };
+window.SoundFX = SoundFX;
 
 // =============================================================================
 // Confetti Particle Engine (Lightweight Canvas Particle Simulation)
@@ -110,27 +119,28 @@ const ConfettiFX = {
     this.canvas.height = window.innerHeight;
   },
 
-  fire(durationMs = 3200) {
+  fire(durationMs = 3500) {
     this.init();
     if (!this.canvas || !this.ctx) return;
 
     this.resize();
-    const colors = ['#0071e3', '#30d158', '#ffd60a', '#ff453a', '#bf5af2', '#64d2ff', '#ffffff'];
+    // Vibrant Dopamine Festival Palette: Cyan, Pink/Coral, Warm Amber, Purple, Emerald, Mint & Royal Blue
+    const colors = ['#00b4d8', '#ff5d8f', '#ffb703', '#7209b7', '#06d6a0', '#ffffff', '#4361ee', '#ff007f'];
     this.particles = [];
 
-    const count = 120;
+    const count = 180;
     for (let i = 0; i < count; i++) {
       this.particles.push({
-        x: this.canvas.width / 2 + (Math.random() - 0.5) * 200,
+        x: this.canvas.width / 2 + (Math.random() - 0.5) * 260,
         y: this.canvas.height / 3,
-        vx: (Math.random() - 0.5) * 14,
-        vy: (Math.random() - 0.8) * 16,
-        size: Math.random() * 8 + 5,
+        vx: (Math.random() - 0.5) * 16,
+        vy: (Math.random() - 0.8) * 18,
+        size: Math.random() * 9 + 5,
         color: colors[Math.floor(Math.random() * colors.length)],
         rotation: Math.random() * 360,
-        rotSpeed: (Math.random() - 0.5) * 12,
+        rotSpeed: (Math.random() - 0.5) * 14,
         alpha: 1,
-        decay: Math.random() * 0.008 + 0.004
+        decay: Math.random() * 0.007 + 0.003
       });
     }
 
@@ -171,6 +181,7 @@ const ConfettiFX = {
     this.animId = requestAnimationFrame(loop);
   }
 };
+window.ConfettiFX = ConfettiFX;
 
 // Audio and Scratchpad are loaded via modular js/audio.js and js/scratchpad.js
 

@@ -325,5 +325,48 @@ function renderLoginShowcase() {
   }
 }
 
+/**
+ * Joyful 3D Tilt Physics and Tactile Haptic Audio Feedback
+ */
+function initTactileAndTiltInteractions() {
+  // 1. 3D Tilt Effect on Bento Cards
+  const cards = document.querySelectorAll('.glass-bento-card, .bento-card-tactile');
+  cards.forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+
+      const rotateX = ((y - centerY) / centerY) * -7;
+      const rotateY = ((x - centerX) / centerX) * 7;
+
+      card.style.transform = `perspective(1000px) rotateX(${rotateX.toFixed(2)}deg) rotateY(${rotateY.toFixed(2)}deg) scale3d(1.02, 1.02, 1.02)`;
+      card.style.transition = 'transform 0.08s ease-out';
+    });
+
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
+      card.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+    });
+  });
+
+  // 2. Tactile Sound Audio on Interactive Dopamine Buttons
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.primary-glow-btn, .coral-glow-btn, .learn-pill-btn, .tactile-pill');
+    if (btn && window.SoundFX && typeof window.SoundFX.click === 'function') {
+      window.SoundFX.click();
+    }
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initTactileAndTiltInteractions);
+} else {
+  initTactileAndTiltInteractions();
+}
+
 window.LoginCosmos = LoginCosmos;
 window.renderLoginShowcase = renderLoginShowcase;
+window.initTactileAndTiltInteractions = initTactileAndTiltInteractions;
