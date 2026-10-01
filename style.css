@@ -621,11 +621,11 @@ body {
 .nav-capsule {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   background: #ffffff;
-  padding: 6px 12px;
+  padding: 4px 8px;
   border-radius: 999px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
   border: 2px solid #e2e8f0;
 }
 
@@ -633,11 +633,11 @@ body {
 .nav-capsule .nav-tab {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
+  gap: 6px;
+  padding: 6px 13px;
   border-radius: 999px;
   font-weight: 700;
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   cursor: pointer;
   border: none;
   background: transparent;
@@ -650,7 +650,7 @@ body {
 
 .nav-capsule .btn .icon,
 .nav-capsule .nav-tab .icon {
-  font-size: 20px;
+  font-size: 18px;
   line-height: 1;
   transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   display: inline-block;
@@ -706,6 +706,14 @@ body {
   background: #ede9fe !important;
   color: #7c3aed !important;
   box-shadow: 0 6px 20px rgba(124, 58, 237, 0.3) !important;
+}
+
+/* 6. Teacher Suite (Fuchsia / Purple) */
+.nav-capsule .btn-teacher:hover,
+.nav-capsule .btn-teacher.active {
+  background: #fce7f3 !important;
+  color: #be185d !important;
+  box-shadow: 0 6px 20px rgba(190, 24, 93, 0.3) !important;
 }
 
 /* Active icon subtle bounce */
@@ -7613,26 +7621,45 @@ table { min-width: 620px; }
 }
 
 @media (max-width: 640px) {
-  #portalNavbar { height: 64px !important; min-height: 64px; }
-  #portalNavbar > div { height: 64px !important; padding-left: 12px; padding-right: 12px; }
-  #portalSidebar { top: 64px !important; }
-  main#portalMain, #portalMain { padding-top: 10px !important; padding-left: 12px; padding-right: 12px; }
+  #portalNavbar { height: 60px !important; min-height: 60px; }
+  #portalNavbar > div { height: 60px !important; padding-left: 10px; padding-right: 10px; }
+  #portalSidebar { top: 60px !important; }
+  main#portalMain, #portalMain, #mainContentWrapper { 
+    padding-top: 8px !important; 
+    padding-left: 10px !important; 
+    padding-right: 10px !important; 
+    padding-bottom: 95px !important; /* Space for mobile floating nav capsule */
+  }
   .view-main-title { font-size: 1.35rem; }
   .view-lead-text { font-size: .84rem; }
   #brandHomeBtn > div:last-child { display: none; }
   #topTeacherQuickBtn { display: none !important; }
   #studentProfilePill { padding-left: 6px; padding-right: 6px; }
   .portal-view .p-6 { padding: 1rem; }
+  .teacher-nav-groups-container {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+  .teacher-tab-group {
+    padding: 0.85rem 1rem !important;
+    border-radius: 20px !important;
+  }
 }
 
-@media (max-width: 1360px) {
-  .nav-capsule .btn {
-    padding: 8px 12px;
-    font-size: 0.82rem;
-    gap: 6px;
+@media (max-width: 1280px) {
+  .nav-capsule {
+    padding: 3px 6px;
+    gap: 3px;
   }
-  .nav-capsule .btn .icon {
-    font-size: 17px;
+  .nav-capsule .btn,
+  .nav-capsule .nav-tab {
+    padding: 5px 9px;
+    font-size: 0.78rem;
+    gap: 5px;
+  }
+  .nav-capsule .btn .icon,
+  .nav-capsule .nav-tab .icon {
+    font-size: 16px;
   }
 }
 

@@ -2619,8 +2619,11 @@ function updateStudentHeader() {
   if (sidebarParent) sidebarParent.style.display = isParent ? 'flex' : 'none';
   if (sidebarTeacher) sidebarTeacher.style.display = isTeacher ? 'flex' : 'none';
 
+  const mobileTeacherBtn = document.getElementById('mobileTeacherNavBtn');
+
   if (isTeacher) {
     if (topTeacherBtn && window.innerWidth >= 640) topTeacherBtn.style.display = 'inline-flex';
+    if (mobileTeacherBtn) mobileTeacherBtn.classList.remove('hidden');
     if (el.navStudentAvatar) el.navStudentAvatar.textContent = user.avatar || '👩‍🏫';
     if (el.navStudentName) el.navStudentName.textContent = user.full_name || 'Miss Rania';
     if (el.navStudentGrade) el.navStudentGrade.innerHTML = `<span>Instructor &bull; Admin</span>`;
@@ -2629,6 +2632,7 @@ function updateStudentHeader() {
     if (el.navXpStripFill) el.navXpStripFill.style.width = '100%';
   } else if (isParent) {
     if (topTeacherBtn) topTeacherBtn.style.display = 'none';
+    if (mobileTeacherBtn) mobileTeacherBtn.classList.add('hidden');
     if (el.navStudentAvatar) el.navStudentAvatar.textContent = user.avatar || '👨‍👩‍👧';
     if (el.navStudentName) el.navStudentName.textContent = user.full_name || 'Parent Portal';
     if (el.navStudentGrade) el.navStudentGrade.innerHTML = `(Parent)`;
@@ -2636,6 +2640,7 @@ function updateStudentHeader() {
     if (studentLevelPill) studentLevelPill.textContent = 'Parent';
   } else {
     if (topTeacherBtn) topTeacherBtn.style.display = 'none';
+    if (mobileTeacherBtn) mobileTeacherBtn.classList.add('hidden');
     if (el.navStudentAvatar) el.navStudentAvatar.textContent = user.avatar || '🦊';
     if (el.navStudentName) el.navStudentName.textContent = user.full_name || 'Student';
     if (el.navStudentGrade) el.navStudentGrade.innerHTML = `(${user.grade_level || 'Year 4'})`;
