@@ -77,16 +77,26 @@
         const permaKey = (skill.permacode || '').toUpperCase();
         const nameLower = (skill.name || skill.skill_name || '').toLowerCase();
 
-        if (yearData.skills[codeKey]) {
-          candidateQuestions = yearData.skills[codeKey].questions || [];
-        } else if (permaKey && yearData.skills[permaKey]) {
+        // 1. Try exact permacode match (highest priority, 100% unambiguous)
+        if (permaKey && yearData.skills[permaKey]) {
           candidateQuestions = yearData.skills[permaKey].questions || [];
+        } else if (skill.subject && codeKey && yearData.skills[`${skill.subject.toUpperCase().slice(0, 3)}-${codeKey}`]) {
+          candidateQuestions = yearData.skills[`${skill.subject.toUpperCase().slice(0, 3)}-${codeKey}`].questions || [];
         } else {
+          // 2. Try match by skill_name
           for (const key of Object.keys(yearData.skills)) {
             const entry = yearData.skills[key];
             if (entry.skill_name && entry.skill_name.toLowerCase() === nameLower) {
               candidateQuestions = entry.questions || [];
               break;
+            }
+          }
+          // 3. Fallback to codeKey if no candidate found
+          if ((!candidateQuestions || candidateQuestions.length === 0) && yearData.skills[codeKey]) {
+            // Verify subject matches if available
+            const entry = yearData.skills[codeKey];
+            if (!skill.subject || !entry.subject || entry.subject.toLowerCase() === skill.subject.toLowerCase()) {
+              candidateQuestions = entry.questions || [];
             }
           }
         }
@@ -132,13 +142,14 @@
     }
   };
 
-  window.QuestionEngine = CustomEngine;
-  window.CustomQuestionBank = QuestionBank;
-
-  if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
-    window.addEventListener('DOMContentLoaded', () => {
-      CustomEngine.loadYear('year4');
-    });
+  if (typeof window !== 'undefined') {
+    window.QuestionEngine = CustomEngine;
+    window.CustomQuestionBank = QuestionBank;
+    if (typeof window.addEventListener === 'function') {
+      window.addEventListener('DOMContentLoaded', () => {
+        CustomEngine.loadYear('year4');
+      });
+    }
   }
 
   if (typeof module !== 'undefined' && module.exports) {
