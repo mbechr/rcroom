@@ -5966,7 +5966,13 @@ function openPracticeModal(skill, titleArg, subjectArg) {
     el.practiceTimer.textContent = `${m}:${s}`;
   }, 1000);
 
-  loadNextQuestion();
+  if (window.QuestionEngine && window.QuestionEngine.loadYear) {
+    window.QuestionEngine.loadYear(skill.grade || 'Year 4').then(() => {
+      loadNextQuestion();
+    });
+  } else {
+    loadNextQuestion();
+  }
   el.practiceModal.classList.add('open');
   if (window.mascotOnPracticeOpen) window.mascotOnPracticeOpen();
 }
@@ -6134,6 +6140,11 @@ function loadNextQuestion() {
       btn.innerHTML = `<span class="choice-text">${optText}</span>`;
 
       btn.onclick = () => {
+        if (q.isPlaceholder) {
+          closePracticeModal();
+          switchView('skills');
+          return;
+        }
         el.practiceOptionsGrid.querySelectorAll('.option-choice-btn').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
         AppState.practice.selectedOption = optText;

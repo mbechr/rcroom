@@ -1,0 +1,202 @@
+{
+  "year": "Year 4",
+  "stage": "Lower Key Stage 2",
+  "curriculum": "UK National Curriculum",
+  "updated_at": "2026-10-03",
+  "skills": {
+    "A.1": {
+      "skill_name": "Place value models - up to thousands",
+      "subject": "Maths",
+      "questions": [
+        {
+          "id": "y4-m-a1-q1",
+          "type": "multiple_choice",
+          "prompt": "In the number 4,825, what is the value of the digit 8?",
+          "visuals": [
+            "🔢 Number: 4,825",
+            "🔍 Target Digit: 8"
+          ],
+          "options": [
+            "800",
+            "8,000",
+            "80",
+            "8"
+          ],
+          "correctAnswer": "800",
+          "explanation": "In 4,825, the 8 is in the hundreds place, so its value is 8 × 100 = 800."
+        },
+        {
+          "id": "y4-m-a1-q2",
+          "type": "multiple_choice",
+          "prompt": "Which digit is in the thousands place in the number 9,341?",
+          "visuals": [
+            "🔢 Number: 9,341"
+          ],
+          "options": [
+            "9",
+            "3",
+            "4",
+            "1"
+          ],
+          "correctAnswer": "9",
+          "explanation": "Looking from right to left: 1 (ones), 4 (tens), 3 (hundreds), and 9 (thousands)."
+        },
+        {
+          "id": "y4-m-a1-q3",
+          "type": "multiple_choice",
+          "prompt": "What is the expanded form of 6,207?",
+          "visuals": [
+            "🔢 Number: 6,207"
+          ],
+          "options": [
+            "6,000 + 200 + 7",
+            "6,000 + 20 + 7",
+            "600 + 200 + 7",
+            "6,000 + 200 + 70"
+          ],
+          "correctAnswer": "6,000 + 200 + 7",
+          "explanation": "6,207 has 6 thousands (6,000), 2 hundreds (200), 0 tens, and 7 ones (7)."
+        }
+      ]
+    },
+    "A.2": {
+      "skill_name": "Round numbers to the nearest 10 or 100",
+      "subject": "Maths",
+      "questions": [
+        {
+          "id": "y4-m-a2-q1",
+          "type": "multiple_choice",
+          "prompt": "Round 368 to the nearest 10.",
+          "visuals": [
+            "🎯 Rounding Target: Nearest 10",
+            "🔢 Value: 368"
+          ],
+          "options": [
+            "370",
+            "360",
+            "400",
+            "380"
+          ],
+          "correctAnswer": "370",
+          "explanation": "Look at the ones digit (8). Because 8 is 5 or greater, round up the tens digit from 6 to 7, giving 370."
+        },
+        {
+          "id": "y4-m-a2-q2",
+          "type": "multiple_choice",
+          "prompt": "Round 1,452 to the nearest 100.",
+          "visuals": [
+            "🎯 Rounding Target: Nearest 100",
+            "🔢 Value: 1,452"
+          ],
+          "options": [
+            "1,500",
+            "1,400",
+            "1,450",
+            "2,000"
+          ],
+          "correctAnswer": "1,500",
+          "explanation": "Look at the tens digit (5). Because it is 5 or more, round up 400 to 500, giving 1,500."
+        }
+      ]
+    },
+    "B.1": {
+      "skill_name": "Identify fronted adverbials in sentences",
+      "subject": "English",
+      "questions": [
+        {
+          "id": "y4-e-b1-q1",
+          "type": "multiple_choice",
+          "prompt": "Which part of this sentence is a fronted adverbial? 'Silently through the woods, the fox crept forward.'",
+          "visuals": [
+            "📖 Sentence Analysis",
+            "🦊 KS2 Grammar Drill"
+          ],
+          "options": [
+            "Silently through the woods,",
+            "the fox",
+            "crept forward.",
+            "through the woods the fox"
+          ],
+          "correctAnswer": "Silently through the woods,",
+          "explanation": "A fronted adverbial is a word or phrase at the very start of a sentence telling how, when, or where the action happens, followed by a comma."
+        },
+        {
+          "id": "y4-e-b1-q2",
+          "type": "multiple_choice",
+          "prompt": "Choose the correctly punctuated fronted adverbial sentence:",
+          "visuals": [
+            "✏️ Punctuation Rules"
+          ],
+          "options": [
+            "Earlier that morning, we packed our school bags.",
+            "Earlier that morning we, packed our school bags.",
+            "Earlier that morning packed, our school bags.",
+            "Earlier that morning we packed, our school bags."
+          ],
+          "correctAnswer": "Earlier that morning, we packed our school bags.",
+          "explanation": "A comma must immediately follow the fronted adverbial phrase ('Earlier that morning,')."
+        }
+      ]
+    },
+    "B.3": {
+      "skill_name": "Identify nouns – common and proper",
+      "subject": "English",
+      "questions": [
+        {
+          "id": "y4-e-b3-q1",
+          "type": "multiple_choice",
+          "prompt": "Which word in the sentence is a PROPER noun? 'Oliver traveled to London during the holidays.'",
+          "visuals": [
+            "📖 Grammar: Noun Types"
+          ],
+          "options": [
+            "London",
+            "traveled",
+            "holidays",
+            "during"
+          ],
+          "correctAnswer": "London",
+          "explanation": "'London' and 'Oliver' are proper nouns because they are specific names and begin with a capital letter."
+        }
+      ]
+    },
+    "S.1": {
+      "skill_name": "States of matter: solids, liquids, and gases",
+      "subject": "Science",
+      "questions": [
+        {
+          "id": "y4-s-s1-q1",
+          "type": "multiple_choice",
+          "prompt": "Which state of matter takes the shape of its container while keeping a fixed volume?",
+          "visuals": [
+            "🔬 Chemistry & States of Matter"
+          ],
+          "options": [
+            "Liquid",
+            "Solid",
+            "Gas",
+            "Plasma"
+          ],
+          "correctAnswer": "Liquid",
+          "explanation": "Liquids have a fixed volume but take the shape of any container they are poured into."
+        },
+        {
+          "id": "y4-s-s1-q2",
+          "type": "multiple_choice",
+          "prompt": "What happens when liquid water is heated to 100°C?",
+          "visuals": [
+            "🌡️ Boiling Point of Water"
+          ],
+          "options": [
+            "It evaporates and turns into water vapour (gas).",
+            "It freezes and turns into solid ice.",
+            "It contracts and stays cold.",
+            "It loses all heat energy."
+          ],
+          "correctAnswer": "It evaporates and turns into water vapour (gas).",
+          "explanation": "At 100°C (the boiling point), liquid water rapidly changes state into water vapour (a gas)."
+        }
+      ]
+    }
+  }
+}
