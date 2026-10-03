@@ -88,11 +88,22 @@ OUTPUT STRICTLY VALID JSON ONLY. NO MARKDOWN TICKS AROUND JSON:
   ]
 }`;
 
+  let currentUploadedFile = null;
   let currentUploadedPdfBytes = null;
   let currentUploadedPdfName = "candidate_exam.pdf";
   let currentRenderedImages = [];
   let currentGradingResult = null;
   let currentAnnotatedPdfBytes = null;
+
+  function base64ToUint8Array(base64) {
+    const binaryString = atob(base64);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes;
+  }
 
   window.initTeacherGrader = function() {
     setupGraderEvents();
@@ -185,6 +196,7 @@ OUTPUT STRICTLY VALID JSON ONLY. NO MARKDOWN TICKS AROUND JSON:
       return;
     }
 
+    currentUploadedFile = file;
     currentUploadedPdfName = file.name;
     const arrayBuffer = await file.arrayBuffer();
     currentUploadedPdfBytes = new Uint8Array(arrayBuffer);
@@ -204,8 +216,9 @@ OUTPUT STRICTLY VALID JSON ONLY. NO MARKDOWN TICKS AROUND JSON:
       startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
     }
 
-    // Convert PDF to images using pdf.js
-    renderPdfThumbnails(currentUploadedPdfBytes, previewContainer);
+    // Convert PDF to images using pdf.js with a cloned buffer so worker transfer cannot neuter currentUploadedPdfBytes
+    const clonedForWorker = new Uint8Array(currentUploadedPdfBytes.slice(0));
+    renderPdfThumbnails(clonedForWorker, previewContainer);
   }
 
   async function renderPdfThumbnails(pdfBytes, container) {
@@ -216,7 +229,8 @@ OUTPUT STRICTLY VALID JSON ONLY. NO MARKDOWN TICKS AROUND JSON:
 
     try {
       window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-      const loadingTask = window.pdfjsLib.getDocument({ data: pdfBytes });
+      const cloned = new Uint8Array(pdfBytes.slice(0));
+      const loadingTask = window.pdfjsLib.getDocument({ data: cloned });
       const pdfDoc = await loadingTask.promise;
       currentRenderedImages = [];
 
@@ -664,7 +678,46 @@ OUTPUT STRICTLY VALID JSON ONLY. NO MARKDOWN TICKS AROUND JSON:
     }
 
     const { PDFDocument, rgb, StandardFonts } = window.PDFLib;
-    const pdfDoc = await PDFDocument.load(originalBytes);
+
+    let bytesToLoad = null;
+    if (currentUploadedFile) {
+      try {
+        const freshBuffer = await currentUploadedFile.arrayBuffer();
+        bytesToLoad = new Uint8Array(freshBuffer);
+      } catch (e) {
+        console.warn('Failed to read fresh buffer from file:', e);
+      }
+    }
+    if ((!bytesToLoad || bytesToLoad.byteLength === 0) && originalBytes && originalBytes.byteLength > 0) {
+      bytesToLoad = new Uint8Array(originalBytes.slice(0));
+    }
+
+    let pdfDoc = null;
+    try {
+      if (bytesToLoad && bytesToLoad.byteLength > 0) {
+        pdfDoc = await PDFDocument.load(bytesToLoad, { ignoreEncryption: true });
+      }
+    } catch (loadErr) {
+      console.warn('PDFDocument.load failed, falling back to reconstructed page images:', loadErr);
+      pdfDoc = null;
+    }
+
+    // Bulletproof fallback: reconstruct PDF from rendered high-res page canvases
+    if (!pdfDoc) {
+      pdfDoc = await PDFDocument.create();
+      for (const img of currentRenderedImages) {
+        const imgBytes = base64ToUint8Array(img.base64);
+        const jpgImage = await pdfDoc.embedJpg(imgBytes);
+        const page = pdfDoc.addPage([jpgImage.width, jpgImage.height]);
+        page.drawImage(jpgImage, {
+          x: 0,
+          y: 0,
+          width: jpgImage.width,
+          height: jpgImage.height
+        });
+      }
+    }
+
     const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
