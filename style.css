@@ -5697,6 +5697,14 @@ html[dir="rtl"] #mainContentWrapper {
   box-shadow: 0 6px 20px rgba(190, 24, 93, 0.3) !important;
 }
 
+/* 10. AI Exam Grader (Indigo / Violet AI) */
+.teacher-sub-tab.tbtn-grader:hover,
+.teacher-sub-tab.tbtn-grader.active {
+  background: #e0e7ff !important;
+  color: #4338ca !important;
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3) !important;
+}
+
 /* Active icon subtle bounce */
 .teacher-sub-tab.active .icon {
   transform: scale(1.15);
@@ -5724,6 +5732,26 @@ html[dir="rtl"] #mainContentWrapper {
 }
 [data-theme="dark"] .teacher-tab-badge.emerald {
   color: #34d399;
+}
+.teacher-tab-badge.indigo {
+  background: rgba(99, 102, 241, 0.15);
+  color: #4f46e5;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+[data-theme="dark"] .teacher-tab-badge.indigo {
+  color: #818cf8;
+}
+
+/* AI Exam Grader Specific Styles */
+#teacherPanelGrader .card {
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+#graderPagesPreview::-webkit-scrollbar {
+  height: 6px;
+}
+#graderPagesPreview::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.3);
+  border-radius: 999px;
 }
 
 /* Student Roster Filter Bar */

@@ -3303,7 +3303,8 @@ window.switchTeacherTab = function(tabName) {
     books: document.getElementById('teacherPanelBooks'),
     planner: document.getElementById('teacherPanelPlanner'),
     curriculum: document.getElementById('teacherPanelCurriculum'),
-    timeline: document.getElementById('teacherPanelTimeline')
+    timeline: document.getElementById('teacherPanelTimeline'),
+    grader: document.getElementById('teacherPanelGrader')
   };
 
   Object.keys(panels).forEach(k => {
@@ -3328,6 +3329,10 @@ window.switchTeacherTab = function(tabName) {
     renderCurriculumAccessManager();
   } else if (tabName === 'timeline') {
     renderTeacherActivityTimeline();
+  } else if (tabName === 'grader') {
+    if (window.initTeacherGrader) {
+      window.initTeacherGrader();
+    }
   }
 };
 
