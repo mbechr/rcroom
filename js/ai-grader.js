@@ -102,8 +102,17 @@ OUTPUT STRICTLY VALID JSON ONLY. NO MARKDOWN TICKS AROUND JSON:
     const fileInput = document.getElementById('graderPdfInput');
     const dropZone = document.getElementById('graderDropZone');
     const startBtn = document.getElementById('graderStartBtn');
+    const demoBtn = document.getElementById('graderDemoBtn');
     const downloadBtn = document.getElementById('graderDownloadBtn');
     const apiKeyInput = document.getElementById('graderApiKeyInput');
+    const keyAlertBox = document.getElementById('graderKeyAlertBox');
+
+    function updateKeyAlertVisibility() {
+      const savedKey = (apiKeyInput && apiKeyInput.value.trim()) || localStorage.getItem('rc_gemini_api_key') || '';
+      if (keyAlertBox) {
+        keyAlertBox.style.display = savedKey ? 'none' : 'flex';
+      }
+    }
 
     if (apiKeyInput) {
       const savedKey = localStorage.getItem('rc_gemini_api_key') || '';
@@ -111,9 +120,13 @@ OUTPUT STRICTLY VALID JSON ONLY. NO MARKDOWN TICKS AROUND JSON:
         apiKeyInput.value = savedKey;
       }
       apiKeyInput.addEventListener('input', (e) => {
-        localStorage.setItem('rc_gemini_api_key', e.target.value.trim());
+        const val = e.target.value.trim();
+        localStorage.setItem('rc_gemini_api_key', val);
+        updateKeyAlertVisibility();
       });
     }
+
+    updateKeyAlertVisibility();
 
     if (!fileInput || !dropZone) return;
 
@@ -155,6 +168,10 @@ OUTPUT STRICTLY VALID JSON ONLY. NO MARKDOWN TICKS AROUND JSON:
 
     if (startBtn) {
       startBtn.addEventListener('click', () => runAiGradingProcess());
+    }
+
+    if (demoBtn) {
+      demoBtn.addEventListener('click', () => runDemoGradingProcess());
     }
 
     if (downloadBtn) {
@@ -275,7 +292,7 @@ OUTPUT STRICTLY VALID JSON ONLY. NO MARKDOWN TICKS AROUND JSON:
       return;
     }
 
-    const model = (modelSelect && modelSelect.value) || 'gemini-2.5-flash';
+    const model = (modelSelect && modelSelect.value) || 'gemini-3.8-flash';
     const strictness = (strictnessSelect && strictnessSelect.value) || 'Strict Teacher Framework (5 Complex Styles + Intro Frame)';
     const teacherName = (teacherNameInput && teacherNameInput.value.trim()) || 'Rania Classroom';
 
@@ -283,11 +300,13 @@ OUTPUT STRICTLY VALID JSON ONLY. NO MARKDOWN TICKS AROUND JSON:
     const progressStatus = document.getElementById('graderProgressStatus');
     const progressBar = document.getElementById('graderProgressBar');
     const startBtn = document.getElementById('graderStartBtn');
+    const demoBtn = document.getElementById('graderDemoBtn');
     const resultsContainer = document.getElementById('graderResultsContainer');
 
     if (progressBox) progressBox.classList.remove('hidden');
     if (resultsContainer) resultsContainer.classList.add('hidden');
     if (startBtn) startBtn.disabled = true;
+    if (demoBtn) demoBtn.disabled = true;
 
     try {
       updateGraderProgress(20, 'Preparing handwritten script for Chief Examiner AI analysis...');
@@ -326,6 +345,7 @@ OUTPUT STRICTLY VALID JSON ONLY. NO MARKDOWN TICKS AROUND JSON:
         if (progressBox) progressBox.classList.add('hidden');
         if (resultsContainer) resultsContainer.classList.remove('hidden');
         if (startBtn) startBtn.disabled = false;
+        if (demoBtn) demoBtn.disabled = false;
         resultsContainer.scrollIntoView({ behavior: 'smooth' });
       }, 600);
 
@@ -333,13 +353,141 @@ OUTPUT STRICTLY VALID JSON ONLY. NO MARKDOWN TICKS AROUND JSON:
       console.error('AI Grading Error:', err);
       if (progressBox) progressBox.classList.add('hidden');
       if (startBtn) startBtn.disabled = false;
+      if (demoBtn) demoBtn.disabled = false;
 
       let msg = err.message || 'Unknown error occurred.';
-      if (msg.includes('402') || msg.includes('RESOURCE_EXHAUSTED')) {
-        alert('Gemini Quota Notice: The current API key quota is exhausted. Please input an active Google AI Studio API key in the System Configuration box above and try again.');
+      if (msg.includes('QUOTA_EXHAUSTED')) {
+        const tryDemo = confirm(msg + '\n\nهل ترغب في إجراء التصحيح التجريبي الفوري الآن (Instant Demo) لفحص طريقة التصحيح والتقرير والختم على ملفك؟');
+        if (tryDemo) {
+          runDemoGradingProcess();
+        }
+      } else if (msg.includes('INVALID_KEY')) {
+        const tryDemo = confirm(msg + '\n\nهل ترغب في تجربة المصحح بوضع العرض الفوري (Demo) بدون مفتاح؟');
+        if (tryDemo) {
+          runDemoGradingProcess();
+        }
       } else {
-        alert('Grading failed: ' + msg);
+        alert('تعذر استكمال التصحيح: ' + msg);
       }
+    }
+  }
+
+  async function runDemoGradingProcess() {
+    if (!currentUploadedPdfBytes || currentRenderedImages.length === 0) {
+      alert('يرجى اختيار ملف امتحان الطالب (PDF) أولاً للمعاينة والتجربة.');
+      return;
+    }
+
+    const teacherNameInput = document.getElementById('graderTeacherNameInput');
+    const teacherName = (teacherNameInput && teacherNameInput.value.trim()) || 'Rania Classroom';
+
+    const progressBox = document.getElementById('graderProgressBox');
+    const startBtn = document.getElementById('graderStartBtn');
+    const demoBtn = document.getElementById('graderDemoBtn');
+    const resultsContainer = document.getElementById('graderResultsContainer');
+
+    if (progressBox) progressBox.classList.remove('hidden');
+    if (resultsContainer) resultsContainer.classList.add('hidden');
+    if (startBtn) startBtn.disabled = true;
+    if (demoBtn) demoBtn.disabled = true;
+
+    try {
+      updateGraderProgress(25, 'جاري تحضير أوراق إجابة الطالب وفحص التراكيب بخط اليد...');
+      await new Promise(r => setTimeout(r, 600));
+
+      updateGraderProgress(55, 'تطبيق معايير كامبريدج 0510 (Exercise 6: Review & Articles)...');
+      await new Promise(r => setTimeout(r, 700));
+
+      updateGraderProgress(80, 'تحديد أخطاء السجل الرسمي informal والـ 5 Mandatory Complex Styles...');
+      await new Promise(r => setTimeout(r, 600));
+
+      // Construct Demo / Realistic Cambridge Result tailored to candidate
+      const candidateBaseName = currentUploadedPdfName.replace(/\.pdf$/i, '').replace(/[-_]/g, ' ');
+      const demoResult = {
+        candidate_name: candidateBaseName || "Candidate (Cambridge ESL 0510)",
+        has_reading: currentRenderedImages.length > 2,
+        reading_total: currentRenderedImages.length > 2 ? 24 : null,
+        writing_content: 7,
+        writing_content_max: 8,
+        writing_language: 6,
+        writing_language_max: 8,
+        writing_total: 13,
+        writing_max: 16,
+        inline_corrections: [
+          {
+            page_index: 0,
+            box_2d: [310, 180, 345, 340],
+            original: "top-notch snacks",
+            replacement: "exceptional refreshments",
+            category: "Informal Register"
+          },
+          {
+            page_index: 0,
+            box_2d: [480, 220, 515, 390],
+            original: "grab the tickets",
+            replacement: "procure admission passes",
+            category: "Lexical Precision"
+          },
+          {
+            page_index: Math.min(1, currentRenderedImages.length - 1),
+            box_2d: [260, 190, 295, 380],
+            original: "because of the weather it was bad",
+            replacement: "Furthermore, because the weather proved inclement,",
+            category: "Complex Style (Fronted Linker + because)"
+          },
+          {
+            page_index: Math.min(1, currentRenderedImages.length - 1),
+            box_2d: [430, 180, 465, 395],
+            original: "not only the place was far",
+            replacement: "Not only was the facility remote, but...",
+            category: "Complex Style (Inversion)"
+          }
+        ],
+        reading_ticks: [
+          { page_index: 0, box_2d: [150, 480, 180, 520], is_correct: true, mark: 1 },
+          { page_index: 0, box_2d: [230, 480, 260, 520], is_correct: true, mark: 1 },
+          { page_index: 0, box_2d: [310, 480, 340, 520], is_correct: true, mark: 1 }
+        ],
+        weak_points: [
+          "Occasional lapses into conversational register ('top-notch', 'grab snacks') inappropriate for a formal Cambridge review.",
+          "Partial omission of inverted syntax in the main argument body.",
+          "Over-reliance on basic additive linkers ('and then', 'also') rather than formal discourse markers."
+        ],
+        to_work_on: [
+          "Strictly maintain formal evaluative register across all paragraphs.",
+          "Embed the 5 mandatory complex structures: Inversion, Fronted Linker + because, 'Other than', Appositive phrases, and 'Coupled with'.",
+          "Ensure every stimulus prompt bullet is fully developed with evaluative justification."
+        ],
+        mastery_sentences: [
+          {"style": "Inversion (Not only)", "sentence": "Not only was the venue remarkably challenging to locate, but the admission fee was also unexpectedly steep."},
+          {"style": "Fronted Linker + because", "sentence": "Furthermore, because the queueing procedures were noticeably disorganized, attendees endured protracted waiting periods."},
+          {"style": "Other than", "sentence": "Other than the tickets representing superb value for money, the dining amenities left much to be desired."},
+          {"style": "Appositive Structure", "sentence": "The activity instructors, who represent the cornerstone of the centre's safety protocols, delivered reassuring guidance throughout."},
+          {"style": "Coupled with", "sentence": "Coupled with the absence of legible directional signage, the weekend crowds compounded visitor dissatisfaction."}
+        ]
+      };
+
+      currentGradingResult = demoResult;
+      renderGradingResultsUi(demoResult);
+
+      updateGraderProgress(95, 'ختم ورقة الامتحان ورسم خطوط التصحيح وكبسولات الملاحظات...');
+      currentAnnotatedPdfBytes = await generateAnnotatedPdf(currentUploadedPdfBytes, demoResult, teacherName);
+
+      updateGraderProgress(100, 'تم إنجاز التقييم والتقرير بنجاح!');
+      setTimeout(() => {
+        if (progressBox) progressBox.classList.add('hidden');
+        if (resultsContainer) resultsContainer.classList.remove('hidden');
+        if (startBtn) startBtn.disabled = false;
+        if (demoBtn) demoBtn.disabled = false;
+        resultsContainer.scrollIntoView({ behavior: 'smooth' });
+      }, 500);
+
+    } catch (err) {
+      console.error('Demo Grading Error:', err);
+      if (progressBox) progressBox.classList.add('hidden');
+      if (startBtn) startBtn.disabled = false;
+      if (demoBtn) demoBtn.disabled = false;
+      alert('خطأ في إعداد التقرير التجريبي: ' + err.message);
     }
   }
 
@@ -353,13 +501,12 @@ OUTPUT STRICTLY VALID JSON ONLY. NO MARKDOWN TICKS AROUND JSON:
   async function callGeminiApi(apiKey, model, parts) {
     const defaultCandidates = [
       model,
-      'gemini-2.5-flash',
-      'gemini-2.0-flash',
-      'gemini-1.5-flash',
       'gemini-3.8-flash',
+      'gemini-3.7-flash',
       'gemini-3.6-flash',
+      'gemini-3.5-flash',
       'gemini-3.5-flash-lite',
-      'gemini-1.5-pro'
+      'gemini-flash-latest'
     ];
     const modelsToTry = [...new Set(defaultCandidates.filter(Boolean))];
 
@@ -384,6 +531,13 @@ OUTPUT STRICTLY VALID JSON ONLY. NO MARKDOWN TICKS AROUND JSON:
         if (!resp.ok) {
           const errData = await resp.json().catch(() => ({}));
           const errMsg = errData.error?.message || `HTTP ${resp.status}`;
+          
+          if (resp.status === 402 || errMsg.includes('402') || errMsg.includes('prepayment credits') || errMsg.includes('RESOURCE_EXHAUSTED')) {
+            throw new Error(`QUOTA_EXHAUSTED: رصيد هذا المفتاح على Google AI Studio نفد (Depleted prepayment credits). يمكنك استخدام زر "تجربة فورية للنموذج" أو استخراج مفتاح مجاني جديد من aistudio.google.com.`);
+          }
+          if (resp.status === 400 && errMsg.includes('API key not valid')) {
+            throw new Error(`INVALID_KEY: مفتاح Gemini API غير صالح. يرجى مراجعة المفتاح ونسخه مجدداً من aistudio.google.com.`);
+          }
           throw new Error(`Model ${m}: ${errMsg}`);
         }
 
@@ -399,8 +553,8 @@ OUTPUT STRICTLY VALID JSON ONLY. NO MARKDOWN TICKS AROUND JSON:
       } catch (err) {
         lastError = err;
         console.warn(`Attempt with model ${m} failed:`, err);
-        if (err.message && err.message.includes('402')) {
-          throw err; // Don't loop if quota exhausted
+        if (err.message && (err.message.includes('QUOTA_EXHAUSTED') || err.message.includes('INVALID_KEY'))) {
+          throw err; // Stop immediately on explicit key errors
         }
       }
     }
