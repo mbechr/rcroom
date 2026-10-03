@@ -43,7 +43,7 @@ class NumberedCanvas(canvas.Canvas):
             
         # Footer
         page_str = f"Page {self._pageNumber} of {page_count}"
-        self.drawString(54, 36, "Target: https://www.rcroom.online/  |  Date: September 30, 2026")
+        self.drawString(54, 36, "Target: https://mbechr.github.io/rcroom/  |  Date: September 30, 2026")
         self.drawRightString(8.5 * inch - 54, 36, page_str)
         self.setStrokeColor(colors.HexColor("#cbd5e1"))
         self.setLineWidth(0.5)
@@ -180,7 +180,7 @@ def build_pdf(filename="RC_Room_Security_Verification_Report.pdf"):
     # Meta Info Card
     meta_data = [
         [
-            Paragraph("<b>Target Platform:</b> https://www.rcroom.online/", table_cell),
+            Paragraph("<b>Target Platform:</b> https://mbechr.github.io/rcroom/", table_cell),
             Paragraph("<b>Audit Scope:</b> Backend Server, RBAC, Cloud Sync & Storage", table_cell),
         ],
         [
